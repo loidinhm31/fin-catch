@@ -7,7 +7,7 @@ mod sources;
 use crate::{
     gateway::DataSourceGateway,
     routes::{create_router, AppState},
-    sources::{MihongSource, SjcSource, SsiSource, VndirectSource},
+    sources::{MihongSource, SjcSource, SsiSource, VndirectSource, YahooFinanceSource},
 };
 use std::sync::Arc;
 use tower_http::{
@@ -44,6 +44,10 @@ async fn main() {
     gateway.register_stock_source(ssi_source);
     tracing::info!("Registered stock data source: SSI");
 
+    let yahoo_finance_source = Arc::new(YahooFinanceSource::new());
+    gateway.register_stock_source(yahoo_finance_source);
+    tracing::info!("Registered stock data source: Yahoo Finance");
+
     // Register gold data sources
     let sjc_source = Arc::new(SjcSource::new());
     gateway.register_gold_source(sjc_source);
@@ -52,15 +56,6 @@ async fn main() {
     let mihong_source = Arc::new(MihongSource::new());
     gateway.register_gold_source(mihong_source);
     tracing::info!("Registered gold data source: MIHONG");
-
-    // You can add more sources here in the future:
-    // Stock sources:
-    // let yahoo_source = Arc::new(YahooSource::new());
-    // gateway.register_stock_source(yahoo_source);
-    //
-    // Gold sources:
-    // let pnj_source = Arc::new(PnjSource::new());
-    // gateway.register_gold_source(pnj_source);
 
     let gateway = Arc::new(gateway);
     tracing::info!(
