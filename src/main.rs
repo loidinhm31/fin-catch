@@ -7,7 +7,7 @@ mod sources;
 use crate::{
     gateway::DataSourceGateway,
     routes::{create_router, AppState},
-    sources::{SsiSource, VndirectSource},
+    sources::{MihongSource, SjcSource, SsiSource, VndirectSource},
 };
 use std::sync::Arc;
 use tower_http::{
@@ -32,24 +32,42 @@ async fn main() {
     tracing::info!("Starting fin-catch-api server...");
 
     // Initialize the data source gateway
-    let mut gateway = DataSourceGateway::new("vndirect".to_string());
+    // Default stock source: vndirect, Default gold source: sjc
+    let mut gateway = DataSourceGateway::new("vndirect".to_string(), "sjc".to_string());
 
-    // Register VNDIRECT source
+    // Register stock data sources
     let vndirect_source = Arc::new(VndirectSource::new());
-    gateway.register_source(vndirect_source);
-    tracing::info!("Registered data source: VNDIRECT");
+    gateway.register_stock_source(vndirect_source);
+    tracing::info!("Registered stock data source: VNDIRECT");
 
-    // Register SSI source
     let ssi_source = Arc::new(SsiSource::new());
-    gateway.register_source(ssi_source);
-    tracing::info!("Registered data source: SSI");
+    gateway.register_stock_source(ssi_source);
+    tracing::info!("Registered stock data source: SSI");
+
+    // Register gold data sources
+    let sjc_source = Arc::new(SjcSource::new());
+    gateway.register_gold_source(sjc_source);
+    tracing::info!("Registered gold data source: SJC");
+
+    let mihong_source = Arc::new(MihongSource::new());
+    gateway.register_gold_source(mihong_source);
+    tracing::info!("Registered gold data source: MIHONG");
 
     // You can add more sources here in the future:
+    // Stock sources:
     // let yahoo_source = Arc::new(YahooSource::new());
-    // gateway.register_source(yahoo_source);
+    // gateway.register_stock_source(yahoo_source);
+    //
+    // Gold sources:
+    // let pnj_source = Arc::new(PnjSource::new());
+    // gateway.register_gold_source(pnj_source);
 
     let gateway = Arc::new(gateway);
-    tracing::info!("Data source gateway initialized with {} sources", gateway.list_sources().len());
+    tracing::info!(
+        "Data source gateway initialized with {} stock sources and {} gold sources",
+        gateway.list_stock_sources().len(),
+        gateway.list_gold_sources().len()
+    );
 
     // Create application state
     let state = AppState { gateway };

@@ -1,7 +1,7 @@
 use crate::{
     error::ApiResult,
     gateway::DataSourceGateway,
-    models::StockHistoryRequest,
+    models::{DataRequest, GoldPriceRequest, StockHistoryRequest},
 };
 use axum::{
     extract::{Query, State},
@@ -25,7 +25,7 @@ async fn get_stock_history(
     State(state): State<AppState>,
     Query(request): Query<StockHistoryRequest>,
 ) -> ApiResult<impl IntoResponse> {
-    let response = state.gateway.fetch_history(request).await?;
+    let response = state.gateway.fetch_stock_history(request).await?;
     Ok(Json(response))
 }
 
@@ -35,18 +35,49 @@ async fn post_stock_history(
     State(state): State<AppState>,
     Json(request): Json<StockHistoryRequest>,
 ) -> ApiResult<impl IntoResponse> {
-    let response = state.gateway.fetch_history(request).await?;
+    let response = state.gateway.fetch_stock_history(request).await?;
+    Ok(Json(response))
+}
+
+/// GET /api/v1/gold/history
+/// Query parameters: gold_price_id, from, to, source (optional)
+async fn get_gold_history(
+    State(state): State<AppState>,
+    Query(request): Query<GoldPriceRequest>,
+) -> ApiResult<impl IntoResponse> {
+    let response = state.gateway.fetch_gold_history(request).await?;
+    Ok(Json(response))
+}
+
+/// POST /api/v1/gold/history
+/// JSON body with GoldPriceRequest
+async fn post_gold_history(
+    State(state): State<AppState>,
+    Json(request): Json<GoldPriceRequest>,
+) -> ApiResult<impl IntoResponse> {
+    let response = state.gateway.fetch_gold_history(request).await?;
+    Ok(Json(response))
+}
+
+/// POST /api/v1/data
+/// Unified endpoint that handles both stock and gold data requests
+/// JSON body with DataRequest (tagged union with data_type field)
+async fn post_unified_data(
+    State(state): State<AppState>,
+    Json(request): Json<DataRequest>,
+) -> ApiResult<impl IntoResponse> {
+    let response = state.gateway.fetch_data(request).await?;
     Ok(Json(response))
 }
 
 /// GET /api/v1/sources
 /// List all available data sources
 async fn list_sources(State(state): State<AppState>) -> impl IntoResponse {
-    let sources = state.gateway.list_sources();
+    let sources_by_type = state.gateway.list_sources_by_type();
     let metadata = state.gateway.sources_metadata();
 
     Json(json!({
-        "sources": sources,
+        "sources_by_type": sources_by_type,
         "metadata": metadata,
     }))
 }
@@ -88,22 +119,48 @@ async fn health_check_source(
 async fn root() -> impl IntoResponse {
     Json(json!({
         "service": "fin-catch-api",
-        "version": "0.1.0",
-        "description": "Stock data aggregation API with support for multiple data sources",
+        "version": "0.2.0",
+        "description": "Financial data aggregation API with support for stock and gold price data from multiple sources",
         "endpoints": {
             "stock_history_get": "GET /api/v1/stock/history?symbol={symbol}&resolution={resolution}&from={from}&to={to}&source={source}",
             "stock_history_post": "POST /api/v1/stock/history",
+            "gold_history_get": "GET /api/v1/gold/history?gold_price_id={id}&from={from}&to={to}&source={source}",
+            "gold_history_post": "POST /api/v1/gold/history",
+            "unified_data": "POST /api/v1/data",
             "list_sources": "GET /api/v1/sources",
             "health": "GET /api/v1/health",
             "health_sources": "GET /api/v1/health/sources",
             "health_source": "GET /api/v1/health/source/:name",
         },
-        "example_request": {
+        "example_stock_request": {
             "symbol": "VND",
             "resolution": "1D",
             "from": 1715385600,
             "to": 1720396800,
             "source": "vndirect"
+        },
+        "example_gold_request": {
+            "gold_price_id": "1",
+            "from": 1730764800,
+            "to": 1731110400,
+            "source": "sjc"
+        },
+        "example_unified_request": {
+            "stock": {
+                "data_type": "stock",
+                "symbol": "VND",
+                "resolution": "1D",
+                "from": 1715385600,
+                "to": 1720396800,
+                "source": "vndirect"
+            },
+            "gold": {
+                "data_type": "gold",
+                "gold_price_id": "1",
+                "from": 1730764800,
+                "to": 1731110400,
+                "source": "sjc"
+            }
         }
     }))
 }
@@ -114,6 +171,9 @@ pub fn create_router(state: AppState) -> Router {
         .route("/", get(root))
         .route("/api/v1/stock/history", get(get_stock_history))
         .route("/api/v1/stock/history", post(post_stock_history))
+        .route("/api/v1/gold/history", get(get_gold_history))
+        .route("/api/v1/gold/history", post(post_gold_history))
+        .route("/api/v1/data", post(post_unified_data))
         .route("/api/v1/sources", get(list_sources))
         .route("/api/v1/health", get(health_check))
         .route("/api/v1/health/sources", get(health_check_sources))

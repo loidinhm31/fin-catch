@@ -1,7 +1,7 @@
 use crate::{
     error::{ApiError, ApiResult},
     models::{Candle, StockHistoryRequest, StockHistoryResponse},
-    sources::source_trait::StockDataSource,
+    sources::stock_source_trait::StockDataSource,
 };
 use async_trait::async_trait;
 use reqwest::Client;
