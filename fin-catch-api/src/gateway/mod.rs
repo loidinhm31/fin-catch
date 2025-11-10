@@ -185,20 +185,6 @@ impl DataSourceGateway {
         source.fetch_history(&request).await
     }
 
-    /// Unified fetch method that handles both stock and gold data
-    pub async fn fetch_data(&self, mut request: DataRequest) -> ApiResult<DataResponse> {
-        match request {
-            DataRequest::Stock(ref mut stock_req) => {
-                let response = self.fetch_stock_history(stock_req.clone()).await?;
-                Ok(DataResponse::Stock(response))
-            }
-            DataRequest::Gold(ref mut gold_req) => {
-                let response = self.fetch_gold_history(gold_req.clone()).await?;
-                Ok(DataResponse::Gold(response))
-            }
-        }
-    }
-
     /// Health check for all sources (stock, gold, and exchange rates)
     pub async fn health_check_all(&self) -> HashMap<String, bool> {
         let mut results = HashMap::new();

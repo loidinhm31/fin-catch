@@ -1,11 +1,14 @@
 use crate::{
     error::ApiResult,
     gateway::DataSourceGateway,
-    models::{DataRequest, GoldPriceRequest, StockHistoryRequest, ExchangeRateRequest},
+    models::{
+        ExchangeRateRequest, GoldPremiumPoint, GoldPremiumRequest,
+        GoldPremiumResponse, GoldPriceRequest, Resolution, StockHistoryRequest,
+    },
 };
 use axum::{
-    extract::{Query, State},
-    http::StatusCode,
+    extract::State
+    ,
     response::IntoResponse,
     routing::{get, post},
     Json, Router,
@@ -19,16 +22,6 @@ pub struct AppState {
     pub gateway: Arc<DataSourceGateway>,
 }
 
-/// GET /api/v1/stock/history
-/// Query parameters: symbol, resolution, from, to, source (optional)
-async fn get_stock_history(
-    State(state): State<AppState>,
-    Query(request): Query<StockHistoryRequest>,
-) -> ApiResult<impl IntoResponse> {
-    let response = state.gateway.fetch_stock_history(request).await?;
-    Ok(Json(response))
-}
-
 /// POST /api/v1/stock/history
 /// JSON body with StockHistoryRequest
 async fn post_stock_history(
@@ -36,16 +29,6 @@ async fn post_stock_history(
     Json(request): Json<StockHistoryRequest>,
 ) -> ApiResult<impl IntoResponse> {
     let response = state.gateway.fetch_stock_history(request).await?;
-    Ok(Json(response))
-}
-
-/// GET /api/v1/gold/history
-/// Query parameters: gold_price_id, from, to, source (optional)
-async fn get_gold_history(
-    State(state): State<AppState>,
-    Query(request): Query<GoldPriceRequest>,
-) -> ApiResult<impl IntoResponse> {
-    let response = state.gateway.fetch_gold_history(request).await?;
     Ok(Json(response))
 }
 
@@ -59,16 +42,6 @@ async fn post_gold_history(
     Ok(Json(response))
 }
 
-/// GET /api/v1/exchange-rate/history
-/// Query parameters: currency_code, from, to, source (optional)
-async fn get_exchange_rate_history(
-    State(state): State<AppState>,
-    Query(request): Query<ExchangeRateRequest>,
-) -> ApiResult<impl IntoResponse> {
-    let response = state.gateway.fetch_exchange_rate_history(request).await?;
-    Ok(Json(response))
-}
-
 /// POST /api/v1/exchange-rate/history
 /// JSON body with ExchangeRateRequest
 async fn post_exchange_rate_history(
@@ -76,17 +49,6 @@ async fn post_exchange_rate_history(
     Json(request): Json<ExchangeRateRequest>,
 ) -> ApiResult<impl IntoResponse> {
     let response = state.gateway.fetch_exchange_rate_history(request).await?;
-    Ok(Json(response))
-}
-
-/// POST /api/v1/data
-/// Unified endpoint that handles both stock and gold data requests
-/// JSON body with DataRequest (tagged union with data_type field)
-async fn post_unified_data(
-    State(state): State<AppState>,
-    Json(request): Json<DataRequest>,
-) -> ApiResult<impl IntoResponse> {
-    let response = state.gateway.fetch_data(request).await?;
     Ok(Json(response))
 }
 
@@ -135,6 +97,170 @@ async fn health_check_source(
     })))
 }
 
+/// POST /api/v1/gold-premium
+/// JSON body with GoldPremiumRequest
+async fn post_gold_premium(
+    State(state): State<AppState>,
+    Json(request): Json<GoldPremiumRequest>,
+) -> ApiResult<impl IntoResponse> {
+    let response = fetch_gold_premium_data(&state.gateway, request).await?;
+    Ok(Json(response))
+}
+
+/// Helper function to fetch and calculate gold premium data
+async fn fetch_gold_premium_data(
+    gateway: &DataSourceGateway,
+    request: GoldPremiumRequest,
+) -> ApiResult<GoldPremiumResponse> {
+    // Validate request
+    request.validate().map_err(|e| crate::error::ApiError::InvalidRequest(e))?;
+
+    // Set default values
+    let gold_price_id = request.gold_price_id.unwrap_or_else(|| "1".to_string());
+    let currency_code = request.currency_code.unwrap_or_else(|| "USD".to_string());
+    let gold_source = request.gold_source.as_deref().unwrap_or("mihong");
+
+    // Fetch gold price data FIRST to get the actual date range
+    let gold_price_request = GoldPriceRequest {
+        gold_price_id: gold_price_id.clone(),
+        from: request.from,
+        to: request.to,
+        source: Some(gold_source.to_string()),
+    };
+
+    let gold_price_response = gateway.fetch_gold_history(gold_price_request).await?;
+
+    let gold_price_data = gold_price_response.data.as_ref().ok_or_else(|| {
+        crate::error::ApiError::DataSource("No gold price data available".to_string())
+    })?;
+
+    if gold_price_data.is_empty() {
+        return Ok(GoldPremiumResponse::error("No gold price data found for the requested period".to_string()));
+    }
+
+    // Determine the actual date range from gold price data
+    let min_timestamp = gold_price_data.iter().map(|p| p.timestamp).min().unwrap_or(request.from);
+    let max_timestamp = gold_price_data.iter().map(|p| p.timestamp).max().unwrap_or(request.to);
+
+    // Add buffer to ensure we get exchange rate and stock data for all days
+    let from_with_buffer = min_timestamp - 86400; // 1 day before
+    let to_with_buffer = max_timestamp + 86400;   // 1 day after
+
+    // Fetch exchange rate and stock data based on gold price date range
+    let stock_request = StockHistoryRequest {
+        symbol: "GC=F".to_string(), // Gold spot price symbol
+        resolution: Resolution::OneDay,
+        from: from_with_buffer,
+        to: to_with_buffer,
+        source: request.stock_source.or(Some("yahoo_finance".to_string())),
+    };
+
+    let exchange_rate_request = ExchangeRateRequest {
+        currency_code: currency_code.clone(),
+        from: from_with_buffer,
+        to: to_with_buffer,
+        source: request.exchange_rate_source,
+    };
+
+    // Fetch data from exchange rate and stock sources
+    let stock_response = gateway.fetch_stock_history(stock_request).await?;
+    let exchange_rate_response = gateway.fetch_exchange_rate_history(exchange_rate_request).await?;
+
+    // Check if responses have data
+    let stock_data = stock_response.data.ok_or_else(|| {
+        crate::error::ApiError::DataSource("No stock data available".to_string())
+    })?;
+
+    let exchange_rate_data = exchange_rate_response.data.ok_or_else(|| {
+        crate::error::ApiError::DataSource("No exchange rate data available".to_string())
+    })?;
+
+    // Calculate premium for each data point
+    let mut premium_points = Vec::new();
+
+    // Helper function to normalize timestamp to start of day (00:00:00 UTC)
+    let normalize_to_day = |timestamp: i64| -> i64 {
+        (timestamp / 86400) * 86400
+    };
+
+    // Create a map of exchange rates by day for quick lookup
+    let mut exchange_rate_map = std::collections::HashMap::new();
+    for point in &exchange_rate_data {
+        let day = normalize_to_day(point.timestamp);
+        exchange_rate_map.insert(day, point.sell);
+    }
+
+    // Create a map of stock prices by day
+    let mut stock_price_map = std::collections::HashMap::new();
+    for candle in &stock_data {
+        let day = normalize_to_day(candle.timestamp);
+        stock_price_map.insert(day, candle.close);
+    }
+
+    // Conversion factor: 1 tael (lượng) = 1.206 troy ounces
+    const TAEL_TO_TROY_OZ: f64 = 1.206;
+
+    // Process gold price data and calculate premium
+    for gold_point in gold_price_data {
+        // Normalize gold price timestamp to the same day
+        let day = normalize_to_day(gold_point.timestamp);
+
+        // Find matching exchange rate and stock price for this day
+        let exchange_rate = exchange_rate_map.get(&day);
+        let market_price_usd = stock_price_map.get(&day);
+
+        if let (Some(&exchange_rate), Some(&market_price_usd)) = (exchange_rate, market_price_usd) {
+            // Calculate market price in VND per tael
+            // Formula: USD/oz × Exchange_Rate × 1.206 = VND/lượng
+            let market_price_vnd = market_price_usd * exchange_rate * TAEL_TO_TROY_OZ;
+
+            // Convert target price based on source
+            // Mihong uses mace (chỉ) unit: 1 mace = 3.75g
+            // SJC prices are already in VND per tael: 1 tael = 37.5g = 10 mace
+            let target_price = if gold_source == "mihong" {
+                gold_point.sell * 10.0  // Convert from mace (chỉ) to tael (lượng)
+            } else {
+                gold_point.sell  // SJC and others already in VND per tael
+            };
+
+            // Calculate premium
+            // Premium (%) = [(Target Price - Market Price VND) / Market Price VND] × 100%
+            let premium_rate = ((target_price - market_price_vnd) / market_price_vnd) * 100.0;
+            let premium_value = target_price - market_price_vnd;
+
+            premium_points.push(GoldPremiumPoint {
+                timestamp: gold_point.timestamp,
+                target_price,
+                market_price_usd,
+                exchange_rate,
+                market_price_vnd,
+                premium_rate,
+                premium_value,
+                gold_type: gold_point.type_name.clone(),
+            });
+        }
+    }
+
+    if premium_points.is_empty() {
+        return Ok(GoldPremiumResponse::error(
+            "No matching data points found across all sources".to_string(),
+        ));
+    }
+
+    Ok(GoldPremiumResponse::success(premium_points).with_metadata(serde_json::json!({
+        "gold_source": gold_price_response.source,
+        "exchange_rate_source": exchange_rate_response.source,
+        "stock_source": stock_response.source,
+        "formula": "Premium (%) = [(Target Price - Market Price VND) / Market Price VND] × 100%",
+        "conversion": "Market Price VND = USD/oz × Exchange Rate × 1.206 (1 tael = 1.206 troy oz)",
+        "note": if gold_source == "mihong" {
+            "Mihong prices are in mace (chỉ, 3.75g) and have been converted to tael (lượng, 37.5g) by multiplying by 10"
+        } else {
+            "Gold prices are already in VND per tael (lượng)"
+        },
+    })))
+}
+
 /// GET / - Root endpoint with API information
 async fn root() -> impl IntoResponse {
     Json(json!({
@@ -148,6 +274,8 @@ async fn root() -> impl IntoResponse {
             "gold_history_post": "POST /api/v1/gold/history",
             "exchange_rate_history_get": "GET /api/v1/exchange-rate/history?currency_code={code}&from={from}&to={to}&source={source}",
             "exchange_rate_history_post": "POST /api/v1/exchange-rate/history",
+            "gold_premium_get": "GET /api/v1/gold-premium?from={from}&to={to}&gold_price_id={id}&currency_code={code}&gold_source={source}&exchange_rate_source={source}&stock_source={source}",
+            "gold_premium_post": "POST /api/v1/gold-premium",
             "unified_data": "POST /api/v1/data",
             "list_sources": "GET /api/v1/sources",
             "health": "GET /api/v1/health",
@@ -173,6 +301,15 @@ async fn root() -> impl IntoResponse {
             "to": 1731110400,
             "source": "vietcombank"
         },
+        "example_gold_premium_request": {
+            "from": 1730764800,
+            "to": 1731110400,
+            "gold_price_id": "999",
+            "currency_code": "USD",
+            "gold_source": "mihong",
+            "exchange_rate_source": "vietcombank",
+            "stock_source": "yahoo_finance"
+        },
         "example_unified_request": {
             "stock": {
                 "data_type": "stock",
@@ -197,13 +334,10 @@ async fn root() -> impl IntoResponse {
 pub fn create_router(state: AppState) -> Router {
     Router::new()
         .route("/", get(root))
-        .route("/api/v1/stock/history", get(get_stock_history))
         .route("/api/v1/stock/history", post(post_stock_history))
-        .route("/api/v1/gold/history", get(get_gold_history))
         .route("/api/v1/gold/history", post(post_gold_history))
-        .route("/api/v1/exchange-rate/history", get(get_exchange_rate_history))
         .route("/api/v1/exchange-rate/history", post(post_exchange_rate_history))
-        .route("/api/v1/data", post(post_unified_data))
+        .route("/api/v1/gold-premium", post(post_gold_premium))
         .route("/api/v1/sources", get(list_sources))
         .route("/api/v1/health", get(health_check))
         .route("/api/v1/health/sources", get(health_check_sources))
