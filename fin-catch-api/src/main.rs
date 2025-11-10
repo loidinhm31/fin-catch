@@ -7,7 +7,7 @@ mod sources;
 use crate::{
     gateway::DataSourceGateway,
     routes::{create_router, AppState},
-    sources::{MihongSource, SjcSource, SsiSource, VndirectSource, YahooFinanceSource},
+    sources::{MihongSource, SjcSource, SsiSource, VndirectSource, YahooFinanceSource, VietcombankSource},
 };
 use std::sync::Arc;
 use tower_http::{
@@ -32,8 +32,12 @@ async fn main() {
     tracing::info!("Starting fin-catch-api server...");
 
     // Initialize the data source gateway
-    // Default stock source: vndirect, Default gold source: sjc
-    let mut gateway = DataSourceGateway::new("vndirect".to_string(), "sjc".to_string());
+    // Default stock source: vndirect, Default gold source: sjc, Default exchange rate source: vietcombank
+    let mut gateway = DataSourceGateway::new(
+        "vndirect".to_string(),
+        "mihong".to_string(),
+        "vietcombank".to_string()
+    );
 
     // Register stock data sources
     let vndirect_source = Arc::new(VndirectSource::new());
@@ -57,11 +61,17 @@ async fn main() {
     gateway.register_gold_source(mihong_source);
     tracing::info!("Registered gold data source: MIHONG");
 
+    // Register exchange rate data sources
+    let vietcombank_source = Arc::new(VietcombankSource::new());
+    gateway.register_exchange_rate_source(vietcombank_source);
+    tracing::info!("Registered exchange rate data source: Vietcombank");
+
     let gateway = Arc::new(gateway);
     tracing::info!(
-        "Data source gateway initialized with {} stock sources and {} gold sources",
+        "Data source gateway initialized with {} stock sources, {} gold sources, and {} exchange rate sources",
         gateway.list_stock_sources().len(),
-        gateway.list_gold_sources().len()
+        gateway.list_gold_sources().len(),
+        gateway.list_exchange_rate_sources().len()
     );
 
     // Create application state

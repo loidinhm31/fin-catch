@@ -1,7 +1,7 @@
 use crate::{
     error::ApiResult,
     gateway::DataSourceGateway,
-    models::{DataRequest, GoldPriceRequest, StockHistoryRequest},
+    models::{DataRequest, GoldPriceRequest, StockHistoryRequest, ExchangeRateRequest},
 };
 use axum::{
     extract::{Query, State},
@@ -56,6 +56,26 @@ async fn post_gold_history(
     Json(request): Json<GoldPriceRequest>,
 ) -> ApiResult<impl IntoResponse> {
     let response = state.gateway.fetch_gold_history(request).await?;
+    Ok(Json(response))
+}
+
+/// GET /api/v1/exchange-rate/history
+/// Query parameters: currency_code, from, to, source (optional)
+async fn get_exchange_rate_history(
+    State(state): State<AppState>,
+    Query(request): Query<ExchangeRateRequest>,
+) -> ApiResult<impl IntoResponse> {
+    let response = state.gateway.fetch_exchange_rate_history(request).await?;
+    Ok(Json(response))
+}
+
+/// POST /api/v1/exchange-rate/history
+/// JSON body with ExchangeRateRequest
+async fn post_exchange_rate_history(
+    State(state): State<AppState>,
+    Json(request): Json<ExchangeRateRequest>,
+) -> ApiResult<impl IntoResponse> {
+    let response = state.gateway.fetch_exchange_rate_history(request).await?;
     Ok(Json(response))
 }
 
@@ -120,12 +140,14 @@ async fn root() -> impl IntoResponse {
     Json(json!({
         "service": "fin-catch-api",
         "version": "0.2.0",
-        "description": "Financial data aggregation API with support for stock and gold price data from multiple sources",
+        "description": "Financial data aggregation API with support for stock, gold price, and exchange rate data from multiple sources",
         "endpoints": {
             "stock_history_get": "GET /api/v1/stock/history?symbol={symbol}&resolution={resolution}&from={from}&to={to}&source={source}",
             "stock_history_post": "POST /api/v1/stock/history",
             "gold_history_get": "GET /api/v1/gold/history?gold_price_id={id}&from={from}&to={to}&source={source}",
             "gold_history_post": "POST /api/v1/gold/history",
+            "exchange_rate_history_get": "GET /api/v1/exchange-rate/history?currency_code={code}&from={from}&to={to}&source={source}",
+            "exchange_rate_history_post": "POST /api/v1/exchange-rate/history",
             "unified_data": "POST /api/v1/data",
             "list_sources": "GET /api/v1/sources",
             "health": "GET /api/v1/health",
@@ -144,6 +166,12 @@ async fn root() -> impl IntoResponse {
             "from": 1730764800,
             "to": 1731110400,
             "source": "sjc"
+        },
+        "example_exchange_rate_request": {
+            "currency_code": "USD",
+            "from": 1730764800,
+            "to": 1731110400,
+            "source": "vietcombank"
         },
         "example_unified_request": {
             "stock": {
@@ -173,6 +201,8 @@ pub fn create_router(state: AppState) -> Router {
         .route("/api/v1/stock/history", post(post_stock_history))
         .route("/api/v1/gold/history", get(get_gold_history))
         .route("/api/v1/gold/history", post(post_gold_history))
+        .route("/api/v1/exchange-rate/history", get(get_exchange_rate_history))
+        .route("/api/v1/exchange-rate/history", post(post_exchange_rate_history))
         .route("/api/v1/data", post(post_unified_data))
         .route("/api/v1/sources", get(list_sources))
         .route("/api/v1/health", get(health_check))
