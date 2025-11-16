@@ -4,6 +4,8 @@ import {
   StockHistoryResponse,
   GoldPriceRequest,
   GoldPriceResponse,
+  GoldPremiumRequest,
+  GoldPremiumResponse,
   DataRequest,
   DataResponse,
   SourceMetadata,
@@ -73,6 +75,21 @@ class FinCatchAPI {
       return response.data;
     } catch (error) {
       console.error("Error fetching gold price:", error);
+      throw this.handleError(error);
+    }
+  }
+
+  /**
+   * Fetch gold premium data (POST method)
+   */
+  async fetchGoldPremium(request: GoldPremiumRequest, signal?: AbortSignal): Promise<GoldPremiumResponse> {
+    try {
+      const response = await this.client.post<GoldPremiumResponse>("/gold-premium", request, {
+        signal,
+      });
+      return response.data;
+    } catch (error) {
+      console.error("Error fetching gold premium:", error);
       throw this.handleError(error);
     }
   }

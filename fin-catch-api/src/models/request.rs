@@ -80,8 +80,8 @@ impl StockHistoryRequest {
             return Err("Symbol cannot be empty".to_string());
         }
 
-        if self.from >= self.to {
-            return Err("'from' timestamp must be less than 'to' timestamp".to_string());
+        if self.from > self.to {
+            return Err("'from' timestamp must be less than or equal to 'to' timestamp".to_string());
         }
 
         if self.from < 0 || self.to < 0 {

@@ -1,6 +1,6 @@
 use crate::{
     error::{ApiError, ApiResult},
-    models::{Candle, StockHistoryRequest, StockHistoryResponse, Resolution},
+    models::{Candle, Resolution, StockHistoryRequest, StockHistoryResponse},
     sources::stock_source_trait::StockDataSource,
 };
 use async_trait::async_trait;
@@ -36,6 +36,18 @@ struct YahooFinanceMeta {
     instrument_type: String,
     #[serde(rename = "exchangeName")]
     exchange_name: String,
+    #[serde(rename = "regularMarketPrice")]
+    regular_market_price: Option<f64>,
+    #[serde(rename = "regularMarketOpen")]
+    regular_market_open: Option<f64>,
+    #[serde(rename = "regularMarketDayHigh")]
+    regular_market_day_high: Option<f64>,
+    #[serde(rename = "regularMarketDayLow")]
+    regular_market_day_low: Option<f64>,
+    #[serde(rename = "regularMarketVolume")]
+    regular_market_volume: Option<i64>,
+    #[serde(rename = "regularMarketTime")]
+    regular_market_time: Option<i64>,
 }
 
 #[derive(Debug, Deserialize, Serialize)]
@@ -217,25 +229,69 @@ impl StockDataSource for YahooFinanceSource {
 
     async fn fetch_history(&self, request: &StockHistoryRequest) -> ApiResult<StockHistoryResponse> {
         let url = format!("{}/v8/finance/chart/{}", self.base_url, request.symbol);
-        let interval = Self::resolution_to_interval(&request.resolution);
 
-        let response = self
-            .client
-            .get(&url)
-            .query(&[
-                ("period1", request.from.to_string().as_str()),
-                ("period2", request.to.to_string().as_str()),
-                ("interval", interval),
-                ("includePrePost", "true"),
-                ("events", "div%7Csplit%7Cearn"),
-            ])
-            .header("Accept", "*/*")
-            .header("Accept-Language", "en-US,en;q=0.9")
-            .header("Origin", "https://finance.yahoo.com")
-            .header("Referer", "https://finance.yahoo.com/")
-            .header("User-Agent", "Mozilla/5.0 (compatible; MSIE 6.0; Windows NT 5.2; .NET CLR 1.0.3705;)")
-            .send()
-            .await?;
+        let now = chrono::Utc::now().timestamp();
+        let is_to_current_date = (now - request.to).abs() < 86400; // to is within 24 hours of now
+        let is_single_day_query = (request.to - request.from).abs() < 86400; // from == to (same day)
+
+        // Determine query type:
+        // - If querying current date only (single day), use range-based query for real-time data
+        // - If querying a date range that includes current date, adjust 'to' to exclude current date
+        // - Otherwise, use period-based query for historical data
+        let (use_range_query, adjusted_from, adjusted_to) = if is_to_current_date && is_single_day_query {
+            // Single day query for current date - use range-based query for real-time data
+            (true, request.from, request.to)
+        } else if is_to_current_date && !is_single_day_query {
+            // Date range includes current date - exclude current date from historical query
+            let start_of_today = chrono::Utc::now()
+                .date_naive()
+                .and_hms_opt(0, 0, 0)
+                .unwrap()
+                .and_utc()
+                .timestamp();
+            (false, request.from, start_of_today)
+        } else {
+            // Pure historical query
+            (false, request.from, request.to)
+        };
+
+        let response = if use_range_query {
+            // Use range-based query for current/recent data to get real-time prices
+            let interval = Self::resolution_to_interval(&request.resolution);
+            self.client
+                .get(&url)
+                .query(&[
+                    ("range", "1d"),  // Get last day's data
+                    ("interval", interval),
+                    ("includePrePost", "true"),
+                ])
+                .header("Accept", "*/*")
+                .header("Accept-Language", "en-US,en;q=0.9")
+                .header("Origin", "https://finance.yahoo.com")
+                .header("Referer", "https://finance.yahoo.com/")
+                .header("User-Agent", "Mozilla/5.0 (compatible; MSIE 6.0; Windows NT 5.2; .NET CLR 1.0.3705;)")
+                .send()
+                .await?
+        } else {
+            // Use period-based query for historical data
+            let interval = Self::resolution_to_interval(&request.resolution);
+            self.client
+                .get(&url)
+                .query(&[
+                    ("period1", adjusted_from.to_string().as_str()),
+                    ("period2", adjusted_to.to_string().as_str()),
+                    ("interval", interval),
+                    ("includePrePost", "true"),
+                    ("events", "div%7Csplit%7Cearn"),
+                ])
+                .header("Accept", "*/*")
+                .header("Accept-Language", "en-US,en;q=0.9")
+                .header("Origin", "https://finance.yahoo.com")
+                .header("Referer", "https://finance.yahoo.com/")
+                .header("User-Agent", "Mozilla/5.0 (compatible; MSIE 6.0; Windows NT 5.2; .NET CLR 1.0.3705;)")
+                .send()
+                .await?
+        };
 
         if !response.status().is_success() {
             return Err(ApiError::DataSource(format!(

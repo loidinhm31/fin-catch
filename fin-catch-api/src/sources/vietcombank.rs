@@ -69,6 +69,94 @@ impl VietcombankSource {
         dates
     }
 
+    /// Fetch dates sequentially with rate limiting (for small requests)
+    async fn fetch_sequential(
+        &self,
+        dates: &[String],
+        currency_code: &str,
+    ) -> (Vec<ExchangeRatePoint>, Vec<String>) {
+        let mut all_data: Vec<ExchangeRatePoint> = Vec::new();
+        let mut failed_dates: Vec<String> = Vec::new();
+
+        for (i, date) in dates.iter().enumerate() {
+            tracing::debug!("Fetching date {}/{}: {}", i + 1, dates.len(), date);
+
+            match self.fetch_single_date(date, currency_code).await {
+                Ok(mut date_data) => {
+                    all_data.append(&mut date_data);
+                }
+                Err(e) => {
+                    tracing::warn!("Failed to fetch date {}: {}", date, e);
+                    failed_dates.push(date.clone());
+                }
+            }
+
+            // Add a delay between requests to avoid rate limiting
+            if i < dates.len() - 1 {
+                tokio::time::sleep(tokio::time::Duration::from_millis(500)).await;
+            }
+        }
+
+        (all_data, failed_dates)
+    }
+
+    /// Fetch dates concurrently with rate limiting (for larger requests)
+    /// Uses batching with controlled concurrency to respect API rate limits
+    async fn fetch_concurrent(
+        &self,
+        dates: &[String],
+        currency_code: &str,
+    ) -> (Vec<ExchangeRatePoint>, Vec<String>) {
+        let mut all_data: Vec<ExchangeRatePoint> = Vec::new();
+        let mut failed_dates: Vec<String> = Vec::new();
+
+        // Process in batches of 5 concurrent requests with 500ms delay between batches
+        const BATCH_SIZE: usize = 5;
+        let chunks: Vec<_> = dates.chunks(BATCH_SIZE).collect();
+
+        for (batch_idx, chunk) in chunks.iter().enumerate() {
+            tracing::debug!(
+                "Processing batch {}/{} ({} dates)",
+                batch_idx + 1,
+                chunks.len(),
+                chunk.len()
+            );
+
+            // Fetch all dates in this batch concurrently using join_all
+            let mut fetch_tasks = Vec::new();
+            for date in chunk.iter() {
+                let task = self.fetch_single_date(date, currency_code);
+                fetch_tasks.push((date.clone(), task));
+            }
+
+            let results = futures::future::join_all(
+                fetch_tasks.into_iter().map(|(date, task)| async move {
+                    (date, task.await)
+                })
+            ).await;
+
+            // Process results
+            for (date, result) in results {
+                match result {
+                    Ok(mut date_data) => {
+                        all_data.append(&mut date_data);
+                    }
+                    Err(e) => {
+                        tracing::warn!("Failed to fetch date {}: {}", date, e);
+                        failed_dates.push(date);
+                    }
+                }
+            }
+
+            // Add delay between batches (except for the last batch)
+            if batch_idx < chunks.len() - 1 {
+                tokio::time::sleep(tokio::time::Duration::from_millis(500)).await;
+            }
+        }
+
+        (all_data, failed_dates)
+    }
+
     /// Fetch exchange rates for a single date
     async fn fetch_single_date(&self, date: &str, currency_code: &str) -> ApiResult<Vec<ExchangeRatePoint>> {
         let url = format!("{}/api/exchangerates?date={}", self.base_url, date);
@@ -215,52 +303,57 @@ impl ExchangeRateDataSource for VietcombankSource {
             self.timestamp_to_date(request.to)
         );
 
-        // Fetch all dates sequentially with rate limiting
-        let mut all_data: Vec<ExchangeRatePoint> = Vec::new();
-
-        for (i, date) in dates.iter().enumerate() {
-            tracing::debug!(
-                "Fetching date {}/{}: {}",
-                i + 1,
-                dates.len(),
-                date
-            );
-
-            match self.fetch_single_date(date, &request.currency_code).await {
-                Ok(mut date_data) => {
-                    all_data.append(&mut date_data);
-                }
-                Err(e) => {
-                    // If any date fails, return error
-                    return Ok(ExchangeRateResponse::error(
-                        request.currency_code.clone(),
-                        self.name().to_string(),
-                        format!("Failed to fetch date {} ({}/{}): {}", date, i + 1, dates.len(), e),
-                    ));
-                }
-            }
-
-            // Add a delay between requests to avoid rate limiting
-            // Sleep for 500ms between requests to be respectful to the API
-            if i < dates.len() - 1 {
-                tokio::time::sleep(tokio::time::Duration::from_millis(500)).await;
-            }
-        }
+        // Determine fetch strategy based on number of dates
+        // For small requests (1-5 days), use sequential fetching
+        // For larger requests, use concurrent fetching with rate limiting
+        let (all_data, failed_dates) = if dates.len() <= 5 {
+            self.fetch_sequential(&dates, &request.currency_code).await
+        } else {
+            self.fetch_concurrent(&dates, &request.currency_code).await
+        };
 
         // Sort by timestamp
+        let mut all_data = all_data;
         all_data.sort_by_key(|p| p.timestamp);
 
         tracing::info!(
-            "Vietcombank request completed: fetched {} data points from {} date(s)",
+            "Vietcombank request completed: fetched {} data points from {} date(s), {} failed",
             all_data.len(),
-            dates.len()
+            dates.len(),
+            failed_dates.len()
         );
 
-        Ok(ExchangeRateResponse::success(
-            request.currency_code.clone(),
-            self.name().to_string(),
-            all_data,
-        ))
+        // If we have some data, return success with metadata about failures
+        if !all_data.is_empty() {
+            let mut response = ExchangeRateResponse::success(
+                request.currency_code.clone(),
+                self.name().to_string(),
+                all_data,
+            );
+
+            // Add metadata about failures if any
+            if !failed_dates.is_empty() {
+                response = response.with_metadata(serde_json::json!({
+                    "total_dates_requested": dates.len(),
+                    "successful_dates": dates.len() - failed_dates.len(),
+                    "failed_dates": failed_dates,
+                    "partial_success": true,
+                }));
+            }
+
+            Ok(response)
+        } else {
+            // If all dates failed, return error
+            Ok(ExchangeRateResponse::error(
+                request.currency_code.clone(),
+                self.name().to_string(),
+                format!(
+                    "Failed to fetch all {} date(s). Errors: {:?}",
+                    dates.len(),
+                    failed_dates
+                ),
+            ))
+        }
     }
 
     async fn health_check(&self) -> ApiResult<bool> {
@@ -291,9 +384,17 @@ impl ExchangeRateDataSource for VietcombankSource {
             "provider": "Vietcombank",
             "country": "Vietnam",
             "max_date_range_days": 180,
-            "rate_limit": "500ms between requests",
+            "fetching_strategy": {
+                "small_requests": "Sequential (1-5 days) with 500ms delay",
+                "large_requests": "Concurrent batching (6+ days, 5 per batch) with 500ms delay between batches"
+            },
+            "features": {
+                "partial_success": true,
+                "concurrent_fetching": true,
+                "error_reporting": "Failed dates reported in metadata"
+            },
             "supported_currencies": "ALL (USD, EUR, JPY, etc.)",
-            "description": "Exchange rates from Vietcombank. Supports single currency or ALL currencies."
+            "description": "Exchange rates from Vietcombank. Supports single currency or ALL currencies. Optimized with concurrent fetching and partial success handling."
         })
     }
 }

@@ -118,7 +118,7 @@ async fn fetch_gold_premium_data(
     // Set default values
     let gold_price_id = request.gold_price_id.unwrap_or_else(|| "1".to_string());
     let currency_code = request.currency_code.unwrap_or_else(|| "USD".to_string());
-    let gold_source = request.gold_source.as_deref().unwrap_or("mihong");
+    let gold_source = request.gold_source.as_deref().unwrap_or("sjc");
 
     // Fetch gold price data FIRST to get the actual date range
     let gold_price_request = GoldPriceRequest {
@@ -143,8 +143,51 @@ async fn fetch_gold_premium_data(
     let max_timestamp = gold_price_data.iter().map(|p| p.timestamp).max().unwrap_or(request.to);
 
     // Add buffer to ensure we get exchange rate and stock data for all days
-    let from_with_buffer = min_timestamp - 86400; // 1 day before
-    let to_with_buffer = max_timestamp + 86400;   // 1 day after
+    // Buffer helps with timezone differences and ensures complete data coverage
+    // However, we must respect the 180-day validation limit for exchange rates
+    const MAX_EXCHANGE_RATE_DAYS: i64 = 180;
+    const ONE_DAY: i64 = 86400;
+
+    let buffered_from = min_timestamp - ONE_DAY; // 1 day before
+    let buffered_to = max_timestamp + ONE_DAY;   // 1 day after
+
+    // Check if buffered range exceeds the limit
+    let buffered_days = (buffered_to - buffered_from) / ONE_DAY;
+
+    let (from_with_buffer, to_with_buffer) = if buffered_days > MAX_EXCHANGE_RATE_DAYS {
+        // If buffer would exceed limit, use unbuffered dates to stay within validation
+        // This typically happens when requesting exactly 180 days (180 + 2 days buffer = 182)
+        tracing::info!(
+            "Gold premium: buffer would create {}-day range (exceeds 180-day limit), using unbuffered dates",
+            buffered_days
+        );
+        (min_timestamp, max_timestamp)
+    } else {
+        // Buffer can be safely applied
+        tracing::debug!(
+            "Gold premium: applying ±1 day buffer for exchange rates ({} days total)",
+            buffered_days
+        );
+        (buffered_from, buffered_to)
+    };
+
+    // Determine exchange rate source based on original request date range
+    // This enables smart routing: single day -> Vietcombank, date range -> Yahoo Finance
+    let exchange_rate_source = if request.exchange_rate_source.is_some() {
+        // User explicitly specified a source
+        request.exchange_rate_source
+    } else {
+        // Smart routing based on ORIGINAL request (not buffered dates)
+        if request.from == request.to {
+            // Single day query - use Vietcombank for official rates
+            tracing::debug!("Gold premium: single day query, using vietcombank for exchange rates");
+            Some("vietcombank".to_string())
+        } else {
+            // Date range query - use Yahoo Finance for fast bulk fetching
+            tracing::debug!("Gold premium: date range query, using yahoo_finance for exchange rates");
+            Some("yahoo_finance".to_string())
+        }
+    };
 
     // Fetch exchange rate and stock data based on gold price date range
     let stock_request = StockHistoryRequest {
@@ -159,7 +202,7 @@ async fn fetch_gold_premium_data(
         currency_code: currency_code.clone(),
         from: from_with_buffer,
         to: to_with_buffer,
-        source: request.exchange_rate_source,
+        source: exchange_rate_source,
     };
 
     // Fetch data from exchange rate and stock sources
@@ -197,7 +240,7 @@ async fn fetch_gold_premium_data(
         stock_price_map.insert(day, candle.close);
     }
 
-    // Conversion factor: 1 tael (lượng) = 1.206 troy ounces
+    // Conversion factor: 1 tael = 1.206 troy ounces
     const TAEL_TO_TROY_OZ: f64 = 1.206;
 
     // Process gold price data and calculate premium
@@ -211,17 +254,11 @@ async fn fetch_gold_premium_data(
 
         if let (Some(&exchange_rate), Some(&market_price_usd)) = (exchange_rate, market_price_usd) {
             // Calculate market price in VND per tael
-            // Formula: USD/oz × Exchange_Rate × 1.206 = VND/lượng
+            // Formula: USD/oz × Exchange_Rate × 1.206 = VND/tael
             let market_price_vnd = market_price_usd * exchange_rate * TAEL_TO_TROY_OZ;
 
-            // Convert target price based on source
-            // Mihong uses mace (chỉ) unit: 1 mace = 3.75g
-            // SJC prices are already in VND per tael: 1 tael = 37.5g = 10 mace
-            let target_price = if gold_source == "mihong" {
-                gold_point.sell * 10.0  // Convert from mace (chỉ) to tael (lượng)
-            } else {
-                gold_point.sell  // SJC and others already in VND per tael
-            };
+            // SJC prices are already in VND per tael: 1 tael = 37.5g
+            let target_price = gold_point.sell;
 
             // Calculate premium
             // Premium (%) = [(Target Price - Market Price VND) / Market Price VND] × 100%
@@ -253,11 +290,7 @@ async fn fetch_gold_premium_data(
         "stock_source": stock_response.source,
         "formula": "Premium (%) = [(Target Price - Market Price VND) / Market Price VND] × 100%",
         "conversion": "Market Price VND = USD/oz × Exchange Rate × 1.206 (1 tael = 1.206 troy oz)",
-        "note": if gold_source == "mihong" {
-            "Mihong prices are in mace (chỉ, 3.75g) and have been converted to tael (lượng, 37.5g) by multiplying by 10"
-        } else {
-            "Gold prices are already in VND per tael (lượng)"
-        },
+        "note": "Gold prices are in VND per tael",
     })))
 }
 
@@ -268,15 +301,10 @@ async fn root() -> impl IntoResponse {
         "version": "0.2.0",
         "description": "Financial data aggregation API with support for stock, gold price, and exchange rate data from multiple sources",
         "endpoints": {
-            "stock_history_get": "GET /api/v1/stock/history?symbol={symbol}&resolution={resolution}&from={from}&to={to}&source={source}",
             "stock_history_post": "POST /api/v1/stock/history",
-            "gold_history_get": "GET /api/v1/gold/history?gold_price_id={id}&from={from}&to={to}&source={source}",
             "gold_history_post": "POST /api/v1/gold/history",
-            "exchange_rate_history_get": "GET /api/v1/exchange-rate/history?currency_code={code}&from={from}&to={to}&source={source}",
             "exchange_rate_history_post": "POST /api/v1/exchange-rate/history",
-            "gold_premium_get": "GET /api/v1/gold-premium?from={from}&to={to}&gold_price_id={id}&currency_code={code}&gold_source={source}&exchange_rate_source={source}&stock_source={source}",
             "gold_premium_post": "POST /api/v1/gold-premium",
-            "unified_data": "POST /api/v1/data",
             "list_sources": "GET /api/v1/sources",
             "health": "GET /api/v1/health",
             "health_sources": "GET /api/v1/health/sources",
@@ -304,29 +332,12 @@ async fn root() -> impl IntoResponse {
         "example_gold_premium_request": {
             "from": 1730764800,
             "to": 1731110400,
-            "gold_price_id": "999",
+            "gold_price_id": "1",
             "currency_code": "USD",
-            "gold_source": "mihong",
+            "gold_source": "sjc",
             "exchange_rate_source": "vietcombank",
             "stock_source": "yahoo_finance"
         },
-        "example_unified_request": {
-            "stock": {
-                "data_type": "stock",
-                "symbol": "VND",
-                "resolution": "1D",
-                "from": 1715385600,
-                "to": 1720396800,
-                "source": "vndirect"
-            },
-            "gold": {
-                "data_type": "gold",
-                "gold_price_id": "1",
-                "from": 1730764800,
-                "to": 1731110400,
-                "source": "sjc"
-            }
-        }
     }))
 }
 

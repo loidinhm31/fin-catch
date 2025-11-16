@@ -7,7 +7,7 @@ mod sources;
 use crate::{
     gateway::DataSourceGateway,
     routes::{create_router, AppState},
-    sources::{MihongSource, SjcSource, SsiSource, VndirectSource, YahooFinanceSource, VietcombankSource},
+    sources::{SjcSource, SsiSource, VietcombankSource, VndirectSource, YahooFinanceExchangeSource, YahooFinanceSource},
 };
 use std::sync::Arc;
 use tower_http::{
@@ -35,7 +35,7 @@ async fn main() {
     // Default stock source: vndirect, Default gold source: sjc, Default exchange rate source: vietcombank
     let mut gateway = DataSourceGateway::new(
         "vndirect".to_string(),
-        "mihong".to_string(),
+        "sjc".to_string(),
         "vietcombank".to_string()
     );
 
@@ -57,14 +57,14 @@ async fn main() {
     gateway.register_gold_source(sjc_source);
     tracing::info!("Registered gold data source: SJC");
 
-    let mihong_source = Arc::new(MihongSource::new());
-    gateway.register_gold_source(mihong_source);
-    tracing::info!("Registered gold data source: MIHONG");
-
     // Register exchange rate data sources
     let vietcombank_source = Arc::new(VietcombankSource::new());
     gateway.register_exchange_rate_source(vietcombank_source);
     tracing::info!("Registered exchange rate data source: Vietcombank");
+
+    let yahoo_finance_exchange_source = Arc::new(YahooFinanceExchangeSource::new());
+    gateway.register_exchange_rate_source(yahoo_finance_exchange_source);
+    tracing::info!("Registered exchange rate data source: Yahoo Finance");
 
     let gateway = Arc::new(gateway);
     tracing::info!(

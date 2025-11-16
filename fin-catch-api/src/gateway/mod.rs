@@ -1,10 +1,10 @@
 use crate::{
     error::{ApiError, ApiResult},
     models::{
-        DataRequest, DataResponse, DataType, GoldPriceRequest, GoldPriceResponse,
-        StockHistoryRequest, StockHistoryResponse, ExchangeRateRequest, ExchangeRateResponse,
+        DataRequest, DataResponse, DataType, ExchangeRateRequest, ExchangeRateResponse,
+        GoldPriceRequest, GoldPriceResponse, StockHistoryRequest, StockHistoryResponse,
     },
-    sources::{GoldDataSource, StockDataSource, ExchangeRateDataSource},
+    sources::{ExchangeRateDataSource, GoldDataSource, StockDataSource},
 };
 use std::{collections::HashMap, sync::Arc};
 
@@ -160,6 +160,8 @@ impl DataSourceGateway {
     }
 
     /// Fetch exchange rate history using the specified or default source
+    /// Routing: If no source specified, uses Vietcombank for single-day queries
+    /// and Yahoo Finance for date range queries
     pub async fn fetch_exchange_rate_history(
         &self,
         mut request: ExchangeRateRequest,
@@ -170,11 +172,23 @@ impl DataSourceGateway {
             .map_err(|e| ApiError::InvalidRequest(e))?;
 
         // Determine which source to use
-        let source_name = request
-            .source
-            .as_ref()
-            .unwrap_or(&self.default_exchange_rate_source)
-            .clone();
+        let source_name = if let Some(source) = &request.source {
+            // User explicitly specified a source, use it
+            source.clone()
+        } else {
+            // Smart routing based on date range
+            let days_diff = (request.to - request.from) / 86400; // Convert seconds to days
+
+            if days_diff == 0 {
+                // Single day query - use Vietcombank for official Vietnamese rates
+                tracing::debug!("Routing: single day query, using vietcombank");
+                "vietcombank".to_string()
+            } else {
+                // Date range query - use Yahoo Finance for efficient bulk fetching
+                tracing::debug!("Routing: {} day range, using yahoo_finance", days_diff);
+                "yahoo_finance".to_string()
+            }
+        };
 
         // Get the source
         let source = self

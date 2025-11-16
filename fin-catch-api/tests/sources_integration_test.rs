@@ -15,9 +15,10 @@
 use fin_catch_api::{
     models::{GoldPriceRequest, Resolution, StockHistoryRequest},
     sources::{
-        GoldDataSource, MihongSource, SjcSource, SsiSource, StockDataSource, VndirectSource,
+        GoldDataSource, SjcSource, SsiSource, StockDataSource, VndirectSource,
     },
 };
+
 
 // Test timestamps based on the shell scripts
 const STOCK_FROM: i64 = 1720396800; // July 8, 2024
@@ -283,137 +284,6 @@ async fn test_sjc_metadata() {
     println!("  → Metadata: {}", serde_json::to_string_pretty(&metadata).unwrap());
 }
 
-#[tokio::test]
-async fn test_mihong_fetch_history() {
-    println!("\n=== Testing MiHong Source ===");
-
-    let source = MihongSource::new();
-    let request = GoldPriceRequest {
-        gold_price_id: "999".to_string(), // 24K gold (999)
-        from: GOLD_FROM,
-        to: GOLD_TO,
-        source: Some("mihong".to_string()),
-    };
-
-    match source.fetch_history(&request).await {
-        Ok(response) => {
-            print_test_result("MiHong", "fetch_history", true);
-            assert_eq!(response.status, "ok", "Response status should be 'ok'");
-            assert_eq!(response.source, "mihong");
-            assert_eq!(response.gold_price_id, "999");
-            assert!(response.data.is_some(), "Response should contain data");
-
-            if let Some(data) = response.data {
-                println!("  → Received {} gold price points", data.len());
-                assert!(!data.is_empty(), "Should have at least some gold price data");
-
-                // Verify data structure
-                if let Some(first_point) = data.first() {
-                    println!("  → First point: timestamp={}, type={}, buy={}, sell={}",
-                        first_point.timestamp, first_point.type_name,
-                        first_point.buy, first_point.sell);
-                    assert!(first_point.timestamp > 0);
-                    assert!(first_point.buy > 0.0);
-                    assert!(first_point.sell > 0.0);
-                }
-            }
-        }
-        Err(e) => {
-            print_test_result("MiHong", "fetch_history", false);
-            panic!("MiHong fetch_history failed: {:?}", e);
-        }
-    }
-}
-
-#[tokio::test]
-async fn test_mihong_fetch_history_sjc_code() {
-    println!("\n=== Testing MiHong Source with SJC Code ===");
-
-    let source = MihongSource::new();
-    let request = GoldPriceRequest {
-        gold_price_id: "SJC".to_string(),
-        from: GOLD_FROM,
-        to: GOLD_TO,
-        source: Some("mihong".to_string()),
-    };
-
-    match source.fetch_history(&request).await {
-        Ok(response) => {
-            print_test_result("MiHong", "fetch_history (SJC)", true);
-            assert_eq!(response.status, "ok");
-            assert_eq!(response.gold_price_id, "SJC");
-
-            if let Some(data) = response.data {
-                println!("  → Received {} gold price points for SJC code", data.len());
-            }
-        }
-        Err(e) => {
-            print_test_result("MiHong", "fetch_history (SJC)", false);
-            panic!("MiHong fetch_history (SJC) failed: {:?}", e);
-        }
-    }
-}
-
-#[tokio::test]
-async fn test_mihong_fetch_history_999_code() {
-    println!("\n=== Testing MiHong Source with 999 Code (24K) ===");
-
-    let source = MihongSource::new();
-    let request = GoldPriceRequest {
-        gold_price_id: "999".to_string(), // Sometimes used for 24K
-        from: GOLD_FROM,
-        to: GOLD_TO,
-        source: Some("mihong".to_string()),
-    };
-
-    match source.fetch_history(&request).await {
-        Ok(response) => {
-            print_test_result("MiHong", "fetch_history (999)", true);
-            assert_eq!(response.source, "mihong");
-            assert_eq!(response.gold_price_id, "999");
-
-            // Note: This might not return data depending on MiHong's supported codes
-            println!("  → Response status: {}", response.status);
-            if let Some(data) = response.data {
-                println!("  → Received {} gold price points for 999 code", data.len());
-            }
-        }
-        Err(e) => {
-            print_test_result("MiHong", "fetch_history (999)", false);
-            panic!("MiHong fetch_history (999) failed: {:?}", e);
-        }
-    }
-}
-
-#[tokio::test]
-async fn test_mihong_health_check() {
-    let source = MihongSource::new();
-
-    match source.health_check().await {
-        Ok(is_healthy) => {
-            print_test_result("MiHong", "health_check", is_healthy);
-            assert!(is_healthy, "MiHong source should be healthy");
-            println!("  → MiHong API is healthy");
-        }
-        Err(e) => {
-            print_test_result("MiHong", "health_check", false);
-            panic!("MiHong health_check failed: {:?}", e);
-        }
-    }
-}
-
-#[tokio::test]
-async fn test_mihong_metadata() {
-    let source = MihongSource::new();
-    let metadata = source.metadata();
-
-    print_test_result("MiHong", "metadata", true);
-    assert_eq!(metadata["source"], "mihong");
-    assert_eq!(metadata["data_type"], "gold");
-    assert_eq!(metadata["country"], "Vietnam");
-    println!("  → Metadata: {}", serde_json::to_string_pretty(&metadata).unwrap());
-}
-
 // =============================================================================
 // COMPREHENSIVE TEST - ALL SOURCES
 // =============================================================================
@@ -425,7 +295,6 @@ async fn test_all_sources_health_check() {
     let vndirect = VndirectSource::new();
     let ssi = SsiSource::new();
     let sjc = SjcSource::new();
-    let mihong = MihongSource::new();
 
     let mut all_healthy = true;
 
@@ -465,18 +334,6 @@ async fn test_all_sources_health_check() {
         }
     }
 
-    // Test MiHong
-    match mihong.health_check().await {
-        Ok(healthy) => {
-            println!("MiHong: {}", if healthy { "✓ Healthy" } else { "✗ Unhealthy" });
-            all_healthy &= healthy;
-        }
-        Err(e) => {
-            println!("MiHong: ✗ Error - {:?}", e);
-            all_healthy = false;
-        }
-    }
-
     assert!(all_healthy, "All sources should be healthy");
     println!("\n✓ All sources are healthy!");
 }
@@ -489,7 +346,6 @@ async fn test_all_sources_metadata() {
         ("VNDIRECT", VndirectSource::new().metadata()),
         ("SSI", SsiSource::new().metadata()),
         ("SJC", SjcSource::new().metadata()),
-        ("MiHong", MihongSource::new().metadata()),
     ];
 
     for (name, metadata) in sources {

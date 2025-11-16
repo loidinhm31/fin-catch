@@ -1,18 +1,23 @@
-import React, { useState } from "react";
-import { TrendingUp, Coins } from "lucide-react";
+import React, { useState, useEffect } from "react";
+import { TrendingUp, Coins, TrendingDown } from "lucide-react";
 import {
   StockQueryForm,
   GoldQueryForm,
   StockChart,
   GoldChart,
+  GoldPremiumChart,
 } from "../organisms";
 import {
   StockHistoryRequest,
   GoldPriceRequest,
   StockHistoryResponse,
   GoldPriceResponse,
+  GoldPremiumRequest,
+  GoldPremiumResponse,
 } from "../../types";
 import { finCatchAPI } from "../../services/api";
+import { dateToUnixTimestamp } from "../../utils/dateUtils";
+import { DateRangePicker } from "../molecules";
 
 type ActiveTab = "stock" | "gold";
 
@@ -32,6 +37,21 @@ export const FinancialDataPage: React.FC = () => {
   // Gold data state
   const [goldData, setGoldData] = useState<GoldPriceResponse | null>(null);
   const [goldError, setGoldError] = useState<string | null>(null);
+
+  // Gold premium state
+  const [showGoldPremium, setShowGoldPremium] = useState(false);
+  const [goldPremiumData, setGoldPremiumData] = useState<GoldPremiumResponse | null>(null);
+  const [goldPremiumError, setGoldPremiumError] = useState<string | null>(null);
+  const [showFullPremiumChart, setShowFullPremiumChart] = useState(false);
+  const [premiumDateRange, setPremiumDateRange] = useState<{ from: Date; to: Date }>(() => {
+    const to = new Date();
+    const from = new Date();
+    from.setDate(from.getDate() - 180); // Default 180 days
+    return { from, to };
+  });
+
+  // AbortController for cancelling API requests
+  const [premiumAbortController, setPremiumAbortController] = useState<AbortController | null>(null);
 
   const handleStockSubmit = async (request: StockHistoryRequest) => {
     setIsLoading(true);
@@ -79,8 +99,96 @@ export const FinancialDataPage: React.FC = () => {
     }
   };
 
+  const fetchGoldPremium = async (dateRange: { from: Date; to: Date }) => {
+    // Cancel previous request if it exists
+    if (premiumAbortController) {
+      premiumAbortController.abort();
+    }
+
+    // Create new AbortController for this request
+    const abortController = new AbortController();
+    setPremiumAbortController(abortController);
+
+    setIsLoading(true);
+    setGoldPremiumError(null);
+
+    try {
+      const request: GoldPremiumRequest = {
+        from: dateToUnixTimestamp(dateRange.from),
+        to: dateToUnixTimestamp(dateRange.to),
+        gold_price_id: "49",
+        currency_code: "USD",
+        gold_source: "sjc",
+        stock_source: "yahoo_finance",
+      };
+
+      const response = await finCatchAPI.fetchGoldPremium(request, abortController.signal);
+
+      if (response.status === "error") {
+        setGoldPremiumError(response.error || "Failed to fetch gold premium data");
+        setGoldPremiumData(null);
+      } else {
+        setGoldPremiumData(response);
+        setGoldPremiumError(null);
+      }
+    } catch (error) {
+      // Don't show error if request was cancelled
+      if (error instanceof Error && error.name === 'CanceledError') {
+        console.log('Request cancelled');
+        return;
+      }
+      const errorMessage = error instanceof Error ? error.message : "Unknown error occurred";
+      setGoldPremiumError(errorMessage);
+      setGoldPremiumData(null);
+    } finally {
+      setIsLoading(false);
+      setPremiumAbortController(null);
+    }
+  };
+
+  const handleToggleGoldPremium = async () => {
+    const newShowState = !showGoldPremium;
+    setShowGoldPremium(newShowState);
+
+    if (newShowState && !goldPremiumData) {
+      // Fetch current date data
+      const today = new Date();
+      await fetchGoldPremium({ from: today, to: today });
+    }
+  };
+
+  const handleToggleFullChart = async () => {
+    const newShowFullState = !showFullPremiumChart;
+    setShowFullPremiumChart(newShowFullState);
+
+    if (newShowFullState) {
+      // Fetch full date range data
+      await fetchGoldPremium(premiumDateRange);
+    } else {
+      // Fetch only current date
+      const today = new Date();
+      await fetchGoldPremium({ from: today, to: today });
+    }
+  };
+
+  const handlePremiumDateRangeChange = async (from: Date, to: Date) => {
+    setPremiumDateRange({ from, to });
+    if (showFullPremiumChart) {
+      await fetchGoldPremium({ from, to });
+    }
+  };
+
   const currentData = activeTab === "stock" ? stockData : goldData;
   const currentError = activeTab === "stock" ? stockError : goldError;
+
+  // Cleanup: Cancel any pending requests on unmount
+  useEffect(() => {
+    return () => {
+      if (premiumAbortController) {
+        premiumAbortController.abort();
+      }
+    };
+  }, [premiumAbortController]);
 
   return (
     <div className="screen-explore">
@@ -257,6 +365,104 @@ export const FinancialDataPage: React.FC = () => {
               </p>
             </div>
           )}
+
+          {/* Gold Premium Section */}
+          <div className="mt-8">
+            <div className="flex items-center justify-between mb-4">
+              <h2 style={{ fontSize: 'var(--text-xl)', fontWeight: 'var(--font-bold)', color: 'var(--cube-gray-900)' }}>
+                Gold Premium Analysis
+              </h2>
+              <button
+                onClick={handleToggleGoldPremium}
+                className={`flex items-center gap-2 px-4 py-2 rounded-xl font-bold transition-all ${
+                  showGoldPremium
+                    ? "bg-gradient-to-r from-yellow-400 to-orange-500 text-white shadow-lg"
+                    : "glass-button text-gray-700"
+                }`}
+                style={{ fontSize: 'var(--text-sm)' }}
+              >
+                <TrendingDown className="w-5 h-5" />
+                {showGoldPremium ? "HIDE PREMIUM" : "SHOW PREMIUM"}
+              </button>
+            </div>
+
+            {showGoldPremium && (
+              <div className="space-y-4">
+                {/* Controls */}
+                <div className="glass-card p-4">
+                  <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
+                    <button
+                      onClick={handleToggleFullChart}
+                      className="btn-primary"
+                      style={{ background: 'linear-gradient(90deg, #facc15 0%, #fb923c 100%)' }}
+                    >
+                      {showFullPremiumChart ? "SHOW CURRENT DATE ONLY" : "VIEW FULL CHART"}
+                    </button>
+
+                    {showFullPremiumChart && (
+                      <div className="flex-1 w-full md:w-auto">
+                        <DateRangePicker
+                          fromDate={premiumDateRange.from}
+                          toDate={premiumDateRange.to}
+                          onFromDateChange={(date) => {
+                            if (date) {
+                              handlePremiumDateRangeChange(date, premiumDateRange.to);
+                            }
+                          }}
+                          onToDateChange={(date) => {
+                            if (date) {
+                              handlePremiumDateRangeChange(premiumDateRange.from, date);
+                            }
+                          }}
+                          required
+                        />
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Error Display */}
+                {goldPremiumError && (
+                  <div className="p-4 bg-red-100 border border-red-300 rounded-xl">
+                    <p style={{ fontWeight: 'var(--font-bold)', color: '#dc2626', fontSize: 'var(--text-sm)' }}>Error</p>
+                    <p style={{ color: '#dc2626', fontSize: 'var(--text-xs)', marginTop: 'var(--space-1)' }}>{goldPremiumError}</p>
+                  </div>
+                )}
+
+                {/* Chart */}
+                {goldPremiumData && goldPremiumData.data && goldPremiumData.data.length > 0 ? (
+                  <div className="glass-card p-6">
+                    <GoldPremiumChart
+                      data={goldPremiumData.data}
+                      showFullChart={showFullPremiumChart}
+                    />
+
+                    {/* Metadata Display */}
+                    {goldPremiumData.metadata && (
+                      <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-xl">
+                        <h4 style={{ fontSize: 'var(--text-sm)', fontWeight: 'var(--font-bold)', color: 'var(--cube-gray-900)', marginBottom: 'var(--space-2)' }}>
+                          Calculation Details
+                        </h4>
+                        <div className="space-y-1" style={{ fontSize: 'var(--text-xs)', color: 'var(--cube-gray-900)' }}>
+                          <p><strong>Formula:</strong> {String(goldPremiumData.metadata.formula || "N/A")}</p>
+                          <p><strong>Conversion:</strong> {String(goldPremiumData.metadata.conversion || "N/A")}</p>
+                          <p><strong>Note:</strong> {String(goldPremiumData.metadata.note || "N/A")}</p>
+                          <p><strong>Sources:</strong> Gold: {String(goldPremiumData.metadata.gold_source || "N/A")}, Exchange: {String(goldPremiumData.metadata.exchange_rate_source || "N/A")}, Market: {String(goldPremiumData.metadata.stock_source || "N/A")}</p>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                ) : showGoldPremium && !isLoading ? (
+                  <div className="glass-card p-8 text-center">
+                    <TrendingDown className="w-16 h-16 mx-auto mb-4 opacity-30" style={{ color: 'var(--cube-yellow)' }} />
+                    <p style={{ fontSize: 'var(--text-lg)', fontWeight: 'var(--font-bold)', color: 'var(--cube-gray-900)' }}>
+                      No premium data available
+                    </p>
+                  </div>
+                ) : null}
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </div>

@@ -69,8 +69,8 @@ impl GoldPremiumRequest {
     }
 
     pub fn validate(&self) -> Result<(), String> {
-        if self.from >= self.to {
-            return Err("'from' timestamp must be less than 'to' timestamp".to_string());
+        if self.from > self.to {
+            return Err("'from' timestamp must be less than or equal to 'to' timestamp".to_string());
         }
 
         if self.from < 0 || self.to < 0 {
@@ -96,7 +96,7 @@ pub struct GoldPremiumPoint {
     /// Exchange rate (USD to VND)
     pub exchange_rate: f64,
 
-    /// Market price converted to VND per lượng (tael)
+    /// Market price converted to VND per tael
     pub market_price_vnd: f64,
 
     /// Premium rate as percentage

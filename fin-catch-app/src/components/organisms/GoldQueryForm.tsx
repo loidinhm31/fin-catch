@@ -8,7 +8,6 @@ import {
   GoldSource,
   GOLD_SOURCE_LABELS,
   SJC_GOLD_PRICE_IDS,
-  MIHONG_GOLD_PRICE_IDS,
   GoldPriceRequest,
 } from "../../types";
 import { dateToUnixTimestamp, getDefaultDateRange, isValidDateRange } from "../../utils/dateUtils";
@@ -45,7 +44,7 @@ export const GoldQueryForm: React.FC<GoldQueryFormProps> = ({ onSubmit, isLoadin
 
   // Dynamically generate gold price ID options based on selected source
   const goldPriceIdOptions = useMemo(() => {
-    const sourceMap = selectedSource === "sjc" ? SJC_GOLD_PRICE_IDS : MIHONG_GOLD_PRICE_IDS;
+    const sourceMap = selectedSource === "sjc" ? SJC_GOLD_PRICE_IDS : {};
     return Object.entries(sourceMap).map(([value, label]) => ({
       value,
       label,

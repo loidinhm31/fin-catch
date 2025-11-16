@@ -1,9 +1,8 @@
 #[cfg(test)]
 mod tests {
-    use std::sync::Arc;
     use fin_catch_api::gateway::DataSourceGateway;
     use fin_catch_api::sources::{SjcSource, VndirectSource};
-    use super::*;
+    use std::sync::Arc;
 
     #[test]
     fn test_gateway_creation() {

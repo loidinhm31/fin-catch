@@ -127,16 +127,33 @@ export const SJC_GOLD_PRICE_IDS: Record<string, string> = {
   "2": "Ha Noi Center",
 };
 
-// Gold price IDs for MiHong source (purity codes)
-export const MIHONG_GOLD_PRICE_IDS: Record<string, string> = {
-  SJC: "SJC Branded Gold",
-  "999": "24K Gold (99.9%)",
-  "985": "23.64K Gold (98.5%)",
-  "980": "23.52K Gold (98.0%)",
-  "950": "22.8K Gold (95.0%)",
-  "750": "18K Gold (75.0%)",
-  "680": "16.32K Gold (68.0%)",
-  "610": "14.64K Gold (61.0%)",
-  "580": "13.92K Gold (58.0%)",
-  "410": "9.84K Gold (41.0%)",
-};
+// Gold Premium Request
+export interface GoldPremiumRequest {
+  from: number; // Unix timestamp in seconds
+  to: number; // Unix timestamp in seconds
+  gold_price_id?: string;
+  currency_code?: string;
+  gold_source?: string;
+  exchange_rate_source?: string;
+  stock_source?: string;
+}
+
+// Gold Premium Point
+export interface GoldPremiumPoint {
+  timestamp: number;
+  target_price: number;
+  market_price_usd: number;
+  exchange_rate: number;
+  market_price_vnd: number;
+  premium_rate: number;
+  premium_value: number;
+  gold_type: string;
+}
+
+// Gold Premium Response
+export interface GoldPremiumResponse {
+  status: "ok" | "error";
+  data?: GoldPremiumPoint[];
+  error?: string;
+  metadata?: Record<string, unknown>;
+}

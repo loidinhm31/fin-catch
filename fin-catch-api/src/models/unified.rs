@@ -1,7 +1,7 @@
-use serde::{Deserialize, Serialize};
 use super::gold::{GoldPriceRequest, GoldPriceResponse};
 use super::request::StockHistoryRequest;
 use super::response::StockHistoryResponse;
+use serde::{Deserialize, Serialize};
 
 /// Data type enum to distinguish between different data types
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
