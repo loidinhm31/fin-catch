@@ -1,6 +1,6 @@
-import React, { forwardRef, useState, useRef } from "react";
-import { format } from "date-fns";
-import { formatDateWithOrdinal } from "../../utils/dateUtils";
+import React, {forwardRef, useRef} from "react";
+import {format} from "date-fns";
+import {formatDateWithOrdinal} from "../../utils/dateUtils";
 
 export interface DateInputProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>, "type" | "value" | "onChange"> {
   value?: Date;

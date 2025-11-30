@@ -1,19 +1,9 @@
 import React from "react";
-import { TransformWrapper, TransformComponent } from "react-zoom-pan-pinch";
-import { ZoomIn, ZoomOut, Maximize2 } from "lucide-react";
-import {
-  ResponsiveContainer,
-  ComposedChart,
-  Line,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  Legend,
-} from "recharts";
-import { GoldPremiumPoint } from "../../types";
-import { formatTimestampForChart } from "../../utils/dateUtils";
+import {TransformComponent, TransformWrapper} from "react-zoom-pan-pinch";
+import {Maximize2, ZoomIn, ZoomOut} from "lucide-react";
+import {Bar, CartesianGrid, ComposedChart, Legend, Line, ResponsiveContainer, Tooltip, XAxis, YAxis,} from "recharts";
+import {GoldPremiumPoint} from "../../types";
+import {formatTimestampForChart} from "../../utils/dateUtils";
 
 export interface GoldPremiumChartProps {
   data: GoldPremiumPoint[];

@@ -1,6 +1,6 @@
 import React from "react";
-import { DateInput } from "../atoms";
-import { FormField } from "./FormField";
+import {DateInput} from "../atoms";
+import {FormField} from "./FormField";
 
 export interface DateRangePickerProps {
   fromDate: Date;

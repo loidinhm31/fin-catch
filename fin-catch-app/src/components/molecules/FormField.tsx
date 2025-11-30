@@ -1,5 +1,5 @@
 import React from "react";
-import { Label, ErrorText } from "../atoms";
+import {ErrorText, Label} from "../atoms";
 
 export interface FormFieldProps {
   label: string;

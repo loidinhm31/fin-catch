@@ -1,11 +1,11 @@
-import { invoke } from "@tauri-apps/api/core";
+import {invoke} from "@tauri-apps/api/core";
 import {
-  StockHistoryRequest,
-  StockHistoryResponse,
-  GoldPriceRequest,
-  GoldPriceResponse,
   GoldPremiumRequest,
   GoldPremiumResponse,
+  GoldPriceRequest,
+  GoldPriceResponse,
+  StockHistoryRequest,
+  StockHistoryResponse,
 } from "../types";
 
 class FinCatchAPI {

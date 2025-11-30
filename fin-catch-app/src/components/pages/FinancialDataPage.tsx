@@ -1,23 +1,17 @@
-import React, { useState, useEffect } from "react";
-import { TrendingUp, Coins, TrendingDown } from "lucide-react";
+import React, {useEffect, useState} from "react";
+import {Coins, TrendingDown, TrendingUp} from "lucide-react";
+import {GoldChart, GoldPremiumChart, GoldQueryForm, StockChart, StockQueryForm,} from "../organisms";
 import {
-  StockQueryForm,
-  GoldQueryForm,
-  StockChart,
-  GoldChart,
-  GoldPremiumChart,
-} from "../organisms";
-import {
-  StockHistoryRequest,
-  GoldPriceRequest,
-  StockHistoryResponse,
-  GoldPriceResponse,
   GoldPremiumRequest,
   GoldPremiumResponse,
+  GoldPriceRequest,
+  GoldPriceResponse,
+  StockHistoryRequest,
+  StockHistoryResponse,
 } from "../../types";
-import { finCatchAPI } from "../../services/api";
-import { dateToUnixTimestamp } from "../../utils/dateUtils";
-import { DateRangePicker } from "../molecules";
+import {finCatchAPI} from "../../services/api";
+import {dateToUnixTimestamp} from "../../utils/dateUtils";
+import {DateRangePicker} from "../molecules";
 
 type ActiveTab = "stock" | "gold";
 

@@ -1,4 +1,4 @@
-import { format, startOfDay, endOfDay } from "date-fns";
+import {endOfDay, format, startOfDay} from "date-fns";
 
 /**
  * Convert JavaScript Date to Unix timestamp (seconds)

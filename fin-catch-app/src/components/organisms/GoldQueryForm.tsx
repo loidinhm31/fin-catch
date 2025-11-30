@@ -1,16 +1,10 @@
-import React, { useMemo, useEffect } from "react";
-import { useForm, Controller } from "react-hook-form";
-import { Coins } from "lucide-react";
-import { Select } from "../atoms";
-import { FormField, DateRangePicker } from "../molecules";
-import {
-  GoldFormData,
-  GoldSource,
-  GOLD_SOURCE_LABELS,
-  SJC_GOLD_PRICE_IDS,
-  GoldPriceRequest,
-} from "../../types";
-import { dateToUnixTimestamp, getDefaultDateRange, isValidDateRange } from "../../utils/dateUtils";
+import React, {useEffect, useMemo} from "react";
+import {Controller, useForm} from "react-hook-form";
+import {Coins} from "lucide-react";
+import {Select} from "../atoms";
+import {DateRangePicker, FormField} from "../molecules";
+import {GOLD_SOURCE_LABELS, GoldFormData, GoldPriceRequest, GoldSource, SJC_GOLD_PRICE_IDS,} from "../../types";
+import {dateToUnixTimestamp, getDefaultDateRange, isValidDateRange} from "../../utils/dateUtils";
 
 export interface GoldQueryFormProps {
   onSubmit: (request: GoldPriceRequest) => void;
