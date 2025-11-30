@@ -1,3 +1,4 @@
+#[cfg(feature = "server")]
 use axum::{
     http::StatusCode,
     response::{IntoResponse, Response},
@@ -32,6 +33,7 @@ struct ErrorResponse {
     message: String,
 }
 
+#[cfg(feature = "server")]
 impl IntoResponse for ApiError {
     fn into_response(self) -> Response {
         let (status, message) = match &self {

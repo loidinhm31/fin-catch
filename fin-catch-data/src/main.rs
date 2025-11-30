@@ -7,7 +7,6 @@ mod sources;
 use crate::{
     gateway::DataSourceGateway,
     routes::{create_router, AppState},
-    sources::{SjcSource, SsiSource, VietcombankSource, VndirectSource, YahooFinanceExchangeSource, YahooFinanceSource},
 };
 use std::sync::Arc;
 use tower_http::{
@@ -23,56 +22,26 @@ async fn main() {
     tracing_subscriber::registry()
         .with(
             tracing_subscriber::EnvFilter::try_from_default_env().unwrap_or_else(|_| {
-                "fin_catch_api=debug,tower_http=debug,axum=trace".into()
+                "fin_catch_data=debug,tower_http=debug,axum=trace".into()
             }),
         )
         .with(tracing_subscriber::fmt::layer())
         .init();
 
-    tracing::info!("Starting fin-catch-api server...");
+    tracing::info!("Starting fin-catch-data server...");
 
-    // Initialize the data source gateway
-    // Default stock source: vndirect, Default gold source: sjc, Default exchange rate source: vietcombank
-    let mut gateway = DataSourceGateway::new(
-        "vndirect".to_string(),
-        "sjc".to_string(),
-        "vietcombank".to_string()
-    );
+    // Initialize the data source gateway with all default sources
+    let gateway = Arc::new(DataSourceGateway::with_all_sources());
 
-    // Register stock data sources
-    let vndirect_source = Arc::new(VndirectSource::new());
-    gateway.register_stock_source(vndirect_source);
-    tracing::info!("Registered stock data source: VNDIRECT");
-
-    let ssi_source = Arc::new(SsiSource::new());
-    gateway.register_stock_source(ssi_source);
-    tracing::info!("Registered stock data source: SSI");
-
-    let yahoo_finance_source = Arc::new(YahooFinanceSource::new());
-    gateway.register_stock_source(yahoo_finance_source);
-    tracing::info!("Registered stock data source: Yahoo Finance");
-
-    // Register gold data sources
-    let sjc_source = Arc::new(SjcSource::new());
-    gateway.register_gold_source(sjc_source);
-    tracing::info!("Registered gold data source: SJC");
-
-    // Register exchange rate data sources
-    let vietcombank_source = Arc::new(VietcombankSource::new());
-    gateway.register_exchange_rate_source(vietcombank_source);
-    tracing::info!("Registered exchange rate data source: Vietcombank");
-
-    let yahoo_finance_exchange_source = Arc::new(YahooFinanceExchangeSource::new());
-    gateway.register_exchange_rate_source(yahoo_finance_exchange_source);
-    tracing::info!("Registered exchange rate data source: Yahoo Finance");
-
-    let gateway = Arc::new(gateway);
     tracing::info!(
         "Data source gateway initialized with {} stock sources, {} gold sources, and {} exchange rate sources",
         gateway.list_stock_sources().len(),
         gateway.list_gold_sources().len(),
         gateway.list_exchange_rate_sources().len()
     );
+    tracing::info!("Stock sources: {:?}", gateway.list_stock_sources());
+    tracing::info!("Gold sources: {:?}", gateway.list_gold_sources());
+    tracing::info!("Exchange rate sources: {:?}", gateway.list_exchange_rate_sources());
 
     // Create application state
     let state = AppState { gateway };

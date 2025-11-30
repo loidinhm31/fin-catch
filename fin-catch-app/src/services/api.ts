@@ -1,4 +1,4 @@
-import axios, { AxiosInstance } from "axios";
+import { invoke } from "@tauri-apps/api/core";
 import {
   StockHistoryRequest,
   StockHistoryResponse,
@@ -6,60 +6,18 @@ import {
   GoldPriceResponse,
   GoldPremiumRequest,
   GoldPremiumResponse,
-  DataRequest,
-  DataResponse,
-  SourceMetadata,
-  HealthCheckResponse,
 } from "../types";
 
-// API Configuration
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:3000";
-const API_VERSION = "v1";
-
 class FinCatchAPI {
-  private client: AxiosInstance;
-
-  constructor(baseURL: string = API_BASE_URL) {
-    this.client = axios.create({
-      baseURL: `${baseURL}/api/${API_VERSION}`,
-      headers: {
-        "Content-Type": "application/json",
-      },
-      timeout: 30000, // 30 seconds
-    });
-
-    // Add request interceptor for logging
-    this.client.interceptors.request.use(
-      (config) => {
-        console.log(`[API Request] ${config.method?.toUpperCase()} ${config.url}`, config.data);
-        return config;
-      },
-      (error) => {
-        console.error("[API Request Error]", error);
-        return Promise.reject(error);
-      }
-    );
-
-    // Add response interceptor for logging and error handling
-    this.client.interceptors.response.use(
-      (response) => {
-        console.log(`[API Response] ${response.config.url}`, response.data);
-        return response;
-      },
-      (error) => {
-        console.error("[API Response Error]", error.response?.data || error.message);
-        return Promise.reject(error);
-      }
-    );
-  }
-
   /**
-   * Fetch stock history data (POST method)
+   * Fetch stock history data via Tauri IPC
    */
   async fetchStockHistory(request: StockHistoryRequest): Promise<StockHistoryResponse> {
     try {
-      const response = await this.client.post<StockHistoryResponse>("/stock/history", request);
-      return response.data;
+      console.log("[Tauri IPC] fetch_stock_history", request);
+      const response = await invoke<StockHistoryResponse>("fetch_stock_history", { request });
+      console.log("[Tauri IPC Response]", response);
+      return response;
     } catch (error) {
       console.error("Error fetching stock history:", error);
       throw this.handleError(error);
@@ -67,12 +25,14 @@ class FinCatchAPI {
   }
 
   /**
-   * Fetch gold price data (POST method)
+   * Fetch gold price data via Tauri IPC
    */
   async fetchGoldPrice(request: GoldPriceRequest): Promise<GoldPriceResponse> {
     try {
-      const response = await this.client.post<GoldPriceResponse>("/gold/history", request);
-      return response.data;
+      console.log("[Tauri IPC] fetch_gold_price", request);
+      const response = await invoke<GoldPriceResponse>("fetch_gold_price", { request });
+      console.log("[Tauri IPC Response]", response);
+      return response;
     } catch (error) {
       console.error("Error fetching gold price:", error);
       throw this.handleError(error);
@@ -80,14 +40,29 @@ class FinCatchAPI {
   }
 
   /**
-   * Fetch gold premium data (POST method)
+   * Fetch exchange rate data via Tauri IPC
    */
-  async fetchGoldPremium(request: GoldPremiumRequest, signal?: AbortSignal): Promise<GoldPremiumResponse> {
+  async fetchExchangeRate(request: any): Promise<any> {
     try {
-      const response = await this.client.post<GoldPremiumResponse>("/gold-premium", request, {
-        signal,
-      });
-      return response.data;
+      console.log("[Tauri IPC] fetch_exchange_rate", request);
+      const response = await invoke<any>("fetch_exchange_rate", { request });
+      console.log("[Tauri IPC Response]", response);
+      return response;
+    } catch (error) {
+      console.error("Error fetching exchange rate:", error);
+      throw this.handleError(error);
+    }
+  }
+
+  /**
+   * Fetch gold premium data via Tauri IPC
+   */
+  async fetchGoldPremium(request: GoldPremiumRequest, _signal?: AbortSignal): Promise<GoldPremiumResponse> {
+    try {
+      console.log("[Tauri IPC] fetch_gold_premium", request);
+      const response = await invoke<GoldPremiumResponse>("fetch_gold_premium", { request });
+      console.log("[Tauri IPC Response]", response);
+      return response;
     } catch (error) {
       console.error("Error fetching gold premium:", error);
       throw this.handleError(error);
@@ -95,25 +70,14 @@ class FinCatchAPI {
   }
 
   /**
-   * Fetch data using unified endpoint (POST method)
+   * Get list of available sources via Tauri IPC
    */
-  async fetchData(request: DataRequest): Promise<DataResponse> {
+  async getSources(): Promise<Record<string, string[]>> {
     try {
-      const response = await this.client.post<DataResponse>("/data", request);
-      return response.data;
-    } catch (error) {
-      console.error("Error fetching data:", error);
-      throw this.handleError(error);
-    }
-  }
-
-  /**
-   * Get list of available sources
-   */
-  async getSources(): Promise<SourceMetadata[]> {
-    try {
-      const response = await this.client.get<SourceMetadata[]>("/sources");
-      return response.data;
+      console.log("[Tauri IPC] get_sources");
+      const response = await invoke<Record<string, string[]>>("get_sources");
+      console.log("[Tauri IPC Response]", response);
+      return response;
     } catch (error) {
       console.error("Error fetching sources:", error);
       throw this.handleError(error);
@@ -121,12 +85,14 @@ class FinCatchAPI {
   }
 
   /**
-   * Health check for all sources
+   * Health check for all sources via Tauri IPC
    */
-  async healthCheckAll(): Promise<HealthCheckResponse> {
+  async healthCheckAll(): Promise<Record<string, boolean>> {
     try {
-      const response = await this.client.get<HealthCheckResponse>("/health/sources");
-      return response.data;
+      console.log("[Tauri IPC] health_check_all");
+      const response = await invoke<Record<string, boolean>>("health_check_all");
+      console.log("[Tauri IPC Response]", response);
+      return response;
     } catch (error) {
       console.error("Error checking health:", error);
       throw this.handleError(error);
@@ -134,12 +100,14 @@ class FinCatchAPI {
   }
 
   /**
-   * Health check for a specific source
+   * Health check for a specific source via Tauri IPC
    */
-  async healthCheckSource(sourceName: string): Promise<{ status: boolean }> {
+  async healthCheckSource(sourceName: string): Promise<boolean> {
     try {
-      const response = await this.client.get<{ status: boolean }>(`/health/source/${sourceName}`);
-      return response.data;
+      console.log("[Tauri IPC] health_check_source", sourceName);
+      const response = await invoke<boolean>("health_check_source", { sourceName });
+      console.log("[Tauri IPC Response]", response);
+      return response;
     } catch (error) {
       console.error(`Error checking health for ${sourceName}:`, error);
       throw this.handleError(error);
@@ -150,15 +118,8 @@ class FinCatchAPI {
    * Handle API errors
    */
   private handleError(error: any): Error {
-    if (axios.isAxiosError(error)) {
-      if (error.response) {
-        // Server responded with error status
-        const message = error.response.data?.error || error.response.statusText;
-        return new Error(`API Error (${error.response.status}): ${message}`);
-      } else if (error.request) {
-        // Request was made but no response
-        return new Error("Network Error: Unable to reach the server. Please check if the API is running.");
-      }
+    if (typeof error === "string") {
+      return new Error(error);
     }
     return error instanceof Error ? error : new Error("Unknown error occurred");
   }

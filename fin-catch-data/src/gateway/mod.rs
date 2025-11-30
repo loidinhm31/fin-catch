@@ -247,3 +247,30 @@ impl Default for DataSourceGateway {
         Self::new("vndirect".to_string(), "sjc".to_string(), "vietcombank".to_string())
     }
 }
+
+impl DataSourceGateway {
+    /// Create a new gateway with all default sources registered
+    /// This is a convenience method for initializing the gateway with all available sources
+    pub fn with_all_sources() -> Self {
+        use crate::sources::{
+            SjcSource, SsiSource, VietcombankSource, VndirectSource,
+            YahooFinanceExchangeSource, YahooFinanceSource,
+        };
+
+        let mut gateway = Self::default();
+
+        // Register stock data sources
+        gateway.register_stock_source(Arc::new(VndirectSource::new()));
+        gateway.register_stock_source(Arc::new(SsiSource::new()));
+        gateway.register_stock_source(Arc::new(YahooFinanceSource::new()));
+
+        // Register gold data sources
+        gateway.register_gold_source(Arc::new(SjcSource::new()));
+
+        // Register exchange rate data sources
+        gateway.register_exchange_rate_source(Arc::new(VietcombankSource::new()));
+        gateway.register_exchange_rate_source(Arc::new(YahooFinanceExchangeSource::new()));
+
+        gateway
+    }
+}

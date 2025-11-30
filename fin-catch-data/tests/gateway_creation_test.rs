@@ -1,7 +1,7 @@
 #[cfg(test)]
 mod tests {
-    use fin_catch_api::gateway::DataSourceGateway;
-    use fin_catch_api::sources::{SjcSource, VndirectSource};
+    use fin_catch_data::gateway::DataSourceGateway;
+    use fin_catch_data::sources::{SjcSource, VndirectSource};
     use std::sync::Arc;
 
     #[test]

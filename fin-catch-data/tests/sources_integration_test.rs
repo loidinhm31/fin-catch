@@ -12,7 +12,7 @@
 /// - External APIs are down or rate-limiting
 /// - API endpoints have changed
 
-use fin_catch_api::{
+use fin_catch_data::{
     models::{GoldPriceRequest, Resolution, StockHistoryRequest},
     sources::{
         GoldDataSource, SjcSource, SsiSource, StockDataSource, VndirectSource,
