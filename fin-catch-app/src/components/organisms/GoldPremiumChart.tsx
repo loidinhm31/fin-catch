@@ -41,7 +41,9 @@ export const GoldPremiumChart: React.FC<GoldPremiumChartProps> = ({ data, showFu
     premium_rate: point.premium_rate,
     premium_value: point.premium_value,
     market_price_usd: point.market_price_usd,
+    stock_price_timestamp: point.stock_price_timestamp,
     exchange_rate: point.exchange_rate,
+    exchange_rate_timestamp: point.exchange_rate_timestamp,
     gold_type: point.gold_type,
   }));
 
@@ -106,14 +108,20 @@ export const GoldPremiumChart: React.FC<GoldPremiumChartProps> = ({ data, showFu
             <p style={{ fontSize: 'var(--text-base)', fontWeight: 'var(--font-bold)' }}>
               ${point.market_price_usd.toFixed(2)}/oz
             </p>
+            <div className="mt-2 flex justify-between items-center" style={{ fontSize: 'var(--text-xs)', opacity: 0.6 }}>
+              <span>{new Date(point.stock_price_timestamp * 1000).toLocaleString()}</span>
+            </div>
           </div>
 
           {/* Exchange Rate */}
           <div className="glass-card p-3">
-            <p style={{ fontSize: 'var(--text-xs)', opacity: 0.6, marginBottom: '4px' }}>Exch Rate</p>
+            <p style={{ fontSize: 'var(--text-xs)', opacity: 0.6, marginBottom: '4px' }}>Exchange Rate</p>
             <p style={{ fontSize: 'var(--text-base)', fontWeight: 'var(--font-bold)' }}>
               {point.exchange_rate.toFixed(0)}
             </p>
+            <div className="mt-2 flex justify-between items-center" style={{ fontSize: 'var(--text-xs)', opacity: 0.6 }}>
+              <span>{new Date(point.exchange_rate_timestamp * 1000).toLocaleString()}</span>
+            </div>
           </div>
         </div>
 

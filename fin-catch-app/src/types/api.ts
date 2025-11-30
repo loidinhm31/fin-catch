@@ -144,7 +144,9 @@ export interface GoldPremiumPoint {
   target_price: number;
   market_price_usd: number;
   exchange_rate: number;
+  exchange_rate_timestamp: number;
   market_price_vnd: number;
+  stock_price_timestamp: number;
   premium_rate: number;
   premium_value: number;
   gold_type: string;

@@ -1,17 +1,17 @@
-import React, { useState } from "react";
-import { useForm, Controller } from "react-hook-form";
-import { TrendingUp } from "lucide-react";
-import { Button, Input, Select } from "../atoms";
-import { FormField, DateRangePicker } from "../molecules";
+import React from "react";
+import {Controller, useForm} from "react-hook-form";
+import {TrendingUp} from "lucide-react";
+import {Input, Select} from "../atoms";
+import {DateRangePicker, FormField} from "../molecules";
 import {
-  StockFormData,
-  Resolution,
-  StockSource,
-  RESOLUTION_LABELS,
-  STOCK_SOURCE_LABELS,
-  StockHistoryRequest,
+    Resolution,
+    RESOLUTION_LABELS,
+    STOCK_SOURCE_LABELS,
+    StockFormData,
+    StockHistoryRequest,
+    StockSource,
 } from "../../types";
-import { dateToUnixTimestamp, getDefaultDateRange, isValidDateRange } from "../../utils/dateUtils";
+import {dateToUnixTimestamp, getDefaultDateRange, isValidDateRange} from "../../utils/dateUtils";
 
 export interface StockQueryFormProps {
   onSubmit: (request: StockHistoryRequest) => void;
@@ -35,7 +35,6 @@ export const StockQueryForm: React.FC<StockQueryFormProps> = ({ onSubmit, isLoad
     control,
     handleSubmit,
     formState: { errors },
-    watch,
   } = useForm<StockFormData>({
     defaultValues: {
       symbol: "AAPL",
@@ -45,9 +44,6 @@ export const StockQueryForm: React.FC<StockQueryFormProps> = ({ onSubmit, isLoad
       source: "yahoo_finance" as StockSource,
     },
   });
-
-  const fromDate = watch("fromDate");
-  const toDate = watch("toDate");
 
   const handleFormSubmit = (data: StockFormData) => {
     // Validate date range

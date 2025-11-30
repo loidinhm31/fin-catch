@@ -104,11 +104,20 @@ pub struct GoldPremiumPoint {
     pub premium_rate: f64,
 
     /// Premium rate as percentage
-    /// Formula: (target_price - market_price_vnd) 
+    /// Formula: (target_price - market_price_vnd)
     pub premium_value: f64,
 
     /// Gold type/product name (e.g., "SJC", "999")
     pub gold_type: String,
+
+    /// Timestamp from gold price source (Unix timestamp in seconds)
+    pub gold_price_timestamp: i64,
+
+    /// Timestamp from exchange rate source (Unix timestamp in seconds)
+    pub exchange_rate_timestamp: i64,
+
+    /// Timestamp from stock/market price source (Unix timestamp in seconds)
+    pub stock_price_timestamp: i64,
 }
 
 /// Gold premium response
@@ -159,6 +168,44 @@ impl GoldPremiumResponse {
 pub struct GoldPremiumCalculator;
 
 impl GoldPremiumCalculator {
+    /// Check if a timestamp falls on a weekend (Saturday or Sunday)
+    fn is_weekend(timestamp: i64) -> bool {
+        use chrono::{DateTime, Datelike, Utc};
+        let datetime = DateTime::<Utc>::from_timestamp(timestamp, 0).unwrap();
+        let weekday = datetime.weekday();
+        weekday == chrono::Weekday::Sat || weekday == chrono::Weekday::Sun
+    }
+
+    /// Get the previous Friday from a weekend date at 12:00:00 GMT (noon)
+    /// If the date is not a weekend, returns the original timestamp
+    fn get_previous_friday(timestamp: i64) -> i64 {
+        use chrono::{DateTime, Datelike, NaiveTime, Utc};
+
+        if !Self::is_weekend(timestamp) {
+            return timestamp;
+        }
+
+        let datetime = DateTime::<Utc>::from_timestamp(timestamp, 0).unwrap();
+        let weekday = datetime.weekday();
+
+        // Calculate days to subtract to get to Friday
+        let days_to_subtract = match weekday {
+            chrono::Weekday::Sat => 1, // Saturday -> Friday (1 day back)
+            chrono::Weekday::Sun => 2, // Sunday -> Friday (2 days back)
+            _ => 0,
+        };
+
+        // Get Friday's date
+        let friday_date = datetime.date_naive() - chrono::Days::new(days_to_subtract as u64);
+
+        // Set time to 12:00:00 GMT (noon)
+        let friday_datetime = friday_date
+            .and_time(NaiveTime::from_hms_opt(12, 0, 0).unwrap())
+            .and_utc();
+
+        friday_datetime.timestamp()
+    }
+
     /// Calculate gold premium by fetching and combining data from multiple sources
     pub async fn calculate(
         gateway: &crate::gateway::DataSourceGateway,
@@ -171,11 +218,33 @@ impl GoldPremiumCalculator {
         let currency_code = request.currency_code.clone().unwrap_or_else(|| "USD".to_string());
         let gold_source = request.gold_source.as_deref().unwrap_or("sjc");
 
+        // Check if requested dates fall on weekends and adjust
+        let mut weekend_warnings = Vec::new();
+        let adjusted_from = if Self::is_weekend(request.from) {
+            let friday = Self::get_previous_friday(request.from);
+            weekend_warnings.push(format!(
+                "Requested 'from' date falls on a weekend. Using previous Friday's data instead."
+            ));
+            friday
+        } else {
+            request.from
+        };
+
+        let adjusted_to = if Self::is_weekend(request.to) {
+            let friday = Self::get_previous_friday(request.to);
+            weekend_warnings.push(format!(
+                "Requested 'to' date falls on a weekend. Using previous Friday's data instead."
+            ));
+            friday
+        } else {
+            request.to
+        };
+
         // Fetch gold price data FIRST to get the actual date range
         let gold_price_request = GoldPriceRequest {
             gold_price_id: gold_price_id.clone(),
-            from: request.from,
-            to: request.to,
+            from: adjusted_from,
+            to: adjusted_to,
             source: Some(gold_source.to_string()),
         };
 
@@ -197,8 +266,12 @@ impl GoldPremiumCalculator {
         const MAX_EXCHANGE_RATE_DAYS: i64 = 180;
         const ONE_DAY: i64 = 86400;
 
-        let buffered_from = min_timestamp - ONE_DAY;
-        let buffered_to = max_timestamp + ONE_DAY;
+        let buffered_from = if request.from == request.to {
+            max_timestamp
+        } else {
+            min_timestamp
+        };
+        let buffered_to = max_timestamp;
 
         let buffered_days = (buffered_to - buffered_from) / ONE_DAY;
 
@@ -208,11 +281,11 @@ impl GoldPremiumCalculator {
             (buffered_from, buffered_to)
         };
 
-        // Determine exchange rate source based on original request
+        // Determine exchange rate source based on adjusted request
         let exchange_rate_source = if request.exchange_rate_source.is_some() {
             request.exchange_rate_source.clone()
         } else {
-            if request.from == request.to {
+            if adjusted_from == adjusted_to {
                 Some("vietcombank".to_string())
             } else {
                 Some("yahoo_finance".to_string())
@@ -254,17 +327,17 @@ impl GoldPremiumCalculator {
             (timestamp / 86400) * 86400
         };
 
-        // Create maps for quick lookup
+        // Create maps for quick lookup - store (timestamp, value) tuples
         let mut exchange_rate_map = std::collections::HashMap::new();
         for point in &exchange_rate_data {
             let day = normalize_to_day(point.timestamp);
-            exchange_rate_map.insert(day, point.sell);
+            exchange_rate_map.insert(day, (point.timestamp, point.sell));
         }
 
         let mut stock_price_map = std::collections::HashMap::new();
         for candle in &stock_data {
             let day = normalize_to_day(candle.timestamp);
-            stock_price_map.insert(day, candle.close);
+            stock_price_map.insert(day, (candle.timestamp, candle.close));
         }
 
         // Conversion factor: 1 tael = 1.206 troy ounces
@@ -274,10 +347,10 @@ impl GoldPremiumCalculator {
         for gold_point in gold_price_data {
             let day = normalize_to_day(gold_point.timestamp);
 
-            let exchange_rate = exchange_rate_map.get(&day);
-            let market_price_usd = stock_price_map.get(&day);
+            let exchange_rate_data = exchange_rate_map.get(&day);
+            let stock_price_data = stock_price_map.get(&day);
 
-            if let (Some(&exchange_rate), Some(&market_price_usd)) = (exchange_rate, market_price_usd) {
+            if let (Some(&(exchange_rate_timestamp, exchange_rate)), Some(&(stock_price_timestamp, market_price_usd))) = (exchange_rate_data, stock_price_data) {
                 let market_price_vnd = market_price_usd * exchange_rate * TAEL_TO_TROY_OZ;
                 let target_price = gold_point.sell;
                 let premium_rate = ((target_price - market_price_vnd) / market_price_vnd) * 100.0;
@@ -292,6 +365,9 @@ impl GoldPremiumCalculator {
                     premium_rate,
                     premium_value,
                     gold_type: gold_point.type_name.clone(),
+                    gold_price_timestamp: gold_point.timestamp,
+                    exchange_rate_timestamp,
+                    stock_price_timestamp,
                 });
             }
         }
@@ -302,13 +378,23 @@ impl GoldPremiumCalculator {
             ));
         }
 
-        Ok(GoldPremiumResponse::success(premium_points).with_metadata(serde_json::json!({
+        let mut metadata = serde_json::json!({
             "gold_source": gold_price_response.source,
             "exchange_rate_source": exchange_rate_response.source,
             "stock_source": stock_response.source,
             "formula": "Premium (%) = [(Target Price - Market Price VND) / Market Price VND] × 100%",
             "conversion": "Market Price VND = USD/oz × Exchange Rate × 1.206 (1 tael = 1.206 troy oz)",
             "note": "Gold prices are in VND per tael",
-        })))
+        });
+
+        // Add weekend warnings if any
+        if !weekend_warnings.is_empty() {
+            metadata["warnings"] = serde_json::json!(weekend_warnings);
+            metadata["caution"] = serde_json::json!(
+                "Weekend dates detected. Markets are typically closed on weekends, so data from the previous Friday is used."
+            );
+        }
+
+        Ok(GoldPremiumResponse::success(premium_points).with_metadata(metadata))
     }
 }

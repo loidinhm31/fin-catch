@@ -89,6 +89,50 @@ impl YahooFinanceSource {
         self
     }
 
+    /// Check if a timestamp falls on a weekend (Saturday or Sunday)
+    fn is_weekend(timestamp: i64) -> bool {
+        use chrono::{DateTime, Datelike, Utc};
+        if let Some(datetime) = DateTime::<Utc>::from_timestamp(timestamp, 0) {
+            let weekday = datetime.weekday();
+            weekday == chrono::Weekday::Sat || weekday == chrono::Weekday::Sun
+        } else {
+            false
+        }
+    }
+
+    /// Get the previous Friday from a weekend date at 12:00:00 GMT (noon)
+    /// If the date is not a weekend, returns the original timestamp
+    fn get_previous_friday(timestamp: i64) -> i64 {
+        use chrono::{DateTime, Datelike, NaiveTime, Timelike, Utc};
+
+        if !Self::is_weekend(timestamp) {
+            return timestamp;
+        }
+
+        if let Some(datetime) = DateTime::<Utc>::from_timestamp(timestamp, 0) {
+            let weekday = datetime.weekday();
+
+            // Calculate days to subtract to get to Friday
+            let days_to_subtract = match weekday {
+                chrono::Weekday::Sat => 1, // Saturday -> Friday (1 day back)
+                chrono::Weekday::Sun => 2, // Sunday -> Friday (2 days back)
+                _ => 0,
+            };
+
+            // Get Friday's date
+            let friday_date = datetime.date_naive() - chrono::Days::new(days_to_subtract as u64);
+
+            // Set time to 12:00:00 GMT (noon)
+            let friday_datetime = friday_date
+                .and_time(NaiveTime::from_hms_opt(12, 0, 0).unwrap())
+                .and_utc();
+
+            friday_datetime.timestamp()
+        } else {
+            timestamp
+        }
+    }
+
     /// Map internal Resolution enum to Yahoo Finance interval parameter
     fn resolution_to_interval(resolution: &Resolution) -> &str {
         match resolution {
@@ -137,8 +181,27 @@ impl YahooFinanceSource {
 
         // Get timestamps
         let timestamps = result.timestamp.as_ref().ok_or_else(|| {
-            ApiError::DataSource("No timestamp data in Yahoo Finance response".to_string())
+            ApiError::DataSource(format!(
+                "No timestamp data in Yahoo Finance response for {}. This may occur if: \
+                 1) The date is in the future, 2) No trading data exists for this period, \
+                 3) The symbol is invalid or delisted",
+                request.symbol
+            ))
         })?;
+
+        // Check if timestamps array is empty
+        if timestamps.is_empty() {
+            return Ok(StockHistoryResponse::error(
+                request.symbol.clone(),
+                request.resolution.as_str().to_string(),
+                self.name().to_string(),
+                format!(
+                    "No data available for {} in the requested time period (from: {}, to: {}). \
+                     This may occur if the date is in the future or no trading occurred during this period",
+                    request.symbol, request.from, request.to
+                ),
+            ));
+        }
 
         // Get quote data
         let indicators = &result.indicators;
@@ -230,26 +293,45 @@ impl StockDataSource for YahooFinanceSource {
     async fn fetch_history(&self, request: &StockHistoryRequest) -> ApiResult<StockHistoryResponse> {
         let url = format!("{}/v8/finance/chart/{}", self.base_url, request.symbol);
 
+        // Check if requested dates fall on weekends and adjust
+        let mut weekend_adjusted = false;
+        let weekend_adjusted_from = if Self::is_weekend(request.from) {
+            weekend_adjusted = true;
+            Self::get_previous_friday(request.from)
+        } else {
+            request.from
+        };
+
+        let weekend_adjusted_to = if Self::is_weekend(request.to) {
+            weekend_adjusted = true;
+            Self::get_previous_friday(request.to)
+        } else {
+            request.to
+        };
+
         let now = chrono::Utc::now().timestamp();
-        let is_to_current_date = (now - request.to).abs() < 86400; // to is within 24 hours of now
-        let is_single_day_query = (request.to - request.from).abs() < 86400; // from == to (same day)
+        let is_to_current_date = (now - weekend_adjusted_to).abs() < 86400; // to is within 24 hours of now
+        let is_single_day_query = (weekend_adjusted_to - weekend_adjusted_from).abs() < 86400; // from == to (same day)
 
         // Determine query type:
         // - If querying current date only (single day), use range-based query for real-time data
         // - If querying a date range that includes current date, adjust 'to' to exclude current date
         // - Otherwise, use period-based query for historical data
+        //
+        // For single-day historical queries, we need to expand the range slightly to ensure
+        // Yahoo Finance returns data for that day
         let (use_range_query, adjusted_from, adjusted_to) = if is_to_current_date && is_single_day_query {
             // Single day query for current date - use range-based query for real-time data
-            (true, request.from, request.to)
-        } else if is_to_current_date && !is_single_day_query {
+            (true, weekend_adjusted_from, weekend_adjusted_to)
+        } else if (is_to_current_date && !is_single_day_query) || is_single_day_query {
             // Date range includes current date - exclude current date from historical query
             let start_of_today = chrono::Utc::now()
                 .date_naive()
-                .and_hms_opt(0, 0, 0)
+                .and_hms_opt(12, 0, 0)
                 .unwrap()
                 .and_utc()
                 .timestamp();
-            (false, request.from, start_of_today)
+            (false, weekend_adjusted_from, start_of_today)
         } else {
             // Pure historical query
             (false, request.from, request.to)
@@ -301,7 +383,19 @@ impl StockDataSource for YahooFinanceSource {
         }
 
         let yahoo_response: YahooFinanceChartResponse = response.json().await?;
-        self.convert_response(yahoo_response, request)
+        let mut result = self.convert_response(yahoo_response, request)?;
+
+        // Add weekend adjustment warning if dates were adjusted
+        if weekend_adjusted && result.status == "ok" {
+            let mut metadata = result.metadata.unwrap_or_else(|| serde_json::json!({}));
+            metadata["weekend_adjusted"] = serde_json::json!(true);
+            metadata["note"] = serde_json::json!(
+                "Weekend dates detected. Markets are closed on weekends, so data from the previous Friday is used."
+            );
+            result.metadata = Some(metadata);
+        }
+
+        Ok(result)
     }
 
     async fn health_check(&self) -> ApiResult<bool> {
