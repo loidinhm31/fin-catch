@@ -186,16 +186,10 @@ export const FinancialDataPage: React.FC = () => {
 
   return (
     <div className="screen-explore">
-      {/* Decorative cube elements */}
-      <CubeShape className="absolute top-20 right-8 animate-pulse-glow" />
-      <CubeShape className="absolute bottom-32 left-8 animate-pulse-glow" />
-      <CubeShape className="absolute top-1/2 right-16 animate-float" variant="yellow" />
-      <div className="absolute bottom-20 right-12 w-16 h-16 cube-decoration cube-yellow"></div>
-      <div className="absolute top-40 left-12 w-20 h-20 cube-decoration cube-pink"></div>
 
       {/* Main glass container */}
-      <div className="glass-container relative z-10 mx-4 my-8 min-h-[calc(100vh-4rem)] overflow-hidden">
-        <div className="h-full overflow-y-auto p-6">
+      <div className=" relative z-10 mx-4 min-h-[calc(100vh-4rem)] overflow-hidden">
+        <div className="h-full">
           {/* Header */}
           <div className="flex justify-between items-center mb-8">
             <div>
@@ -212,12 +206,12 @@ export const FinancialDataPage: React.FC = () => {
           </div>
 
           {/* Tab Navigation */}
-          <div className="flex gap-3 mb-6">
+          <div className="flex gap-3 mb-3">
             <button
               onClick={() => setActiveTab("stock")}
               className={`flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-xl font-bold transition-all ${
                 activeTab === "stock"
-                  ? "bg-gradient-to-r from-cyan-400 to-blue-500 text-white shadow-lg"
+                  ? "bg-gradient-to-r from-cyan-300 to-blue-700 text-white shadow-lg"
                   : "glass-button text-gray-700"
               }`}
               style={{ fontSize: 'var(--text-sm)' }}
@@ -227,7 +221,7 @@ export const FinancialDataPage: React.FC = () => {
             </button>
             <button
               onClick={() => setActiveTab("gold")}
-              className={`flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-xl font-bold transition-all ${
+              className={`flex-1 flex items-center justify-center gap-2 py-2 px-2 rounded-xl font-bold transition-all ${
                 activeTab === "gold"
                   ? "bg-gradient-to-r from-yellow-400 to-orange-500 text-white shadow-lg"
                   : "glass-button text-gray-700"
@@ -240,11 +234,11 @@ export const FinancialDataPage: React.FC = () => {
           </div>
 
           {/* Query Form Section */}
-          <div className="mb-6">
+          <div className="mb-3">
             <h2 style={{ fontSize: 'var(--text-xl)', fontWeight: 'var(--font-bold)', color: 'var(--cube-gray-900)', marginBottom: 'var(--space-4)' }}>
               {activeTab === "stock" ? "Stock Query" : "Gold Query"}
             </h2>
-            <div className="glass-card p-6">
+            <div className="glass-card p-3">
               {activeTab === "stock" ? (
                 <StockQueryForm onSubmit={handleStockSubmit} isLoading={isLoading} />
               ) : (
@@ -425,7 +419,7 @@ export const FinancialDataPage: React.FC = () => {
 
                 {/* Chart */}
                 {goldPremiumData && goldPremiumData.data && goldPremiumData.data.length > 0 ? (
-                  <div className="glass-card p-6">
+                  <div className="glass-card p-3">
                     <GoldPremiumChart
                       data={goldPremiumData.data}
                       showFullChart={showFullPremiumChart}
@@ -433,7 +427,7 @@ export const FinancialDataPage: React.FC = () => {
 
                     {/* Metadata Display */}
                     {goldPremiumData.metadata && (
-                      <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-xl">
+                      <div className="mt-6 p-2 bg-blue-50 border border-blue-200 rounded-xl">
                         <h4 style={{ fontSize: 'var(--text-sm)', fontWeight: 'var(--font-bold)', color: 'var(--cube-gray-900)', marginBottom: 'var(--space-2)' }}>
                           Calculation Details
                         </h4>
