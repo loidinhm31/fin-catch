@@ -168,56 +168,42 @@ impl GoldPremiumResponse {
 pub struct GoldPremiumCalculator;
 
 impl GoldPremiumCalculator {
-    /// Check if a timestamp falls on a weekend (Saturday or Sunday) or before market open (08:00:00 GMT)
-    fn is_market_closed(timestamp: i64) -> bool {
-        use chrono::{DateTime, Datelike, Timelike, Utc};
+    /// Check if a timestamp falls on a weekend (Saturday or Sunday)
+    fn is_weekend(timestamp: i64) -> bool {
+        use chrono::{DateTime, Datelike, Utc};
         let datetime = DateTime::<Utc>::from_timestamp(timestamp, 0).unwrap();
         let weekday = datetime.weekday();
-        let hour = datetime.hour();
-
-        // Weekend check
-        let is_weekend = weekday == chrono::Weekday::Sat || weekday == chrono::Weekday::Sun;
-
-        // Before market open (08:00:00 GMT)
-        let before_market_open = hour < 8;
-
-        is_weekend || before_market_open
+        weekday == chrono::Weekday::Sat || weekday == chrono::Weekday::Sun
     }
 
-    /// Get the previous trading day at 12:00:00 GMT (noon)
-    /// - If weekend (Sat/Sun): returns previous Friday at 12:00:00 GMT
-    /// - If before 08:00:00 GMT on a weekday: returns previous day at 12:00:00 GMT
-    /// - If before 08:00:00 GMT on Monday: returns previous Friday at 12:00:00 GMT
-    /// - Otherwise: returns the timestamp as-is
-    fn get_previous_trading_day(timestamp: i64) -> i64 {
-        use chrono::{DateTime, Datelike, NaiveTime, Timelike, Utc};
+    /// Get the previous Friday from a weekend date at 12:00:00 GMT (noon)
+    /// If the date is not a weekend, returns the original timestamp
+    fn get_previous_friday(timestamp: i64) -> i64 {
+        use chrono::{DateTime, Datelike, NaiveTime, Utc};
 
-        if !Self::is_market_closed(timestamp) {
+        if !Self::is_weekend(timestamp) {
             return timestamp;
         }
 
         let datetime = DateTime::<Utc>::from_timestamp(timestamp, 0).unwrap();
         let weekday = datetime.weekday();
-        let hour = datetime.hour();
 
-        // Calculate days to subtract to get to the previous trading day
+        // Calculate days to subtract to get to Friday
         let days_to_subtract = match weekday {
             chrono::Weekday::Sat => 1, // Saturday -> Friday (1 day back)
             chrono::Weekday::Sun => 2, // Sunday -> Friday (2 days back)
-            chrono::Weekday::Mon if hour < 8 => 3, // Monday before 08:00 -> Friday (3 days back)
-            _ if hour < 8 => 1, // Any other weekday before 08:00 -> previous day (1 day back)
             _ => 0,
         };
 
-        // Get the previous trading day's date
-        let trading_date = datetime.date_naive() - chrono::Days::new(days_to_subtract as u64);
+        // Get Friday's date
+        let friday_date = datetime.date_naive() - chrono::Days::new(days_to_subtract as u64);
 
         // Set time to 12:00:00 GMT (noon)
-        let trading_datetime = trading_date
+        let friday_datetime = friday_date
             .and_time(NaiveTime::from_hms_opt(12, 0, 0).unwrap())
             .and_utc();
 
-        trading_datetime.timestamp()
+        friday_datetime.timestamp()
     }
 
     /// Calculate gold premium by fetching and combining data from multiple sources
@@ -232,24 +218,24 @@ impl GoldPremiumCalculator {
         let currency_code = request.currency_code.clone().unwrap_or_else(|| "USD".to_string());
         let gold_source = request.gold_source.as_deref().unwrap_or("sjc");
 
-        // Check if requested dates fall on weekends or before market open and adjust
-        let mut market_warnings = Vec::new();
-        let adjusted_from = if Self::is_market_closed(request.from) {
-            let trading_day = Self::get_previous_trading_day(request.from);
-            market_warnings.push(format!(
-                "Requested 'from' date falls outside market hours (weekend or before 08:00 GMT). Using previous trading day's data instead."
+        // Check if requested dates fall on weekends and adjust
+        let mut weekend_warnings = Vec::new();
+        let adjusted_from = if Self::is_weekend(request.from) {
+            let friday = Self::get_previous_friday(request.from);
+            weekend_warnings.push(format!(
+                "Requested 'from' date falls on a weekend. Using previous Friday's data instead."
             ));
-            trading_day
+            friday
         } else {
             request.from
         };
 
-        let adjusted_to = if Self::is_market_closed(request.to) {
-            let trading_day = Self::get_previous_trading_day(request.to);
-            market_warnings.push(format!(
-                "Requested 'to' date falls outside market hours (weekend or before 08:00 GMT). Using previous trading day's data instead."
+        let adjusted_to = if Self::is_weekend(request.to) {
+            let friday = Self::get_previous_friday(request.to);
+            weekend_warnings.push(format!(
+                "Requested 'to' date falls on a weekend. Using previous Friday's data instead."
             ));
-            trading_day
+            friday
         } else {
             request.to
         };
@@ -336,10 +322,9 @@ impl GoldPremiumCalculator {
         // Calculate premium for each data point
         let mut premium_points = Vec::new();
 
-        // Helper function to normalize timestamp to 12:00:00 GMT (noon)
+        // Helper function to normalize timestamp to start of day
         let normalize_to_day = |timestamp: i64| -> i64 {
-            const TWELVE_HOURS: i64 = 43200; // 12 * 60 * 60
-            (timestamp / 86400) * 86400 + TWELVE_HOURS
+            (timestamp / 86400) * 86400
         };
 
         // Create maps for quick lookup - store (timestamp, value) tuples
@@ -402,11 +387,11 @@ impl GoldPremiumCalculator {
             "note": "Gold prices are in VND per tael",
         });
 
-        // Add market hours warnings if any
-        if !market_warnings.is_empty() {
-            metadata["warnings"] = serde_json::json!(market_warnings);
+        // Add weekend warnings if any
+        if !weekend_warnings.is_empty() {
+            metadata["warnings"] = serde_json::json!(weekend_warnings);
             metadata["caution"] = serde_json::json!(
-                "Requested date(s) fall outside market hours (weekends or before 08:00 GMT). Data from the previous trading day is used instead."
+                "Weekend dates detected. Markets are typically closed on weekends, so data from the previous Friday is used."
             );
         }
 

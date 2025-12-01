@@ -16,9 +16,7 @@ const TEST_FROM: i64 = 1730764800; // Nov 5, 2024 (Tuesday)
 const TEST_TO: i64 = 1730851200; // Nov 6, 2024 (Wednesday)
 const TEST_FRIDAY_NOON: i64 = 1764331200; // Nov 28, 2025 12:00:00 GMT (Friday at noon)
 const TEST_SATURDAY: i64 = 1764374400; // Nov 29, 2025 00:00:00 GMT (Saturday)
-const TEST_SUNDAY: i64 = 1764547200; // Nov 30, 2025 00:00:00 GMT (Sunday)
-const TEST_TUESDAY_EARLY: i64 = 1730772000; // Nov 5, 2024 02:00:00 GMT (Tuesday before market open)
-const TEST_MONDAY_EARLY: i64 = 1730685600; // Nov 4, 2024 02:00:00 GMT (Monday before market open)
+const TEST_SUNDAY: i64 = 1764460800; // Nov 30, 2025 00:00:00 GMT (Sunday)
 
 /// Test helper to print test results
 fn print_test_result(test_name: &str, success: bool) {
@@ -182,8 +180,8 @@ async fn test_gold_premium_future_date() {
             // Verify the error message is helpful
             let error_msg = format!("{:?}", e);
             let has_helpful_error = error_msg.contains("No data") ||
-                                   error_msg.contains("timestamp") ||
-                                   error_msg.contains("available");
+                error_msg.contains("timestamp") ||
+                error_msg.contains("available");
             print_test_result("gold_premium_future_date_error_handling", has_helpful_error);
 
             if !has_helpful_error {
@@ -376,117 +374,6 @@ async fn test_gold_premium_weekday_no_warning() {
         Err(e) => {
             println!("  → Error (may be acceptable): {:?}", e);
             print_test_result("gold_premium_weekday_request", true);
-        }
-    }
-}
-
-#[tokio::test]
-async fn test_gold_premium_before_market_open_tuesday() {
-    println!("\n=== Testing Gold Premium - Tuesday Before Market Open (Should Fallback to Monday) ===");
-
-    let gateway = DataSourceGateway::with_all_sources();
-
-    // Request for a Tuesday at 02:00 GMT - should fallback to previous day (Monday)
-    let request = GoldPremiumRequest {
-        from: TEST_TUESDAY_EARLY,
-        to: TEST_TUESDAY_EARLY,
-        gold_price_id: Some("1".to_string()),
-        currency_code: Some("USD".to_string()),
-        gold_source: Some("sjc".to_string()),
-        exchange_rate_source: None,
-        stock_source: Some("yahoo_finance".to_string()),
-    };
-
-    use fin_catch_data::models::gold_premium::GoldPremiumCalculator;
-
-    match GoldPremiumCalculator::calculate(&gateway, &request).await {
-        Ok(response) => {
-            println!("  → Status: {}", response.status);
-            print_test_result("gold_premium_before_market_open", true);
-
-            // Check metadata for market hours warnings
-            if let Some(metadata) = &response.metadata {
-                println!("  → Metadata: {}", serde_json::to_string_pretty(metadata).unwrap());
-
-                // Verify warnings exist
-                if let Some(warnings) = metadata.get("warnings") {
-                    println!("  → Warnings found: {}", warnings);
-                    assert!(warnings.is_array(), "Warnings should be an array");
-
-                    // Check that warning mentions market hours
-                    let warnings_str = warnings.to_string();
-                    assert!(
-                        warnings_str.contains("market hours") || warnings_str.contains("08:00"),
-                        "Warning should mention market hours or 08:00 GMT"
-                    );
-                    print_test_result("gold_premium_market_hours_warning", true);
-                } else {
-                    println!("  → No warnings (may be acceptable if no data returned)");
-                }
-            }
-
-            if let Some(data) = &response.data {
-                println!("  → Data points: {}", data.len());
-            }
-        }
-        Err(e) => {
-            println!("  → Error: {:?}", e);
-            print_test_result("gold_premium_before_market_open", false);
-        }
-    }
-}
-
-#[tokio::test]
-async fn test_gold_premium_before_market_open_monday() {
-    println!("\n=== Testing Gold Premium - Monday Before Market Open (Should Fallback to Friday) ===");
-
-    let gateway = DataSourceGateway::with_all_sources();
-
-    // Request for a Monday at 02:00 GMT - should fallback to previous Friday
-    let request = GoldPremiumRequest {
-        from: TEST_MONDAY_EARLY,
-        to: TEST_MONDAY_EARLY,
-        gold_price_id: Some("1".to_string()),
-        currency_code: Some("USD".to_string()),
-        gold_source: Some("sjc".to_string()),
-        exchange_rate_source: None,
-        stock_source: Some("yahoo_finance".to_string()),
-    };
-
-    use fin_catch_data::models::gold_premium::GoldPremiumCalculator;
-
-    match GoldPremiumCalculator::calculate(&gateway, &request).await {
-        Ok(response) => {
-            println!("  → Status: {}", response.status);
-            print_test_result("gold_premium_monday_before_market_open", true);
-
-            // Check metadata for market hours warnings
-            if let Some(metadata) = &response.metadata {
-                println!("  → Metadata: {}", serde_json::to_string_pretty(metadata).unwrap());
-
-                // Verify warnings exist
-                if let Some(warnings) = metadata.get("warnings") {
-                    println!("  → Warnings found: {}", warnings);
-
-                    // Check that warning mentions market hours
-                    let warnings_str = warnings.to_string();
-                    assert!(
-                        warnings_str.contains("market hours") || warnings_str.contains("08:00"),
-                        "Warning should mention market hours or 08:00 GMT"
-                    );
-                    print_test_result("gold_premium_monday_market_hours_warning", true);
-                } else {
-                    println!("  → No warnings (may be acceptable if no data returned)");
-                }
-            }
-
-            if let Some(data) = &response.data {
-                println!("  → Data points: {}", data.len());
-            }
-        }
-        Err(e) => {
-            println!("  → Error: {:?}", e);
-            print_test_result("gold_premium_monday_before_market_open", false);
         }
     }
 }
