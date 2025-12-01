@@ -29,6 +29,7 @@ export const GoldChart: React.FC<GoldChartProps> = ({ data, goldPriceId }) => {
     branch: point.branch_name || "N/A",
   }));
 
+  console.log('ch', chartData)
   // Format currency
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat("en-EN", {
@@ -126,7 +127,7 @@ export const GoldChart: React.FC<GoldChartProps> = ({ data, goldPriceId }) => {
                       boxShadow: "0 10px 15px -3px rgba(0, 0, 0, 0.1)"
                     }}
                     formatter={(value: any, name: string) => {
-                      return [formatCurrency(Number(value)) + " VND", name === "buy" ? "Buy Price" : "Sell Price"];
+                      return [formatCurrency(Number(value)) + " VND", name];
                     }}
                     labelFormatter={(label) => `Time: ${label}`}
                   />
