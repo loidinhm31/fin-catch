@@ -6,6 +6,10 @@ import {
   GoldPriceResponse,
   StockHistoryRequest,
   StockHistoryResponse,
+  ExchangeRateRequest,
+  ExchangeRateResponse,
+  Portfolio,
+  PortfolioEntry,
 } from "../types";
 
 class FinCatchAPI {
@@ -42,10 +46,10 @@ class FinCatchAPI {
   /**
    * Fetch exchange rate data via Tauri IPC
    */
-  async fetchExchangeRate(request: any): Promise<any> {
+  async fetchExchangeRate(request: ExchangeRateRequest): Promise<ExchangeRateResponse> {
     try {
       console.log("[Tauri IPC] fetch_exchange_rate", request);
-      const response = await invoke<any>("fetch_exchange_rate", { request });
+      const response = await invoke<ExchangeRateResponse>("fetch_exchange_rate", { request });
       console.log("[Tauri IPC Response]", response);
       return response;
     } catch (error) {
@@ -110,6 +114,128 @@ class FinCatchAPI {
       return response;
     } catch (error) {
       console.error(`Error checking health for ${sourceName}:`, error);
+      throw this.handleError(error);
+    }
+  }
+
+  /**
+   * Portfolio operations
+   */
+  async createPortfolio(portfolio: Portfolio): Promise<number> {
+    try {
+      console.log("[Tauri IPC] create_portfolio", portfolio);
+      const id = await invoke<number>("create_portfolio", { portfolio });
+      console.log("[Tauri IPC Response]", id);
+      return id;
+    } catch (error) {
+      console.error("Error creating portfolio:", error);
+      throw this.handleError(error);
+    }
+  }
+
+  async getPortfolio(id: number): Promise<Portfolio> {
+    try {
+      console.log("[Tauri IPC] get_portfolio", id);
+      const portfolio = await invoke<Portfolio>("get_portfolio", { id });
+      console.log("[Tauri IPC Response]", portfolio);
+      return portfolio;
+    } catch (error) {
+      console.error("Error getting portfolio:", error);
+      throw this.handleError(error);
+    }
+  }
+
+  async listPortfolios(): Promise<Portfolio[]> {
+    try {
+      console.log("[Tauri IPC] list_portfolios");
+      const portfolios = await invoke<Portfolio[]>("list_portfolios");
+      console.log("[Tauri IPC Response]", portfolios);
+      return portfolios;
+    } catch (error) {
+      console.error("Error listing portfolios:", error);
+      throw this.handleError(error);
+    }
+  }
+
+  async updatePortfolio(portfolio: Portfolio): Promise<void> {
+    try {
+      console.log("[Tauri IPC] update_portfolio", portfolio);
+      await invoke<void>("update_portfolio", { portfolio });
+      console.log("[Tauri IPC Response] Portfolio updated");
+    } catch (error) {
+      console.error("Error updating portfolio:", error);
+      throw this.handleError(error);
+    }
+  }
+
+  async deletePortfolio(id: number): Promise<void> {
+    try {
+      console.log("[Tauri IPC] delete_portfolio", id);
+      await invoke<void>("delete_portfolio", { id });
+      console.log("[Tauri IPC Response] Portfolio deleted");
+    } catch (error) {
+      console.error("Error deleting portfolio:", error);
+      throw this.handleError(error);
+    }
+  }
+
+  /**
+   * Portfolio Entry operations
+   */
+  async createEntry(entry: PortfolioEntry): Promise<number> {
+    try {
+      console.log("[Tauri IPC] create_entry", entry);
+      const id = await invoke<number>("create_entry", { entry });
+      console.log("[Tauri IPC Response]", id);
+      return id;
+    } catch (error) {
+      console.error("Error creating entry:", error);
+      throw this.handleError(error);
+    }
+  }
+
+  async getEntry(id: number): Promise<PortfolioEntry> {
+    try {
+      console.log("[Tauri IPC] get_entry", id);
+      const entry = await invoke<PortfolioEntry>("get_entry", { id });
+      console.log("[Tauri IPC Response]", entry);
+      return entry;
+    } catch (error) {
+      console.error("Error getting entry:", error);
+      throw this.handleError(error);
+    }
+  }
+
+  async listEntries(portfolioId: number): Promise<PortfolioEntry[]> {
+    try {
+      console.log("[Tauri IPC] list_entries", portfolioId);
+      const entries = await invoke<PortfolioEntry[]>("list_entries", { portfolioId });
+      console.log("[Tauri IPC Response]", entries);
+      return entries;
+    } catch (error) {
+      console.error("Error listing entries:", error);
+      throw this.handleError(error);
+    }
+  }
+
+  async updateEntry(entry: PortfolioEntry): Promise<void> {
+    try {
+      console.log("[Tauri IPC] update_entry", entry);
+      await invoke<void>("update_entry", { entry });
+      console.log("[Tauri IPC Response] Entry updated");
+    } catch (error) {
+      console.error("Error updating entry:", error);
+      throw this.handleError(error);
+    }
+  }
+
+  async deleteEntry(id: number): Promise<void> {
+    try {
+      console.log("[Tauri IPC] delete_entry", id);
+      await invoke<void>("delete_entry", { id });
+      console.log("[Tauri IPC Response] Entry deleted");
+    } catch (error) {
+      console.error("Error deleting entry:", error);
       throw this.handleError(error);
     }
   }

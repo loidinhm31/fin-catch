@@ -188,7 +188,7 @@ export const FinancialDataPage: React.FC = () => {
     <div className="screen-explore">
 
       {/* Main glass container */}
-      <div className=" relative z-10 mx-4 min-h-[calc(100vh-4rem)] overflow-hidden">
+      <div className=" relative z-10 mx-4 pb-28 min-h-[calc(100vh-4rem)] overflow-hidden">
         <div className="h-full">
           {/* Header */}
           <div className="flex justify-between items-center mb-8">

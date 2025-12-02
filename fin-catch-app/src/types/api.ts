@@ -159,3 +159,64 @@ export interface GoldPremiumResponse {
   error?: string;
   metadata?: Record<string, unknown>;
 }
+
+// Currency codes
+export type CurrencyCode = "USD" | "VND" | "EUR" | "GBP" | "JPY" | "CNY" | "KRW" | "THB" | "SGD";
+
+// Exchange Rate Sources
+export type ExchangeRateSource = "vietcombank" | "openexchangerates";
+
+// Exchange Rate Request
+// Note: Backend fetches rates for a currency TO VND (not arbitrary pairs)
+export interface ExchangeRateRequest {
+  currency_code: string; // Currency code to get rate for (e.g., "USD" gets USD->VND rate)
+  from: number; // Unix timestamp in seconds
+  to: number; // Unix timestamp in seconds
+  source?: string; // Optional: "vietcombank" or other source
+}
+
+// Exchange Rate Point
+export interface ExchangeRatePoint {
+  timestamp: number;
+  currency_code: string; // The foreign currency (e.g., "USD")
+  currency_name: string; // Currency name (e.g., "US Dollar")
+  buy_cash?: number; // Buy rate for cash
+  buy_transfer?: number; // Buy rate for transfer
+  sell: number; // Sell rate (this is what we'll use for conversions)
+}
+
+// Exchange Rate Response
+export interface ExchangeRateResponse {
+  currency_code: string; // The foreign currency
+  source: string;
+  status: "ok" | "error";
+  data?: ExchangeRatePoint[];
+  error?: string;
+  metadata?: Record<string, unknown>;
+}
+
+// Currency labels
+export const CURRENCY_LABELS: Record<CurrencyCode, string> = {
+  USD: "US Dollar",
+  VND: "Vietnamese Dong",
+  EUR: "Euro",
+  GBP: "British Pound",
+  JPY: "Japanese Yen",
+  CNY: "Chinese Yuan",
+  KRW: "South Korean Won",
+  THB: "Thai Baht",
+  SGD: "Singapore Dollar",
+};
+
+// Currency symbols
+export const CURRENCY_SYMBOLS: Record<CurrencyCode, string> = {
+  USD: "$",
+  VND: "₫",
+  EUR: "€",
+  GBP: "£",
+  JPY: "¥",
+  CNY: "¥",
+  KRW: "₩",
+  THB: "฿",
+  SGD: "S$",
+};

@@ -4,3 +4,5 @@ export * from "./Select";
 export * from "./Label";
 export * from "./DateInput";
 export * from "./ErrorText";
+export { AlertDialog, ConfirmDialog } from "./UI";
+export * from "./CurrencySelect";

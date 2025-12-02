@@ -1,7 +1,7 @@
-import React from "react";
+import React, { useState } from "react";
 import {Controller, useForm} from "react-hook-form";
 import {TrendingUp} from "lucide-react";
-import {Input, Select} from "../atoms";
+import {Input, Select, AlertDialog} from "../atoms";
 import {DateRangePicker, FormField} from "../molecules";
 import {
     Resolution,
@@ -30,6 +30,7 @@ const stockSourceOptions = Object.entries(STOCK_SOURCE_LABELS).map(([value, labe
 
 export const StockQueryForm: React.FC<StockQueryFormProps> = ({ onSubmit, isLoading = false }) => {
   const { from, to } = getDefaultDateRange();
+  const [showAlert, setShowAlert] = useState(false);
 
   const {
     control,
@@ -48,7 +49,7 @@ export const StockQueryForm: React.FC<StockQueryFormProps> = ({ onSubmit, isLoad
   const handleFormSubmit = (data: StockFormData) => {
     // Validate date range
     if (!isValidDateRange(data.fromDate, data.toDate)) {
-      alert("From date must be before To date");
+      setShowAlert(true);
       return;
     }
 
@@ -179,6 +180,15 @@ export const StockQueryForm: React.FC<StockQueryFormProps> = ({ onSubmit, isLoad
       >
         {isLoading ? "LOADING..." : "QUERY STOCK DATA"}
       </button>
+
+      {/* Date Validation Alert */}
+      <AlertDialog
+        isOpen={showAlert}
+        onClose={() => setShowAlert(false)}
+        title="Invalid Date Range"
+        message="From date must be before To date"
+        type="warning"
+      />
     </form>
   );
 };

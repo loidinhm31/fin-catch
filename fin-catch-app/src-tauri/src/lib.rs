@@ -1,5 +1,7 @@
+mod db;
+
 use std::sync::Arc;
-use tauri::State;
+use tauri::{Manager, State};
 use fin_catch_data::{
     DataSourceGateway,
     StockHistoryRequest, StockHistoryResponse,
@@ -7,10 +9,12 @@ use fin_catch_data::{
     ExchangeRateRequest, ExchangeRateResponse,
     GoldPremiumRequest, GoldPremiumResponse,
 };
+use db::{Database, Portfolio, PortfolioEntry};
 
-// Application state that holds the data source gateway
+// Application state that holds the data source gateway and database
 pub struct AppState {
     gateway: Arc<DataSourceGateway>,
+    db: Arc<Database>,
 }
 
 // Stock history command
@@ -95,16 +99,77 @@ async fn health_check_source(
         .map_err(|e| e.to_string())
 }
 
+// Portfolio commands
+#[tauri::command]
+fn create_portfolio(portfolio: Portfolio, state: State<'_, AppState>) -> Result<i64, String> {
+    state.db.create_portfolio(&portfolio).map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+fn get_portfolio(id: i64, state: State<'_, AppState>) -> Result<Portfolio, String> {
+    state.db.get_portfolio(id).map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+fn list_portfolios(state: State<'_, AppState>) -> Result<Vec<Portfolio>, String> {
+    state.db.list_portfolios().map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+fn update_portfolio(portfolio: Portfolio, state: State<'_, AppState>) -> Result<(), String> {
+    state.db.update_portfolio(&portfolio).map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+fn delete_portfolio(id: i64, state: State<'_, AppState>) -> Result<(), String> {
+    state.db.delete_portfolio(id).map_err(|e| e.to_string())
+}
+
+// Portfolio Entry commands
+#[tauri::command]
+fn create_entry(entry: PortfolioEntry, state: State<'_, AppState>) -> Result<i64, String> {
+    state.db.create_entry(&entry).map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+fn get_entry(id: i64, state: State<'_, AppState>) -> Result<PortfolioEntry, String> {
+    state.db.get_entry(id).map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+fn list_entries(portfolio_id: i64, state: State<'_, AppState>) -> Result<Vec<PortfolioEntry>, String> {
+    state.db.list_entries(portfolio_id).map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+fn update_entry(entry: PortfolioEntry, state: State<'_, AppState>) -> Result<(), String> {
+    state.db.update_entry(&entry).map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+fn delete_entry(id: i64, state: State<'_, AppState>) -> Result<(), String> {
+    state.db.delete_entry(id).map_err(|e| e.to_string())
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
-    // Initialize the data source gateway with all sources
-    let gateway = Arc::new(DataSourceGateway::with_all_sources());
-
-    let app_state = AppState { gateway };
-
     tauri::Builder::default()
         .plugin(tauri_plugin_opener::init())
-        .manage(app_state)
+        .setup(|app| {
+            // Initialize the data source gateway with all sources
+            let gateway = Arc::new(DataSourceGateway::with_all_sources());
+
+            // Initialize database
+            let app_data_dir = app.path().app_data_dir().expect("failed to get app data dir");
+            std::fs::create_dir_all(&app_data_dir).expect("failed to create app data dir");
+            let db_path = app_data_dir.join("portfolio.db");
+            let db = Arc::new(Database::new(db_path).expect("failed to initialize database"));
+
+            let app_state = AppState { gateway, db };
+            app.manage(app_state);
+
+            Ok(())
+        })
         .invoke_handler(tauri::generate_handler![
             fetch_stock_history,
             fetch_gold_price,
@@ -113,6 +178,16 @@ pub fn run() {
             get_sources,
             health_check_all,
             health_check_source,
+            create_portfolio,
+            get_portfolio,
+            list_portfolios,
+            update_portfolio,
+            delete_portfolio,
+            create_entry,
+            get_entry,
+            list_entries,
+            update_entry,
+            delete_entry,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

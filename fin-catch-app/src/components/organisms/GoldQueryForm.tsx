@@ -1,7 +1,7 @@
-import React, {useEffect, useMemo} from "react";
+import React, {useEffect, useMemo, useState} from "react";
 import {Controller, useForm} from "react-hook-form";
 import {Coins} from "lucide-react";
-import {Select} from "../atoms";
+import {Select, AlertDialog} from "../atoms";
 import {DateRangePicker, FormField} from "../molecules";
 import {GOLD_SOURCE_LABELS, GoldFormData, GoldPriceRequest, GoldSource, SJC_GOLD_PRICE_IDS,} from "../../types";
 import {dateToUnixTimestamp, getDefaultDateRange, isValidDateRange} from "../../utils/dateUtils";
@@ -18,6 +18,7 @@ const goldSourceOptions = Object.entries(GOLD_SOURCE_LABELS).map(([value, label]
 
 export const GoldQueryForm: React.FC<GoldQueryFormProps> = ({ onSubmit, isLoading = false }) => {
   const { from, to } = getDefaultDateRange();
+  const [showAlert, setShowAlert] = useState(false);
 
   const {
     control,
@@ -60,7 +61,7 @@ export const GoldQueryForm: React.FC<GoldQueryFormProps> = ({ onSubmit, isLoadin
   const handleFormSubmit = (data: GoldFormData) => {
     // Validate date range
     if (!isValidDateRange(data.fromDate, data.toDate)) {
-      alert("From date must be before To date");
+      setShowAlert(true);
       return;
     }
 
@@ -164,6 +165,15 @@ export const GoldQueryForm: React.FC<GoldQueryFormProps> = ({ onSubmit, isLoadin
       >
         {isLoading ? "LOADING..." : "QUERY GOLD DATA"}
       </button>
+
+      {/* Date Validation Alert */}
+      <AlertDialog
+        isOpen={showAlert}
+        onClose={() => setShowAlert(false)}
+        title="Invalid Date Range"
+        message="From date must be before To date"
+        type="warning"
+      />
     </form>
   );
 };
