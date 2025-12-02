@@ -274,7 +274,8 @@ impl YahooFinanceSource {
             request.resolution.as_str().to_string(),
             self.name().to_string(),
             candles,
-        ))
+        )
+        .with_metadata(self.metadata()))
     }
 }
 
@@ -429,7 +430,8 @@ impl StockDataSource for YahooFinanceSource {
             "provider": "Yahoo Finance",
             "supports_resolutions": ["1m", "5m", "15m", "30m", "1h", "1d", "1wk", "1mo"],
             "supports_symbols": ["stocks", "indices", "forex", "crypto", "futures", "commodities"],
-            "notes": "Supports a wide range of financial instruments including gold futures (GC=F), silver (SI=F), oil (CL=F), etc."
+            "notes": "Supports a wide range of financial instruments including gold futures (GC=F), silver (SI=F), oil (CL=F), etc.",
+            "price_scale": 1,
         })
     }
 }

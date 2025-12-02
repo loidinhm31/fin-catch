@@ -151,7 +151,8 @@ impl SsiSource {
             request.resolution.as_str().to_string(),
             self.name().to_string(),
             candles,
-        ))
+        )
+        .with_metadata(self.metadata()))
     }
 }
 
@@ -233,6 +234,7 @@ impl StockDataSource for SsiSource {
             "base_url": self.base_url,
             "provider": "SSI (Saigon Securities Inc.)",
             "supports_resolutions": ["1", "5", "15", "30", "60", "1D", "1W", "1M"],
+            "price_scale": 1000,
         })
     }
 }

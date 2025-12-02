@@ -43,6 +43,7 @@ export interface PortfolioPerformance {
 export interface EntryPerformance {
   entry: PortfolioEntry;
   current_price: number;
+  purchase_price?: number; // Scaled purchase price in display currency
   current_value: number;
   total_cost: number;
   gain_loss: number;

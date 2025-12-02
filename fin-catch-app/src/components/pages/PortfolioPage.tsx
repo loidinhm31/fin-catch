@@ -10,6 +10,7 @@ import {
 } from "../../types";
 import { dateToUnixTimestamp } from "../../utils/dateUtils";
 import { convertCurrency, formatCurrency as formatCurrencyUtil } from "../../utils/currency";
+import { getPreference, setPreference } from "../../utils/preferences";
 import {
   Button,
   Input,
@@ -21,6 +22,7 @@ import {
   ConfirmDialog,
 } from "../atoms/UI";
 import { CurrencySelect } from "../atoms";
+import { CURRENCY_SYMBOLS } from "../../types";
 
 // Cube decoration component
 const CubeShape = ({ className = "", variant = "default" }: { className?: string; variant?: "default" | "yellow" | "pink" }) => (
@@ -32,7 +34,9 @@ export const PortfolioPage: React.FC = () => {
   const [selectedPortfolioId, setSelectedPortfolioId] = useState<number | null>(null);
   const [entries, setEntries] = useState<PortfolioEntry[]>([]);
   const [performance, setPerformance] = useState<PortfolioPerformance | null>(null);
-  const [displayCurrency, setDisplayCurrency] = useState<CurrencyCode>("USD");
+  const [displayCurrency, setDisplayCurrency] = useState<CurrencyCode>(
+    () => getPreference("displayCurrency") || "USD"
+  );
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -117,6 +121,7 @@ export const PortfolioPage: React.FC = () => {
       for (const entry of entries) {
         let currentPrice = 0;
         let currentPriceCurrency: CurrencyCode = entry.currency || "USD";
+        let priceScale = 1; // Default price scale
 
         if (entry.asset_type === "stock") {
           const response = await finCatchAPI.fetchStockHistory({
@@ -128,7 +133,10 @@ export const PortfolioPage: React.FC = () => {
           });
 
           if (response.data && response.data.length > 0) {
-            currentPrice = response.data[response.data.length - 1].close;
+            const rawPrice = response.data[response.data.length - 1].close;
+            // Get price_scale from metadata (default to 1 if not present)
+            priceScale = (response.metadata?.price_scale as number) ?? 1;
+            currentPrice = rawPrice * priceScale;
           }
         } else if (entry.asset_type === "gold") {
           const response = await finCatchAPI.fetchGoldPrice({
@@ -139,7 +147,10 @@ export const PortfolioPage: React.FC = () => {
           });
 
           if (response.data && response.data.length > 0) {
-            currentPrice = response.data[response.data.length - 1].sell;
+            const rawPrice = response.data[response.data.length - 1].sell;
+            // Get price_scale from metadata (default to 1 if not present)
+            priceScale = (response.metadata?.price_scale as number) ?? 1;
+            currentPrice = rawPrice * priceScale;
           }
         }
 
@@ -150,9 +161,12 @@ export const PortfolioPage: React.FC = () => {
           displayCurrency
         );
 
+        // Apply the same price_scale to purchase price (assuming it was entered in the source's format)
+        const scaledPurchasePrice = entry.purchase_price * priceScale;
+
         // Convert purchase price to display currency
         const purchasePriceInDisplayCurrency = await convertCurrency(
-          entry.purchase_price,
+          scaledPurchasePrice,
           entry.currency || "USD",
           displayCurrency
         );
@@ -175,6 +189,7 @@ export const PortfolioPage: React.FC = () => {
         entriesPerformance.push({
           entry,
           current_price: currentPriceInDisplayCurrency,
+          purchase_price: purchasePriceInDisplayCurrency, // Store scaled purchase price in display currency
           current_value: currentValue,
           total_cost: totalCost,
           gain_loss: gainLoss,
@@ -350,6 +365,11 @@ export const PortfolioPage: React.FC = () => {
     return new Date(timestamp * 1000).toLocaleDateString();
   };
 
+  const handleCurrencyChange = (currency: CurrencyCode) => {
+    setDisplayCurrency(currency);
+    setPreference("displayCurrency", currency);
+  };
+
   const selectedPortfolio = portfolios.find((p) => p.id === selectedPortfolioId);
 
   return (
@@ -358,7 +378,7 @@ export const PortfolioPage: React.FC = () => {
       <div className="relative z-10 mx-4 pb-28 min-h-[calc(100vh-4rem)] overflow-hidden">
         <div className="h-full">
           {/* Header */}
-          <div className="flex justify-between items-center mb-8">
+          <div className="flex justify-between items-start mb-8">
             <div>
               <h1 style={{ fontSize: 'var(--text-3xl)', fontWeight: 'var(--font-bold)', color: 'var(--cube-gray-900)' }}>
                 PORTFOLIO
@@ -367,26 +387,17 @@ export const PortfolioPage: React.FC = () => {
                 Track your investments
               </p>
             </div>
-            <div className="flex items-center gap-4">
-              <div style={{ minWidth: '180px' }}>
-                <CurrencySelect
-                  label="Display Currency"
-                  value={displayCurrency}
-                  onChange={setDisplayCurrency}
-                  id="display-currency"
-                />
-              </div>
-              <CubeShape className="animate-float" variant="pink" />
-            </div>
+            <CubeShape className="animate-float" variant="pink" />
           </div>
 
-          {/* Portfolio Selector */}
-          <div className="mb-6">
-            <h2 style={{ fontSize: 'var(--text-xl)', fontWeight: 'var(--font-bold)', color: 'var(--cube-gray-900)', marginBottom: 'var(--space-4)' }}>
-              Your Portfolios
-            </h2>
-            <div className="flex gap-3 overflow-x-auto pb-2">
-              {portfolios.map((portfolio) => (
+          {/* Portfolio Selector & Currency Selector */}
+          <div className="mb-6 space-y-4">
+            <div>
+              <h2 style={{ fontSize: 'var(--text-xl)', fontWeight: 'var(--font-bold)', color: 'var(--cube-gray-900)', marginBottom: 'var(--space-4)' }}>
+                Your Portfolios
+              </h2>
+              <div className="flex gap-3 overflow-x-auto pb-2">
+                {portfolios.map((portfolio) => (
                 <button
                   key={portfolio.id}
                   onClick={() => setSelectedPortfolioId(portfolio.id!)}
@@ -422,6 +433,30 @@ export const PortfolioPage: React.FC = () => {
                 <Plus className="w-5 h-5 inline-block mr-2" />
                 NEW
               </button>
+            </div>
+            </div>
+
+            {/* Currency Selector */}
+            <div>
+              <h3 style={{ fontSize: 'var(--text-sm)', fontWeight: 'var(--font-medium)', color: 'var(--cube-gray-900)', opacity: 0.7, marginBottom: 'var(--space-2)' }}>
+                Display Currency
+              </h3>
+              <div className="flex gap-2 overflow-x-auto pb-2">
+                {(["USD", "VND", "EUR", "GBP", "JPY"] as CurrencyCode[]).map((currency) => (
+                  <button
+                    key={currency}
+                    onClick={() => handleCurrencyChange(currency)}
+                    className={`flex-shrink-0 px-3 py-2 rounded-lg font-bold transition-all ${
+                      displayCurrency === currency
+                        ? "bg-gradient-to-r from-cyan-400 to-blue-600 text-white shadow-md"
+                        : "glass-button"
+                    }`}
+                    style={{ fontSize: 'var(--text-xs)' }}
+                  >
+                    {CURRENCY_SYMBOLS[currency]} {currency}
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
 
@@ -608,9 +643,9 @@ export const PortfolioPage: React.FC = () => {
                                   </p>
                                 </div>
                                 <div>
-                                  <p style={{ fontSize: 'var(--text-xs)', color: 'var(--cube-gray-500)' }}>Purchase Price (Original)</p>
+                                  <p style={{ fontSize: 'var(--text-xs)', color: 'var(--cube-gray-500)' }}>Purchase Price (in {displayCurrency})</p>
                                   <p style={{ fontSize: 'var(--text-sm)', fontWeight: 'var(--font-medium)', color: 'var(--cube-gray-900)' }}>
-                                    {formatCurrency(entry.purchase_price, entry.currency || "USD")}
+                                    {formatCurrency(entryPerf.purchase_price || 0)}
                                   </p>
                                 </div>
                                 <div>
