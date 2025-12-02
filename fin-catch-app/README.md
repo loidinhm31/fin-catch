@@ -13,7 +13,7 @@ FinCatch App is a desktop application that integrates the **fin-catch-data** lib
 ## Features
 
 - **Stock Market Data Query**: Query stock data from multiple sources (VNDIRECT, SSI, Yahoo Finance)
-- **Gold Price Data Query**: Query gold prices from SJC and MiHong sources
+- **Gold Price Data Query**: Query gold prices from SJC source
 - **Interactive Charts**:
   - Zoom & Pan functionality for detailed analysis
   - Touch gestures (pinch-to-zoom, swipe-to-pan) for mobile
@@ -142,11 +142,11 @@ External Data Sources (VNDIRECT, SJC, Yahoo Finance, etc.)
 
 ### Gold Query Parameters
 
-- **Gold Type**: Depends on source
-  - SJC: Location IDs (1-5)
-  - MiHong: Purity codes (999, 985, 750, etc.)
+- **Gold Type**: SJC gold types
+  - Gold Bars: IDs 1, 2 (priced per tael/lượng)
+  - Jewelry/Rings: ID 49 (priced per mace/chỉ)
 - **Date Range**: From and To dates
-- **Source**: Data source (sjc, mihong)
+- **Source**: Data source (sjc)
 
 ## Technology Stack
 

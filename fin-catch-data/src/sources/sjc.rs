@@ -319,11 +319,24 @@ impl GoldDataSource for SjcSource {
             chunks.len()
         );
 
-        Ok(GoldPriceResponse::success(
+        let mut response = GoldPriceResponse::success(
             request.gold_price_id.clone(),
             self.name().to_string(),
             all_data,
-        ))
+        );
+
+        // Add metadata with unit information
+        // IMPORTANT: SJC API ALWAYS returns prices per tael (lượng = 37.5g = 10 chỉ)
+        // This is true for ALL gold types regardless of their typical trading unit
+        response.metadata = Some(serde_json::json!({
+            "unit": "tael",
+            "unit_label": "Tael/Lượng (37.5g)",
+            "currency": "VND",
+            "price_scale": 1.0,
+            "note": "All prices are per tael (lượng). User entries in other units will be converted."
+        }));
+
+        Ok(response)
     }
 
     async fn health_check(&self) -> ApiResult<bool> {
@@ -367,12 +380,13 @@ impl GoldDataSource for SjcSource {
             "data_type": "gold",
             "provider": "SJC Gold Company",
             "country": "Vietnam",
+            "currency": "VND",
+            "default_unit": "mace",
+            "unit_label": "Depends on gold type",
             "supported_gold_types": [
-                {"id": "1", "name": "Vàng SJC 1L, 10L, 1KG"},
-                {"id": "2", "name": "Vàng nữ trang 99.99"},
-                {"id": "3", "name": "Vàng nữ trang 99%"},
-                {"id": "4", "name": "Vàng nữ trang 75%"},
-                {"id": "5", "name": "Vàng nữ trang 58.3%"}
+                {"id": "1", "name": "Vàng SJC 1L, 10L, 1KG - HCMC", "unit": "tael", "unit_label": "Tael/Lượng (37.5g)"},
+                {"id": "2", "name": "Vàng SJC 1L, 10L, 1KG - Hanoi", "unit": "tael", "unit_label": "Tael/Lượng (37.5g)"},
+                {"id": "49", "name": "Vàng nhẫn SJC 99.99% 1 chỉ, 2 chỉ, 5 chỉ", "unit": "mace", "unit_label": "Mace/Chỉ (3.75g)"}
             ]
         })
     }

@@ -29,6 +29,52 @@ const CubeShape = ({ className = "", variant = "default" }: { className?: string
   <div className={`cube-decoration ${variant === 'yellow' ? 'cube-yellow' : variant === 'pink' ? 'cube-pink' : ''} ${className}`}></div>
 );
 
+// Gold price ID to unit mapping (based on API source metadata)
+const getGoldUnitByIdAndSource = (goldPriceId: string, source: string): "gram" | "mace" | "tael" | "ounce" | "kg" => {
+  if (source === "sjc") {
+    // SJC gold bars (1L, 10L, 1KG) - priced per tael (lượng)
+    if (goldPriceId === "1" || goldPriceId === "2") {
+      return "tael";
+    }
+    // SJC jewelry/rings (99.99%) - priced per mace (chỉ)
+    if (goldPriceId === "49") {
+      return "mace";
+    }
+    // Default for other SJC types
+    return "mace";
+  }
+
+  // Default to mace for Vietnamese gold
+  return "mace";
+};
+
+// Helper functions for gold unit conversions
+const getGramsPerUnit = (unit: string): number => {
+  switch (unit) {
+    case "gram": return 1;
+    case "mace": return 3.75; // 1 mace (chỉ) = 3.75 grams
+    case "tael": return 37.5; // 1 tael (lượng) = 10 mace = 37.5 grams
+    case "ounce": return 31.1035; // 1 troy ounce = 31.1035 grams
+    case "kg": return 1000;
+    default: return 1;
+  }
+};
+
+const convertToGrams = (quantity: number, unit: string): number => {
+  return quantity * getGramsPerUnit(unit);
+};
+
+const getUnitLabel = (unit: string): string => {
+  switch (unit) {
+    case "gram": return "Gram (g)";
+    case "mace": return "Mace/Chỉ (3.75g)";
+    case "tael": return "Tael/Lượng (37.5g)";
+    case "ounce": return "Troy Ounce (31.1g)";
+    case "kg": return "Kilogram (kg)";
+    default: return unit;
+  }
+};
+
 export const PortfolioPage: React.FC = () => {
   const [portfolios, setPortfolios] = useState<Portfolio[]>([]);
   const [selectedPortfolioId, setSelectedPortfolioId] = useState<number | null>(null);
@@ -60,6 +106,10 @@ export const PortfolioPage: React.FC = () => {
   const [entryTags, setEntryTags] = useState("");
   const [entryFees, setEntryFees] = useState("");
   const [entrySource, setEntrySource] = useState("");
+
+  // Gold-specific fields
+  const [goldUnit, setGoldUnit] = useState<"gram" | "mace" | "tael" | "ounce" | "kg">("mace");
+  const [goldType, setGoldType] = useState<string>("");
 
   const [expandedEntries, setExpandedEntries] = useState<Set<number>>(new Set());
 
@@ -139,11 +189,18 @@ export const PortfolioPage: React.FC = () => {
             currentPrice = rawPrice * priceScale;
           }
         } else if (entry.asset_type === "gold") {
+          // Ensure source is valid for gold API
+          const goldSource = entry.source as "sjc";
+          if (!goldSource || goldSource !== "sjc") {
+            console.warn(`Invalid gold source for entry ${entry.id}: ${entry.source}`);
+            continue; // Skip this entry if source is invalid
+          }
+
           const response = await finCatchAPI.fetchGoldPrice({
-            gold_price_id: entry.symbol || "SJC99.99",
+            gold_price_id: entry.symbol, // This is now the gold price ID (1, 2, 999, etc.)
             from: Math.floor(Date.now() / 1000) - 86400,
             to: Math.floor(Date.now() / 1000),
-            source: entry.source as any,
+            source: goldSource,
           });
 
           if (response.data && response.data.length > 0) {
@@ -151,6 +208,12 @@ export const PortfolioPage: React.FC = () => {
             // Get price_scale from metadata (default to 1 if not present)
             priceScale = (response.metadata?.price_scale as number) ?? 1;
             currentPrice = rawPrice * priceScale;
+
+            // SJC gold API ALWAYS returns prices in VND per tael (lượng = 37.5g)
+            currentPriceCurrency = "VND";
+
+            // NOTE: All Vietnamese gold APIs return prices per tael (lượng = 37.5g = 10 chỉ)
+            // If user entered price per mace (chỉ), we need to convert to per tael for comparison
           }
         }
 
@@ -161,8 +224,31 @@ export const PortfolioPage: React.FC = () => {
           displayCurrency
         );
 
-        // Apply the same price_scale to purchase price (assuming it was entered in the source's format)
-        const scaledPurchasePrice = entry.purchase_price * priceScale;
+        // For stocks: purchase_price is per share (apply price_scale for consistency with API format)
+        // For gold: need to handle unit conversion
+        let scaledPurchasePrice: number;
+        if (entry.asset_type === "stock") {
+          scaledPurchasePrice = entry.purchase_price * priceScale;
+        } else {
+          // Gold: API returns price per tael, but user might have entered per mace
+          // Convert user's purchase price to per-tael if needed
+          const userUnit = entry.unit || "tael"; // Default to tael if not set
+
+          if (userUnit === "mace") {
+            // User entered per mace (chỉ), convert to per tael (lượng)
+            // 1 tael = 10 mace, so multiply by 10
+            scaledPurchasePrice = entry.purchase_price * 10;
+          } else if (userUnit === "tael") {
+            // User entered per tael, use as-is
+            scaledPurchasePrice = entry.purchase_price;
+          } else if (userUnit === "gram") {
+            // User entered per gram, convert to per tael (37.5g)
+            scaledPurchasePrice = entry.purchase_price * 37.5;
+          } else {
+            // Default: assume tael
+            scaledPurchasePrice = entry.purchase_price;
+          }
+        }
 
         // Convert purchase price to display currency
         const purchasePriceInDisplayCurrency = await convertCurrency(
@@ -181,8 +267,22 @@ export const PortfolioPage: React.FC = () => {
           ? currentPriceInDisplayCurrency / (currentPrice || 1)
           : 1.0;
 
-        const currentValue = currentPriceInDisplayCurrency * entry.quantity;
-        const totalCost = purchasePriceInDisplayCurrency * entry.quantity + feesInDisplayCurrency;
+        // For gold: convert quantity to taels if user entered in mace
+        let quantityInTaels = entry.quantity;
+        if (entry.asset_type === "gold") {
+          const userUnit = entry.unit || "tael";
+          if (userUnit === "mace") {
+            // User has quantity in mace, convert to taels (divide by 10)
+            quantityInTaels = entry.quantity / 10;
+          } else if (userUnit === "gram") {
+            // User has quantity in grams, convert to taels (divide by 37.5)
+            quantityInTaels = entry.quantity / 37.5;
+          }
+          // If unit is "tael", quantityInTaels is already correct
+        }
+
+        const currentValue = currentPriceInDisplayCurrency * quantityInTaels;
+        const totalCost = purchasePriceInDisplayCurrency * quantityInTaels + feesInDisplayCurrency;
         const gainLoss = currentValue - totalCost;
         const gainLossPercentage = totalCost > 0 ? (gainLoss / totalCost) * 100 : 0;
 
@@ -262,9 +362,17 @@ export const PortfolioPage: React.FC = () => {
   };
 
   const handleSaveEntry = async () => {
-    if (!entrySymbol.trim() || !entryQuantity || !entryPurchasePrice || !entryPurchaseDate) {
-      setEntryFormError("Symbol, quantity, purchase price, and date are required");
-      return;
+    // Validation
+    if (entryAssetType === "gold") {
+      if (!goldType || !entryQuantity || !entryPurchasePrice || !entryPurchaseDate || !entrySource) {
+        setEntryFormError("Gold price ID, quantity, purchase price, date, and source are required");
+        return;
+      }
+    } else {
+      if (!entrySymbol.trim() || !entryQuantity || !entryPurchasePrice || !entryPurchaseDate) {
+        setEntryFormError("Symbol, quantity, purchase price, and date are required");
+        return;
+      }
     }
 
     try {
@@ -272,7 +380,7 @@ export const PortfolioPage: React.FC = () => {
         id: editingEntry?.id,
         portfolio_id: selectedPortfolioId!,
         asset_type: entryAssetType,
-        symbol: entrySymbol.toUpperCase(),
+        symbol: entryAssetType === "gold" ? goldType : entrySymbol.toUpperCase(),
         quantity: parseFloat(entryQuantity),
         purchase_price: parseFloat(entryPurchasePrice),
         currency: entryCurrency,
@@ -282,6 +390,9 @@ export const PortfolioPage: React.FC = () => {
         transaction_fees: entryFees ? parseFloat(entryFees) : undefined,
         source: entrySource || undefined,
         created_at: editingEntry?.created_at || Math.floor(Date.now() / 1000),
+        // Add gold-specific fields
+        unit: entryAssetType === "gold" ? goldUnit : undefined,
+        gold_type: entryAssetType === "gold" ? goldType : undefined,
       };
 
       if (editingEntry) {
@@ -310,7 +421,15 @@ export const PortfolioPage: React.FC = () => {
   const handleEditEntry = (entry: PortfolioEntry) => {
     setEditingEntry(entry);
     setEntryAssetType(entry.asset_type);
-    setEntrySymbol(entry.symbol);
+
+    // Set asset-type-specific fields
+    if (entry.asset_type === "gold") {
+      setGoldType(entry.gold_type || entry.symbol); // Use gold_type if available, fallback to symbol
+      setGoldUnit((entry.unit as any) || "mace"); // Default to mace if not set
+    } else {
+      setEntrySymbol(entry.symbol);
+    }
+
     setEntryQuantity(entry.quantity.toString());
     setEntryPurchasePrice(entry.purchase_price.toString());
     setEntryCurrency(entry.currency || "USD");
@@ -350,7 +469,11 @@ export const PortfolioPage: React.FC = () => {
     setEntryTags("");
     setEntryFees("");
     setEntrySource("");
+    setEditingEntry(null);
     setEntryFormError(null);
+    // Reset gold-specific fields
+    setGoldUnit("mace"); // Default to mace (chỉ) for Vietnamese gold
+    setGoldType("");
   };
 
   const formatCurrency = (value: number, currency?: CurrencyCode) => {
@@ -637,19 +760,30 @@ export const PortfolioPage: React.FC = () => {
                             <div className="pt-3 border-t space-y-2" style={{ borderColor: 'rgba(0, 0, 0, 0.1)' }}>
                               <div className="grid grid-cols-2 gap-3">
                                 <div>
-                                  <p style={{ fontSize: 'var(--text-xs)', color: 'var(--cube-gray-500)' }}>Quantity</p>
+                                  <p style={{ fontSize: 'var(--text-xs)', color: 'var(--cube-gray-500)' }}>
+                                    Quantity {entry.asset_type === "gold" && entry.unit ? `(${getUnitLabel(entry.unit)})` : ""}
+                                  </p>
                                   <p style={{ fontSize: 'var(--text-sm)', fontWeight: 'var(--font-medium)', color: 'var(--cube-gray-900)' }}>
                                     {entry.quantity}
+                                    {entry.asset_type === "gold" && entry.unit && (
+                                      <span style={{ fontSize: 'var(--text-xs)', color: 'var(--cube-gray-500)', marginLeft: 'var(--space-1)' }}>
+                                        ({convertToGrams(entry.quantity, entry.unit).toFixed(2)}g)
+                                      </span>
+                                    )}
                                   </p>
                                 </div>
                                 <div>
-                                  <p style={{ fontSize: 'var(--text-xs)', color: 'var(--cube-gray-500)' }}>Purchase Price (in {displayCurrency})</p>
+                                  <p style={{ fontSize: 'var(--text-xs)', color: 'var(--cube-gray-500)' }}>
+                                    Purchase Price per {entry.asset_type === "gold" && entry.unit ? entry.unit : "share"} ({displayCurrency})
+                                  </p>
                                   <p style={{ fontSize: 'var(--text-sm)', fontWeight: 'var(--font-medium)', color: 'var(--cube-gray-900)' }}>
                                     {formatCurrency(entryPerf.purchase_price || 0)}
                                   </p>
                                 </div>
                                 <div>
-                                  <p style={{ fontSize: 'var(--text-xs)', color: 'var(--cube-gray-500)' }}>Current Price (in {displayCurrency})</p>
+                                  <p style={{ fontSize: 'var(--text-xs)', color: 'var(--cube-gray-500)' }}>
+                                    Current Price per {entry.asset_type === "gold" && entry.unit ? entry.unit : "share"} ({displayCurrency})
+                                  </p>
                                   <p style={{ fontSize: 'var(--text-sm)', fontWeight: 'var(--font-medium)', color: 'var(--cube-gray-900)' }}>
                                     {formatCurrency(entryPerf.current_price)}
                                   </p>
@@ -669,6 +803,14 @@ export const PortfolioPage: React.FC = () => {
                                   </div>
                                 )}
                               </div>
+                              {entry.asset_type === "gold" && entry.gold_type && (
+                                <div>
+                                  <p style={{ fontSize: 'var(--text-xs)', color: 'var(--cube-gray-500)' }}>Gold Type</p>
+                                  <p style={{ fontSize: 'var(--text-sm)', fontWeight: 'var(--font-medium)', color: 'var(--cube-gray-900)' }}>
+                                    {entry.gold_type}
+                                  </p>
+                                </div>
+                              )}
                               {entry.notes && (
                                 <div>
                                   <p style={{ fontSize: 'var(--text-xs)', color: 'var(--cube-gray-500)' }}>Notes</p>
@@ -770,42 +912,141 @@ export const PortfolioPage: React.FC = () => {
         <div className="space-y-4">
           <div>
             <Label required>Asset Type</Label>
-            <Select value={entryAssetType} onChange={(e) => setEntryAssetType(e.target.value as "stock" | "gold")}>
+            <Select
+              value={entryAssetType}
+              onChange={(e) => {
+                const newType = e.target.value as "stock" | "gold";
+                setEntryAssetType(newType);
+                // Auto-set defaults for gold
+                if (newType === "gold") {
+                  setEntryCurrency("VND");
+                  setEntrySource("sjc");
+                } else {
+                  setEntryCurrency("USD");
+                  setEntrySource("");
+                }
+              }}
+            >
               <option value="stock">Stock</option>
               <option value="gold">Gold</option>
             </Select>
           </div>
-          <div>
-            <Label required>Symbol</Label>
-            <Input
-              type="text"
-              value={entrySymbol}
-              onChange={(e) => setEntrySymbol(e.target.value)}
-              placeholder="e.g., AAPL"
-            />
-          </div>
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <Label required>Quantity</Label>
-              <Input
-                type="number"
-                step="0.01"
-                value={entryQuantity}
-                onChange={(e) => setEntryQuantity(e.target.value)}
-                placeholder="0.00"
-              />
-            </div>
-            <div>
-              <Label required>Purchase Price</Label>
-              <Input
-                type="number"
-                step="0.01"
-                value={entryPurchasePrice}
-                onChange={(e) => setEntryPurchasePrice(e.target.value)}
-                placeholder="0.00"
-              />
-            </div>
-          </div>
+
+          {entryAssetType === "gold" ? (
+            <>
+              {/* Gold-specific fields */}
+              <div>
+                <Label required>Gold Price ID</Label>
+                <Select
+                  value={goldType}
+                  onChange={(e) => {
+                    const newGoldType = e.target.value;
+                    setGoldType(newGoldType);
+                    // Auto-select the correct unit based on gold ID and source
+                    if (newGoldType && entrySource) {
+                      const correctUnit = getGoldUnitByIdAndSource(newGoldType, entrySource);
+                      setGoldUnit(correctUnit);
+                    }
+                  }}
+                >
+                  <option value="">Select gold price ID</option>
+                  <optgroup label="SJC - Gold Bars (per tael/lượng)">
+                    <option value="1">SJC 1L, 10L, 1KG - Ho Chi Minh</option>
+                    <option value="2">SJC 1L, 10L, 1KG - Ha Noi</option>
+                  </optgroup>
+                  <optgroup label="SJC - Jewelry/Rings (per mace/chỉ)">
+                    <option value="49">SJC Nhẫn 99.99% (1 chỉ, 2 chỉ, 5 chỉ)</option>
+                  </optgroup>
+                </Select>
+                <p style={{ fontSize: 'var(--text-xs)', color: 'var(--cube-gray-500)', marginTop: 'var(--space-1)' }}>
+                  Select the gold price source to track
+                </p>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label required>Unit</Label>
+                  <Select value={goldUnit} onChange={(e) => setGoldUnit(e.target.value as any)}>
+                    <option value="mace">Mace/Chỉ (3.75g) - Default for VN</option>
+                    <option value="tael">Tael/Lượng (37.5g)</option>
+                    <option value="gram">Gram (g)</option>
+                    <option value="ounce">Troy Ounce (31.1g)</option>
+                    <option value="kg">Kilogram (kg)</option>
+                  </Select>
+                  <p style={{ fontSize: 'var(--text-xs)', color: '#6366f1', marginTop: 'var(--space-1)' }}>
+                    💡 You can enter in any unit - prices will be auto-converted for comparison
+                  </p>
+                  <p style={{ fontSize: 'var(--text-xs)', color: '#10b981', marginTop: 'var(--space-1)' }}>
+                    ℹ️ {entrySource ? entrySource.toUpperCase() : 'API'} returns prices per tael, conversion handled automatically
+                  </p>
+                </div>
+                <div>
+                  <Label required>Quantity</Label>
+                  <Input
+                    type="number"
+                    step="0.01"
+                    value={entryQuantity}
+                    onChange={(e) => setEntryQuantity(e.target.value)}
+                    placeholder={`Number of ${goldUnit}s`}
+                  />
+                </div>
+              </div>
+
+              <div>
+                <Label required>Purchase Price per {getUnitLabel(goldUnit)}</Label>
+                <Input
+                  type="number"
+                  step="0.01"
+                  value={entryPurchasePrice}
+                  onChange={(e) => setEntryPurchasePrice(e.target.value)}
+                  placeholder="Price per unit"
+                />
+                {entryQuantity && entryPurchasePrice && (
+                  <p style={{ fontSize: 'var(--text-xs)', color: 'var(--cube-gray-600)', marginTop: 'var(--space-1)' }}>
+                    Total: {formatCurrencyUtil(parseFloat(entryPurchasePrice) * parseFloat(entryQuantity), entryCurrency)}
+                  </p>
+                )}
+                <p style={{ fontSize: 'var(--text-xs)', color: '#10b981', marginTop: 'var(--space-1)' }}>
+                  ✓ Enter your purchase price in your preferred unit - system handles conversion
+                </p>
+              </div>
+            </>
+          ) : (
+            <>
+              {/* Stock-specific fields */}
+              <div>
+                <Label required>Symbol</Label>
+                <Input
+                  type="text"
+                  value={entrySymbol}
+                  onChange={(e) => setEntrySymbol(e.target.value)}
+                  placeholder="e.g., AAPL, MSFT"
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label required>Quantity</Label>
+                  <Input
+                    type="number"
+                    step="0.01"
+                    value={entryQuantity}
+                    onChange={(e) => setEntryQuantity(e.target.value)}
+                    placeholder="Number of shares"
+                  />
+                </div>
+                <div>
+                  <Label required>Purchase Price per Share</Label>
+                  <Input
+                    type="number"
+                    step="0.01"
+                    value={entryPurchasePrice}
+                    onChange={(e) => setEntryPurchasePrice(e.target.value)}
+                    placeholder="0.00"
+                  />
+                </div>
+              </div>
+            </>
+          )}
           <div>
             <CurrencySelect
               label="Currency"
@@ -835,13 +1076,36 @@ export const PortfolioPage: React.FC = () => {
             </div>
           </div>
           <div>
-            <Label>Source</Label>
-            <Input
-              type="text"
-              value={entrySource}
-              onChange={(e) => setEntrySource(e.target.value)}
-              placeholder="e.g., yahoo_finance"
-            />
+            <Label required={entryAssetType === "gold"}>Source</Label>
+            {entryAssetType === "gold" ? (
+              <>
+                <Select
+                  value={entrySource}
+                  onChange={(e) => {
+                    const newSource = e.target.value;
+                    setEntrySource(newSource);
+                    // Auto-select the correct unit based on source and gold ID
+                    if (newSource && goldType) {
+                      const correctUnit = getGoldUnitByIdAndSource(goldType, newSource);
+                      setGoldUnit(correctUnit);
+                    }
+                  }}
+                >
+                  <option value="">Select source</option>
+                  <option value="sjc">SJC Gold</option>
+                </Select>
+                <p style={{ fontSize: 'var(--text-xs)', color: '#2563eb', marginTop: 'var(--space-1)' }}>
+                  💡 Source determines which API to use for current prices
+                </p>
+              </>
+            ) : (
+              <Input
+                type="text"
+                value={entrySource}
+                onChange={(e) => setEntrySource(e.target.value)}
+                placeholder="e.g., yahoo_finance"
+              />
+            )}
           </div>
           <div>
             <Label>Tags</Label>

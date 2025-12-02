@@ -27,6 +27,9 @@ pub struct PortfolioEntry {
     pub transaction_fees: Option<f64>,
     pub source: Option<String>, // Stock or gold source
     pub created_at: i64,
+    // Gold-specific fields
+    pub unit: Option<String>, // Unit of quantity for gold: "gram", "mace", "tael", "ounce", "kg"
+    pub gold_type: Option<String>, // Type of gold (e.g., "1" for SJC HCMC, "2" for SJC Hanoi, "49" for SJC rings)
 }
 
 pub struct Database {
@@ -37,17 +40,19 @@ impl Database {
     pub fn new(db_path: PathBuf) -> Result<Self> {
         let conn = Connection::open(db_path)?;
 
-        // Create tables
+        // Create portfolios table with all columns
         conn.execute(
             "CREATE TABLE IF NOT EXISTS portfolios (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 name TEXT NOT NULL,
                 description TEXT,
+                base_currency TEXT,
                 created_at INTEGER NOT NULL
             )",
             [],
         )?;
 
+        // Create portfolio_entries table with all columns including gold-specific fields
         conn.execute(
             "CREATE TABLE IF NOT EXISTS portfolio_entries (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -56,12 +61,15 @@ impl Database {
                 symbol TEXT NOT NULL,
                 quantity REAL NOT NULL,
                 purchase_price REAL NOT NULL,
+                currency TEXT,
                 purchase_date INTEGER NOT NULL,
                 notes TEXT,
                 tags TEXT,
                 transaction_fees REAL,
                 source TEXT,
                 created_at INTEGER NOT NULL,
+                unit TEXT,
+                gold_type TEXT,
                 FOREIGN KEY (portfolio_id) REFERENCES portfolios(id) ON DELETE CASCADE
             )",
             [],
@@ -72,31 +80,6 @@ impl Database {
             "CREATE INDEX IF NOT EXISTS idx_entries_portfolio_id ON portfolio_entries(portfolio_id)",
             [],
         )?;
-
-        // Migrate existing tables to add currency columns if they don't exist
-        // For portfolios table
-        let portfolio_has_currency = conn
-            .prepare("SELECT base_currency FROM portfolios LIMIT 1")
-            .is_ok();
-
-        if !portfolio_has_currency {
-            conn.execute(
-                "ALTER TABLE portfolios ADD COLUMN base_currency TEXT",
-                [],
-            )?;
-        }
-
-        // For portfolio_entries table
-        let entry_has_currency = conn
-            .prepare("SELECT currency FROM portfolio_entries LIMIT 1")
-            .is_ok();
-
-        if !entry_has_currency {
-            conn.execute(
-                "ALTER TABLE portfolio_entries ADD COLUMN currency TEXT",
-                [],
-            )?;
-        }
 
         Ok(Self {
             conn: Mutex::new(conn),
@@ -167,8 +150,8 @@ impl Database {
         conn.execute(
             "INSERT INTO portfolio_entries (
                 portfolio_id, asset_type, symbol, quantity, purchase_price, currency,
-                purchase_date, notes, tags, transaction_fees, source, created_at
-            ) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12)",
+                purchase_date, notes, tags, transaction_fees, source, created_at, unit, gold_type
+            ) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14)",
             params![
                 entry.portfolio_id,
                 entry.asset_type,
@@ -182,6 +165,8 @@ impl Database {
                 entry.transaction_fees,
                 entry.source,
                 entry.created_at,
+                entry.unit,
+                entry.gold_type,
             ],
         )?;
         Ok(conn.last_insert_rowid())
@@ -191,7 +176,7 @@ impl Database {
         let conn = self.conn.lock().unwrap();
         conn.query_row(
             "SELECT id, portfolio_id, asset_type, symbol, quantity, purchase_price, currency,
-                    purchase_date, notes, tags, transaction_fees, source, created_at
+                    purchase_date, notes, tags, transaction_fees, source, created_at, unit, gold_type
              FROM portfolio_entries WHERE id = ?1",
             params![id],
             |row| {
@@ -209,6 +194,8 @@ impl Database {
                     transaction_fees: row.get(10)?,
                     source: row.get(11)?,
                     created_at: row.get(12)?,
+                    unit: row.get(13)?,
+                    gold_type: row.get(14)?,
                 })
             },
         )
@@ -218,7 +205,7 @@ impl Database {
         let conn = self.conn.lock().unwrap();
         let mut stmt = conn.prepare(
             "SELECT id, portfolio_id, asset_type, symbol, quantity, purchase_price, currency,
-                    purchase_date, notes, tags, transaction_fees, source, created_at
+                    purchase_date, notes, tags, transaction_fees, source, created_at, unit, gold_type
              FROM portfolio_entries WHERE portfolio_id = ?1 ORDER BY created_at DESC"
         )?;
         let entries = stmt.query_map(params![portfolio_id], |row| {
@@ -236,6 +223,8 @@ impl Database {
                 transaction_fees: row.get(10)?,
                 source: row.get(11)?,
                 created_at: row.get(12)?,
+                unit: row.get(13)?,
+                gold_type: row.get(14)?,
             })
         })?;
 
@@ -247,8 +236,9 @@ impl Database {
         conn.execute(
             "UPDATE portfolio_entries SET
                 asset_type = ?1, symbol = ?2, quantity = ?3, purchase_price = ?4, currency = ?5,
-                purchase_date = ?6, notes = ?7, tags = ?8, transaction_fees = ?9, source = ?10
-             WHERE id = ?11",
+                purchase_date = ?6, notes = ?7, tags = ?8, transaction_fees = ?9, source = ?10,
+                unit = ?11, gold_type = ?12
+             WHERE id = ?13",
             params![
                 entry.asset_type,
                 entry.symbol,
@@ -260,6 +250,8 @@ impl Database {
                 entry.tags,
                 entry.transaction_fees,
                 entry.source,
+                entry.unit,
+                entry.gold_type,
                 entry.id,
             ],
         )?;

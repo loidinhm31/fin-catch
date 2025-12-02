@@ -23,6 +23,9 @@ export interface PortfolioEntry {
   transaction_fees?: number;
   source?: string;
   created_at: number;
+  // Gold-specific fields
+  unit?: "gram" | "mace" | "tael" | "ounce" | "kg"; // Unit of quantity for gold
+  gold_type?: string; // Type of gold (e.g., "1" for SJC HCMC, "2" for SJC Hanoi, "49" for SJC rings)
 }
 
 // Portfolio with entries

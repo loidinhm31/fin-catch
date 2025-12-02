@@ -28,10 +28,10 @@ export const GoldQueryForm: React.FC<GoldQueryFormProps> = ({ onSubmit, isLoadin
     setValue,
   } = useForm<GoldFormData>({
     defaultValues: {
-      goldPriceId: "999",
+      goldPriceId: "1",
       fromDate: from,
       toDate: to,
-      source: "mihong" as GoldSource,
+      source: "sjc" as GoldSource,
     },
   });
 
@@ -49,12 +49,7 @@ export const GoldQueryForm: React.FC<GoldQueryFormProps> = ({ onSubmit, isLoadin
   // Reset goldPriceId to first available option when source changes
   useEffect(() => {
     if (goldPriceIdOptions.length > 0) {
-        if (selectedSource === 'mihong') {
-            setValue("goldPriceId", goldPriceIdOptions
-                .find((o) => o?.value === "999")!.value);
-        } else {
-            setValue("goldPriceId", goldPriceIdOptions[0].value);
-        }
+      setValue("goldPriceId", goldPriceIdOptions[0].value);
     }
   }, [selectedSource, goldPriceIdOptions, setValue]);
 

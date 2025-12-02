@@ -5,7 +5,7 @@ export type Resolution = "1" | "5" | "15" | "30" | "60" | "1D" | "1W" | "1M";
 export type StockSource = "vndirect" | "ssi" | "yahoo_finance";
 
 // Gold data sources
-export type GoldSource = "sjc" | "mihong";
+export type GoldSource = "sjc";
 
 // Data type enum
 export type DataType = "stock" | "gold";
@@ -118,7 +118,6 @@ export const STOCK_SOURCE_LABELS: Record<StockSource, string> = {
 // Gold source labels
 export const GOLD_SOURCE_LABELS: Record<GoldSource, string> = {
   sjc: "SJC Gold",
-  mihong: "MiHong",
 };
 
 // Gold price IDs for SJC source
