@@ -564,12 +564,12 @@ export const PortfolioPage: React.FC = () => {
               <h3 style={{ fontSize: 'var(--text-sm)', fontWeight: 'var(--font-medium)', color: 'var(--cube-gray-900)', opacity: 0.7, marginBottom: 'var(--space-2)' }}>
                 Display Currency
               </h3>
-              <div className="flex gap-2 overflow-x-auto pb-2">
+              <div className="flex flex-wrap gap-2">
                 {(["USD", "VND", "EUR", "GBP", "JPY"] as CurrencyCode[]).map((currency) => (
                   <button
                     key={currency}
                     onClick={() => handleCurrencyChange(currency)}
-                    className={`flex-shrink-0 px-3 py-2 rounded-lg font-bold transition-all ${
+                    className={`px-3 py-2 rounded-lg font-bold transition-all ${
                       displayCurrency === currency
                         ? "bg-gradient-to-r from-cyan-400 to-blue-600 text-white shadow-md"
                         : "glass-button"
@@ -730,30 +730,31 @@ export const PortfolioPage: React.FC = () => {
                                 </div>
                               </div>
                             </div>
-                            <div className="flex gap-2 ml-4">
-                              <button
+                          </div>
+
+                          <div className="flex gap-2 ml-4">
+                            <button
                                 onClick={() => handleEditEntry(entry)}
                                 className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center hover:bg-blue-200 transition-all"
-                              >
-                                <Edit className="w-4 h-4" style={{ color: '#2563eb' }} />
-                              </button>
-                              <button
+                            >
+                              <Edit className="w-4 h-4" style={{ color: '#2563eb' }} />
+                            </button>
+                            <button
                                 onClick={() => handleDeleteEntry(entry.id!)}
                                 className="w-8 h-8 rounded-full bg-red-100 flex items-center justify-center hover:bg-red-200 transition-all"
-                              >
-                                <Trash2 className="w-4 h-4" style={{ color: '#dc2626' }} />
-                              </button>
-                              <button
+                            >
+                              <Trash2 className="w-4 h-4" style={{ color: '#dc2626' }} />
+                            </button>
+                            <button
                                 onClick={() => toggleExpanded(entry.id!)}
                                 className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center hover:bg-gray-200 transition-all"
-                              >
-                                {isExpanded ? (
+                            >
+                              {isExpanded ? (
                                   <ChevronUp className="w-4 h-4" style={{ color: 'var(--cube-gray-700)' }} />
-                                ) : (
+                              ) : (
                                   <ChevronDown className="w-4 h-4" style={{ color: 'var(--cube-gray-700)' }} />
-                                )}
-                              </button>
-                            </div>
+                              )}
+                            </button>
                           </div>
 
                           {isExpanded && (

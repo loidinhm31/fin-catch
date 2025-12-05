@@ -427,15 +427,15 @@ export const FinancialDataPage: React.FC = () => {
 
                     {/* Metadata Display */}
                     {goldPremiumData.metadata && (
-                      <div className="mt-6 p-2 bg-blue-50 border border-blue-200 rounded-xl">
-                        <h4 style={{ fontSize: 'var(--text-sm)', fontWeight: 'var(--font-bold)', color: 'var(--cube-gray-900)', marginBottom: 'var(--space-2)' }}>
+                      <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-xl">
+                        <h4 style={{ fontSize: 'var(--text-sm)', fontWeight: 'var(--font-bold)', color: '#1e293b', marginBottom: 'var(--space-2)' }}>
                           Calculation Details
                         </h4>
-                        <div className="space-y-1" style={{ fontSize: 'var(--text-xs)', color: 'var(--cube-gray-900)' }}>
-                          <p><strong>Formula:</strong> {String(goldPremiumData.metadata.formula || "N/A")}</p>
-                          <p><strong>Conversion:</strong> {String(goldPremiumData.metadata.conversion || "N/A")}</p>
-                          <p><strong>Note:</strong> {String(goldPremiumData.metadata.note || "N/A")}</p>
-                          <p><strong>Sources:</strong> Gold: {String(goldPremiumData.metadata.gold_source || "N/A")}, Exchange: {String(goldPremiumData.metadata.exchange_rate_source || "N/A")}, Market: {String(goldPremiumData.metadata.stock_source || "N/A")}</p>
+                        <div className="space-y-1" style={{ fontSize: 'var(--text-xs)', color: '#334155', lineHeight: '1.6' }}>
+                          <p><strong style={{ color: '#1e293b' }}>Formula:</strong> {String(goldPremiumData.metadata.formula || "N/A")}</p>
+                          <p><strong style={{ color: '#1e293b' }}>Conversion:</strong> {String(goldPremiumData.metadata.conversion || "N/A")}</p>
+                          <p><strong style={{ color: '#1e293b' }}>Note:</strong> {String(goldPremiumData.metadata.note || "N/A")}</p>
+                          <p><strong style={{ color: '#1e293b' }}>Sources:</strong> Gold: {String(goldPremiumData.metadata.gold_source || "N/A")}, Exchange: {String(goldPremiumData.metadata.exchange_rate_source || "N/A")}, Market: {String(goldPremiumData.metadata.stock_source || "N/A")}</p>
                         </div>
                       </div>
                     )}

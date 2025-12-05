@@ -62,14 +62,13 @@ export const GoldPremiumChart: React.FC<GoldPremiumChartProps> = ({ data, showFu
         <div className={`p-4 rounded-xl mb-3 ${isPremiumPositive ? 'bg-gradient-to-r from-yellow-100 to-orange-100' : 'bg-gradient-to-r from-blue-100 to-cyan-100'} border-2 ${isPremiumPositive ? 'border-yellow-300' : 'border-blue-300'}`}>
           <div className="flex items-center justify-between">
             <div className="flex items-baseline gap-2">
-              <span style={{ fontSize: 'var(--text-xs)', opacity: 0.7 }}>Premium:</span>
-              <span style={{ fontSize: 'var(--text-2xl)', fontWeight: 'var(--font-bold)', color: isPremiumPositive ? '#f59e0b' : '#0ea5e9' }}>
+              <span style={{ fontSize: 'var(--text-xs)', color: '#d97706', opacity: 0.9 }}>Premium:</span>
+              <span style={{ fontSize: 'var(--text-2xl)', fontWeight: 'var(--font-bold)', color: isPremiumPositive ? '#d97706' : '#0284c7' }}>
                 {isPremiumPositive ? '+' : ''}{formatPercent(point.premium_rate)}
               </span>
             </div>
             <div className="flex items-center gap-2">
-              <span style={{ fontSize: 'var(--text-sm)', opacity: 0.7 }}>{formatCurrency(point.premium_value)} VND</span>
-              <span style={{ fontSize: 'var(--text-xl)' }}>{isPremiumPositive ? '📈' : '📉'}</span>
+              <span style={{ fontSize: 'var(--text-sm)', color: '#d97706', opacity: 0.9 }}>{formatCurrency(point.premium_value)} VND</span>
             </div>
           </div>
         </div>
