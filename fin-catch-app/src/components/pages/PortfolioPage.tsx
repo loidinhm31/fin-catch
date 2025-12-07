@@ -1,28 +1,21 @@
-import React, { useEffect, useState } from "react";
-import { Plus, Trash2, Edit, ChevronDown, ChevronUp, X, TrendingUp, TrendingDown, Wallet } from "lucide-react";
-import { finCatchAPI } from "../../services/api";
+import React, {useEffect, useRef, useState} from "react";
+import {BarChart3, ChevronDown, ChevronUp, Edit, Plus, Trash2, TrendingDown, TrendingUp, Wallet, X} from "lucide-react";
+import {finCatchAPI} from "../../services/api";
 import {
+  CURRENCY_SYMBOLS,
+  CurrencyCode,
+  EntryPerformance,
   Portfolio,
   PortfolioEntry,
+  PortfolioHoldingsPerformance,
   PortfolioPerformance,
-  EntryPerformance,
-  CurrencyCode,
 } from "../../types";
-import { dateToUnixTimestamp } from "../../utils/dateUtils";
-import { convertCurrency, formatCurrency as formatCurrencyUtil } from "../../utils/currency";
-import { getPreference, setPreference } from "../../utils/preferences";
-import {
-  Button,
-  Input,
-  Select,
-  Textarea,
-  Label,
-  Modal,
-  ErrorAlert,
-  ConfirmDialog,
-} from "../atoms/UI";
-import { CurrencySelect } from "../atoms";
-import { CURRENCY_SYMBOLS } from "../../types";
+import {dateToUnixTimestamp} from "../../utils/dateUtils";
+import {convertCurrency, formatCurrency as formatCurrencyUtil} from "../../utils/currency";
+import {getPreference, setPreference} from "../../utils/preferences";
+import {calculateAllHoldingsPerformance} from "../../utils/holdings";
+import {Button, ConfirmDialog, CurrencySelect, ErrorAlert, Input, Label, Modal, Select, Textarea} from "../atoms";
+import {HoldingsPerformanceChart} from "../organisms/HoldingsPerformanceChart";
 
 // Cube decoration component
 const CubeShape = ({ className = "", variant = "default" }: { className?: string; variant?: "default" | "yellow" | "pink" }) => (
@@ -115,6 +108,15 @@ export const PortfolioPage: React.FC = () => {
 
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [portfolioToDelete, setPortfolioToDelete] = useState<number | null>(null);
+
+  // Date input ref to handle picker closing
+  const dateInputRef = useRef<HTMLInputElement>(null);
+
+  // Holdings performance chart state
+  const [showHoldingsChart, setShowHoldingsChart] = useState(false);
+  const [holdingsTimeframe, setHoldingsTimeframe] = useState<"1M" | "3M" | "6M" | "1Y" | "ALL">("1Y");
+  const [holdingsPerformanceData, setHoldingsPerformanceData] = useState<PortfolioHoldingsPerformance | null>(null);
+  const [isHoldingsLoading, setIsHoldingsLoading] = useState(false);
 
   // Load portfolios on mount
   useEffect(() => {
@@ -493,6 +495,73 @@ export const PortfolioPage: React.FC = () => {
     setPreference("displayCurrency", currency);
   };
 
+  const calculateHoldingsTimeframe = (): { start: number; end: number } => {
+    const now = Math.floor(Date.now() / 1000);
+    let start = now;
+
+    switch (holdingsTimeframe) {
+      case "1M":
+        start = now - 30 * 86400;
+        break;
+      case "3M":
+        start = now - 90 * 86400;
+        break;
+      case "6M":
+        start = now - 180 * 86400;
+        break;
+      case "1Y":
+        start = now - 365 * 86400;
+        break;
+      case "ALL":
+        // Find earliest entry date
+        if (entries.length > 0) {
+          start = Math.min(...entries.map(e => e.purchase_date));
+        } else {
+          start = now - 365 * 86400;
+        }
+        break;
+    }
+
+    return { start, end: now };
+  };
+
+  const loadHoldingsPerformance = async () => {
+    if (!selectedPortfolioId || entries.length === 0) {
+      return;
+    }
+
+    setIsHoldingsLoading(true);
+    try {
+      const { start, end } = calculateHoldingsTimeframe();
+
+      const performanceData = await calculateAllHoldingsPerformance(
+        entries,
+        start,
+        end,
+        displayCurrency
+      );
+
+      setHoldingsPerformanceData(performanceData);
+    } catch (err) {
+      console.error("Failed to load holdings performance:", err);
+      setError(err instanceof Error ? err.message : "Failed to load holdings performance");
+    } finally {
+      setIsHoldingsLoading(false);
+    }
+  };
+
+  const handleShowHoldingsChart = () => {
+    setShowHoldingsChart(true);
+    loadHoldingsPerformance();
+  };
+
+  // Reload holdings performance when timeframe or currency changes
+  useEffect(() => {
+    if (showHoldingsChart && entries.length > 0) {
+      loadHoldingsPerformance();
+    }
+  }, [holdingsTimeframe, displayCurrency]);
+
   const selectedPortfolio = portfolios.find((p) => p.id === selectedPortfolioId);
 
   return (
@@ -521,29 +590,38 @@ export const PortfolioPage: React.FC = () => {
               </h2>
               <div className="flex gap-3 overflow-x-auto pb-2">
                 {portfolios.map((portfolio) => (
-                <button
-                  key={portfolio.id}
-                  onClick={() => setSelectedPortfolioId(portfolio.id!)}
-                  className={`relative flex-shrink-0 px-4 py-3 rounded-xl font-bold transition-all ${
-                    selectedPortfolioId === portfolio.id
-                      ? "bg-gradient-to-r from-pink-400 to-purple-600 text-white shadow-lg"
-                      : "glass-button"
-                  }`}
-                  style={{ fontSize: 'var(--text-sm)' }}
-                >
-                  {portfolio.name}
+                <div key={portfolio.id} className="relative flex-shrink-0">
+                  <button
+                    onClick={() => setSelectedPortfolioId(portfolio.id!)}
+                    className={`px-4 py-3 rounded-xl font-bold transition-all ${
+                      selectedPortfolioId === portfolio.id
+                        ? "bg-gradient-to-r from-pink-400 to-purple-600 text-white shadow-lg"
+                        : "glass-button"
+                    }`}
+                    style={{ fontSize: 'var(--text-sm)' }}
+                  >
+                    {portfolio.name}
+                  </button>
                   {selectedPortfolioId === portfolio.id && (
-                    <button
+                    <span
                       onClick={(e) => {
                         e.stopPropagation();
                         handleDeletePortfolioClick(portfolio.id!);
                       }}
-                      className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 rounded-full flex items-center justify-center text-white hover:bg-red-600"
+                      className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 rounded-full flex items-center justify-center text-white hover:bg-red-600 cursor-pointer"
+                      role="button"
+                      tabIndex={0}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                          e.preventDefault();
+                          handleDeletePortfolioClick(portfolio.id!);
+                        }
+                      }}
                     >
                       <X className="w-3 h-3" />
-                    </button>
+                    </span>
                   )}
-                </button>
+                </div>
               ))}
               <button
                 onClick={() => {
@@ -634,6 +712,82 @@ export const PortfolioPage: React.FC = () => {
                       </div>
                     </div>
                   </div>
+                </div>
+              )}
+
+              {/* Holdings Performance Chart Section */}
+              {entries.length > 0 && (
+                <div className="mb-6">
+                  <div className="flex justify-between items-center mb-4">
+                    <h2 style={{ fontSize: 'var(--text-xl)', fontWeight: 'var(--font-bold)', color: 'var(--cube-gray-900)' }}>
+                      Holdings Performance
+                    </h2>
+                    {!showHoldingsChart && (
+                      <button
+                        onClick={handleShowHoldingsChart}
+                        className="bg-gradient-to-r from-purple-300 to-pink-600 text-white px-4 py-2 rounded-xl font-bold shadow-lg hover:shadow-xl transition-all flex items-center gap-2"
+                        style={{ fontSize: 'var(--text-sm)' }}
+                      >
+                        <BarChart3 className="w-4 h-4" />
+                        SHOW CHART
+                      </button>
+                    )}
+                  </div>
+
+                  {showHoldingsChart && (
+                    <div className="glass-card p-6">
+                      {/* Timeframe Controls */}
+                      <div className="mb-4">
+                        <h3 style={{ fontSize: 'var(--text-sm)', fontWeight: 'var(--font-medium)', color: 'var(--cube-gray-900)', opacity: 0.7, marginBottom: 'var(--space-2)' }}>
+                          Timeframe
+                        </h3>
+                        <div className="flex flex-wrap gap-2">
+                          {(["1M", "3M", "6M", "1Y", "ALL"] as const).map((tf) => (
+                            <button
+                              key={tf}
+                              onClick={() => setHoldingsTimeframe(tf)}
+                              className={`px-3 py-2 rounded-lg font-bold transition-all ${
+                                holdingsTimeframe === tf
+                                  ? "bg-gradient-to-r from-cyan-400 to-blue-600 text-white shadow-md"
+                                  : "glass-button"
+                              }`}
+                              style={{ fontSize: 'var(--text-xs)' }}
+                            >
+                              {tf}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Holdings Performance Chart */}
+                      {isHoldingsLoading ? (
+                        <div className="p-12 text-center">
+                          <div className="w-8 h-8 border-4 border-purple-600 border-t-transparent rounded-full animate-spin mx-auto"></div>
+                          <p style={{ fontSize: 'var(--text-sm)', color: 'var(--cube-gray-900)', marginTop: 'var(--space-4)' }}>
+                            Loading holdings performance...
+                          </p>
+                        </div>
+                      ) : holdingsPerformanceData ? (
+                        <HoldingsPerformanceChart data={holdingsPerformanceData} resolution="1D" />
+                      ) : (
+                        <div className="p-12 text-center">
+                          <p style={{ fontSize: 'var(--text-sm)', color: 'var(--cube-gray-900)', opacity: 0.7 }}>
+                            No holdings performance data available
+                          </p>
+                        </div>
+                      )}
+
+                      <div className="mt-4 flex justify-end">
+                        <button
+                          onClick={() => setShowHoldingsChart(false)}
+                          className="glass-button px-4 py-2 rounded-xl font-bold transition-all"
+                          style={{ fontSize: 'var(--text-sm)' }}
+                        >
+                          HIDE CHART
+                        </button>
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
 
@@ -1060,9 +1214,18 @@ export const PortfolioPage: React.FC = () => {
             <div>
               <Label required>Purchase Date</Label>
               <Input
+                ref={dateInputRef}
                 type="date"
                 value={entryPurchaseDate}
-                onChange={(e) => setEntryPurchaseDate(e.target.value)}
+                onChange={(e) => {
+                  setEntryPurchaseDate(e.target.value);
+                  // Force blur after a short delay to ensure date picker closes
+                  setTimeout(() => {
+                    if (dateInputRef.current) {
+                      dateInputRef.current.blur();
+                    }
+                  }, 100);
+                }}
               />
             </div>
             <div>

@@ -6,14 +6,15 @@ export interface SelectOption {
 }
 
 export interface SelectProps extends React.SelectHTMLAttributes<HTMLSelectElement> {
-  options: SelectOption[];
+  options?: SelectOption[];
   error?: boolean;
   fullWidth?: boolean;
   placeholder?: string;
+  children?: React.ReactNode;
 }
 
 export const Select = forwardRef<HTMLSelectElement, SelectProps>(
-  ({ options, error = false, fullWidth = false, placeholder, className = "", ...props }, ref) => {
+  ({ options, error = false, fullWidth = false, placeholder, className = "", children, ...props }, ref) => {
     const widthStyle = fullWidth ? "w-full" : "";
 
     return (
@@ -29,11 +30,12 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(
               {placeholder}
             </option>
           )}
-          {options.map((option) => (
+          {options && options.map((option) => (
             <option key={option.value} value={option.value}>
               {option.label}
             </option>
           ))}
+          {children}
         </select>
         <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3" style={{ color: 'var(--cube-gray-900)' }}>
           <svg

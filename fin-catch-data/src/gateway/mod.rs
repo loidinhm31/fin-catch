@@ -1,7 +1,7 @@
 use crate::{
     error::{ApiError, ApiResult},
     models::{
-        DataRequest, DataResponse, DataType, ExchangeRateRequest, ExchangeRateResponse,
+        ExchangeRateRequest, ExchangeRateResponse,
         GoldPriceRequest, GoldPriceResponse, StockHistoryRequest, StockHistoryResponse,
     },
     sources::{ExchangeRateDataSource, GoldDataSource, StockDataSource},
@@ -110,7 +110,7 @@ impl DataSourceGateway {
     /// Fetch stock history using the specified or default source
     pub async fn fetch_stock_history(
         &self,
-        mut request: StockHistoryRequest,
+        request: StockHistoryRequest,
     ) -> ApiResult<StockHistoryResponse> {
         // Validate request
         request
@@ -136,7 +136,7 @@ impl DataSourceGateway {
     /// Fetch gold price history using the specified or default source
     pub async fn fetch_gold_history(
         &self,
-        mut request: GoldPriceRequest,
+        request: GoldPriceRequest,
     ) -> ApiResult<GoldPriceResponse> {
         // Validate request
         request
@@ -164,7 +164,7 @@ impl DataSourceGateway {
     /// and Yahoo Finance for date range queries
     pub async fn fetch_exchange_rate_history(
         &self,
-        mut request: ExchangeRateRequest,
+        request: ExchangeRateRequest,
     ) -> ApiResult<ExchangeRateResponse> {
         // Validate request
         request

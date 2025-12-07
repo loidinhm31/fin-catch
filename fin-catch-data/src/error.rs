@@ -27,12 +27,6 @@ pub enum ApiError {
     Internal(String),
 }
 
-#[derive(Serialize)]
-struct ErrorResponse {
-    error: String,
-    message: String,
-}
-
 #[cfg(feature = "server")]
 impl IntoResponse for ApiError {
     fn into_response(self) -> Response {

@@ -72,6 +72,7 @@ export const CurrencySelect: React.FC<CurrencySelectProps> = ({
           border-radius: 4px;
           font-size: 14px;
           background: white;
+          color: #111827;
           cursor: pointer;
         }
 

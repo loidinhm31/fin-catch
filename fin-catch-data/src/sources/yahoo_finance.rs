@@ -103,7 +103,7 @@ impl YahooFinanceSource {
     /// Get the previous Friday from a weekend date at 12:00:00 GMT (noon)
     /// If the date is not a weekend, returns the original timestamp
     fn get_previous_friday(timestamp: i64) -> i64 {
-        use chrono::{DateTime, Datelike, NaiveTime, Timelike, Utc};
+        use chrono::{DateTime, Datelike, NaiveTime, Utc};
 
         if !Self::is_weekend(timestamp) {
             return timestamp;

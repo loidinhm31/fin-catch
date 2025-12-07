@@ -573,3 +573,52 @@ h1, h2, h3, h4, h5, h6 {
 
 /* Old gradient variables */
 --gradient-explore: linear-gradient(135deg, var(--color-bg-primary) 0%, var(--color-bg-secondary) 100%);
+
+/* ===== DATE PICKER FIXES ===== */
+
+/* Fix white text on white background in date inputs */
+input[type="date"],
+input[type="time"],
+input[type="datetime-local"] {
+    color: #111827 !important;
+    color-scheme: light;
+    position: relative;
+}
+
+/* Ensure date picker calendar closes after selection */
+input[type="date"]::-webkit-calendar-picker-indicator {
+    cursor: pointer;
+    position: relative;
+    z-index: 2;
+}
+
+/* Make sure the native date picker appears above modals */
+input[type="date"]::-webkit-datetime-edit,
+input[type="date"]::-webkit-datetime-edit-fields-wrapper {
+    position: relative;
+}
+
+/* Fix for date input in modals and forms */
+input[type="date"]:valid {
+    color: #111827 !important;
+}
+
+/* Ensure the calendar popup appears above everything */
+input[type="date"]:focus,
+input[type="datetime-local"]:focus {
+    position: relative;
+    z-index: 9999;
+}
+
+/* Fix datetime-local picker */
+input[type="datetime-local"]::-webkit-calendar-picker-indicator {
+    cursor: pointer;
+    position: relative;
+    z-index: 2;
+}
+
+/* Option elements should be dark text */
+option {
+    color: #111827 !important;
+    background: white !important;
+}
