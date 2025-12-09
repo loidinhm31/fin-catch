@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Plus, Wallet } from "lucide-react";
-import { PortfolioPerformance, CurrencyCode, PortfolioEntry } from "../../types";
-import { HoldingCard } from "../molecules/HoldingCard";
+import { CurrencyCode, PortfolioEntry, PortfolioPerformance } from "@/types";
+import { HoldingCard } from "@/components/molecules";
 
 export interface HoldingsSectionProps {
   performance: PortfolioPerformance | null;
@@ -26,7 +26,9 @@ export const HoldingsSection: React.FC<HoldingsSectionProps> = ({
   formatPercentage,
   formatDate,
 }) => {
-  const [expandedEntries, setExpandedEntries] = useState<Set<number>>(new Set());
+  const [expandedEntries, setExpandedEntries] = useState<Set<number>>(
+    new Set(),
+  );
 
   const toggleExpanded = (entryId: number) => {
     const newExpanded = new Set(expandedEntries);
@@ -50,7 +52,10 @@ export const HoldingsSection: React.FC<HoldingsSectionProps> = ({
             color: "var(--cube-gray-900)",
           }}
         >
-          Holdings <span style={{ color: "var(--cube-gray-400)" }}>({entriesCount})</span>
+          Holdings{" "}
+          <span style={{ color: "var(--cube-gray-400)" }}>
+            ({entriesCount})
+          </span>
         </h2>
         <button
           onClick={onAdd}

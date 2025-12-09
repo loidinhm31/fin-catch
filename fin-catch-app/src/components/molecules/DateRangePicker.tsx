@@ -1,6 +1,6 @@
 import React from "react";
-import {DateInput} from "../atoms";
-import {FormField} from "./FormField";
+import { DateInput } from "@/components/atoms";
+import { FormField } from "./FormField";
 
 export interface DateRangePickerProps {
   fromDate: Date;
@@ -25,7 +25,12 @@ export const DateRangePicker: React.FC<DateRangePickerProps> = ({
 }) => {
   return (
     <div className={`grid grid-cols-1 md:grid-cols-2 gap-4 ${className}`}>
-      <FormField label="From Date" error={fromError} required={required} htmlFor="from-date">
+      <FormField
+        label="From Date"
+        error={fromError}
+        required={required}
+        htmlFor="from-date"
+      >
         <DateInput
           id="from-date"
           value={fromDate}
@@ -35,7 +40,12 @@ export const DateRangePicker: React.FC<DateRangePickerProps> = ({
         />
       </FormField>
 
-      <FormField label="To Date" error={toError} required={required} htmlFor="to-date">
+      <FormField
+        label="To Date"
+        error={toError}
+        required={required}
+        htmlFor="to-date"
+      >
         <DateInput
           id="to-date"
           value={toDate}

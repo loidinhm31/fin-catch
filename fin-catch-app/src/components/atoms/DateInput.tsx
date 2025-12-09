@@ -1,8 +1,11 @@
-import React, {forwardRef, useRef, useEffect} from "react";
-import {format} from "date-fns";
-import {formatDateWithOrdinal} from "../../utils/dateUtils";
+import React, { forwardRef, useEffect, useRef } from "react";
+import { format } from "date-fns";
+import { formatDateWithOrdinal } from "../../utils/dateUtils";
 
-export interface DateInputProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>, "type" | "value" | "onChange"> {
+export interface DateInputProps extends Omit<
+  React.InputHTMLAttributes<HTMLInputElement>,
+  "type" | "value" | "onChange"
+> {
   value?: Date;
   onChange?: (date: Date | null) => void;
   error?: boolean;
@@ -10,7 +13,17 @@ export interface DateInputProps extends Omit<React.InputHTMLAttributes<HTMLInput
 }
 
 export const DateInput = forwardRef<HTMLInputElement, DateInputProps>(
-  ({ value, onChange, error = false, fullWidth = false, className = "", ...props }, ref) => {
+  (
+    {
+      value,
+      onChange,
+      error = false,
+      fullWidth = false,
+      className = "",
+      ...props
+    },
+    ref,
+  ) => {
     const widthStyle = fullWidth ? "w-full" : "";
     const dateInputRef = useRef<HTMLInputElement>(null);
     const closeTimerRef = useRef<NodeJS.Timeout | null>(null);
@@ -77,8 +90,8 @@ export const DateInput = forwardRef<HTMLInputElement, DateInputProps>(
           onClick={handleClick}
           readOnly
           placeholder="Select a date"
-          className={`glass-input ${widthStyle} ${error ? 'border-2 border-red-500' : ''} ${className} cursor-pointer`}
-          style={{ color: 'var(--cube-gray-900)' }}
+          className={`glass-input ${widthStyle} ${error ? "border-2 border-red-500" : ""} ${className} cursor-pointer`}
+          style={{ color: "var(--cube-gray-900)" }}
           {...props}
         />
 
@@ -91,16 +104,16 @@ export const DateInput = forwardRef<HTMLInputElement, DateInputProps>(
           onBlur={handleBlur}
           className="absolute"
           style={{
-            left: '-9999px',
-            position: 'absolute',
-            colorScheme: 'light',
-            color: '#111827'
+            left: "-9999px",
+            position: "absolute",
+            colorScheme: "light",
+            color: "#111827",
           }}
           tabIndex={-1}
         />
       </div>
     );
-  }
+  },
 );
 
 DateInput.displayName = "DateInput";

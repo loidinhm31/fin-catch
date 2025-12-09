@@ -1,4 +1,4 @@
-import { CurrencyCode } from "../types";
+import { CurrencyCode } from "@/types";
 
 /**
  * User preferences stored in localStorage
@@ -39,7 +39,7 @@ export function savePreferences(preferences: UserPreferences): void {
  * Get a specific preference value
  */
 export function getPreference<K extends keyof UserPreferences>(
-  key: K
+  key: K,
 ): UserPreferences[K] | undefined {
   const prefs = loadPreferences();
   return prefs[key];
@@ -50,7 +50,7 @@ export function getPreference<K extends keyof UserPreferences>(
  */
 export function setPreference<K extends keyof UserPreferences>(
   key: K,
-  value: UserPreferences[K]
+  value: UserPreferences[K],
 ): void {
   const prefs = loadPreferences();
   prefs[key] = value;

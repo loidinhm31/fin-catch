@@ -1,10 +1,12 @@
-import { useState, useEffect } from "react";
-import { Portfolio } from "../types";
-import { finCatchAPI } from "../services/api";
+import { useEffect, useState } from "react";
+import { Portfolio } from "@/types";
+import { finCatchAPI } from "@/services/api";
 
 export const usePortfolios = () => {
   const [portfolios, setPortfolios] = useState<Portfolio[]>([]);
-  const [selectedPortfolioId, setSelectedPortfolioId] = useState<number | null>(null);
+  const [selectedPortfolioId, setSelectedPortfolioId] = useState<number | null>(
+    null,
+  );
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -18,7 +20,9 @@ export const usePortfolios = () => {
       }
       setError(null);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to load portfolios");
+      setError(
+        err instanceof Error ? err.message : "Failed to load portfolios",
+      );
     } finally {
       setIsLoading(false);
     }
@@ -43,7 +47,9 @@ export const usePortfolios = () => {
     loadPortfolios();
   }, []);
 
-  const selectedPortfolio = portfolios.find((p) => p.id === selectedPortfolioId);
+  const selectedPortfolio = portfolios.find(
+    (p) => p.id === selectedPortfolioId,
+  );
 
   return {
     portfolios,

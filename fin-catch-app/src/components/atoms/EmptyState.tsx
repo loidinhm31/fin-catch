@@ -7,7 +7,11 @@ interface EmptyStateProps {
   description: string;
 }
 
-export const EmptyState: React.FC<EmptyStateProps> = ({ icon, title, description }) => {
+export const EmptyState: React.FC<EmptyStateProps> = ({
+  icon,
+  title,
+  description,
+}) => {
   return (
     <Card className="p-12 text-center">
       <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4 text-purple-600">

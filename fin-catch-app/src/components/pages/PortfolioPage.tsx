@@ -1,22 +1,22 @@
 import React, { useState } from "react";
 import { Wallet } from "lucide-react";
-import { CurrencyCode, PortfolioEntry } from "../../types";
-import { formatCurrency as formatCurrencyUtil } from "../../utils/currency";
-import { getPreference, setPreference } from "../../utils/preferences";
-import { ConfirmDialog, CubeShape } from "../atoms";
+import { CurrencyCode, PortfolioEntry } from "@/types";
+import { formatCurrency as formatCurrencyUtil } from "@/utils/currency";
+import { getPreference, setPreference } from "@/utils/preferences";
+import { ConfirmDialog, CubeShape } from "@/components/atoms";
 import {
-  CreatePortfolioModal,
   AddEditEntryModal,
+  CreatePortfolioModal,
+  CurrencySelectorSection,
+  HoldingsChartSection,
+  HoldingsSection,
   PerformanceSummaryCard,
   PortfolioSelector,
-  CurrencySelectorSection,
-  HoldingsSection,
-  HoldingsChartSection,
-} from "../organisms";
-import { usePortfolios } from "../../hooks/usePortfolios";
-import { usePortfolioEntries } from "../../hooks/usePortfolioEntries";
-import { usePortfolioPerformance } from "../../hooks/usePortfolioPerformance";
-import { useHoldingsPerformance } from "../../hooks/useHoldingsPerformance";
+} from "@/components/organisms";
+import { usePortfolios } from "@/hooks/usePortfolios";
+import { usePortfolioEntries } from "@/hooks/usePortfolioEntries";
+import { usePortfolioPerformance } from "@/hooks/usePortfolioPerformance";
+import { useHoldingsPerformance } from "@/hooks/useHoldingsPerformance";
 
 export const PortfolioPage: React.FC = () => {
   // Hooks for data management
@@ -29,12 +29,14 @@ export const PortfolioPage: React.FC = () => {
     error: portfolioError,
   } = usePortfolios();
 
-  const { entries, isLoading: isEntriesLoading, deleteEntry } = usePortfolioEntries(
-    selectedPortfolioId
-  );
+  const {
+    entries,
+    isLoading: isEntriesLoading,
+    deleteEntry,
+  } = usePortfolioEntries(selectedPortfolioId);
 
   const [displayCurrency, setDisplayCurrency] = useState<CurrencyCode>(
-    () => getPreference("displayCurrency") || "USD"
+    () => getPreference("displayCurrency") || "USD",
   );
 
   const { performance } = usePortfolioPerformance(entries, displayCurrency);
@@ -53,7 +55,9 @@ export const PortfolioPage: React.FC = () => {
   const [showAddEntry, setShowAddEntry] = useState(false);
   const [editingEntry, setEditingEntry] = useState<PortfolioEntry | null>(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
-  const [portfolioToDelete, setPortfolioToDelete] = useState<number | null>(null);
+  const [portfolioToDelete, setPortfolioToDelete] = useState<number | null>(
+    null,
+  );
 
   // Handlers
   const handleCurrencyChange = (currency: CurrencyCode) => {
@@ -143,10 +147,22 @@ export const PortfolioPage: React.FC = () => {
           {/* Error Display */}
           {portfolioError && !showCreatePortfolio && !showAddEntry && (
             <div className="mb-6 p-4 bg-red-100 border border-red-300 rounded-xl">
-              <p style={{ fontWeight: "var(--font-bold)", color: "#dc2626", fontSize: "var(--text-sm)" }}>
+              <p
+                style={{
+                  fontWeight: "var(--font-bold)",
+                  color: "#dc2626",
+                  fontSize: "var(--text-sm)",
+                }}
+              >
                 Error
               </p>
-              <p style={{ color: "#dc2626", fontSize: "var(--text-xs)", marginTop: "var(--space-1)" }}>
+              <p
+                style={{
+                  color: "#dc2626",
+                  fontSize: "var(--text-xs)",
+                  marginTop: "var(--space-1)",
+                }}
+              >
                 {portfolioError}
               </p>
             </div>

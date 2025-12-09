@@ -1,34 +1,45 @@
 import React, { useState } from "react";
-import {Controller, useForm} from "react-hook-form";
-import {TrendingUp} from "lucide-react";
-import {Input, Select, AlertDialog} from "../atoms";
-import {DateRangePicker, FormField} from "../molecules";
+import { Controller, useForm } from "react-hook-form";
+import { TrendingUp } from "lucide-react";
+import { AlertDialog, Input, Select } from "@/components/atoms";
+import { DateRangePicker, FormField } from "@/components/molecules";
 import {
-    Resolution,
-    RESOLUTION_LABELS,
-    STOCK_SOURCE_LABELS,
-    StockFormData,
-    StockHistoryRequest,
-    StockSource,
-} from "../../types";
-import {dateToUnixTimestamp, getDefaultDateRange, isValidDateRange} from "../../utils/dateUtils";
+  Resolution,
+  RESOLUTION_LABELS,
+  STOCK_SOURCE_LABELS,
+  StockFormData,
+  StockHistoryRequest,
+  StockSource,
+} from "@/types";
+import {
+  dateToUnixTimestamp,
+  getDefaultDateRange,
+  isValidDateRange,
+} from "@/utils/dateUtils";
 
 export interface StockQueryFormProps {
   onSubmit: (request: StockHistoryRequest) => void;
   isLoading?: boolean;
 }
 
-const resolutionOptions = Object.entries(RESOLUTION_LABELS).map(([value, label]) => ({
-  value,
-  label,
-}));
+const resolutionOptions = Object.entries(RESOLUTION_LABELS).map(
+  ([value, label]) => ({
+    value,
+    label,
+  }),
+);
 
-const stockSourceOptions = Object.entries(STOCK_SOURCE_LABELS).map(([value, label]) => ({
-  value,
-  label,
-}));
+const stockSourceOptions = Object.entries(STOCK_SOURCE_LABELS).map(
+  ([value, label]) => ({
+    value,
+    label,
+  }),
+);
 
-export const StockQueryForm: React.FC<StockQueryFormProps> = ({ onSubmit, isLoading = false }) => {
+export const StockQueryForm: React.FC<StockQueryFormProps> = ({
+  onSubmit,
+  isLoading = false,
+}) => {
   const { from, to } = getDefaultDateRange();
   const [showAlert, setShowAlert] = useState(false);
 
@@ -68,8 +79,14 @@ export const StockQueryForm: React.FC<StockQueryFormProps> = ({ onSubmit, isLoad
   return (
     <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-6">
       <div className="flex items-center space-x-2 mb-4">
-        <TrendingUp className="w-6 h-6" style={{ color: 'var(--cube-cyan)' }} />
-        <h3 style={{ fontSize: 'var(--text-lg)', fontWeight: 'var(--font-bold)', color: 'var(--cube-gray-900)' }}>
+        <TrendingUp className="w-6 h-6" style={{ color: "var(--cube-cyan)" }} />
+        <h3
+          style={{
+            fontSize: "var(--text-lg)",
+            fontWeight: "var(--font-bold)",
+            color: "var(--cube-gray-900)",
+          }}
+        >
           Stock Query
         </h3>
       </div>
@@ -173,11 +190,7 @@ export const StockQueryForm: React.FC<StockQueryFormProps> = ({ onSubmit, isLoad
       </FormField>
 
       {/* Submit Button */}
-      <button
-        type="submit"
-        disabled={isLoading}
-        className="btn-primary w-full"
-      >
+      <button type="submit" disabled={isLoading} className="btn-primary w-full">
         {isLoading ? "LOADING..." : "QUERY STOCK DATA"}
       </button>
 

@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import {
+  Brush,
   CartesianGrid,
   ComposedChart,
   Legend,
@@ -8,13 +9,12 @@ import {
   Tooltip,
   XAxis,
   YAxis,
-  Brush,
 } from "recharts";
-import { PortfolioHoldingsPerformance } from "../../types";
-import { formatTimestampForChart } from "../../utils/dateUtils";
-import { calculateXAxisInterval } from "../../utils/chartUtils";
-import { useResponsiveChart } from "../../hooks/useResponsiveChart";
-import { ResponsiveChartContainer } from "../molecules/ResponsiveChartContainer";
+import { PortfolioHoldingsPerformance } from "@/types";
+import { formatTimestampForChart } from "@/utils/dateUtils";
+import { calculateXAxisInterval } from "@/utils/chartUtils";
+import { useResponsiveChart } from "@/hooks/useResponsiveChart";
+import { ResponsiveChartContainer } from "@/components/molecules";
 
 export interface HoldingsPerformanceChartResponsiveProps {
   data: PortfolioHoldingsPerformance;
@@ -29,7 +29,8 @@ export const HoldingsPerformanceChartResponsive: React.FC<
     endIndex?: number;
   }>({});
 
-  const { dimensions, fullscreenDimensions, isMobile, isTablet } = useResponsiveChart();
+  const { dimensions, fullscreenDimensions, isMobile, isTablet } =
+    useResponsiveChart();
 
   if (!data || !data.holdings || data.holdings.length === 0) {
     return (
@@ -56,7 +57,7 @@ export const HoldingsPerformanceChartResponsive: React.FC<
 
   // Convert to array and sort by timestamp
   const chartData = Array.from(timestampMap.values()).sort(
-    (a, b) => a.timestamp - b.timestamp
+    (a, b) => a.timestamp - b.timestamp,
   );
 
   const handleBrushChange = (newIndex: any) => {
@@ -113,7 +114,7 @@ export const HoldingsPerformanceChartResponsive: React.FC<
       chartData.length,
       isFullscreen,
       isMobile,
-      isTablet
+      isTablet,
     );
 
     return (
@@ -137,7 +138,10 @@ export const HoldingsPerformanceChartResponsive: React.FC<
             <XAxis
               dataKey="time"
               stroke="#a0aec0"
-              style={{ fontSize: `${activeDimensions.tickFontSize}px`, fontWeight: "500" }}
+              style={{
+                fontSize: `${activeDimensions.tickFontSize}px`,
+                fontWeight: "500",
+              }}
               angle={activeDimensions.angleXAxis}
               textAnchor="end"
               height={activeDimensions.marginBottom}
@@ -146,14 +150,21 @@ export const HoldingsPerformanceChartResponsive: React.FC<
             />
             <YAxis
               stroke="#a0aec0"
-              style={{ fontSize: `${activeDimensions.tickFontSize}px`, fontWeight: "500" }}
+              style={{
+                fontSize: `${activeDimensions.tickFontSize}px`,
+                fontWeight: "500",
+              }}
               label={
                 !isMobile
                   ? {
                       value: "Performance (Base 100)",
                       angle: -90,
-                      position: "insideLeft",
-                      style: { fill: "#ffffff", fontWeight: "600", fontSize: `${activeDimensions.labelFontSize}px` },
+                      position: "insideBottomLeft",
+                      style: {
+                        fill: "#ffffff",
+                        fontWeight: "600",
+                        fontSize: `${activeDimensions.labelFontSize}px`,
+                      },
                     }
                   : undefined
               }
@@ -173,12 +184,16 @@ export const HoldingsPerformanceChartResponsive: React.FC<
                   "0 8px 24px rgba(0, 0, 0, 0.3), 0 0 24px rgba(0, 212, 255, 0.2)",
                 backdropFilter: "blur(12px)",
               }}
-              labelStyle={{ color: "#00d4ff", marginBottom: "8px", fontSize: `${activeDimensions.fontSize}px` }}
+              labelStyle={{
+                color: "#00d4ff",
+                marginBottom: "8px",
+                fontSize: `${activeDimensions.fontSize}px`,
+              }}
               formatter={(value: any, name: string) => {
                 const change = ((Number(value) - 100) / 100) * 100;
                 return [
                   `${Number(value).toFixed(2)} (${change >= 0 ? "+" : ""}${change.toFixed(
-                    2
+                    2,
                   )}%)`,
                   name,
                 ];

@@ -1,6 +1,6 @@
-import { useState, useEffect } from "react";
-import { PortfolioEntry } from "../types";
-import { finCatchAPI } from "../services/api";
+import { useEffect, useState } from "react";
+import { PortfolioEntry } from "@/types";
+import { finCatchAPI } from "@/services/api";
 
 export const usePortfolioEntries = (portfolioId: number | null) => {
   const [entries, setEntries] = useState<PortfolioEntry[]>([]);

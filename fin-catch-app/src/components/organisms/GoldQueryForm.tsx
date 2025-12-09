@@ -1,22 +1,37 @@
-import React, {useEffect, useMemo, useState} from "react";
-import {Controller, useForm} from "react-hook-form";
-import {Coins} from "lucide-react";
-import {Select, AlertDialog} from "../atoms";
-import {DateRangePicker, FormField} from "../molecules";
-import {GOLD_SOURCE_LABELS, GoldFormData, GoldPriceRequest, GoldSource, SJC_GOLD_PRICE_IDS,} from "../../types";
-import {dateToUnixTimestamp, getDefaultDateRange, isValidDateRange} from "../../utils/dateUtils";
+import React, { useEffect, useMemo, useState } from "react";
+import { Controller, useForm } from "react-hook-form";
+import { Coins } from "lucide-react";
+import { AlertDialog, Select } from "@/components/atoms";
+import { DateRangePicker, FormField } from "@/components/molecules";
+import {
+  GOLD_SOURCE_LABELS,
+  GoldFormData,
+  GoldPriceRequest,
+  GoldSource,
+  SJC_GOLD_PRICE_IDS,
+} from "@/types";
+import {
+  dateToUnixTimestamp,
+  getDefaultDateRange,
+  isValidDateRange,
+} from "@/utils/dateUtils";
 
 export interface GoldQueryFormProps {
   onSubmit: (request: GoldPriceRequest) => void;
   isLoading?: boolean;
 }
 
-const goldSourceOptions = Object.entries(GOLD_SOURCE_LABELS).map(([value, label]) => ({
-  value,
-  label,
-}));
+const goldSourceOptions = Object.entries(GOLD_SOURCE_LABELS).map(
+  ([value, label]) => ({
+    value,
+    label,
+  }),
+);
 
-export const GoldQueryForm: React.FC<GoldQueryFormProps> = ({ onSubmit, isLoading = false }) => {
+export const GoldQueryForm: React.FC<GoldQueryFormProps> = ({
+  onSubmit,
+  isLoading = false,
+}) => {
   const { from, to } = getDefaultDateRange();
   const [showAlert, setShowAlert] = useState(false);
 
@@ -74,8 +89,14 @@ export const GoldQueryForm: React.FC<GoldQueryFormProps> = ({ onSubmit, isLoadin
   return (
     <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-6">
       <div className="flex items-center space-x-2 mb-4">
-        <Coins className="w-6 h-6" style={{ color: 'var(--cube-yellow)' }} />
-        <h3 style={{ fontSize: 'var(--text-lg)', fontWeight: 'var(--font-bold)', color: 'var(--cube-gray-900)' }}>
+        <Coins className="w-6 h-6" style={{ color: "var(--cube-yellow)" }} />
+        <h3
+          style={{
+            fontSize: "var(--text-lg)",
+            fontWeight: "var(--font-bold)",
+            color: "var(--cube-gray-900)",
+          }}
+        >
           Gold Query
         </h3>
       </div>
@@ -156,7 +177,9 @@ export const GoldQueryForm: React.FC<GoldQueryFormProps> = ({ onSubmit, isLoadin
         type="submit"
         disabled={isLoading}
         className="btn-primary w-full"
-        style={{ background: 'linear-gradient(90deg, #facc15 0%, #fb923c 100%)' }}
+        style={{
+          background: "linear-gradient(90deg, #facc15 0%, #fb923c 100%)",
+        }}
       >
         {isLoading ? "LOADING..." : "QUERY GOLD DATA"}
       </button>

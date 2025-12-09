@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Wallet } from "lucide-react";
-import { finCatchAPI } from "../../services/api";
-import { Portfolio } from "../../types";
+import { finCatchAPI } from "@/services/api";
+import { Portfolio } from "@/types";
 import { Button, ErrorAlert, Input, Label, Modal, Textarea } from "../atoms";
 
 export interface CreatePortfolioModalProps {
@@ -42,10 +42,17 @@ export const CreatePortfolioModal: React.FC<CreatePortfolioModalProps> = ({
       setDescription("");
       setError(null);
 
-      onSuccess({ id: portfolioId, name: name.trim(), description: description.trim() || undefined, created_at: Math.floor(Date.now() / 1000) });
+      onSuccess({
+        id: portfolioId,
+        name: name.trim(),
+        description: description.trim() || undefined,
+        created_at: Math.floor(Date.now() / 1000),
+      });
       onClose();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to create portfolio");
+      setError(
+        err instanceof Error ? err.message : "Failed to create portfolio",
+      );
     } finally {
       setIsSubmitting(false);
     }
@@ -62,7 +69,9 @@ export const CreatePortfolioModal: React.FC<CreatePortfolioModalProps> = ({
     <Modal isOpen={isOpen} onClose={handleClose} title="Create Portfolio">
       <form onSubmit={handleSubmit}>
         <div className="space-y-4">
-          {error && <ErrorAlert message={error} onDismiss={() => setError(null)} />}
+          {error && (
+            <ErrorAlert message={error} onDismiss={() => setError(null)} />
+          )}
 
           <div>
             <Label htmlFor="portfolio-name">
@@ -80,7 +89,9 @@ export const CreatePortfolioModal: React.FC<CreatePortfolioModalProps> = ({
           </div>
 
           <div>
-            <Label htmlFor="portfolio-description">Description (Optional)</Label>
+            <Label htmlFor="portfolio-description">
+              Description (Optional)
+            </Label>
             <Textarea
               id="portfolio-description"
               value={description}

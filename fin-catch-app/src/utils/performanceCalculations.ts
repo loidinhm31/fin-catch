@@ -1,10 +1,15 @@
-import { CurrencyCode, EntryPerformance, PortfolioEntry, PortfolioPerformance } from "../types";
-import { finCatchAPI } from "../services/api";
+import {
+  CurrencyCode,
+  EntryPerformance,
+  PortfolioEntry,
+  PortfolioPerformance,
+} from "@/types";
+import { finCatchAPI } from "@/services/api";
 import { convertCurrency } from "./currency";
 
 export const calculatePortfolioPerformance = async (
   entries: PortfolioEntry[],
-  displayCurrency: CurrencyCode
+  displayCurrency: CurrencyCode,
 ): Promise<PortfolioPerformance | null> => {
   if (entries.length === 0) return null;
 
@@ -33,7 +38,9 @@ export const calculatePortfolioPerformance = async (
       } else if (entry.asset_type === "gold") {
         const goldSource = entry.source as "sjc";
         if (!goldSource || goldSource !== "sjc") {
-          console.warn(`Invalid gold source for entry ${entry.id}: ${entry.source}`);
+          console.warn(
+            `Invalid gold source for entry ${entry.id}: ${entry.source}`,
+          );
           continue;
         }
 
@@ -55,12 +62,13 @@ export const calculatePortfolioPerformance = async (
       const currentPriceInDisplayCurrency = await convertCurrency(
         currentPrice,
         currentPriceCurrency,
-        displayCurrency
+        displayCurrency,
       );
 
       let scaledPurchasePrice: number;
       if (entry.asset_type === "stock") {
-        scaledPurchasePrice = entry.purchase_price * priceScale;
+        // Purchase price was entered by user in actual price, no scaling needed
+        scaledPurchasePrice = entry.purchase_price;
       } else {
         const userUnit = entry.unit || "tael";
         if (userUnit === "mace") {
@@ -77,11 +85,15 @@ export const calculatePortfolioPerformance = async (
       const purchasePriceInDisplayCurrency = await convertCurrency(
         scaledPurchasePrice,
         entry.currency || "USD",
-        displayCurrency
+        displayCurrency,
       );
 
       const feesInDisplayCurrency = entry.transaction_fees
-        ? await convertCurrency(entry.transaction_fees, entry.currency || "USD", displayCurrency)
+        ? await convertCurrency(
+            entry.transaction_fees,
+            entry.currency || "USD",
+            displayCurrency,
+          )
         : 0;
 
       const exchangeRate =
@@ -100,9 +112,12 @@ export const calculatePortfolioPerformance = async (
       }
 
       const currentValue = currentPriceInDisplayCurrency * quantityInTaels;
-      const totalCost = purchasePriceInDisplayCurrency * quantityInTaels + feesInDisplayCurrency;
+      const totalCost =
+        purchasePriceInDisplayCurrency * quantityInTaels +
+        feesInDisplayCurrency;
       const gainLoss = currentValue - totalCost;
-      const gainLossPercentage = totalCost > 0 ? (gainLoss / totalCost) * 100 : 0;
+      const gainLossPercentage =
+        totalCost > 0 ? (gainLoss / totalCost) * 100 : 0;
 
       entriesPerformance.push({
         entry,
@@ -118,10 +133,17 @@ export const calculatePortfolioPerformance = async (
       });
     }
 
-    const totalValue = entriesPerformance.reduce((sum, e) => sum + e.current_value, 0);
-    const totalCost = entriesPerformance.reduce((sum, e) => sum + e.total_cost, 0);
+    const totalValue = entriesPerformance.reduce(
+      (sum, e) => sum + e.current_value,
+      0,
+    );
+    const totalCost = entriesPerformance.reduce(
+      (sum, e) => sum + e.total_cost,
+      0,
+    );
     const totalGainLoss = totalValue - totalCost;
-    const totalGainLossPercentage = totalCost > 0 ? (totalGainLoss / totalCost) * 100 : 0;
+    const totalGainLossPercentage =
+      totalCost > 0 ? (totalGainLoss / totalCost) * 100 : 0;
 
     return {
       total_value: totalValue,

@@ -1,10 +1,10 @@
-import { finCatchAPI } from "../services/api";
+import { finCatchAPI } from "@/services/api";
 import {
-  PortfolioEntry,
   CurrencyCode,
-  PortfolioHoldingsPerformance,
   HoldingPerformance,
-} from "../types";
+  PortfolioEntry,
+  PortfolioHoldingsPerformance,
+} from "@/types";
 import { convertCurrency } from "./currency";
 
 // Chart colors for holdings
@@ -30,11 +30,13 @@ export const calculateHoldingPerformance = async (
   startDate: number,
   endDate: number,
   displayCurrency: CurrencyCode,
-  intervalDays: number = 1
-): Promise<{
-  timestamp: number;
-  value: number;
-}[]> => {
+  intervalDays: number = 1,
+): Promise<
+  {
+    timestamp: number;
+    value: number;
+  }[]
+> => {
   const result: { timestamp: number; value: number }[] = [];
   const timestamps: number[] = [];
 
@@ -46,7 +48,10 @@ export const calculateHoldingPerformance = async (
     timestamps.push(ts);
   }
   // Ensure end date is included
-  if (timestamps.length === 0 || timestamps[timestamps.length - 1] !== endDate) {
+  if (
+    timestamps.length === 0 ||
+    timestamps[timestamps.length - 1] !== endDate
+  ) {
     timestamps.push(endDate);
   }
 
@@ -71,7 +76,7 @@ export const calculateHoldingPerformance = async (
   const purchasePriceInDisplayCurrency = await convertCurrency(
     purchasePrice,
     purchasePriceCurrency,
-    displayCurrency
+    displayCurrency,
   );
 
   for (const timestamp of timestamps) {
@@ -121,13 +126,14 @@ export const calculateHoldingPerformance = async (
       const currentPriceInDisplayCurrency = await convertCurrency(
         currentPrice,
         currentPriceCurrency,
-        displayCurrency
+        displayCurrency,
       );
 
       // Normalize to 100 at purchase
       const normalizedValue =
         purchasePriceInDisplayCurrency > 0
-          ? (currentPriceInDisplayCurrency / purchasePriceInDisplayCurrency) * 100
+          ? (currentPriceInDisplayCurrency / purchasePriceInDisplayCurrency) *
+            100
           : 100;
 
       result.push({
@@ -135,7 +141,10 @@ export const calculateHoldingPerformance = async (
         value: normalizedValue,
       });
     } catch (error) {
-      console.warn(`Failed to fetch price for ${entry.symbol} at ${timestamp}:`, error);
+      console.warn(
+        `Failed to fetch price for ${entry.symbol} at ${timestamp}:`,
+        error,
+      );
     }
   }
 
@@ -149,7 +158,7 @@ export const calculateAllHoldingsPerformance = async (
   entries: PortfolioEntry[],
   startDate: number,
   endDate: number,
-  displayCurrency: CurrencyCode
+  displayCurrency: CurrencyCode,
 ): Promise<PortfolioHoldingsPerformance | null> => {
   if (entries.length === 0) {
     return null;
@@ -166,7 +175,7 @@ export const calculateAllHoldingsPerformance = async (
         startDate,
         endDate,
         displayCurrency,
-        1 // Daily intervals
+        1, // Daily intervals
       );
 
       if (performanceData.length === 0) {

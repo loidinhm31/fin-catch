@@ -1,7 +1,7 @@
 import React from "react";
 import { ChevronDown, ChevronUp, Edit, Trash2 } from "lucide-react";
-import { EntryPerformance, CurrencyCode, PortfolioEntry } from "../../types";
-import { convertToGrams, getUnitLabel } from "../../utils/goldConversions";
+import { CurrencyCode, EntryPerformance, PortfolioEntry } from "@/types";
+import { convertToGrams, getUnitLabel } from "@/utils/goldConversions";
 
 export interface HoldingCardProps {
   entryPerf: EntryPerformance;
@@ -37,7 +37,8 @@ export const HoldingCard: React.FC<HoldingCardProps> = ({
             <span
               className="inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-semibold"
               style={{
-                backgroundColor: entry.asset_type === "stock" ? "#dbeafe" : "#fef3c7",
+                backgroundColor:
+                  entry.asset_type === "stock" ? "#dbeafe" : "#fef3c7",
                 color: entry.asset_type === "stock" ? "#1e40af" : "#92400e",
               }}
             >
@@ -47,8 +48,10 @@ export const HoldingCard: React.FC<HoldingCardProps> = ({
               <span
                 className="inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-semibold"
                 style={{
-                  backgroundColor: entry.currency === displayCurrency ? "#d1fae5" : "#fce7f3",
-                  color: entry.currency === displayCurrency ? "#065f46" : "#9f1239",
+                  backgroundColor:
+                    entry.currency === displayCurrency ? "#d1fae5" : "#fce7f3",
+                  color:
+                    entry.currency === displayCurrency ? "#065f46" : "#9f1239",
                 }}
               >
                 {entry.currency}
@@ -75,7 +78,12 @@ export const HoldingCard: React.FC<HoldingCardProps> = ({
               >
                 Current Value
               </p>
-              <p style={{ fontWeight: "var(--font-bold)", color: "var(--cube-gray-900)" }}>
+              <p
+                style={{
+                  fontWeight: "var(--font-bold)",
+                  color: "var(--cube-gray-900)",
+                }}
+              >
                 {formatCurrency(entryPerf.current_value)}
               </p>
             </div>
@@ -89,7 +97,12 @@ export const HoldingCard: React.FC<HoldingCardProps> = ({
               >
                 P&L
               </p>
-              <p style={{ fontWeight: "var(--font-bold)", color: isPositive ? "#10b981" : "#ef4444" }}>
+              <p
+                style={{
+                  fontWeight: "var(--font-bold)",
+                  color: isPositive ? "#10b981" : "#ef4444",
+                }}
+              >
                 {formatCurrency(entryPerf.gain_loss)}
               </p>
               <p
@@ -123,20 +136,36 @@ export const HoldingCard: React.FC<HoldingCardProps> = ({
           className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center hover:bg-gray-200 transition-all"
         >
           {isExpanded ? (
-            <ChevronUp className="w-4 h-4" style={{ color: "var(--cube-gray-700)" }} />
+            <ChevronUp
+              className="w-4 h-4"
+              style={{ color: "var(--cube-gray-700)" }}
+            />
           ) : (
-            <ChevronDown className="w-4 h-4" style={{ color: "var(--cube-gray-700)" }} />
+            <ChevronDown
+              className="w-4 h-4"
+              style={{ color: "var(--cube-gray-700)" }}
+            />
           )}
         </button>
       </div>
 
       {isExpanded && (
-        <div className="pt-3 border-t space-y-2" style={{ borderColor: "rgba(0, 0, 0, 0.1)" }}>
+        <div
+          className="pt-3 border-t space-y-2"
+          style={{ borderColor: "rgba(0, 0, 0, 0.1)" }}
+        >
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <p style={{ fontSize: "var(--text-xs)", color: "var(--cube-gray-500)" }}>
+              <p
+                style={{
+                  fontSize: "var(--text-xs)",
+                  color: "var(--cube-gray-500)",
+                }}
+              >
                 Quantity{" "}
-                {entry.asset_type === "gold" && entry.unit ? `(${getUnitLabel(entry.unit)})` : ""}
+                {entry.asset_type === "gold" && entry.unit
+                  ? `(${getUnitLabel(entry.unit)})`
+                  : ""}
               </p>
               <p
                 style={{
@@ -160,9 +189,17 @@ export const HoldingCard: React.FC<HoldingCardProps> = ({
               </p>
             </div>
             <div>
-              <p style={{ fontSize: "var(--text-xs)", color: "var(--cube-gray-500)" }}>
-                Purchase Price per {entry.asset_type === "gold" && entry.unit ? entry.unit : "share"} (
-                {displayCurrency})
+              <p
+                style={{
+                  fontSize: "var(--text-xs)",
+                  color: "var(--cube-gray-500)",
+                }}
+              >
+                Purchase Price per{" "}
+                {entry.asset_type === "gold" && entry.unit
+                  ? entry.unit
+                  : "share"}{" "}
+                ({displayCurrency})
               </p>
               <p
                 style={{
@@ -175,9 +212,17 @@ export const HoldingCard: React.FC<HoldingCardProps> = ({
               </p>
             </div>
             <div>
-              <p style={{ fontSize: "var(--text-xs)", color: "var(--cube-gray-500)" }}>
-                Current Price per {entry.asset_type === "gold" && entry.unit ? entry.unit : "share"} (
-                {displayCurrency})
+              <p
+                style={{
+                  fontSize: "var(--text-xs)",
+                  color: "var(--cube-gray-500)",
+                }}
+              >
+                Current Price per{" "}
+                {entry.asset_type === "gold" && entry.unit
+                  ? entry.unit
+                  : "share"}{" "}
+                ({displayCurrency})
               </p>
               <p
                 style={{
@@ -190,7 +235,14 @@ export const HoldingCard: React.FC<HoldingCardProps> = ({
               </p>
             </div>
             <div>
-              <p style={{ fontSize: "var(--text-xs)", color: "var(--cube-gray-500)" }}>Purchase Date</p>
+              <p
+                style={{
+                  fontSize: "var(--text-xs)",
+                  color: "var(--cube-gray-500)",
+                }}
+              >
+                Purchase Date
+              </p>
               <p
                 style={{
                   fontSize: "var(--text-sm)",
@@ -201,26 +253,41 @@ export const HoldingCard: React.FC<HoldingCardProps> = ({
                 {formatDate(entry.purchase_date)}
               </p>
             </div>
-            {entry.currency && entry.currency !== displayCurrency && entryPerf.exchange_rate && (
-              <div className="col-span-2">
-                <p style={{ fontSize: "var(--text-xs)", color: "var(--cube-gray-500)" }}>
-                  Exchange Rate
-                </p>
-                <p
-                  style={{
-                    fontSize: "var(--text-sm)",
-                    fontWeight: "var(--font-medium)",
-                    color: "var(--cube-gray-900)",
-                  }}
-                >
-                  1 {entry.currency} = {entryPerf.exchange_rate.toFixed(4)} {displayCurrency}
-                </p>
-              </div>
-            )}
+            {entry.currency &&
+              entry.currency !== displayCurrency &&
+              entryPerf.exchange_rate && (
+                <div className="col-span-2">
+                  <p
+                    style={{
+                      fontSize: "var(--text-xs)",
+                      color: "var(--cube-gray-500)",
+                    }}
+                  >
+                    Exchange Rate
+                  </p>
+                  <p
+                    style={{
+                      fontSize: "var(--text-sm)",
+                      fontWeight: "var(--font-medium)",
+                      color: "var(--cube-gray-900)",
+                    }}
+                  >
+                    1 {entry.currency} = {entryPerf.exchange_rate.toFixed(4)}{" "}
+                    {displayCurrency}
+                  </p>
+                </div>
+              )}
           </div>
           {entry.asset_type === "gold" && entry.gold_type && (
             <div>
-              <p style={{ fontSize: "var(--text-xs)", color: "var(--cube-gray-500)" }}>Gold Type</p>
+              <p
+                style={{
+                  fontSize: "var(--text-xs)",
+                  color: "var(--cube-gray-500)",
+                }}
+              >
+                Gold Type
+              </p>
               <p
                 style={{
                   fontSize: "var(--text-sm)",
@@ -234,14 +301,42 @@ export const HoldingCard: React.FC<HoldingCardProps> = ({
           )}
           {entry.notes && (
             <div>
-              <p style={{ fontSize: "var(--text-xs)", color: "var(--cube-gray-500)" }}>Notes</p>
-              <p style={{ fontSize: "var(--text-sm)", color: "var(--cube-gray-900)" }}>{entry.notes}</p>
+              <p
+                style={{
+                  fontSize: "var(--text-xs)",
+                  color: "var(--cube-gray-500)",
+                }}
+              >
+                Notes
+              </p>
+              <p
+                style={{
+                  fontSize: "var(--text-sm)",
+                  color: "var(--cube-gray-900)",
+                }}
+              >
+                {entry.notes}
+              </p>
             </div>
           )}
           {entry.tags && (
             <div>
-              <p style={{ fontSize: "var(--text-xs)", color: "var(--cube-gray-500)" }}>Tags</p>
-              <p style={{ fontSize: "var(--text-sm)", color: "var(--cube-gray-900)" }}>{entry.tags}</p>
+              <p
+                style={{
+                  fontSize: "var(--text-xs)",
+                  color: "var(--cube-gray-500)",
+                }}
+              >
+                Tags
+              </p>
+              <p
+                style={{
+                  fontSize: "var(--text-sm)",
+                  color: "var(--cube-gray-900)",
+                }}
+              >
+                {entry.tags}
+              </p>
             </div>
           )}
         </div>

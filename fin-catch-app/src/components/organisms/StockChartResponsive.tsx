@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import {
   Bar,
+  Brush,
   CartesianGrid,
   ComposedChart,
   Legend,
@@ -9,14 +10,13 @@ import {
   Tooltip,
   XAxis,
   YAxis,
-  Brush,
 } from "recharts";
-import { StockCandle } from "../../types";
-import { formatTimestampForChart } from "../../utils/dateUtils";
-import { formatVolume, formatCurrencyCompact } from "../../utils/chartFormatters";
-import { calculateXAxisInterval } from "../../utils/chartUtils";
-import { useResponsiveChart } from "../../hooks/useResponsiveChart";
-import { ResponsiveChartContainer } from "../molecules/ResponsiveChartContainer";
+import { StockCandle } from "@/types";
+import { formatTimestampForChart } from "@/utils/dateUtils";
+import { formatCurrencyCompact, formatVolume } from "@/utils/chartFormatters";
+import { calculateXAxisInterval } from "@/utils/chartUtils";
+import { useResponsiveChart } from "@/hooks/useResponsiveChart";
+import { ResponsiveChartContainer } from "@/components/molecules";
 
 export interface StockChartResponsiveProps {
   data: StockCandle[];
@@ -34,7 +34,8 @@ export const StockChartResponsive: React.FC<StockChartResponsiveProps> = ({
     endIndex?: number;
   }>({});
 
-  const { dimensions, fullscreenDimensions, isMobile, isTablet } = useResponsiveChart();
+  const { dimensions, fullscreenDimensions, isMobile, isTablet } =
+    useResponsiveChart();
 
   if (!data || data.length === 0) {
     return (
@@ -72,7 +73,7 @@ export const StockChartResponsive: React.FC<StockChartResponsiveProps> = ({
       chartData.length,
       isFullscreen,
       isMobile,
-      isTablet
+      isTablet,
     );
 
     return (
@@ -100,7 +101,10 @@ export const StockChartResponsive: React.FC<StockChartResponsiveProps> = ({
           <XAxis
             dataKey="time"
             stroke="#a0aec0"
-            style={{ fontSize: `${activeDimensions.tickFontSize}px`, fontWeight: "500" }}
+            style={{
+              fontSize: `${activeDimensions.tickFontSize}px`,
+              fontWeight: "500",
+            }}
             angle={activeDimensions.angleXAxis}
             textAnchor="end"
             height={activeDimensions.marginBottom}
@@ -110,14 +114,21 @@ export const StockChartResponsive: React.FC<StockChartResponsiveProps> = ({
           <YAxis
             yAxisId="price"
             stroke="#a0aec0"
-            style={{ fontSize: `${activeDimensions.tickFontSize}px`, fontWeight: "500" }}
+            style={{
+              fontSize: `${activeDimensions.tickFontSize}px`,
+              fontWeight: "500",
+            }}
             label={
               !isMobile
                 ? {
                     value: "Price",
                     angle: -90,
                     position: "insideLeft",
-                    style: { fill: "#ffffff", fontWeight: "600", fontSize: `${activeDimensions.labelFontSize}px` },
+                    style: {
+                      fill: "#ffffff",
+                      fontWeight: "600",
+                      fontSize: `${activeDimensions.labelFontSize}px`,
+                    },
                   }
                 : undefined
             }
@@ -130,14 +141,21 @@ export const StockChartResponsive: React.FC<StockChartResponsiveProps> = ({
             yAxisId="volume"
             orientation="right"
             stroke="#a0aec0"
-            style={{ fontSize: `${activeDimensions.tickFontSize}px`, fontWeight: "500" }}
+            style={{
+              fontSize: `${activeDimensions.tickFontSize}px`,
+              fontWeight: "500",
+            }}
             label={
               !isMobile
                 ? {
                     value: "Volume",
                     angle: 90,
                     position: "insideRight",
-                    style: { fill: "#ffffff", fontWeight: "600", fontSize: `${activeDimensions.labelFontSize}px` },
+                    style: {
+                      fill: "#ffffff",
+                      fontWeight: "600",
+                      fontSize: `${activeDimensions.labelFontSize}px`,
+                    },
                   }
                 : undefined
             }
@@ -153,10 +171,15 @@ export const StockChartResponsive: React.FC<StockChartResponsiveProps> = ({
               color: "#ffffff",
               fontWeight: "600",
               fontSize: `${activeDimensions.fontSize}px`,
-              boxShadow: "0 8px 24px rgba(0, 0, 0, 0.3), 0 0 24px rgba(0, 212, 255, 0.2)",
+              boxShadow:
+                "0 8px 24px rgba(0, 0, 0, 0.3), 0 0 24px rgba(0, 212, 255, 0.2)",
               backdropFilter: "blur(12px)",
             }}
-            labelStyle={{ color: "#00d4ff", marginBottom: "8px", fontSize: `${activeDimensions.fontSize}px` }}
+            labelStyle={{
+              color: "#00d4ff",
+              marginBottom: "8px",
+              fontSize: `${activeDimensions.fontSize}px`,
+            }}
             formatter={(value: any, name: string) => {
               if (name === "volume") {
                 return [new Intl.NumberFormat().format(value), "Volume"];
@@ -192,7 +215,12 @@ export const StockChartResponsive: React.FC<StockChartResponsiveProps> = ({
             strokeWidth={isMobile ? 2 : 2.5}
             dot={false}
             name="Close"
-            activeDot={{ r: isMobile ? 4 : 6, fill: "#00d4ff", stroke: "#ffffff", strokeWidth: 2 }}
+            activeDot={{
+              r: isMobile ? 4 : 6,
+              fill: "#00d4ff",
+              stroke: "#ffffff",
+              strokeWidth: 2,
+            }}
           />
           <Line
             yAxisId="price"
@@ -203,7 +231,12 @@ export const StockChartResponsive: React.FC<StockChartResponsiveProps> = ({
             dot={false}
             name="High"
             strokeDasharray="5 5"
-            activeDot={{ r: isMobile ? 3 : 5, fill: "#00ff88", stroke: "#ffffff", strokeWidth: 2 }}
+            activeDot={{
+              r: isMobile ? 3 : 5,
+              fill: "#00ff88",
+              stroke: "#ffffff",
+              strokeWidth: 2,
+            }}
           />
           <Line
             yAxisId="price"
@@ -214,7 +247,12 @@ export const StockChartResponsive: React.FC<StockChartResponsiveProps> = ({
             dot={false}
             name="Low"
             strokeDasharray="5 5"
-            activeDot={{ r: isMobile ? 3 : 5, fill: "#ff3366", stroke: "#ffffff", strokeWidth: 2 }}
+            activeDot={{
+              r: isMobile ? 3 : 5,
+              fill: "#ff3366",
+              stroke: "#ffffff",
+              strokeWidth: 2,
+            }}
           />
           {showBrush && (
             <Brush

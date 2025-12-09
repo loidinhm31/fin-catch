@@ -1,10 +1,22 @@
-import React, { useState, useRef, useEffect } from "react";
-import { finCatchAPI } from "../../services/api";
-import { PortfolioEntry, CurrencyCode } from "../../types";
-import { dateToUnixTimestamp } from "../../utils/dateUtils";
-import { formatCurrency } from "../../utils/currency";
-import { getGoldUnitByIdAndSource, getUnitLabel } from "../../utils/goldConversions";
-import { Button, ErrorAlert, Input, Label, Modal, Select, Textarea, CurrencySelect } from "../atoms";
+import React, { useEffect, useRef, useState } from "react";
+import { finCatchAPI } from "@/services/api";
+import { CurrencyCode, PortfolioEntry } from "@/types";
+import { dateToUnixTimestamp } from "@/utils/dateUtils";
+import { formatCurrency } from "@/utils/currency";
+import {
+  getGoldUnitByIdAndSource,
+  getUnitLabel,
+} from "@/utils/goldConversions";
+import {
+  Button,
+  CurrencySelect,
+  ErrorAlert,
+  Input,
+  Label,
+  Modal,
+  Select,
+  Textarea,
+} from "../atoms";
 
 export interface AddEditEntryModalProps {
   isOpen: boolean;
@@ -31,7 +43,9 @@ export const AddEditEntryModal: React.FC<AddEditEntryModalProps> = ({
   const [tags, setTags] = useState("");
   const [fees, setFees] = useState("");
   const [source, setSource] = useState("");
-  const [goldUnit, setGoldUnit] = useState<"gram" | "mace" | "tael" | "ounce" | "kg">("mace");
+  const [goldUnit, setGoldUnit] = useState<
+    "gram" | "mace" | "tael" | "ounce" | "kg"
+  >("mace");
   const [goldType, setGoldType] = useState<string>("");
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -48,15 +62,19 @@ export const AddEditEntryModal: React.FC<AddEditEntryModalProps> = ({
       setCurrency(editingEntry.currency || "USD");
       setPurchaseDate(
         editingEntry.purchase_date
-          ? new Date(editingEntry.purchase_date * 1000).toISOString().split("T")[0]
-          : ""
+          ? new Date(editingEntry.purchase_date * 1000)
+              .toISOString()
+              .split("T")[0]
+          : "",
       );
       setNotes(editingEntry.notes || "");
       setTags(editingEntry.tags || "");
       setFees(editingEntry.transaction_fees?.toString() || "");
       setSource(editingEntry.source || "");
       setGoldUnit((editingEntry.unit as any) || "mace");
-      setGoldType(editingEntry.asset_type === "gold" ? editingEntry.symbol : "");
+      setGoldType(
+        editingEntry.asset_type === "gold" ? editingEntry.symbol : "",
+      );
     } else {
       resetForm();
     }
@@ -175,9 +193,10 @@ export const AddEditEntryModal: React.FC<AddEditEntryModalProps> = ({
     onClose();
   };
 
-  const totalCost = quantity && purchasePrice
-    ? parseFloat(purchasePrice) * parseFloat(quantity)
-    : 0;
+  const totalCost =
+    quantity && purchasePrice
+      ? parseFloat(purchasePrice) * parseFloat(quantity)
+      : 0;
 
   return (
     <Modal
@@ -190,7 +209,12 @@ export const AddEditEntryModal: React.FC<AddEditEntryModalProps> = ({
       <div className="space-y-4">
         <div>
           <Label required>Asset Type</Label>
-          <Select value={assetType} onChange={(e) => handleAssetTypeChange(e.target.value as "stock" | "gold")}>
+          <Select
+            value={assetType}
+            onChange={(e) =>
+              handleAssetTypeChange(e.target.value as "stock" | "gold")
+            }
+          >
             <option value="stock">Stock</option>
             <option value="gold">Gold</option>
           </Select>
@@ -201,36 +225,66 @@ export const AddEditEntryModal: React.FC<AddEditEntryModalProps> = ({
             {/* Gold-specific fields */}
             <div>
               <Label required>Gold Price ID</Label>
-              <Select value={goldType} onChange={(e) => handleGoldTypeChange(e.target.value)}>
+              <Select
+                value={goldType}
+                onChange={(e) => handleGoldTypeChange(e.target.value)}
+              >
                 <option value="">Select gold price ID</option>
                 <optgroup label="SJC - Gold Bars (per tael/lượng)">
                   <option value="1">SJC 1L, 10L, 1KG - Ho Chi Minh</option>
                   <option value="2">SJC 1L, 10L, 1KG - Ha Noi</option>
                 </optgroup>
                 <optgroup label="SJC - Jewelry/Rings (per mace/chỉ)">
-                  <option value="49">SJC Nhẫn 99.99% (1 chỉ, 2 chỉ, 5 chỉ)</option>
+                  <option value="49">
+                    SJC Nhẫn 99.99% (1 chỉ, 2 chỉ, 5 chỉ)
+                  </option>
                 </optgroup>
               </Select>
-              <p style={{ fontSize: 'var(--text-xs)', color: 'var(--cube-gray-500)', marginTop: 'var(--space-1)' }}>
+              <p
+                style={{
+                  fontSize: "var(--text-xs)",
+                  color: "var(--cube-gray-500)",
+                  marginTop: "var(--space-1)",
+                }}
+              >
                 Select the gold price source to track
               </p>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <Label required>Unit</Label>
-                <Select value={goldUnit} onChange={(e) => setGoldUnit(e.target.value as any)}>
-                  <option value="mace">Mace/Chỉ (3.75g) - Default for VN</option>
+                <Select
+                  value={goldUnit}
+                  onChange={(e) => setGoldUnit(e.target.value as any)}
+                >
+                  <option value="mace">
+                    Mace/Chỉ (3.75g) - Default for VN
+                  </option>
                   <option value="tael">Tael/Lượng (37.5g)</option>
                   <option value="gram">Gram (g)</option>
                   <option value="ounce">Troy Ounce (31.1g)</option>
                   <option value="kg">Kilogram (kg)</option>
                 </Select>
-                <p style={{ fontSize: 'var(--text-xs)', color: '#6366f1', marginTop: 'var(--space-1)' }}>
-                  💡 You can enter in any unit - prices will be auto-converted for comparison
+                <p
+                  style={{
+                    fontSize: "var(--text-xs)",
+                    color: "#6366f1",
+                    marginTop: "var(--space-1)",
+                  }}
+                >
+                  💡 You can enter in any unit - prices will be auto-converted
+                  for comparison
                 </p>
-                <p style={{ fontSize: 'var(--text-xs)', color: '#10b981', marginTop: 'var(--space-1)' }}>
-                  ℹ️ {source ? source.toUpperCase() : 'API'} returns prices per tael, conversion handled automatically
+                <p
+                  style={{
+                    fontSize: "var(--text-xs)",
+                    color: "#10b981",
+                    marginTop: "var(--space-1)",
+                  }}
+                >
+                  ℹ️ {source ? source.toUpperCase() : "API"} returns prices per
+                  tael, conversion handled automatically
                 </p>
               </div>
               <div>
@@ -247,7 +301,9 @@ export const AddEditEntryModal: React.FC<AddEditEntryModalProps> = ({
             </div>
 
             <div>
-              <Label required>Purchase Price per {getUnitLabel(goldUnit)}</Label>
+              <Label required>
+                Purchase Price per {getUnitLabel(goldUnit)}
+              </Label>
               <Input
                 type="number"
                 step="0.01"
@@ -257,12 +313,25 @@ export const AddEditEntryModal: React.FC<AddEditEntryModalProps> = ({
                 disabled={isSubmitting}
               />
               {totalCost > 0 && (
-                <p style={{ fontSize: 'var(--text-xs)', color: 'var(--cube-gray-600)', marginTop: 'var(--space-1)' }}>
+                <p
+                  style={{
+                    fontSize: "var(--text-xs)",
+                    color: "var(--cube-gray-600)",
+                    marginTop: "var(--space-1)",
+                  }}
+                >
                   Total: {formatCurrency(totalCost, currency)}
                 </p>
               )}
-              <p style={{ fontSize: 'var(--text-xs)', color: '#10b981', marginTop: 'var(--space-1)' }}>
-                ✓ Enter your purchase price in your preferred unit - system handles conversion
+              <p
+                style={{
+                  fontSize: "var(--text-xs)",
+                  color: "#10b981",
+                  marginTop: "var(--space-1)",
+                }}
+              >
+                ✓ Enter your purchase price in your preferred unit - system
+                handles conversion
               </p>
             </div>
           </>
@@ -279,7 +348,7 @@ export const AddEditEntryModal: React.FC<AddEditEntryModalProps> = ({
                 disabled={isSubmitting}
               />
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <Label required>Quantity</Label>
                 <Input
@@ -315,7 +384,7 @@ export const AddEditEntryModal: React.FC<AddEditEntryModalProps> = ({
           />
         </div>
 
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <Label required>Purchase Date</Label>
             <Input
@@ -350,11 +419,20 @@ export const AddEditEntryModal: React.FC<AddEditEntryModalProps> = ({
           <Label required={assetType === "gold"}>Source</Label>
           {assetType === "gold" ? (
             <>
-              <Select value={source} onChange={(e) => handleSourceChange(e.target.value)}>
+              <Select
+                value={source}
+                onChange={(e) => handleSourceChange(e.target.value)}
+              >
                 <option value="">Select source</option>
                 <option value="sjc">SJC Gold</option>
               </Select>
-              <p style={{ fontSize: 'var(--text-xs)', color: '#2563eb', marginTop: 'var(--space-1)' }}>
+              <p
+                style={{
+                  fontSize: "var(--text-xs)",
+                  color: "#2563eb",
+                  marginTop: "var(--space-1)",
+                }}
+              >
                 💡 Source determines which API to use for current prices
               </p>
             </>
@@ -391,7 +469,7 @@ export const AddEditEntryModal: React.FC<AddEditEntryModalProps> = ({
           />
         </div>
 
-        <div className="flex gap-3 pt-4">
+        <div className="flex flex-col sm:flex-row gap-3 pt-4">
           <Button
             variant="secondary"
             className="flex-1"

@@ -1,4 +1,4 @@
-import {endOfDay, format, startOfDay} from "date-fns";
+import { endOfDay, format, startOfDay } from "date-fns";
 
 /**
  * Convert JavaScript Date to Unix timestamp (seconds)
@@ -6,15 +6,17 @@ import {endOfDay, format, startOfDay} from "date-fns";
  */
 export const dateToUnixTimestamp = (date: Date): number => {
   // Create a new date at start of day in UTC
-  const utcDate = new Date(Date.UTC(
-    date.getFullYear(),
-    date.getMonth(),
-    date.getDate(),
-    0, // hours
-    0, // minutes
-    0, // seconds
-    0  // milliseconds
-  ));
+  const utcDate = new Date(
+    Date.UTC(
+      date.getFullYear(),
+      date.getMonth(),
+      date.getDate(),
+      0, // hours
+      0, // minutes
+      0, // seconds
+      0, // milliseconds
+    ),
+  );
 
   return Math.floor(utcDate.getTime() / 1000);
 };
@@ -29,14 +31,20 @@ export const unixTimestampToDate = (timestamp: number): Date => {
 /**
  * Format date for display
  */
-export const formatDate = (date: Date, formatString: string = "yyyy-MM-dd"): string => {
+export const formatDate = (
+  date: Date,
+  formatString: string = "yyyy-MM-dd",
+): string => {
   return format(date, formatString);
 };
 
 /**
  * Format datetime for display
  */
-export const formatDateTime = (date: Date, formatString: string = "yyyy-MM-dd HH:mm:ss"): string => {
+export const formatDateTime = (
+  date: Date,
+  formatString: string = "yyyy-MM-dd HH:mm:ss",
+): string => {
   return format(date, formatString);
 };
 
@@ -57,7 +65,10 @@ export const getEndOfDayTimestamp = (date: Date): number => {
 /**
  * Format timestamp for chart display
  */
-export const formatTimestampForChart = (timestamp: number, resolution: string): string => {
+export const formatTimestampForChart = (
+  timestamp: number,
+  resolution: string,
+): string => {
   const date = unixTimestampToDate(timestamp);
 
   switch (resolution) {
@@ -100,12 +111,16 @@ export const isValidDateRange = (from: Date, to: Date): boolean => {
  * Get ordinal suffix for a day number (1st, 2nd, 3rd, 4th, etc.)
  */
 const getOrdinalSuffix = (day: number): string => {
-  if (day > 3 && day < 21) return 'th';
+  if (day > 3 && day < 21) return "th";
   switch (day % 10) {
-    case 1: return 'st';
-    case 2: return 'nd';
-    case 3: return 'rd';
-    default: return 'th';
+    case 1:
+      return "st";
+    case 2:
+      return "nd";
+    case 3:
+      return "rd";
+    default:
+      return "th";
   }
 };
 
@@ -114,7 +129,7 @@ const getOrdinalSuffix = (day: number): string => {
  */
 export const formatDateWithOrdinal = (date: Date): string => {
   const day = date.getDate();
-  const month = format(date, 'MMMM'); // Full month name
+  const month = format(date, "MMMM"); // Full month name
   const year = date.getFullYear();
 
   return `${day}${getOrdinalSuffix(day)}, ${month}, ${year}`;

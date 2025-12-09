@@ -4,6 +4,7 @@ import { PortfolioEntry } from "./portfolio";
 // Holdings performance chart types
 export interface HoldingPerformanceData {
   timestamp: number;
+
   [symbol: string]: number; // Symbol -> normalized value (base 100 at purchase date)
 }
 

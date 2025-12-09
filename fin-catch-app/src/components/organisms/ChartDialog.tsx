@@ -1,5 +1,5 @@
 import React from "react";
-import { X, Maximize2 } from "lucide-react";
+import { Maximize2, X } from "lucide-react";
 
 export interface ChartDialogProps {
   isOpen: boolean;

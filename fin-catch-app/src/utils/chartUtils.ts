@@ -10,7 +10,7 @@ export const calculateXAxisInterval = (
   dataLength: number,
   isFullscreen: boolean,
   isMobile: boolean,
-  isTablet: boolean = false
+  isTablet: boolean = false,
 ): number | "preserveStartEnd" | "preserveStart" => {
   // For very small datasets, show all ticks
   if (dataLength <= 5) {
@@ -71,7 +71,7 @@ export const calculateXAxisInterval = (
  */
 export const calculateExpectedTicks = (
   dataLength: number,
-  interval: number | "preserveStartEnd" | "preserveStart"
+  interval: number | "preserveStartEnd" | "preserveStart",
 ): number => {
   if (interval === "preserveStartEnd") return 2;
   if (interval === "preserveStart") return Math.min(dataLength, 3);

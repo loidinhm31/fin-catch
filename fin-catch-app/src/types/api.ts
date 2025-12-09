@@ -160,7 +160,16 @@ export interface GoldPremiumResponse {
 }
 
 // Currency codes
-export type CurrencyCode = "USD" | "VND" | "EUR" | "GBP" | "JPY" | "CNY" | "KRW" | "THB" | "SGD";
+export type CurrencyCode =
+  | "USD"
+  | "VND"
+  | "EUR"
+  | "GBP"
+  | "JPY"
+  | "CNY"
+  | "KRW"
+  | "THB"
+  | "SGD";
 
 // Exchange Rate Sources
 export type ExchangeRateSource = "vietcombank" | "openexchangerates";

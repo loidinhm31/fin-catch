@@ -36,7 +36,17 @@ export const CurrencySelect: React.FC<CurrencySelectProps> = ({
   disabled = false,
   id = "currency-select",
 }) => {
-  const currencies: CurrencyCode[] = ["USD", "VND", "EUR", "GBP", "JPY", "CNY", "KRW", "THB", "SGD"];
+  const currencies: CurrencyCode[] = [
+    "USD",
+    "VND",
+    "EUR",
+    "GBP",
+    "JPY",
+    "CNY",
+    "KRW",
+    "THB",
+    "SGD",
+  ];
 
   const handleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     onChange(e.target.value as CurrencyCode);
@@ -48,17 +58,17 @@ export const CurrencySelect: React.FC<CurrencySelectProps> = ({
         <label
           htmlFor={id}
           style={{
-            display: 'block',
-            fontSize: 'var(--text-sm)',
-            fontWeight: 'var(--font-bold)',
-            marginBottom: 'var(--space-2)',
-            color: 'var(--color-text-primary)',
+            display: "block",
+            fontSize: "var(--text-sm)",
+            fontWeight: "var(--font-bold)",
+            marginBottom: "var(--space-2)",
+            color: "var(--color-text-primary)",
           }}
         >
           {label}
         </label>
       )}
-      <div style={{ position: 'relative' }}>
+      <div style={{ position: "relative" }}>
         <select
           id={id}
           value={value}
@@ -66,31 +76,32 @@ export const CurrencySelect: React.FC<CurrencySelectProps> = ({
           disabled={disabled}
           className="glass-input w-full"
           style={{
-            color: 'var(--color-text-primary) !important',
-            cursor: disabled ? 'not-allowed' : 'pointer',
+            color: "var(--color-text-primary) !important",
+            cursor: disabled ? "not-allowed" : "pointer",
             opacity: disabled ? 0.6 : 1,
-            appearance: 'none',
-            paddingRight: '2.5rem',
+            appearance: "none",
+            paddingRight: "2.5rem",
           }}
         >
           {currencies.map((currency) => (
             <option key={currency} value={currency}>
-              {CURRENCY_SYMBOLS[currency]} {currency} - {CURRENCY_LABELS[currency]}
+              {CURRENCY_SYMBOLS[currency]} {currency} -{" "}
+              {CURRENCY_LABELS[currency]}
             </option>
           ))}
         </select>
         <div
           style={{
-            pointerEvents: 'none',
-            position: 'absolute',
-            top: '50%',
-            right: '0.75rem',
-            transform: 'translateY(-50%)',
-            color: 'var(--color-text-primary)',
+            pointerEvents: "none",
+            position: "absolute",
+            top: "50%",
+            right: "0.75rem",
+            transform: "translateY(-50%)",
+            color: "var(--color-text-primary)",
           }}
         >
           <svg
-            style={{ fill: 'currentColor', height: '1rem', width: '1rem' }}
+            style={{ fill: "currentColor", height: "1rem", width: "1rem" }}
             xmlns="http://www.w3.org/2000/svg"
             viewBox="0 0 20 20"
           >

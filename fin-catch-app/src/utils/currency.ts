@@ -1,10 +1,10 @@
-import { finCatchAPI } from "../services/api";
+import { finCatchAPI } from "@/services/api";
 import type {
+  CURRENCY_SYMBOLS,
   CurrencyCode,
   ExchangeRateRequest,
   ExchangeRateResponse,
-  CURRENCY_SYMBOLS,
-} from "../types";
+} from "@/types";
 
 /**
  * Cache for exchange rates to avoid repeated API calls
@@ -33,7 +33,7 @@ function getCacheKey(from: CurrencyCode, to: CurrencyCode): string {
  */
 async function getCurrencyToVNDRate(
   currency: CurrencyCode,
-  date?: Date
+  date?: Date,
 ): Promise<number> {
   // VND to VND is always 1
   if (currency === "VND") {
@@ -49,14 +49,17 @@ async function getCurrencyToVNDRate(
     to: timestamp,
   };
 
-  const response: ExchangeRateResponse = await finCatchAPI.fetchExchangeRate(request);
+  const response: ExchangeRateResponse =
+    await finCatchAPI.fetchExchangeRate(request);
 
   if (response.status === "ok" && response.data && response.data.length > 0) {
     // Get the most recent rate - use sell rate for conversions
     const latestRate = response.data[response.data.length - 1];
     return latestRate.sell;
   } else {
-    throw new Error(response.error || `Failed to fetch exchange rate for ${currency}`);
+    throw new Error(
+      response.error || `Failed to fetch exchange rate for ${currency}`,
+    );
   }
 }
 
@@ -71,7 +74,7 @@ async function getCurrencyToVNDRate(
 export async function getExchangeRate(
   fromCurrency: CurrencyCode,
   toCurrency: CurrencyCode,
-  date?: Date
+  date?: Date,
 ): Promise<number> {
   // If same currency, no conversion needed
   if (fromCurrency === toCurrency) {
@@ -118,7 +121,10 @@ export async function getExchangeRate(
 
     return rate;
   } catch (error) {
-    console.error(`Error fetching exchange rate from ${fromCurrency} to ${toCurrency}:`, error);
+    console.error(
+      `Error fetching exchange rate from ${fromCurrency} to ${toCurrency}:`,
+      error,
+    );
     throw error;
   }
 }
@@ -135,7 +141,7 @@ export async function convertCurrency(
   amount: number,
   fromCurrency: CurrencyCode,
   toCurrency: CurrencyCode,
-  date?: Date
+  date?: Date,
 ): Promise<number> {
   const rate = await getExchangeRate(fromCurrency, toCurrency, date);
   return amount * rate;
@@ -151,7 +157,7 @@ export async function convertCurrency(
 export function formatCurrency(
   amount: number,
   currency: CurrencyCode,
-  decimals: number = 2
+  decimals: number = 2,
 ): string {
   const symbols: typeof CURRENCY_SYMBOLS = {
     USD: "$",
@@ -186,7 +192,7 @@ export function formatCurrency(
  * @returns Map of conversion keys to rates
  */
 export async function getExchangeRateBatch(
-  conversions: Array<{ from: CurrencyCode; to: CurrencyCode; date?: Date }>
+  conversions: Array<{ from: CurrencyCode; to: CurrencyCode; date?: Date }>,
 ): Promise<Map<string, number>> {
   const results = new Map<string, number>();
 
@@ -202,7 +208,7 @@ export async function getExchangeRateBatch(
         // Set to 0 to indicate failure
         results.set(getCacheKey(from, to), 0);
       }
-    })
+    }),
   );
 
   return results;
@@ -218,7 +224,9 @@ export function clearExchangeRateCache(): void {
 /**
  * Validate if a currency code is supported
  */
-export function isSupportedCurrency(currency: string): currency is CurrencyCode {
+export function isSupportedCurrency(
+  currency: string,
+): currency is CurrencyCode {
   const supportedCurrencies: CurrencyCode[] = [
     "USD",
     "VND",

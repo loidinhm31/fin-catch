@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import {
   Bar,
+  Brush,
   CartesianGrid,
   ComposedChart,
   Legend,
@@ -9,30 +10,33 @@ import {
   Tooltip,
   XAxis,
   YAxis,
-  Brush,
 } from "recharts";
-import { GoldPremiumPoint } from "../../types";
-import { formatTimestampForChart } from "../../utils/dateUtils";
-import { formatCurrencyValue, formatCurrencyCompact, formatPercent } from "../../utils/chartFormatters";
-import { calculateXAxisInterval } from "../../utils/chartUtils";
-import { useResponsiveChart } from "../../hooks/useResponsiveChart";
-import { ResponsiveChartContainer } from "../molecules/ResponsiveChartContainer";
+import { GoldPremiumPoint } from "@/types";
+import { formatTimestampForChart } from "@/utils/dateUtils";
+import {
+  formatCurrencyCompact,
+  formatCurrencyValue,
+  formatPercent,
+} from "@/utils/chartFormatters";
+import { calculateXAxisInterval } from "@/utils/chartUtils";
+import { useResponsiveChart } from "@/hooks/useResponsiveChart";
+import { ResponsiveChartContainer } from "@/components/molecules";
 
 export interface GoldPremiumChartResponsiveProps {
   data: GoldPremiumPoint[];
   showFullChart?: boolean;
 }
 
-export const GoldPremiumChartResponsive: React.FC<GoldPremiumChartResponsiveProps> = ({
-  data,
-  showFullChart = false,
-}) => {
+export const GoldPremiumChartResponsive: React.FC<
+  GoldPremiumChartResponsiveProps
+> = ({ data, showFullChart = false }) => {
   const [brushIndex, setBrushIndex] = useState<{
     startIndex?: number;
     endIndex?: number;
   }>({});
 
-  const { dimensions, fullscreenDimensions, isMobile, isTablet } = useResponsiveChart();
+  const { dimensions, fullscreenDimensions, isMobile, isTablet } =
+    useResponsiveChart();
 
   if (!data || data.length === 0) {
     return (
@@ -84,7 +88,13 @@ export const GoldPremiumChartResponsive: React.FC<GoldPremiumChartResponsiveProp
         >
           <div className="flex items-center justify-between flex-wrap gap-2">
             <div className="flex items-baseline gap-2">
-              <span style={{ fontSize: "var(--text-xs)", color: "#d97706", opacity: 0.9 }}>
+              <span
+                style={{
+                  fontSize: "var(--text-xs)",
+                  color: "#d97706",
+                  opacity: 0.9,
+                }}
+              >
                 Premium:
               </span>
               <span
@@ -99,7 +109,13 @@ export const GoldPremiumChartResponsive: React.FC<GoldPremiumChartResponsiveProp
               </span>
             </div>
             <div className="flex items-center gap-2">
-              <span style={{ fontSize: "var(--text-sm)", color: "#d97706", opacity: 0.9 }}>
+              <span
+                style={{
+                  fontSize: "var(--text-sm)",
+                  color: "#d97706",
+                  opacity: 0.9,
+                }}
+              >
                 {formatCurrencyValue(point.premium_value)} VND
               </span>
             </div>
@@ -110,7 +126,13 @@ export const GoldPremiumChartResponsive: React.FC<GoldPremiumChartResponsiveProp
         <div className="grid grid-cols-2 gap-2">
           {/* Target Price */}
           <div className="glass-card p-2 sm:p-3">
-            <p style={{ fontSize: "var(--text-xs)", opacity: 0.6, marginBottom: "4px" }}>
+            <p
+              style={{
+                fontSize: "var(--text-xs)",
+                opacity: 0.6,
+                marginBottom: "4px",
+              }}
+            >
               Local Target
             </p>
             <p
@@ -126,7 +148,13 @@ export const GoldPremiumChartResponsive: React.FC<GoldPremiumChartResponsiveProp
 
           {/* Market Price VND */}
           <div className="glass-card p-2 sm:p-3">
-            <p style={{ fontSize: "var(--text-xs)", opacity: 0.6, marginBottom: "4px" }}>
+            <p
+              style={{
+                fontSize: "var(--text-xs)",
+                opacity: 0.6,
+                marginBottom: "4px",
+              }}
+            >
               Market (VND)
             </p>
             <p
@@ -142,7 +170,13 @@ export const GoldPremiumChartResponsive: React.FC<GoldPremiumChartResponsiveProp
 
           {/* Market Price USD */}
           <div className="glass-card p-2 sm:p-3">
-            <p style={{ fontSize: "var(--text-xs)", opacity: 0.6, marginBottom: "4px" }}>
+            <p
+              style={{
+                fontSize: "var(--text-xs)",
+                opacity: 0.6,
+                marginBottom: "4px",
+              }}
+            >
               Market (USD)
             </p>
             <p
@@ -157,7 +191,13 @@ export const GoldPremiumChartResponsive: React.FC<GoldPremiumChartResponsiveProp
 
           {/* Exchange Rate */}
           <div className="glass-card p-2 sm:p-3">
-            <p style={{ fontSize: "var(--text-xs)", opacity: 0.6, marginBottom: "4px" }}>
+            <p
+              style={{
+                fontSize: "var(--text-xs)",
+                opacity: 0.6,
+                marginBottom: "4px",
+              }}
+            >
               Exchange Rate
             </p>
             <p
@@ -193,7 +233,7 @@ export const GoldPremiumChartResponsive: React.FC<GoldPremiumChartResponsiveProp
       chartData.length,
       isFullscreen,
       isMobile,
-      isTablet
+      isTablet,
     );
 
     return (
@@ -221,7 +261,10 @@ export const GoldPremiumChartResponsive: React.FC<GoldPremiumChartResponsiveProp
           <XAxis
             dataKey="time"
             stroke="#a0aec0"
-            style={{ fontSize: `${activeDimensions.tickFontSize}px`, fontWeight: "500" }}
+            style={{
+              fontSize: `${activeDimensions.tickFontSize}px`,
+              fontWeight: "500",
+            }}
             angle={activeDimensions.angleXAxis}
             textAnchor="end"
             height={activeDimensions.marginBottom}
@@ -231,14 +274,21 @@ export const GoldPremiumChartResponsive: React.FC<GoldPremiumChartResponsiveProp
           <YAxis
             yAxisId="left"
             stroke="#a0aec0"
-            style={{ fontSize: `${activeDimensions.tickFontSize}px`, fontWeight: "500" }}
+            style={{
+              fontSize: `${activeDimensions.tickFontSize}px`,
+              fontWeight: "500",
+            }}
             label={
               !isMobile
                 ? {
                     value: "Price (VND)",
                     angle: -90,
                     position: "insideLeft",
-                    style: { fill: "#ffffff", fontWeight: "600", fontSize: `${activeDimensions.labelFontSize}px` },
+                    style: {
+                      fill: "#ffffff",
+                      fontWeight: "600",
+                      fontSize: `${activeDimensions.labelFontSize}px`,
+                    },
                   }
                 : undefined
             }
@@ -250,14 +300,21 @@ export const GoldPremiumChartResponsive: React.FC<GoldPremiumChartResponsiveProp
             yAxisId="right"
             orientation="right"
             stroke="#a0aec0"
-            style={{ fontSize: `${activeDimensions.tickFontSize}px`, fontWeight: "500" }}
+            style={{
+              fontSize: `${activeDimensions.tickFontSize}px`,
+              fontWeight: "500",
+            }}
             label={
               !isMobile
                 ? {
                     value: "Premium (%)",
                     angle: 90,
                     position: "insideRight",
-                    style: { fill: "#ffffff", fontWeight: "600", fontSize: `${activeDimensions.labelFontSize}px` },
+                    style: {
+                      fill: "#ffffff",
+                      fontWeight: "600",
+                      fontSize: `${activeDimensions.labelFontSize}px`,
+                    },
                   }
                 : undefined
             }
@@ -273,17 +330,28 @@ export const GoldPremiumChartResponsive: React.FC<GoldPremiumChartResponsiveProp
               color: "#ffffff",
               fontWeight: "600",
               fontSize: `${activeDimensions.fontSize}px`,
-              boxShadow: "0 8px 24px rgba(0, 0, 0, 0.3), 0 0 24px rgba(0, 212, 255, 0.2)",
+              boxShadow:
+                "0 8px 24px rgba(0, 0, 0, 0.3), 0 0 24px rgba(0, 212, 255, 0.2)",
               backdropFilter: "blur(12px)",
             }}
-            labelStyle={{ color: "#00d4ff", marginBottom: "8px", fontSize: `${activeDimensions.fontSize}px` }}
+            labelStyle={{
+              color: "#00d4ff",
+              marginBottom: "8px",
+              fontSize: `${activeDimensions.fontSize}px`,
+            }}
             formatter={(value: any, name: string) => {
               if (name === "premium_rate") {
                 return [formatPercent(Number(value)), "Premium Rate"];
               } else if (name === "target_price") {
-                return [formatCurrencyValue(Number(value)) + " VND", "Target Price"];
+                return [
+                  formatCurrencyValue(Number(value)) + " VND",
+                  "Target Price",
+                ];
               } else if (name === "market_price_vnd") {
-                return [formatCurrencyValue(Number(value)) + " VND", "Market Price (VND)"];
+                return [
+                  formatCurrencyValue(Number(value)) + " VND",
+                  "Market Price (VND)",
+                ];
               }
               return [value, name];
             }}

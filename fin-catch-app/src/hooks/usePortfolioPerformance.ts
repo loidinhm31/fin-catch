@@ -1,12 +1,14 @@
-import { useState, useEffect } from "react";
-import { CurrencyCode, PortfolioEntry, PortfolioPerformance } from "../types";
-import { calculatePortfolioPerformance } from "../utils/performanceCalculations";
+import { useEffect, useState } from "react";
+import { CurrencyCode, PortfolioEntry, PortfolioPerformance } from "@/types";
+import { calculatePortfolioPerformance } from "@/utils/performanceCalculations";
 
 export const usePortfolioPerformance = (
   entries: PortfolioEntry[],
-  displayCurrency: CurrencyCode
+  displayCurrency: CurrencyCode,
 ) => {
-  const [performance, setPerformance] = useState<PortfolioPerformance | null>(null);
+  const [performance, setPerformance] = useState<PortfolioPerformance | null>(
+    null,
+  );
   const [isCalculating, setIsCalculating] = useState(false);
 
   const calculatePerformance = async () => {
@@ -17,7 +19,10 @@ export const usePortfolioPerformance = (
 
     setIsCalculating(true);
     try {
-      const result = await calculatePortfolioPerformance(entries, displayCurrency);
+      const result = await calculatePortfolioPerformance(
+        entries,
+        displayCurrency,
+      );
       setPerformance(result);
     } catch (err) {
       console.error("Failed to calculate performance:", err);

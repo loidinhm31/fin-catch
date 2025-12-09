@@ -1,25 +1,30 @@
-import {invoke} from "@tauri-apps/api/core";
+import { invoke } from "@tauri-apps/api/core";
 import {
+  ExchangeRateRequest,
+  ExchangeRateResponse,
   GoldPremiumRequest,
   GoldPremiumResponse,
   GoldPriceRequest,
   GoldPriceResponse,
-  StockHistoryRequest,
-  StockHistoryResponse,
-  ExchangeRateRequest,
-  ExchangeRateResponse,
   Portfolio,
   PortfolioEntry,
-} from "../types";
+  StockHistoryRequest,
+  StockHistoryResponse,
+} from "@/types";
 
 class FinCatchAPI {
   /**
    * Fetch stock history data via Tauri IPC
    */
-  async fetchStockHistory(request: StockHistoryRequest): Promise<StockHistoryResponse> {
+  async fetchStockHistory(
+    request: StockHistoryRequest,
+  ): Promise<StockHistoryResponse> {
     try {
       console.log("[Tauri IPC] fetch_stock_history", request);
-      const response = await invoke<StockHistoryResponse>("fetch_stock_history", { request });
+      const response = await invoke<StockHistoryResponse>(
+        "fetch_stock_history",
+        { request },
+      );
       console.log("[Tauri IPC Response]", response);
       return response;
     } catch (error) {
@@ -34,7 +39,9 @@ class FinCatchAPI {
   async fetchGoldPrice(request: GoldPriceRequest): Promise<GoldPriceResponse> {
     try {
       console.log("[Tauri IPC] fetch_gold_price", request);
-      const response = await invoke<GoldPriceResponse>("fetch_gold_price", { request });
+      const response = await invoke<GoldPriceResponse>("fetch_gold_price", {
+        request,
+      });
       console.log("[Tauri IPC Response]", response);
       return response;
     } catch (error) {
@@ -46,10 +53,15 @@ class FinCatchAPI {
   /**
    * Fetch exchange rate data via Tauri IPC
    */
-  async fetchExchangeRate(request: ExchangeRateRequest): Promise<ExchangeRateResponse> {
+  async fetchExchangeRate(
+    request: ExchangeRateRequest,
+  ): Promise<ExchangeRateResponse> {
     try {
       console.log("[Tauri IPC] fetch_exchange_rate", request);
-      const response = await invoke<ExchangeRateResponse>("fetch_exchange_rate", { request });
+      const response = await invoke<ExchangeRateResponse>(
+        "fetch_exchange_rate",
+        { request },
+      );
       console.log("[Tauri IPC Response]", response);
       return response;
     } catch (error) {
@@ -61,10 +73,15 @@ class FinCatchAPI {
   /**
    * Fetch gold premium data via Tauri IPC
    */
-  async fetchGoldPremium(request: GoldPremiumRequest, _signal?: AbortSignal): Promise<GoldPremiumResponse> {
+  async fetchGoldPremium(
+    request: GoldPremiumRequest,
+    _signal?: AbortSignal,
+  ): Promise<GoldPremiumResponse> {
     try {
       console.log("[Tauri IPC] fetch_gold_premium", request);
-      const response = await invoke<GoldPremiumResponse>("fetch_gold_premium", { request });
+      const response = await invoke<GoldPremiumResponse>("fetch_gold_premium", {
+        request,
+      });
       console.log("[Tauri IPC Response]", response);
       return response;
     } catch (error) {
@@ -94,7 +111,8 @@ class FinCatchAPI {
   async healthCheckAll(): Promise<Record<string, boolean>> {
     try {
       console.log("[Tauri IPC] health_check_all");
-      const response = await invoke<Record<string, boolean>>("health_check_all");
+      const response =
+        await invoke<Record<string, boolean>>("health_check_all");
       console.log("[Tauri IPC Response]", response);
       return response;
     } catch (error) {
@@ -109,7 +127,9 @@ class FinCatchAPI {
   async healthCheckSource(sourceName: string): Promise<boolean> {
     try {
       console.log("[Tauri IPC] health_check_source", sourceName);
-      const response = await invoke<boolean>("health_check_source", { sourceName });
+      const response = await invoke<boolean>("health_check_source", {
+        sourceName,
+      });
       console.log("[Tauri IPC Response]", response);
       return response;
     } catch (error) {
@@ -209,7 +229,9 @@ class FinCatchAPI {
   async listEntries(portfolioId: number): Promise<PortfolioEntry[]> {
     try {
       console.log("[Tauri IPC] list_entries", portfolioId);
-      const entries = await invoke<PortfolioEntry[]>("list_entries", { portfolioId });
+      const entries = await invoke<PortfolioEntry[]>("list_entries", {
+        portfolioId,
+      });
       console.log("[Tauri IPC Response]", entries);
       return entries;
     } catch (error) {

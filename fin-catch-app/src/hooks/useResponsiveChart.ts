@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 
 export interface ChartDimensions {
   height: number;
@@ -32,20 +32,21 @@ export const useResponsiveChart = () => {
   });
 
   // Fullscreen dimensions - always larger and more detailed
-  const [fullscreenDimensions, setFullscreenDimensions] = useState<ChartDimensions>({
-    height: 600,
-    fontSize: 13,
-    tickFontSize: 13,
-    labelFontSize: 15,
-    legendFontSize: 13,
-    brushHeight: 40,
-    showBrush: true,
-    showLegend: true,
-    angleXAxis: -45,
-    marginLeft: 30,
-    marginRight: 40,
-    marginBottom: 90,
-  });
+  const [fullscreenDimensions, setFullscreenDimensions] =
+    useState<ChartDimensions>({
+      height: 600,
+      fontSize: 13,
+      tickFontSize: 13,
+      labelFontSize: 15,
+      legendFontSize: 13,
+      brushHeight: 40,
+      showBrush: true,
+      showLegend: true,
+      angleXAxis: -45,
+      marginLeft: 30,
+      marginRight: 40,
+      marginBottom: 90,
+    });
 
   const [isMobile, setIsMobile] = useState(false);
   const [isTablet, setIsTablet] = useState(false);

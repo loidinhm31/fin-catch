@@ -6,7 +6,11 @@ interface CardProps {
   onClick?: () => void;
 }
 
-export const Card: React.FC<CardProps> = ({ children, className = "", onClick }) => {
+export const Card: React.FC<CardProps> = ({
+  children,
+  className = "",
+  onClick,
+}) => {
   return (
     <div
       className={`bg-white rounded-xl border border-gray-200 shadow-sm ${onClick ? "cursor-pointer" : ""} ${className}`}

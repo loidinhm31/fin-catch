@@ -5,17 +5,20 @@ export interface ErrorTextProps {
   className?: string;
 }
 
-export const ErrorText: React.FC<ErrorTextProps> = ({ children, className = "" }) => {
+export const ErrorText: React.FC<ErrorTextProps> = ({
+  children,
+  className = "",
+}) => {
   if (!children) return null;
 
   return (
     <p
       className={className}
       style={{
-        fontSize: 'var(--text-sm)',
-        color: '#dc2626',
-        fontWeight: 'var(--font-medium)',
-        marginTop: 'var(--space-1)'
+        fontSize: "var(--text-sm)",
+        color: "#dc2626",
+        fontWeight: "var(--font-medium)",
+        marginTop: "var(--space-1)",
       }}
     >
       {children}

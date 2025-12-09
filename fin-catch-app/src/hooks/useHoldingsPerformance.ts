@@ -1,12 +1,18 @@
-import { useState, useEffect } from "react";
-import { PortfolioEntry, CurrencyCode, PortfolioHoldingsPerformance } from "../types";
-import { calculateAllHoldingsPerformance } from "../utils/holdings";
+import { useEffect, useState } from "react";
+import {
+  CurrencyCode,
+  PortfolioEntry,
+  PortfolioHoldingsPerformance,
+} from "@/types";
+import { calculateAllHoldingsPerformance } from "@/utils/holdings";
 
 export const useHoldingsPerformance = (
   entries: PortfolioEntry[],
-  displayCurrency: CurrencyCode
+  displayCurrency: CurrencyCode,
 ) => {
-  const [timeframe, setTimeframe] = useState<"1M" | "3M" | "6M" | "1Y" | "ALL">("1Y");
+  const [timeframe, setTimeframe] = useState<"1M" | "3M" | "6M" | "1Y" | "ALL">(
+    "1Y",
+  );
   const [data, setData] = useState<PortfolioHoldingsPerformance | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [showChart, setShowChart] = useState(false);
@@ -54,13 +60,17 @@ export const useHoldingsPerformance = (
         entries,
         start,
         end,
-        displayCurrency
+        displayCurrency,
       );
       setData(performanceData);
       setError(null);
     } catch (err) {
       console.error("Failed to load holdings performance:", err);
-      setError(err instanceof Error ? err.message : "Failed to load holdings performance");
+      setError(
+        err instanceof Error
+          ? err.message
+          : "Failed to load holdings performance",
+      );
     } finally {
       setIsLoading(false);
     }

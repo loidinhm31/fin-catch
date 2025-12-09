@@ -1,6 +1,12 @@
-import React, {useEffect, useState} from "react";
-import {Coins, TrendingDown, TrendingUp} from "lucide-react";
-import {GoldChartResponsive, GoldPremiumChartResponsive, GoldQueryForm, StockChartResponsive, StockQueryForm,} from "../organisms";
+import React, { useEffect, useState } from "react";
+import { Coins, TrendingDown, TrendingUp } from "lucide-react";
+import {
+  GoldChartResponsive,
+  GoldPremiumChartResponsive,
+  GoldQueryForm,
+  StockChartResponsive,
+  StockQueryForm,
+} from "../organisms";
 import {
   GoldPremiumRequest,
   GoldPremiumResponse,
@@ -8,16 +14,24 @@ import {
   GoldPriceResponse,
   StockHistoryRequest,
   StockHistoryResponse,
-} from "../../types";
-import {finCatchAPI} from "../../services/api";
-import {dateToUnixTimestamp} from "../../utils/dateUtils";
-import {DateRangePicker} from "../molecules";
+} from "@/types";
+import { finCatchAPI } from "@/services/api";
+import { dateToUnixTimestamp } from "@/utils/dateUtils";
+import { DateRangePicker } from "@/components/molecules";
 
 type ActiveTab = "stock" | "gold";
 
 // Cube decoration component
-const CubeShape = ({ className = "", variant = "default" }: { className?: string; variant?: "default" | "yellow" | "pink" }) => (
-  <div className={`cube-decoration ${variant === 'yellow' ? 'cube-yellow' : variant === 'pink' ? 'cube-pink' : ''} ${className}`}></div>
+const CubeShape = ({
+  className = "",
+  variant = "default",
+}: {
+  className?: string;
+  variant?: "default" | "yellow" | "pink";
+}) => (
+  <div
+    className={`cube-decoration ${variant === "yellow" ? "cube-yellow" : variant === "pink" ? "cube-pink" : ""} ${className}`}
+  ></div>
 );
 
 export const FinancialDataPage: React.FC = () => {
@@ -34,10 +48,14 @@ export const FinancialDataPage: React.FC = () => {
 
   // Gold premium state
   const [showGoldPremium, setShowGoldPremium] = useState(false);
-  const [goldPremiumData, setGoldPremiumData] = useState<GoldPremiumResponse | null>(null);
+  const [goldPremiumData, setGoldPremiumData] =
+    useState<GoldPremiumResponse | null>(null);
   const [goldPremiumError, setGoldPremiumError] = useState<string | null>(null);
   const [showFullPremiumChart, setShowFullPremiumChart] = useState(false);
-  const [premiumDateRange, setPremiumDateRange] = useState<{ from: Date; to: Date }>(() => {
+  const [premiumDateRange, setPremiumDateRange] = useState<{
+    from: Date;
+    to: Date;
+  }>(() => {
     const to = new Date();
     const from = new Date();
     from.setDate(from.getDate() - 180); // Default 180 days
@@ -45,7 +63,8 @@ export const FinancialDataPage: React.FC = () => {
   });
 
   // AbortController for cancelling API requests
-  const [premiumAbortController, setPremiumAbortController] = useState<AbortController | null>(null);
+  const [premiumAbortController, setPremiumAbortController] =
+    useState<AbortController | null>(null);
 
   const handleStockSubmit = async (request: StockHistoryRequest) => {
     setIsLoading(true);
@@ -62,7 +81,8 @@ export const FinancialDataPage: React.FC = () => {
         setStockError(null);
       }
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : "Unknown error occurred";
+      const errorMessage =
+        error instanceof Error ? error.message : "Unknown error occurred";
       setStockError(errorMessage);
       setStockData(null);
     } finally {
@@ -85,7 +105,8 @@ export const FinancialDataPage: React.FC = () => {
         setGoldError(null);
       }
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : "Unknown error occurred";
+      const errorMessage =
+        error instanceof Error ? error.message : "Unknown error occurred";
       setGoldError(errorMessage);
       setGoldData(null);
     } finally {
@@ -116,10 +137,15 @@ export const FinancialDataPage: React.FC = () => {
         stock_source: "yahoo_finance",
       };
 
-      const response = await finCatchAPI.fetchGoldPremium(request, abortController.signal);
+      const response = await finCatchAPI.fetchGoldPremium(
+        request,
+        abortController.signal,
+      );
 
       if (response.status === "error") {
-        setGoldPremiumError(response.error || "Failed to fetch gold premium data");
+        setGoldPremiumError(
+          response.error || "Failed to fetch gold premium data",
+        );
         setGoldPremiumData(null);
       } else {
         setGoldPremiumData(response);
@@ -127,11 +153,12 @@ export const FinancialDataPage: React.FC = () => {
       }
     } catch (error) {
       // Don't show error if request was cancelled
-      if (error instanceof Error && error.name === 'CanceledError') {
-        console.log('Request cancelled');
+      if (error instanceof Error && error.name === "CanceledError") {
+        console.log("Request cancelled");
         return;
       }
-      const errorMessage = error instanceof Error ? error.message : "Unknown error occurred";
+      const errorMessage =
+        error instanceof Error ? error.message : "Unknown error occurred";
       setGoldPremiumError(errorMessage);
       setGoldPremiumData(null);
     } finally {
@@ -186,17 +213,28 @@ export const FinancialDataPage: React.FC = () => {
 
   return (
     <div className="screen-explore">
-
       {/* Main glass container */}
       <div className=" relative z-10 mx-4 pb-28 min-h-[calc(100vh-4rem)] overflow-hidden">
         <div className="h-full">
           {/* Header */}
           <div className="flex justify-between items-center mb-8">
             <div>
-              <h1 style={{ fontSize: 'var(--text-3xl)', fontWeight: 'var(--font-bold)', color: 'var(--cube-gray-900)' }}>
+              <h1
+                style={{
+                  fontSize: "var(--text-3xl)",
+                  fontWeight: "var(--font-bold)",
+                  color: "var(--cube-gray-900)",
+                }}
+              >
                 FIN-CATCH
               </h1>
-              <p style={{ fontSize: 'var(--text-sm)', color: 'var(--cube-gray-900)', opacity: 0.7 }}>
+              <p
+                style={{
+                  fontSize: "var(--text-sm)",
+                  color: "var(--cube-gray-900)",
+                  opacity: 0.7,
+                }}
+              >
                 Financial Data Query System
               </p>
             </div>
@@ -214,7 +252,7 @@ export const FinancialDataPage: React.FC = () => {
                   ? "bg-gradient-to-r from-cyan-300 to-blue-700 text-white shadow-lg"
                   : "glass-button text-gray-700"
               }`}
-              style={{ fontSize: 'var(--text-sm)' }}
+              style={{ fontSize: "var(--text-sm)" }}
             >
               <TrendingUp className="w-5 h-5" />
               STOCK
@@ -226,7 +264,7 @@ export const FinancialDataPage: React.FC = () => {
                   ? "bg-gradient-to-r from-yellow-400 to-orange-500 text-white shadow-lg"
                   : "glass-button text-gray-700"
               }`}
-              style={{ fontSize: 'var(--text-sm)' }}
+              style={{ fontSize: "var(--text-sm)" }}
             >
               <Coins className="w-5 h-5" />
               GOLD
@@ -235,14 +273,27 @@ export const FinancialDataPage: React.FC = () => {
 
           {/* Query Form Section */}
           <div className="mb-3">
-            <h2 style={{ fontSize: 'var(--text-xl)', fontWeight: 'var(--font-bold)', color: 'var(--cube-gray-900)', marginBottom: 'var(--space-4)' }}>
+            <h2
+              style={{
+                fontSize: "var(--text-xl)",
+                fontWeight: "var(--font-bold)",
+                color: "var(--cube-gray-900)",
+                marginBottom: "var(--space-4)",
+              }}
+            >
               {activeTab === "stock" ? "Stock Query" : "Gold Query"}
             </h2>
             <div className="glass-card p-3">
               {activeTab === "stock" ? (
-                <StockQueryForm onSubmit={handleStockSubmit} isLoading={isLoading} />
+                <StockQueryForm
+                  onSubmit={handleStockSubmit}
+                  isLoading={isLoading}
+                />
               ) : (
-                <GoldQueryForm onSubmit={handleGoldSubmit} isLoading={isLoading} />
+                <GoldQueryForm
+                  onSubmit={handleGoldSubmit}
+                  isLoading={isLoading}
+                />
               )}
             </div>
           </div>
@@ -250,8 +301,24 @@ export const FinancialDataPage: React.FC = () => {
           {/* Error Display */}
           {currentError && (
             <div className="mb-6 p-4 bg-red-100 border border-red-300 rounded-xl">
-              <p style={{ fontWeight: 'var(--font-bold)', color: '#dc2626', fontSize: 'var(--text-sm)' }}>Error</p>
-              <p style={{ color: '#dc2626', fontSize: 'var(--text-xs)', marginTop: 'var(--space-1)' }}>{currentError}</p>
+              <p
+                style={{
+                  fontWeight: "var(--font-bold)",
+                  color: "#dc2626",
+                  fontSize: "var(--text-sm)",
+                }}
+              >
+                Error
+              </p>
+              <p
+                style={{
+                  color: "#dc2626",
+                  fontSize: "var(--text-xs)",
+                  marginTop: "var(--space-1)",
+                }}
+              >
+                {currentError}
+              </p>
             </div>
           )}
 
@@ -265,38 +332,104 @@ export const FinancialDataPage: React.FC = () => {
                   symbol={stockData.symbol}
                 />
               ) : activeTab === "gold" && goldData ? (
-                <GoldChartResponsive data={goldData.data!} goldPriceId={goldData.gold_price_id} />
+                <GoldChartResponsive
+                  data={goldData.data!}
+                  goldPriceId={goldData.gold_price_id}
+                />
               ) : null}
 
               {/* Data Summary */}
               <div className="mt-6 glass-card p-6">
-                <h3 style={{ fontSize: 'var(--text-lg)', fontWeight: 'var(--font-bold)', color: 'var(--cube-gray-900)', marginBottom: 'var(--space-4)' }}>
+                <h3
+                  style={{
+                    fontSize: "var(--text-lg)",
+                    fontWeight: "var(--font-bold)",
+                    color: "var(--cube-gray-900)",
+                    marginBottom: "var(--space-4)",
+                  }}
+                >
                   Data Summary
                 </h3>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                   {activeTab === "stock" && stockData && (
                     <>
                       <div>
-                        <p style={{ fontSize: 'var(--text-xs)', color: 'var(--cube-gray-900)', opacity: 0.6 }}>Symbol</p>
-                        <p style={{ fontSize: 'var(--text-lg)', fontWeight: 'var(--font-bold)', color: 'var(--cube-gray-900)' }}>
+                        <p
+                          style={{
+                            fontSize: "var(--text-xs)",
+                            color: "var(--cube-gray-900)",
+                            opacity: 0.6,
+                          }}
+                        >
+                          Symbol
+                        </p>
+                        <p
+                          style={{
+                            fontSize: "var(--text-lg)",
+                            fontWeight: "var(--font-bold)",
+                            color: "var(--cube-gray-900)",
+                          }}
+                        >
                           {stockData.symbol}
                         </p>
                       </div>
                       <div>
-                        <p style={{ fontSize: 'var(--text-xs)', color: 'var(--cube-gray-900)', opacity: 0.6 }}>Source</p>
-                        <p style={{ fontSize: 'var(--text-lg)', fontWeight: 'var(--font-bold)', color: 'var(--cube-gray-900)' }}>
+                        <p
+                          style={{
+                            fontSize: "var(--text-xs)",
+                            color: "var(--cube-gray-900)",
+                            opacity: 0.6,
+                          }}
+                        >
+                          Source
+                        </p>
+                        <p
+                          style={{
+                            fontSize: "var(--text-lg)",
+                            fontWeight: "var(--font-bold)",
+                            color: "var(--cube-gray-900)",
+                          }}
+                        >
                           {stockData.source}
                         </p>
                       </div>
                       <div>
-                        <p style={{ fontSize: 'var(--text-xs)', color: 'var(--cube-gray-900)', opacity: 0.6 }}>Resolution</p>
-                        <p style={{ fontSize: 'var(--text-lg)', fontWeight: 'var(--font-bold)', color: 'var(--cube-gray-900)' }}>
+                        <p
+                          style={{
+                            fontSize: "var(--text-xs)",
+                            color: "var(--cube-gray-900)",
+                            opacity: 0.6,
+                          }}
+                        >
+                          Resolution
+                        </p>
+                        <p
+                          style={{
+                            fontSize: "var(--text-lg)",
+                            fontWeight: "var(--font-bold)",
+                            color: "var(--cube-gray-900)",
+                          }}
+                        >
                           {stockData.resolution}
                         </p>
                       </div>
                       <div>
-                        <p style={{ fontSize: 'var(--text-xs)', color: 'var(--cube-gray-900)', opacity: 0.6 }}>Data Points</p>
-                        <p style={{ fontSize: 'var(--text-lg)', fontWeight: 'var(--font-bold)', color: 'var(--cube-gray-900)' }}>
+                        <p
+                          style={{
+                            fontSize: "var(--text-xs)",
+                            color: "var(--cube-gray-900)",
+                            opacity: 0.6,
+                          }}
+                        >
+                          Data Points
+                        </p>
+                        <p
+                          style={{
+                            fontSize: "var(--text-lg)",
+                            fontWeight: "var(--font-bold)",
+                            color: "var(--cube-gray-900)",
+                          }}
+                        >
                           {stockData.data?.length || 0}
                         </p>
                       </div>
@@ -305,26 +438,82 @@ export const FinancialDataPage: React.FC = () => {
                   {activeTab === "gold" && goldData && (
                     <>
                       <div>
-                        <p style={{ fontSize: 'var(--text-xs)', color: 'var(--cube-gray-900)', opacity: 0.6 }}>Gold Type</p>
-                        <p style={{ fontSize: 'var(--text-lg)', fontWeight: 'var(--font-bold)', color: 'var(--cube-gray-900)' }}>
+                        <p
+                          style={{
+                            fontSize: "var(--text-xs)",
+                            color: "var(--cube-gray-900)",
+                            opacity: 0.6,
+                          }}
+                        >
+                          Gold Type
+                        </p>
+                        <p
+                          style={{
+                            fontSize: "var(--text-lg)",
+                            fontWeight: "var(--font-bold)",
+                            color: "var(--cube-gray-900)",
+                          }}
+                        >
                           {goldData.gold_price_id}
                         </p>
                       </div>
                       <div>
-                        <p style={{ fontSize: 'var(--text-xs)', color: 'var(--cube-gray-900)', opacity: 0.6 }}>Source</p>
-                        <p style={{ fontSize: 'var(--text-lg)', fontWeight: 'var(--font-bold)', color: 'var(--cube-gray-900)' }}>
+                        <p
+                          style={{
+                            fontSize: "var(--text-xs)",
+                            color: "var(--cube-gray-900)",
+                            opacity: 0.6,
+                          }}
+                        >
+                          Source
+                        </p>
+                        <p
+                          style={{
+                            fontSize: "var(--text-lg)",
+                            fontWeight: "var(--font-bold)",
+                            color: "var(--cube-gray-900)",
+                          }}
+                        >
                           {goldData.source}
                         </p>
                       </div>
                       <div>
-                        <p style={{ fontSize: 'var(--text-xs)', color: 'var(--cube-gray-900)', opacity: 0.6 }}>Status</p>
-                        <p style={{ fontSize: 'var(--text-lg)', fontWeight: 'var(--font-bold)', color: 'var(--cube-gray-900)' }}>
+                        <p
+                          style={{
+                            fontSize: "var(--text-xs)",
+                            color: "var(--cube-gray-900)",
+                            opacity: 0.6,
+                          }}
+                        >
+                          Status
+                        </p>
+                        <p
+                          style={{
+                            fontSize: "var(--text-lg)",
+                            fontWeight: "var(--font-bold)",
+                            color: "var(--cube-gray-900)",
+                          }}
+                        >
                           {goldData.status}
                         </p>
                       </div>
                       <div>
-                        <p style={{ fontSize: 'var(--text-xs)', color: 'var(--cube-gray-900)', opacity: 0.6 }}>Data Points</p>
-                        <p style={{ fontSize: 'var(--text-lg)', fontWeight: 'var(--font-bold)', color: 'var(--cube-gray-900)' }}>
+                        <p
+                          style={{
+                            fontSize: "var(--text-xs)",
+                            color: "var(--cube-gray-900)",
+                            opacity: 0.6,
+                          }}
+                        >
+                          Data Points
+                        </p>
+                        <p
+                          style={{
+                            fontSize: "var(--text-lg)",
+                            fontWeight: "var(--font-bold)",
+                            color: "var(--cube-gray-900)",
+                          }}
+                        >
                           {goldData.data?.length || 0}
                         </p>
                       </div>
@@ -336,14 +525,33 @@ export const FinancialDataPage: React.FC = () => {
           ) : (
             <div className="glass-card p-12 text-center">
               {activeTab === "stock" ? (
-                <TrendingUp className="w-20 h-20 mx-auto mb-4 opacity-30" style={{ color: 'var(--cube-cyan)' }} />
+                <TrendingUp
+                  className="w-20 h-20 mx-auto mb-4 opacity-30"
+                  style={{ color: "var(--cube-cyan)" }}
+                />
               ) : (
-                <Coins className="w-20 h-20 mx-auto mb-4 opacity-30" style={{ color: 'var(--cube-yellow)' }} />
+                <Coins
+                  className="w-20 h-20 mx-auto mb-4 opacity-30"
+                  style={{ color: "var(--cube-yellow)" }}
+                />
               )}
-              <p style={{ fontSize: 'var(--text-lg)', fontWeight: 'var(--font-bold)', color: 'var(--cube-gray-900)' }}>
+              <p
+                style={{
+                  fontSize: "var(--text-lg)",
+                  fontWeight: "var(--font-bold)",
+                  color: "var(--cube-gray-900)",
+                }}
+              >
                 No data yet
               </p>
-              <p style={{ fontSize: 'var(--text-sm)', color: 'var(--cube-gray-900)', opacity: 0.7, marginTop: 'var(--space-2)' }}>
+              <p
+                style={{
+                  fontSize: "var(--text-sm)",
+                  color: "var(--cube-gray-900)",
+                  opacity: 0.7,
+                  marginTop: "var(--space-2)",
+                }}
+              >
                 Submit a query to view the chart
               </p>
             </div>
@@ -352,7 +560,13 @@ export const FinancialDataPage: React.FC = () => {
           {/* Gold Premium Section */}
           <div className="mt-8">
             <div className="flex items-center justify-between mb-4">
-              <h2 style={{ fontSize: 'var(--text-xl)', fontWeight: 'var(--font-bold)', color: 'var(--cube-gray-900)' }}>
+              <h2
+                style={{
+                  fontSize: "var(--text-xl)",
+                  fontWeight: "var(--font-bold)",
+                  color: "var(--cube-gray-900)",
+                }}
+              >
                 Gold Premium Analysis
               </h2>
               <button
@@ -362,7 +576,7 @@ export const FinancialDataPage: React.FC = () => {
                     ? "bg-gradient-to-r from-yellow-400 to-orange-500 text-white shadow-lg"
                     : "glass-button text-gray-700"
                 }`}
-                style={{ fontSize: 'var(--text-sm)' }}
+                style={{ fontSize: "var(--text-sm)" }}
               >
                 <TrendingDown className="w-5 h-5" />
                 {showGoldPremium ? "HIDE PREMIUM" : "SHOW PREMIUM"}
@@ -377,9 +591,14 @@ export const FinancialDataPage: React.FC = () => {
                     <button
                       onClick={handleToggleFullChart}
                       className="btn-primary"
-                      style={{ background: 'linear-gradient(90deg, #facc15 0%, #fb923c 100%)' }}
+                      style={{
+                        background:
+                          "linear-gradient(90deg, #facc15 0%, #fb923c 100%)",
+                      }}
                     >
-                      {showFullPremiumChart ? "SHOW CURRENT DATE ONLY" : "VIEW FULL CHART"}
+                      {showFullPremiumChart
+                        ? "SHOW CURRENT DATE ONLY"
+                        : "VIEW FULL CHART"}
                     </button>
 
                     {showFullPremiumChart && (
@@ -389,12 +608,18 @@ export const FinancialDataPage: React.FC = () => {
                           toDate={premiumDateRange.to}
                           onFromDateChange={(date) => {
                             if (date) {
-                              handlePremiumDateRangeChange(date, premiumDateRange.to);
+                              handlePremiumDateRangeChange(
+                                date,
+                                premiumDateRange.to,
+                              );
                             }
                           }}
                           onToDateChange={(date) => {
                             if (date) {
-                              handlePremiumDateRangeChange(premiumDateRange.from, date);
+                              handlePremiumDateRangeChange(
+                                premiumDateRange.from,
+                                date,
+                              );
                             }
                           }}
                           required
@@ -407,13 +632,31 @@ export const FinancialDataPage: React.FC = () => {
                 {/* Error Display */}
                 {goldPremiumError && (
                   <div className="p-4 bg-red-100 border border-red-300 rounded-xl">
-                    <p style={{ fontWeight: 'var(--font-bold)', color: '#dc2626', fontSize: 'var(--text-sm)' }}>Error</p>
-                    <p style={{ color: '#dc2626', fontSize: 'var(--text-xs)', marginTop: 'var(--space-1)' }}>{goldPremiumError}</p>
+                    <p
+                      style={{
+                        fontWeight: "var(--font-bold)",
+                        color: "#dc2626",
+                        fontSize: "var(--text-sm)",
+                      }}
+                    >
+                      Error
+                    </p>
+                    <p
+                      style={{
+                        color: "#dc2626",
+                        fontSize: "var(--text-xs)",
+                        marginTop: "var(--space-1)",
+                      }}
+                    >
+                      {goldPremiumError}
+                    </p>
                   </div>
                 )}
 
                 {/* Chart */}
-                {goldPremiumData && goldPremiumData.data && goldPremiumData.data.length > 0 ? (
+                {goldPremiumData &&
+                goldPremiumData.data &&
+                goldPremiumData.data.length > 0 ? (
                   <div>
                     <GoldPremiumChartResponsive
                       data={goldPremiumData.data}
@@ -423,22 +666,77 @@ export const FinancialDataPage: React.FC = () => {
                     {/* Metadata Display */}
                     {goldPremiumData.metadata && (
                       <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-xl">
-                        <h4 style={{ fontSize: 'var(--text-sm)', fontWeight: 'var(--font-bold)', color: '#1e293b', marginBottom: 'var(--space-2)' }}>
+                        <h4
+                          style={{
+                            fontSize: "var(--text-sm)",
+                            fontWeight: "var(--font-bold)",
+                            color: "#1e293b",
+                            marginBottom: "var(--space-2)",
+                          }}
+                        >
                           Calculation Details
                         </h4>
-                        <div className="space-y-1" style={{ fontSize: 'var(--text-xs)', color: '#334155', lineHeight: '1.6' }}>
-                          <p><strong style={{ color: '#1e293b' }}>Formula:</strong> {String(goldPremiumData.metadata.formula || "N/A")}</p>
-                          <p><strong style={{ color: '#1e293b' }}>Conversion:</strong> {String(goldPremiumData.metadata.conversion || "N/A")}</p>
-                          <p><strong style={{ color: '#1e293b' }}>Note:</strong> {String(goldPremiumData.metadata.note || "N/A")}</p>
-                          <p><strong style={{ color: '#1e293b' }}>Sources:</strong> Gold: {String(goldPremiumData.metadata.gold_source || "N/A")}, Exchange: {String(goldPremiumData.metadata.exchange_rate_source || "N/A")}, Market: {String(goldPremiumData.metadata.stock_source || "N/A")}</p>
+                        <div
+                          className="space-y-1"
+                          style={{
+                            fontSize: "var(--text-xs)",
+                            color: "#334155",
+                            lineHeight: "1.6",
+                          }}
+                        >
+                          <p>
+                            <strong style={{ color: "#1e293b" }}>
+                              Formula:
+                            </strong>{" "}
+                            {String(goldPremiumData.metadata.formula || "N/A")}
+                          </p>
+                          <p>
+                            <strong style={{ color: "#1e293b" }}>
+                              Conversion:
+                            </strong>{" "}
+                            {String(
+                              goldPremiumData.metadata.conversion || "N/A",
+                            )}
+                          </p>
+                          <p>
+                            <strong style={{ color: "#1e293b" }}>Note:</strong>{" "}
+                            {String(goldPremiumData.metadata.note || "N/A")}
+                          </p>
+                          <p>
+                            <strong style={{ color: "#1e293b" }}>
+                              Sources:
+                            </strong>{" "}
+                            Gold:{" "}
+                            {String(
+                              goldPremiumData.metadata.gold_source || "N/A",
+                            )}
+                            , Exchange:{" "}
+                            {String(
+                              goldPremiumData.metadata.exchange_rate_source ||
+                                "N/A",
+                            )}
+                            , Market:{" "}
+                            {String(
+                              goldPremiumData.metadata.stock_source || "N/A",
+                            )}
+                          </p>
                         </div>
                       </div>
                     )}
                   </div>
                 ) : showGoldPremium && !isLoading ? (
                   <div className="glass-card p-8 text-center">
-                    <TrendingDown className="w-16 h-16 mx-auto mb-4 opacity-30" style={{ color: 'var(--cube-yellow)' }} />
-                    <p style={{ fontSize: 'var(--text-lg)', fontWeight: 'var(--font-bold)', color: 'var(--cube-gray-900)' }}>
+                    <TrendingDown
+                      className="w-16 h-16 mx-auto mb-4 opacity-30"
+                      style={{ color: "var(--cube-yellow)" }}
+                    />
+                    <p
+                      style={{
+                        fontSize: "var(--text-lg)",
+                        fontWeight: "var(--font-bold)",
+                        color: "var(--cube-gray-900)",
+                      }}
+                    >
                       No premium data available
                     </p>
                   </div>

@@ -1,11 +1,11 @@
-import { finCatchAPI } from "../services/api";
+import { finCatchAPI } from "@/services/api";
 import {
   BenchmarkData,
   BenchmarkOption,
-  PortfolioBenchmarkComparison,
   CurrencyCode,
+  PortfolioBenchmarkComparison,
   PortfolioEntry,
-} from "../types";
+} from "@/types";
 import { convertCurrency } from "./currency";
 
 /**
@@ -17,7 +17,7 @@ export const calculatePortfolioHistoricalPerformance = async (
   startDate: number,
   endDate: number,
   displayCurrency: CurrencyCode,
-  intervalDays: number = 1
+  intervalDays: number = 1,
 ): Promise<BenchmarkData[]> => {
   const result: BenchmarkData[] = [];
   const timestamps: number[] = [];
@@ -86,7 +86,7 @@ export const calculatePortfolioHistoricalPerformance = async (
         const priceInDisplayCurrency = await convertCurrency(
           currentPrice,
           currentPriceCurrency,
-          displayCurrency
+          displayCurrency,
         );
 
         // Calculate quantity in proper units (for gold, convert to taels)
@@ -102,7 +102,10 @@ export const calculatePortfolioHistoricalPerformance = async (
 
         totalValue += priceInDisplayCurrency * quantityInBaseUnit;
       } catch (error) {
-        console.warn(`Failed to fetch price for ${entry.symbol} at ${timestamp}:`, error);
+        console.warn(
+          `Failed to fetch price for ${entry.symbol} at ${timestamp}:`,
+          error,
+        );
       }
     }
 
@@ -112,7 +115,8 @@ export const calculatePortfolioHistoricalPerformance = async (
     }
 
     // Normalize to 100 at start
-    const normalizedValue = initialValue > 0 ? (totalValue / initialValue) * 100 : 100;
+    const normalizedValue =
+      initialValue > 0 ? (totalValue / initialValue) * 100 : 100;
 
     result.push({
       timestamp,
@@ -130,7 +134,7 @@ export const fetchBenchmarkData = async (
   benchmark: BenchmarkOption,
   startDate: number,
   endDate: number,
-  _displayCurrency: CurrencyCode
+  _displayCurrency: CurrencyCode,
 ): Promise<BenchmarkData[]> => {
   const result: BenchmarkData[] = [];
 
@@ -162,7 +166,10 @@ export const fetchBenchmarkData = async (
 
     return result;
   } catch (error) {
-    console.error(`Failed to fetch benchmark data for ${benchmark.symbol}:`, error);
+    console.error(
+      `Failed to fetch benchmark data for ${benchmark.symbol}:`,
+      error,
+    );
     return [];
   }
 };
@@ -175,7 +182,7 @@ export const calculateBenchmarkComparison = async (
   benchmark: BenchmarkOption,
   startDate: number,
   endDate: number,
-  displayCurrency: CurrencyCode
+  displayCurrency: CurrencyCode,
 ): Promise<PortfolioBenchmarkComparison | null> => {
   try {
     // Calculate portfolio performance
@@ -184,7 +191,7 @@ export const calculateBenchmarkComparison = async (
       startDate,
       endDate,
       displayCurrency,
-      1 // Daily intervals
+      1, // Daily intervals
     );
 
     // Fetch benchmark data
@@ -192,7 +199,7 @@ export const calculateBenchmarkComparison = async (
       benchmark,
       startDate,
       endDate,
-      displayCurrency
+      displayCurrency,
     );
 
     if (portfolioData.length === 0 || benchmarkData.length === 0) {

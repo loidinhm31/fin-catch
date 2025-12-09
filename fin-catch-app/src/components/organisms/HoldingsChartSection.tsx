@@ -1,7 +1,7 @@
 import React from "react";
 import { BarChart3 } from "lucide-react";
-import { PortfolioHoldingsPerformance } from "../../types";
-import { HoldingsPerformanceChartResponsive } from "./HoldingsPerformanceChartResponsive";
+import { PortfolioHoldingsPerformance } from "@/types";
+import { HoldingsPerformanceChartResponsive } from "@/components/organisms/HoldingsPerformanceChartResponsive";
 
 export interface HoldingsChartSectionProps {
   showChart: boolean;

@@ -1,4 +1,4 @@
-import React, {forwardRef} from "react";
+import React, { forwardRef } from "react";
 
 export interface SelectOption {
   value: string;
@@ -14,15 +14,26 @@ export interface SelectProps extends React.SelectHTMLAttributes<HTMLSelectElemen
 }
 
 export const Select = forwardRef<HTMLSelectElement, SelectProps>(
-  ({ options, error = false, fullWidth = false, placeholder, className = "", children, ...props }, ref) => {
+  (
+    {
+      options,
+      error = false,
+      fullWidth = false,
+      placeholder,
+      className = "",
+      children,
+      ...props
+    },
+    ref,
+  ) => {
     const widthStyle = fullWidth ? "w-full" : "";
 
     return (
       <div className={`relative ${widthStyle}`}>
         <select
           ref={ref}
-          className={`glass-input ${widthStyle} ${error ? 'border-2 border-red-500' : ''} ${className} pr-10 appearance-none cursor-pointer`}
-          style={{ color: 'var(--color-text-primary)' }}
+          className={`glass-input ${widthStyle} ${error ? "border-2 border-red-500" : ""} ${className} pr-10 appearance-none cursor-pointer`}
+          style={{ color: "var(--color-text-primary)" }}
           {...props}
         >
           {placeholder && (
@@ -30,14 +41,18 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(
               {placeholder}
             </option>
           )}
-          {options && options.map((option) => (
-            <option key={option.value} value={option.value}>
-              {option.label}
-            </option>
-          ))}
+          {options &&
+            options.map((option) => (
+              <option key={option.value} value={option.value}>
+                {option.label}
+              </option>
+            ))}
           {children}
         </select>
-        <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3" style={{ color: 'var(--color-text-primary)' }}>
+        <div
+          className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3"
+          style={{ color: "var(--color-text-primary)" }}
+        >
           <svg
             className="fill-current h-4 w-4"
             xmlns="http://www.w3.org/2000/svg"
@@ -48,7 +63,7 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(
         </div>
       </div>
     );
-  }
+  },
 );
 
 Select.displayName = "Select";

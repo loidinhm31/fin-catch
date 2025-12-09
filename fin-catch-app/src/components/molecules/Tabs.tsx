@@ -13,9 +13,16 @@ export interface TabsProps {
   className?: string;
 }
 
-export const Tabs: React.FC<TabsProps> = ({ tabs, activeTab, onChange, className = "" }) => {
+export const Tabs: React.FC<TabsProps> = ({
+  tabs,
+  activeTab,
+  onChange,
+  className = "",
+}) => {
   return (
-    <div className={`flex space-x-2 border-b border-gray-200 dark:border-gray-700 ${className}`}>
+    <div
+      className={`flex space-x-2 border-b border-gray-200 dark:border-gray-700 ${className}`}
+    >
       {tabs.map((tab) => {
         const isActive = tab.id === activeTab;
         return (

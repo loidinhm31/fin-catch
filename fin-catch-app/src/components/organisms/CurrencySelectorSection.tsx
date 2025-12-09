@@ -1,5 +1,5 @@
 import React from "react";
-import { CURRENCY_SYMBOLS, CurrencyCode } from "../../types";
+import { CURRENCY_SYMBOLS, CurrencyCode } from "@/types";
 
 export interface CurrencySelectorSectionProps {
   selectedCurrency: CurrencyCode;
@@ -7,7 +7,9 @@ export interface CurrencySelectorSectionProps {
   currencies?: CurrencyCode[];
 }
 
-export const CurrencySelectorSection: React.FC<CurrencySelectorSectionProps> = ({
+export const CurrencySelectorSection: React.FC<
+  CurrencySelectorSectionProps
+> = ({
   selectedCurrency,
   onSelectCurrency,
   currencies = ["USD", "VND", "EUR", "GBP", "JPY"],

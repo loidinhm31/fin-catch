@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import {
+  Brush,
   CartesianGrid,
   Legend,
   Line,
@@ -8,14 +9,16 @@ import {
   Tooltip,
   XAxis,
   YAxis,
-  Brush,
 } from "recharts";
-import { GoldPricePoint } from "../../types";
-import { formatTimestampForChart } from "../../utils/dateUtils";
-import { formatCurrencyValue, formatCurrencyCompact } from "../../utils/chartFormatters";
-import { calculateXAxisInterval } from "../../utils/chartUtils";
-import { useResponsiveChart } from "../../hooks/useResponsiveChart";
-import { ResponsiveChartContainer } from "../molecules/ResponsiveChartContainer";
+import { GoldPricePoint } from "@/types";
+import { formatTimestampForChart } from "@/utils/dateUtils";
+import {
+  formatCurrencyCompact,
+  formatCurrencyValue,
+} from "@/utils/chartFormatters";
+import { calculateXAxisInterval } from "@/utils/chartUtils";
+import { useResponsiveChart } from "@/hooks/useResponsiveChart";
+import { ResponsiveChartContainer } from "@/components/molecules";
 
 export interface GoldChartResponsiveProps {
   data: GoldPricePoint[];
@@ -31,7 +34,8 @@ export const GoldChartResponsive: React.FC<GoldChartResponsiveProps> = ({
     endIndex?: number;
   }>({});
 
-  const { dimensions, fullscreenDimensions, isMobile, isTablet } = useResponsiveChart();
+  const { dimensions, fullscreenDimensions, isMobile, isTablet } =
+    useResponsiveChart();
 
   if (!data || data.length === 0) {
     return (
@@ -68,7 +72,7 @@ export const GoldChartResponsive: React.FC<GoldChartResponsiveProps> = ({
       chartData.length,
       isFullscreen,
       isMobile,
-      isTablet
+      isTablet,
     );
 
     return (
@@ -100,7 +104,10 @@ export const GoldChartResponsive: React.FC<GoldChartResponsiveProps> = ({
           <XAxis
             dataKey="time"
             stroke="#a0aec0"
-            style={{ fontSize: `${activeDimensions.tickFontSize}px`, fontWeight: "500" }}
+            style={{
+              fontSize: `${activeDimensions.tickFontSize}px`,
+              fontWeight: "500",
+            }}
             angle={activeDimensions.angleXAxis}
             textAnchor="end"
             height={activeDimensions.marginBottom}
@@ -109,14 +116,21 @@ export const GoldChartResponsive: React.FC<GoldChartResponsiveProps> = ({
           />
           <YAxis
             stroke="#a0aec0"
-            style={{ fontSize: `${activeDimensions.tickFontSize}px`, fontWeight: "500" }}
+            style={{
+              fontSize: `${activeDimensions.tickFontSize}px`,
+              fontWeight: "500",
+            }}
             label={
               !isMobile
                 ? {
                     value: "Price (VND)",
                     angle: -90,
                     position: "insideLeft",
-                    style: { fill: "#ffffff", fontWeight: "600", fontSize: `${activeDimensions.labelFontSize}px` },
+                    style: {
+                      fill: "#ffffff",
+                      fontWeight: "600",
+                      fontSize: `${activeDimensions.labelFontSize}px`,
+                    },
                   }
                 : undefined
             }
@@ -132,10 +146,15 @@ export const GoldChartResponsive: React.FC<GoldChartResponsiveProps> = ({
               color: "#ffffff",
               fontWeight: "600",
               fontSize: `${activeDimensions.fontSize}px`,
-              boxShadow: "0 8px 24px rgba(0, 0, 0, 0.3), 0 0 24px rgba(255, 170, 0, 0.2)",
+              boxShadow:
+                "0 8px 24px rgba(0, 0, 0, 0.3), 0 0 24px rgba(255, 170, 0, 0.2)",
               backdropFilter: "blur(12px)",
             }}
-            labelStyle={{ color: "#ffaa00", marginBottom: "8px", fontSize: `${activeDimensions.fontSize}px` }}
+            labelStyle={{
+              color: "#ffaa00",
+              marginBottom: "8px",
+              fontSize: `${activeDimensions.fontSize}px`,
+            }}
             formatter={(value: any, name: string) => {
               const label = name === "buy" ? "Buy Price" : "Sell Price";
               return [formatCurrencyValue(Number(value)) + " VND", label];
@@ -160,7 +179,12 @@ export const GoldChartResponsive: React.FC<GoldChartResponsiveProps> = ({
             strokeWidth={isMobile ? 2 : 2.5}
             dot={false}
             name="Buy Price"
-            activeDot={{ r: isMobile ? 4 : 6, fill: "#ffaa00", stroke: "#ffffff", strokeWidth: 2 }}
+            activeDot={{
+              r: isMobile ? 4 : 6,
+              fill: "#ffaa00",
+              stroke: "#ffffff",
+              strokeWidth: 2,
+            }}
           />
           <Line
             type="monotone"
@@ -169,7 +193,12 @@ export const GoldChartResponsive: React.FC<GoldChartResponsiveProps> = ({
             strokeWidth={isMobile ? 2 : 2.5}
             dot={false}
             name="Sell Price"
-            activeDot={{ r: isMobile ? 4 : 6, fill: "#00ff88", stroke: "#ffffff", strokeWidth: 2 }}
+            activeDot={{
+              r: isMobile ? 4 : 6,
+              fill: "#00ff88",
+              stroke: "#ffffff",
+              strokeWidth: 2,
+            }}
           />
           {showBrush && (
             <Brush

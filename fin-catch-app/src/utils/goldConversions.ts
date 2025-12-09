@@ -2,7 +2,7 @@ export type GoldUnit = "gram" | "mace" | "tael" | "ounce" | "kg";
 
 export const getGoldUnitByIdAndSource = (
   goldPriceId: string,
-  source: string
+  source: string,
 ): GoldUnit => {
   if (source === "sjc") {
     // SJC gold bars (1L, 10L, 1KG) - priced per tael (lượng)

@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Maximize2 } from "lucide-react";
-import { ChartDialog } from "../organisms";
+import { ChartDialog } from "@/components/organisms";
 
 export interface ResponsiveChartContainerProps {
   title: string;
@@ -11,7 +11,9 @@ export interface ResponsiveChartContainerProps {
   className?: string;
 }
 
-export const ResponsiveChartContainer: React.FC<ResponsiveChartContainerProps> = ({
+export const ResponsiveChartContainer: React.FC<
+  ResponsiveChartContainerProps
+> = ({
   title,
   subtitle,
   children,
