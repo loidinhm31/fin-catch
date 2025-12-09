@@ -17,7 +17,12 @@ export default function App() {
       }}
     >
       {/* Page Content */}
-      <div className="pb-20">
+      <div
+        style={{
+          paddingBottom: "calc(80px + env(safe-area-inset-bottom, 0px))",
+          paddingTop: "20px",
+        }}
+      >
         {currentPage === "financial-data" ? (
           <FinancialDataPage />
         ) : (
@@ -34,6 +39,7 @@ export default function App() {
           WebkitBackdropFilter: "blur(16px)",
           borderTopColor: "rgba(255, 255, 255, 0.1)",
           boxShadow: "0 -4px 20px rgba(0, 0, 0, 0.4)",
+          paddingBottom: "env(safe-area-inset-bottom, 0px)",
         }}
       >
         <div className="max-w-lg mx-auto px-4">
