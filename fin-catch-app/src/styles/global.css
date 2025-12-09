@@ -547,41 +547,42 @@ h1, h2, h3, h4, h5, h6 {
 
 /* ===== BACKWARDS COMPATIBILITY ===== */
 
-/* Keep old color variable names for existing components */
---cube-cyan: var(--color-cyan-400);
---cube-cyan-light: var(--color-cyan-400);
---cube-cyan-dark: var(--color-cyan-500);
---cube-blue: var(--color-blue-500);
---cube-blue-light: var(--color-blue-400);
---cube-blue-dark: var(--color-blue-500);
---cube-yellow: var(--color-amber-400);
---cube-yellow-light: var(--color-amber-400);
---cube-pink: #EC4899;
---cube-pink-light: #F9A8D4;
+:root {
+    /* Keep old color variable names for existing components */
+    --cube-cyan: var(--color-cyan-400);
+    --cube-cyan-light: var(--color-cyan-400);
+    --cube-cyan-dark: var(--color-cyan-500);
+    --cube-blue: var(--color-blue-500);
+    --cube-blue-light: var(--color-blue-400);
+    --cube-blue-dark: var(--color-blue-500);
+    --cube-yellow: var(--color-amber-400);
+    --cube-yellow-light: var(--color-amber-400);
+    --cube-pink: #EC4899;
+    --cube-pink-light: #F9A8D4;
 
-/* Text colors - ensure high contrast */
---cube-gray-900: var(--color-text-primary);    /* #F8FAFC - White text for dark mode */
---cube-gray-800: var(--color-text-secondary);  /* #CBD5E1 - Light gray */
---cube-gray-700: var(--color-text-secondary);  /* #CBD5E1 - Light gray */
---cube-gray-600: var(--color-text-secondary);  /* #CBD5E1 - Light gray */
---cube-gray-500: var(--color-text-muted);      /* #64748B - Muted but visible */
---cube-gray-400: var(--color-text-muted);      /* #64748B - Muted but visible */
---cube-gray-300: var(--color-text-secondary);  /* #CBD5E1 - Light gray */
---cube-gray-200: var(--color-border-primary);  /* #334155 - Borders */
---cube-gray-100: var(--color-border-secondary); /* #1E293B - Subtle borders */
---cube-white: var(--color-text-primary);       /* #F8FAFC - White */
+    /* Text colors - ensure high contrast */
+    --cube-gray-900: var(--color-text-primary);    /* #F8FAFC - White text for dark mode */
+    --cube-gray-800: var(--color-text-secondary);  /* #CBD5E1 - Light gray */
+    --cube-gray-700: var(--color-text-secondary);  /* #CBD5E1 - Light gray */
+    --cube-gray-600: var(--color-text-secondary);  /* #CBD5E1 - Light gray */
+    --cube-gray-500: var(--color-text-muted);      /* #64748B - Muted but visible */
+    --cube-gray-400: var(--color-text-muted);      /* #64748B - Muted but visible */
+    --cube-gray-300: var(--color-text-secondary);  /* #CBD5E1 - Light gray */
+    --cube-gray-200: var(--color-border-primary);  /* #334155 - Borders */
+    --cube-gray-100: var(--color-border-secondary); /* #1E293B - Subtle borders */
+    --cube-white: var(--color-text-primary);       /* #F8FAFC - White */
 
-/* Old gradient variables */
---gradient-explore: linear-gradient(135deg, var(--color-bg-primary) 0%, var(--color-bg-secondary) 100%);
+    /* Old gradient variables */
+    --gradient-explore: linear-gradient(135deg, var(--color-bg-primary) 0%, var(--color-bg-secondary) 100%);
+}
 
 /* ===== DATE PICKER FIXES ===== */
 
-/* Fix white text on white background in date inputs */
+/* Dark mode date inputs - allow text color to inherit from parent */
 input[type="date"],
 input[type="time"],
 input[type="datetime-local"] {
-    color: #111827 !important;
-    color-scheme: light;
+    color-scheme: dark;
     position: relative;
 }
 
@@ -590,17 +591,13 @@ input[type="date"]::-webkit-calendar-picker-indicator {
     cursor: pointer;
     position: relative;
     z-index: 2;
+    filter: invert(1); /* Make calendar icon visible on dark background */
 }
 
 /* Make sure the native date picker appears above modals */
 input[type="date"]::-webkit-datetime-edit,
 input[type="date"]::-webkit-datetime-edit-fields-wrapper {
     position: relative;
-}
-
-/* Fix for date input in modals and forms */
-input[type="date"]:valid {
-    color: #111827 !important;
 }
 
 /* Ensure the calendar popup appears above everything */
@@ -615,10 +612,11 @@ input[type="datetime-local"]::-webkit-calendar-picker-indicator {
     cursor: pointer;
     position: relative;
     z-index: 2;
+    filter: invert(1); /* Make calendar icon visible on dark background */
 }
 
-/* Option elements should be dark text */
+/* Option elements in dropdowns - use light background for readability */
 option {
-    color: #111827 !important;
-    background: white !important;
+    color: #111827;
+    background: white;
 }

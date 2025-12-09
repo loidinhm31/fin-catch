@@ -22,7 +22,7 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(
         <select
           ref={ref}
           className={`glass-input ${widthStyle} ${error ? 'border-2 border-red-500' : ''} ${className} pr-10 appearance-none cursor-pointer`}
-          style={{ color: 'var(--cube-gray-900)' }}
+          style={{ color: 'var(--color-text-primary)' }}
           {...props}
         >
           {placeholder && (
@@ -37,7 +37,7 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(
           ))}
           {children}
         </select>
-        <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3" style={{ color: 'var(--cube-gray-900)' }}>
+        <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3" style={{ color: 'var(--color-text-primary)' }}>
           <svg
             className="fill-current h-4 w-4"
             xmlns="http://www.w3.org/2000/svg"

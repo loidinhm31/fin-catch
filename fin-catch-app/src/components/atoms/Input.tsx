@@ -13,7 +13,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
       <input
         ref={ref}
         className={`glass-input ${widthStyle} ${error ? 'border-2 border-red-500' : ''} ${className}`}
-        style={{ color: 'var(--cube-gray-900)' }}
+        style={{ color: 'var(--color-text-primary)' }}
         {...props}
       />
     );

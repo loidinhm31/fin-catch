@@ -20,7 +20,8 @@ export const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children, 
 
   return (
     <div
-      className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-end sm:items-center justify-center z-[100] p-0 sm:p-4"
+      className="fixed inset-0 backdrop-blur-sm flex items-end sm:items-center justify-center z-[100] p-0 sm:p-4"
+      style={{ backgroundColor: 'rgba(0, 0, 0, 0.7)' }}
       onClick={(e) => {
         // Only close if clicking the backdrop, not the modal content
         if (e.target === e.currentTarget) {
@@ -28,12 +29,43 @@ export const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children, 
         }
       }}
     >
-      <div className={`bg-white w-full ${sizeClasses[size]} rounded-t-2xl sm:rounded-2xl max-h-[90vh] overflow-hidden shadow-2xl flex flex-col`}>
-        <div className="sticky top-0 bg-white z-10 px-6 pt-6 pb-4 border-b border-gray-100 flex justify-between items-center rounded-t-2xl sm:rounded-t-2xl">
-          <h2 className="text-2xl font-bold text-gray-900">{title}</h2>
+      <div
+        className={`w-full ${sizeClasses[size]} rounded-t-2xl sm:rounded-2xl max-h-[90vh] overflow-hidden flex flex-col glass-container`}
+        style={{
+          background: 'var(--glass-bg-dark-strong)',
+          backdropFilter: 'var(--blur-xl)',
+          boxShadow: 'var(--shadow-xl)',
+        }}
+      >
+        <div
+          className="sticky top-0 z-10 px-6 pt-6 pb-4 flex justify-between items-center rounded-t-2xl sm:rounded-t-2xl"
+          style={{
+            background: 'var(--glass-bg-dark-strong)',
+            borderBottom: '1px solid var(--glass-border-medium)',
+          }}
+        >
+          <h2
+            className="text-2xl font-bold"
+            style={{
+              color: 'var(--color-text-primary)',
+              fontFamily: 'var(--font-heading)',
+            }}
+          >
+            {title}
+          </h2>
           <button
             onClick={onClose}
-            className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center hover:bg-gray-200 transition-all flex-shrink-0"
+            className="w-10 h-10 rounded-full flex items-center justify-center transition-all flex-shrink-0"
+            style={{
+              backgroundColor: 'rgba(255, 255, 255, 0.1)',
+              color: 'var(--color-text-primary)',
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.2)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.1)';
+            }}
           >
             <X className="w-5 h-5" />
           </button>

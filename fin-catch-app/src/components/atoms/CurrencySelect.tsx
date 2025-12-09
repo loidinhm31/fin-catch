@@ -43,49 +43,61 @@ export const CurrencySelect: React.FC<CurrencySelectProps> = ({
   };
 
   return (
-    <div className={`currency-select-wrapper ${className}`}>
-      {label && <label htmlFor={id}>{label}</label>}
-      <select id={id} value={value} onChange={handleChange} disabled={disabled}>
-        {currencies.map((currency) => (
-          <option key={currency} value={currency}>
-            {CURRENCY_SYMBOLS[currency]} {currency} - {CURRENCY_LABELS[currency]}
-          </option>
-        ))}
-      </select>
-
-      <style>{`
-        .currency-select-wrapper {
-          display: flex;
-          flex-direction: column;
-          gap: 4px;
-        }
-
-        .currency-select-wrapper label {
-          font-size: 14px;
-          font-weight: 500;
-          color: #555;
-        }
-
-        .currency-select-wrapper select {
-          padding: 8px 12px;
-          border: 1px solid #ccc;
-          border-radius: 4px;
-          font-size: 14px;
-          background: white;
-          color: #111827;
-          cursor: pointer;
-        }
-
-        .currency-select-wrapper select:focus {
-          outline: none;
-          border-color: #007bff;
-        }
-
-        .currency-select-wrapper select:disabled {
-          background: #f5f5f5;
-          cursor: not-allowed;
-        }
-      `}</style>
+    <div className={className}>
+      {label && (
+        <label
+          htmlFor={id}
+          style={{
+            display: 'block',
+            fontSize: 'var(--text-sm)',
+            fontWeight: 'var(--font-bold)',
+            marginBottom: 'var(--space-2)',
+            color: 'var(--color-text-primary)',
+          }}
+        >
+          {label}
+        </label>
+      )}
+      <div style={{ position: 'relative' }}>
+        <select
+          id={id}
+          value={value}
+          onChange={handleChange}
+          disabled={disabled}
+          className="glass-input w-full"
+          style={{
+            color: 'var(--color-text-primary) !important',
+            cursor: disabled ? 'not-allowed' : 'pointer',
+            opacity: disabled ? 0.6 : 1,
+            appearance: 'none',
+            paddingRight: '2.5rem',
+          }}
+        >
+          {currencies.map((currency) => (
+            <option key={currency} value={currency}>
+              {CURRENCY_SYMBOLS[currency]} {currency} - {CURRENCY_LABELS[currency]}
+            </option>
+          ))}
+        </select>
+        <div
+          style={{
+            pointerEvents: 'none',
+            position: 'absolute',
+            top: '50%',
+            right: '0.75rem',
+            transform: 'translateY(-50%)',
+            color: 'var(--color-text-primary)',
+          }}
+        >
+          <svg
+            style={{ fill: 'currentColor', height: '1rem', width: '1rem' }}
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 20 20"
+          >
+            <path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" />
+          </svg>
+        </div>
+      </div>
     </div>
   );
 };

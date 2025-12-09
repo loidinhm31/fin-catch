@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from "react";
 import {Coins, TrendingDown, TrendingUp} from "lucide-react";
-import {GoldChart, GoldPremiumChart, GoldQueryForm, StockChart, StockQueryForm,} from "../organisms";
+import {GoldChartResponsive, GoldPremiumChartResponsive, GoldQueryForm, StockChartResponsive, StockQueryForm,} from "../organisms";
 import {
   GoldPremiumRequest,
   GoldPremiumResponse,
@@ -258,20 +258,15 @@ export const FinancialDataPage: React.FC = () => {
           {/* Chart Display Section */}
           {currentData && currentData.data && currentData.data.length > 0 ? (
             <div>
-              <h2 style={{ fontSize: 'var(--text-xl)', fontWeight: 'var(--font-bold)', color: 'var(--cube-gray-900)', marginBottom: 'var(--space-4)' }}>
-                Chart Visualization
-              </h2>
-              <div className="glass-card p-6">
-                {activeTab === "stock" && stockData ? (
-                  <StockChart
-                    data={stockData.data!}
-                    resolution={stockData.resolution}
-                    symbol={stockData.symbol}
-                  />
-                ) : activeTab === "gold" && goldData ? (
-                  <GoldChart data={goldData.data!} goldPriceId={goldData.gold_price_id} />
-                ) : null}
-              </div>
+              {activeTab === "stock" && stockData ? (
+                <StockChartResponsive
+                  data={stockData.data!}
+                  resolution={stockData.resolution}
+                  symbol={stockData.symbol}
+                />
+              ) : activeTab === "gold" && goldData ? (
+                <GoldChartResponsive data={goldData.data!} goldPriceId={goldData.gold_price_id} />
+              ) : null}
 
               {/* Data Summary */}
               <div className="mt-6 glass-card p-6">
@@ -419,8 +414,8 @@ export const FinancialDataPage: React.FC = () => {
 
                 {/* Chart */}
                 {goldPremiumData && goldPremiumData.data && goldPremiumData.data.length > 0 ? (
-                  <div className="glass-card p-3">
-                    <GoldPremiumChart
+                  <div>
+                    <GoldPremiumChartResponsive
                       data={goldPremiumData.data}
                       showFullChart={showFullPremiumChart}
                     />

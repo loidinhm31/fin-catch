@@ -20,3 +20,5 @@ export * from "./EmptyState";
 export * from "./AlertDialog";
 export * from "./ConfirmDialog";
 
+export * from "./CubeShape";
+export * from "./IconButton";
