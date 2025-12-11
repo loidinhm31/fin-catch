@@ -2,6 +2,7 @@ import React from "react";
 import { ChevronDown, ChevronUp, Edit, Trash2 } from "lucide-react";
 import { CurrencyCode, EntryPerformance, PortfolioEntry } from "@/types";
 import { convertToGrams, getUnitLabel } from "@/utils/goldConversions";
+import { CouponPaymentsSection } from "./CouponPaymentsSection";
 
 export interface HoldingCardProps {
   entryPerf: EntryPerformance;
@@ -10,6 +11,7 @@ export interface HoldingCardProps {
   onToggleExpand: () => void;
   onEdit: (entry: PortfolioEntry) => void;
   onDelete: (entryId: number) => void;
+  onPaymentsChange?: () => void; // Callback to refresh performance after coupon changes
   formatCurrency: (value: number, currency?: CurrencyCode) => string;
   formatPercentage: (value: number) => string;
   formatDate: (timestamp: number) => string;
@@ -22,6 +24,7 @@ export const HoldingCard: React.FC<HoldingCardProps> = ({
   onToggleExpand,
   onEdit,
   onDelete,
+  onPaymentsChange,
   formatCurrency,
   formatPercentage,
   formatDate,
@@ -38,8 +41,13 @@ export const HoldingCard: React.FC<HoldingCardProps> = ({
               className="inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-semibold"
               style={{
                 backgroundColor:
-                  entry.asset_type === "stock" ? "#dbeafe" : "#fef3c7",
-                color: entry.asset_type === "stock" ? "#1e40af" : "#92400e",
+                  entry.asset_type === "stock" ? "#dbeafe" :
+                  entry.asset_type === "gold" ? "#fef3c7" :
+                  "#f3e8ff",
+                color:
+                  entry.asset_type === "stock" ? "#1e40af" :
+                  entry.asset_type === "gold" ? "#92400e" :
+                  "#6b21a8",
               }}
             >
               {entry.asset_type.toUpperCase()}
@@ -165,7 +173,9 @@ export const HoldingCard: React.FC<HoldingCardProps> = ({
                 Quantity{" "}
                 {entry.asset_type === "gold" && entry.unit
                   ? `(${getUnitLabel(entry.unit)})`
-                  : ""}
+                  : entry.asset_type === "bond"
+                  ? "(bonds)"
+                  : "(shares)"}
               </p>
               <p
                 style={{
@@ -198,6 +208,8 @@ export const HoldingCard: React.FC<HoldingCardProps> = ({
                 Purchase Price per{" "}
                 {entry.asset_type === "gold" && entry.unit
                   ? entry.unit
+                  : entry.asset_type === "bond"
+                  ? "bond"
                   : "share"}{" "}
                 ({displayCurrency})
               </p>
@@ -221,6 +233,8 @@ export const HoldingCard: React.FC<HoldingCardProps> = ({
                 Current Price per{" "}
                 {entry.asset_type === "gold" && entry.unit
                   ? entry.unit
+                  : entry.asset_type === "bond"
+                  ? "bond"
                   : "share"}{" "}
                 ({displayCurrency})
               </p>
@@ -298,6 +312,71 @@ export const HoldingCard: React.FC<HoldingCardProps> = ({
                 {entry.gold_type}
               </p>
             </div>
+          )}
+          {entry.asset_type === "bond" && (
+            <>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <p style={{ fontSize: "var(--text-xs)", color: "var(--cube-gray-500)" }}>
+                    Face Value
+                  </p>
+                  <p style={{ fontSize: "var(--text-sm)", fontWeight: "var(--font-medium)", color: "var(--cube-gray-900)" }}>
+                    {entry.face_value ? formatCurrency(entry.face_value, entry.currency) : "N/A"}
+                  </p>
+                </div>
+                <div>
+                  <p style={{ fontSize: "var(--text-xs)", color: "var(--cube-gray-500)" }}>
+                    Coupon Rate
+                  </p>
+                  <p style={{ fontSize: "var(--text-sm)", fontWeight: "var(--font-medium)", color: "var(--cube-gray-900)" }}>
+                    {entry.coupon_rate ? `${entry.coupon_rate.toFixed(2)}%` : "N/A"}
+                  </p>
+                </div>
+                <div>
+                  <p style={{ fontSize: "var(--text-xs)", color: "var(--cube-gray-500)" }}>
+                    Maturity Date
+                  </p>
+                  <p style={{ fontSize: "var(--text-sm)", fontWeight: "var(--font-medium)", color: "var(--cube-gray-900)" }}>
+                    {entry.maturity_date ? formatDate(entry.maturity_date) : "N/A"}
+                  </p>
+                </div>
+                <div>
+                  <p style={{ fontSize: "var(--text-xs)", color: "var(--cube-gray-500)" }}>
+                    Frequency
+                  </p>
+                  <p style={{ fontSize: "var(--text-sm)", fontWeight: "var(--font-medium)", color: "var(--cube-gray-900)" }}>
+                    {entry.coupon_frequency ? entry.coupon_frequency.charAt(0).toUpperCase() + entry.coupon_frequency.slice(1) : "N/A"}
+                  </p>
+                </div>
+                {entry.current_market_price && (
+                  <div className="col-span-2">
+                    <p style={{ fontSize: "var(--text-xs)", color: "var(--cube-gray-500)" }}>
+                      Current Market Price (Manual)
+                    </p>
+                    <p style={{ fontSize: "var(--text-sm)", fontWeight: "var(--font-medium)", color: "var(--cube-gray-900)" }}>
+                      {formatCurrency(entry.current_market_price, entry.currency)}
+                      {entry.last_price_update && (
+                        <span style={{ fontSize: "var(--text-xs)", color: "var(--cube-gray-500)", marginLeft: "4px" }}>
+                          (Updated: {formatDate(entry.last_price_update)})
+                        </span>
+                      )}
+                    </p>
+                  </div>
+                )}
+              </div>
+
+              {/* Coupon Payments Section */}
+              {entry.id && (
+                <CouponPaymentsSection
+                  entryId={entry.id}
+                  entryCurrency={entry.currency || "USD"}
+                  displayCurrency={displayCurrency}
+                  formatCurrency={formatCurrency}
+                  formatDate={formatDate}
+                  onPaymentsChange={onPaymentsChange}
+                />
+              )}
+            </>
           )}
           {entry.notes && (
             <div>

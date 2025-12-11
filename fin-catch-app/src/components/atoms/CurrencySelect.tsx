@@ -1,5 +1,7 @@
+import * as React from "react";
 import type { CurrencyCode } from "../../types";
 import { CURRENCY_LABELS, CURRENCY_SYMBOLS } from "../../types";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./Select";
 
 interface CurrencySelectProps {
   /**
@@ -48,8 +50,8 @@ export const CurrencySelect: React.FC<CurrencySelectProps> = ({
     "SGD",
   ];
 
-  const handleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    onChange(e.target.value as CurrencyCode);
+  const handleChange = (newValue: string) => {
+    onChange(newValue as CurrencyCode);
   };
 
   return (
@@ -68,47 +70,18 @@ export const CurrencySelect: React.FC<CurrencySelectProps> = ({
           {label}
         </label>
       )}
-      <div style={{ position: "relative" }}>
-        <select
-          id={id}
-          value={value}
-          onChange={handleChange}
-          disabled={disabled}
-          className="glass-input w-full"
-          style={{
-            color: "var(--color-text-primary) !important",
-            cursor: disabled ? "not-allowed" : "pointer",
-            opacity: disabled ? 0.6 : 1,
-            appearance: "none",
-            paddingRight: "2.5rem",
-          }}
-        >
+      <Select value={value} onValueChange={handleChange} disabled={disabled} name={id}>
+        <SelectTrigger id={id}>
+          <SelectValue placeholder="Select currency" />
+        </SelectTrigger>
+        <SelectContent>
           {currencies.map((currency) => (
-            <option key={currency} value={currency}>
-              {CURRENCY_SYMBOLS[currency]} {currency} -{" "}
-              {CURRENCY_LABELS[currency]}
-            </option>
+            <SelectItem key={currency} value={currency}>
+              {CURRENCY_SYMBOLS[currency]} {currency} - {CURRENCY_LABELS[currency]}
+            </SelectItem>
           ))}
-        </select>
-        <div
-          style={{
-            pointerEvents: "none",
-            position: "absolute",
-            top: "50%",
-            right: "0.75rem",
-            transform: "translateY(-50%)",
-            color: "var(--color-text-primary)",
-          }}
-        >
-          <svg
-            style={{ fill: "currentColor", height: "1rem", width: "1rem" }}
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 20 20"
-          >
-            <path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" />
-          </svg>
-        </div>
-      </div>
+        </SelectContent>
+      </Select>
     </div>
   );
 };

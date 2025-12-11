@@ -1,11 +1,97 @@
-import {
-  CurrencyCode,
-  EntryPerformance,
-  PortfolioEntry,
-  PortfolioPerformance,
-} from "@/types";
-import { finCatchAPI } from "@/services/api";
-import { convertCurrency } from "./currency";
+import {CurrencyCode, EntryPerformance, PortfolioEntry, PortfolioPerformance,} from "@/types";
+import {finCatchAPI} from "@/services/api";
+import {convertCurrency} from "./currency";
+
+/**
+ * Calculate the current market value of a bond based on present value formula
+ * PV = Σ[C / (1 + r)^t] + [FV / (1 + r)^n]
+ */
+const calculateBondPresentValue = (
+  faceValue: number,
+  couponRate: number,
+  ytm: number,
+  maturityDate: number,
+  couponFrequency: "annual" | "semiannual" | "quarterly" | "monthly"
+): number => {
+  const now = Math.floor(Date.now() / 1000);
+  const timeToMaturityYears = (maturityDate - now) / (365 * 24 * 60 * 60);
+  // If bond has matured or is about to mature, return face value
+  if (timeToMaturityYears <= 0) {
+    return faceValue;
+  }
+
+  // Convert YTM from percentage to decimal
+  const ytmDecimal = ytm / 100;
+
+  // Determine periods per year
+  let periodsPerYear: number;
+  switch (couponFrequency) {
+    case "annual":
+      periodsPerYear = 1;
+      break;
+    case "semiannual":
+      periodsPerYear = 2;
+      break;
+    case "quarterly":
+      periodsPerYear = 4;
+      break;
+    case "monthly":
+      periodsPerYear = 12;
+      break;
+  }
+
+  // Calculate periodic coupon payment
+  const periodicCouponRate = couponRate / 100 / periodsPerYear;
+  const periodicCoupon = faceValue * periodicCouponRate;
+
+  // Calculate periodic YTM
+  const periodicYTM = ytmDecimal / periodsPerYear;
+
+  // Calculate number of remaining periods
+  const remainingPeriods = Math.ceil(timeToMaturityYears * periodsPerYear);
+
+  // Calculate present value of coupon payments
+  let pvCoupons = 0;
+  for (let t = remainingPeriods; t > 0; t--) {
+    if (t > 1) {
+      pvCoupons += periodicCoupon / Math.pow(1 + periodicYTM, t);
+    } else {
+      pvCoupons += periodicCoupon / (1 + periodicYTM * getTargetDateProgressRatio(maturityDate));
+    }
+  }
+
+  // Calculate present value of face value
+  let pvFaceValue: number;
+  if (remainingPeriods > 1) {
+    pvFaceValue = faceValue / Math.pow(1 + periodicYTM, remainingPeriods)
+  } else {
+    pvFaceValue = faceValue / (1 + periodicYTM * getTargetDateProgressRatio(maturityDate))
+  }
+
+  console.log('sss', pvCoupons, pvFaceValue, periodicYTM, ytm)
+  // Total present value
+  return pvCoupons + pvFaceValue;
+};
+
+const getTargetDateProgressRatio = (targetTimestampInSeconds: number): number => {
+  const targetTimestampInMs = targetTimestampInSeconds * 1000;
+
+  const now = new Date();
+  const targetDate = new Date(targetTimestampInMs);
+
+  if (targetDate.getTime() < now.getTime()) {
+    return 0;
+  }
+
+  const diffInMilliseconds = targetDate.getTime() - now.getTime();
+
+  const daysRemaining = Math.ceil(diffInMilliseconds / (1000 * 60 * 60 * 24));
+
+  const ratio = daysRemaining / 365;
+
+  // Round to 3 decimal places and convert back to number
+  return Number(ratio.toFixed(3));
+}
 
 export const calculatePortfolioPerformance = async (
   entries: PortfolioEntry[],
@@ -57,6 +143,36 @@ export const calculatePortfolioPerformance = async (
           currentPrice = rawPrice * priceScale;
           currentPriceCurrency = "VND";
         }
+      } else if (entry.asset_type === "bond") {
+        // For bonds, calculate present value if we have all required data
+        if (
+          entry.face_value &&
+          entry.coupon_rate !== undefined &&
+          entry.ytm !== undefined &&
+          entry.maturity_date &&
+          entry.coupon_frequency
+        ) {
+          // Calculate current market value using present value formula
+          currentPrice = calculateBondPresentValue(
+            entry.face_value,
+            entry.coupon_rate,
+            entry.ytm,
+            entry.maturity_date,
+            entry.coupon_frequency
+          );
+          console.log('curre', currentPrice)
+        } else if (entry.current_market_price !== undefined && entry.current_market_price > 0) {
+          // Fallback to manual current_market_price if calculation data is not available
+          currentPrice = entry.current_market_price;
+        } else if (entry.face_value) {
+          // Fallback to face_value
+          currentPrice = entry.face_value;
+        } else {
+          // Final fallback to purchase price
+          currentPrice = entry.purchase_price;
+        }
+        currentPriceCurrency = entry.currency || "USD";
+        priceScale = 1; // No scaling for bonds
       }
 
       const currentPriceInDisplayCurrency = await convertCurrency(
@@ -115,9 +231,42 @@ export const calculatePortfolioPerformance = async (
       const totalCost =
         purchasePriceInDisplayCurrency * quantityInTaels +
         feesInDisplayCurrency;
-      const gainLoss = currentValue - totalCost;
+
+      // Fetch and sum coupon payments for bonds
+      let couponIncomeInDisplayCurrency = 0;
+      if (entry.asset_type === "bond" && entry.id) {
+        try {
+          const couponPayments = await finCatchAPI.listCouponPayments(entry.id);
+          for (const payment of couponPayments) {
+            const convertedAmount = await convertCurrency(
+              payment.amount,
+              payment.currency,
+              displayCurrency,
+            );
+            couponIncomeInDisplayCurrency += convertedAmount;
+          }
+        } catch (err) {
+          console.warn(`Failed to fetch coupon payments for entry ${entry.id}:`, err);
+        }
+      }
+
+      // Calculate gain/loss including coupon income for bonds
+      const gainLoss = currentValue - totalCost + couponIncomeInDisplayCurrency;
       const gainLossPercentage =
         totalCost > 0 ? (gainLoss / totalCost) * 100 : 0;
+
+      let priceSource: string;
+      if (entry.asset_type === "bond") {
+        if (entry.face_value && entry.coupon_rate !== undefined && entry.ytm !== undefined && entry.maturity_date && entry.coupon_frequency) {
+          priceSource = "calculated";
+        } else if (entry.current_market_price) {
+          priceSource = "manual";
+        } else {
+          priceSource = "face_value";
+        }
+      } else {
+        priceSource = entry.source || "unknown";
+      }
 
       entriesPerformance.push({
         entry,
@@ -127,7 +276,7 @@ export const calculatePortfolioPerformance = async (
         total_cost: totalCost,
         gain_loss: gainLoss,
         gain_loss_percentage: gainLossPercentage,
-        price_source: entry.source || "unknown",
+        price_source: priceSource,
         currency: displayCurrency,
         exchange_rate: exchangeRate,
       });

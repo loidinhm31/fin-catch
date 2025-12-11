@@ -1,54 +1,133 @@
-import React from "react";
-import { AlertCircle } from "lucide-react";
-import { Modal } from "./Modal";
-import { Button } from "./Button";
+import * as React from "react";
+import * as AlertDialogPrimitive from "@radix-ui/react-alert-dialog";
+import { cn } from "@/utils/cn";
+import { buttonVariants } from "./Button";
 
-interface AlertDialogProps {
-  isOpen: boolean;
-  onClose: () => void;
-  title: string;
-  message: string;
-  type?: "info" | "warning" | "error" | "success";
-}
+const AlertDialog = AlertDialogPrimitive.Root;
 
-export const AlertDialog: React.FC<AlertDialogProps> = ({
-  isOpen,
-  onClose,
-  title,
-  message,
-  type = "info",
-}) => {
-  const iconColors = {
-    info: "text-blue-600 bg-blue-100",
-    warning: "text-amber-600 bg-amber-100",
-    error: "text-red-600 bg-red-100",
-    success: "text-green-600 bg-green-100",
-  };
+const AlertDialogTrigger = AlertDialogPrimitive.Trigger;
 
-  const buttonColors = {
-    info: "bg-gradient-to-r from-cyan-300 to-blue-700",
-    warning: "bg-gradient-to-r from-yellow-400 to-orange-500",
-    error: "bg-gradient-to-r from-red-400 to-red-600",
-    success: "bg-gradient-to-r from-green-400 to-green-600",
-  };
+const AlertDialogPortal = AlertDialogPrimitive.Portal;
 
-  return (
-    <Modal isOpen={isOpen} onClose={onClose} title={title} size="sm">
-      <div className="text-center">
-        <div
-          className={`w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 ${iconColors[type]}`}
-        >
-          <AlertCircle className="w-8 h-8" />
-        </div>
-        <p className="text-gray-700 mb-6">{message}</p>
-        <Button
-          variant="primary"
-          className={`w-full ${buttonColors[type]} text-white`}
-          onClick={onClose}
-        >
-          OK
-        </Button>
-      </div>
-    </Modal>
-  );
+const AlertDialogOverlay = React.forwardRef<
+  React.ElementRef<typeof AlertDialogPrimitive.Overlay>,
+  React.ComponentPropsWithoutRef<typeof AlertDialogPrimitive.Overlay>
+>(({ className, ...props }, ref) => (
+  <AlertDialogPrimitive.Overlay
+    className={cn(
+      "fixed inset-0 z-[100] bg-black/80 backdrop-blur-sm",
+      "data-[state=open]:animate-in data-[state=closed]:animate-out",
+      "data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0",
+      className
+    )}
+    {...props}
+    ref={ref}
+  />
+));
+AlertDialogOverlay.displayName = AlertDialogPrimitive.Overlay.displayName;
+
+const AlertDialogContent = React.forwardRef<
+  React.ElementRef<typeof AlertDialogPrimitive.Content>,
+  React.ComponentPropsWithoutRef<typeof AlertDialogPrimitive.Content>
+>(({ className, ...props }, ref) => (
+  <AlertDialogPortal>
+    <AlertDialogOverlay />
+    <AlertDialogPrimitive.Content
+      ref={ref}
+      className={cn(
+        "fixed left-[50%] top-[50%] z-[100] translate-x-[-50%] translate-y-[-50%]",
+        "w-[calc(100%-2rem)] max-w-md rounded-2xl p-6",
+        "data-[state=open]:animate-in data-[state=closed]:animate-out",
+        "data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0",
+        "data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95",
+        "data-[state=closed]:slide-out-to-left-1/2 data-[state=closed]:slide-out-to-top-[48%]",
+        "data-[state=open]:slide-in-from-left-1/2 data-[state=open]:slide-in-from-top-[48%]",
+        className
+      )}
+      style={{
+        background: "var(--glass-bg-dark-strong)",
+        backdropFilter: "var(--blur-xl)",
+        WebkitBackdropFilter: "var(--blur-xl)",
+        boxShadow: "var(--shadow-xl)",
+        border: "1px solid var(--glass-border-medium)",
+      }}
+      {...props}
+    />
+  </AlertDialogPortal>
+));
+AlertDialogContent.displayName = AlertDialogPrimitive.Content.displayName;
+
+const AlertDialogHeader = ({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) => (
+  <div className={cn("flex flex-col space-y-2 text-center sm:text-left", className)} {...props} />
+);
+AlertDialogHeader.displayName = "AlertDialogHeader";
+
+const AlertDialogFooter = ({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) => (
+  <div
+    className={cn("flex flex-col-reverse sm:flex-row sm:justify-end sm:space-x-2", className)}
+    {...props}
+  />
+);
+AlertDialogFooter.displayName = "AlertDialogFooter";
+
+const AlertDialogTitle = React.forwardRef<
+  React.ElementRef<typeof AlertDialogPrimitive.Title>,
+  React.ComponentPropsWithoutRef<typeof AlertDialogPrimitive.Title>
+>(({ className, ...props }, ref) => (
+  <AlertDialogPrimitive.Title
+    ref={ref}
+    className={cn("text-xl font-bold", className)}
+    style={{ color: "var(--color-text-primary)" }}
+    {...props}
+  />
+));
+AlertDialogTitle.displayName = AlertDialogPrimitive.Title.displayName;
+
+const AlertDialogDescription = React.forwardRef<
+  React.ElementRef<typeof AlertDialogPrimitive.Description>,
+  React.ComponentPropsWithoutRef<typeof AlertDialogPrimitive.Description>
+>(({ className, ...props }, ref) => (
+  <AlertDialogPrimitive.Description
+    ref={ref}
+    className={cn("text-sm", className)}
+    style={{ color: "var(--color-text-secondary)" }}
+    {...props}
+  />
+));
+AlertDialogDescription.displayName = AlertDialogPrimitive.Description.displayName;
+
+const AlertDialogAction = React.forwardRef<
+  React.ElementRef<typeof AlertDialogPrimitive.Action>,
+  React.ComponentPropsWithoutRef<typeof AlertDialogPrimitive.Action>
+>(({ className, ...props }, ref) => (
+  <AlertDialogPrimitive.Action
+    ref={ref}
+    className={cn(buttonVariants({ variant: "primary" }), className)}
+    {...props}
+  />
+));
+AlertDialogAction.displayName = AlertDialogPrimitive.Action.displayName;
+
+const AlertDialogCancel = React.forwardRef<
+  React.ElementRef<typeof AlertDialogPrimitive.Cancel>,
+  React.ComponentPropsWithoutRef<typeof AlertDialogPrimitive.Cancel>
+>(({ className, ...props }, ref) => (
+  <AlertDialogPrimitive.Cancel
+    ref={ref}
+    className={cn(buttonVariants({ variant: "outline" }), "mt-2 sm:mt-0", className)}
+    {...props}
+  />
+));
+AlertDialogCancel.displayName = AlertDialogPrimitive.Cancel.displayName;
+
+export {
+  AlertDialog,
+  AlertDialogTrigger,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogFooter,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogAction,
+  AlertDialogCancel,
 };

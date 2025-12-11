@@ -1,5 +1,6 @@
 import { invoke } from "@tauri-apps/api/core";
 import {
+  BondCouponPayment,
   ExchangeRateRequest,
   ExchangeRateResponse,
   GoldPremiumRequest,
@@ -258,6 +259,57 @@ class FinCatchAPI {
       console.log("[Tauri IPC Response] Entry deleted");
     } catch (error) {
       console.error("Error deleting entry:", error);
+      throw this.handleError(error);
+    }
+  }
+
+  /**
+   * Bond Coupon Payment operations
+   */
+  async createCouponPayment(payment: BondCouponPayment): Promise<number> {
+    try {
+      console.log("[Tauri IPC] create_coupon_payment", payment);
+      const id = await invoke<number>("create_coupon_payment", { payment });
+      console.log("[Tauri IPC Response]", id);
+      return id;
+    } catch (error) {
+      console.error("Error creating coupon payment:", error);
+      throw this.handleError(error);
+    }
+  }
+
+  async listCouponPayments(entryId: number): Promise<BondCouponPayment[]> {
+    try {
+      console.log("[Tauri IPC] list_coupon_payments", entryId);
+      const payments = await invoke<BondCouponPayment[]>("list_coupon_payments", {
+        entryId,
+      });
+      console.log("[Tauri IPC Response]", payments);
+      return payments;
+    } catch (error) {
+      console.error("Error listing coupon payments:", error);
+      throw this.handleError(error);
+    }
+  }
+
+  async updateCouponPayment(payment: BondCouponPayment): Promise<void> {
+    try {
+      console.log("[Tauri IPC] update_coupon_payment", payment);
+      await invoke<void>("update_coupon_payment", { payment });
+      console.log("[Tauri IPC Response] Coupon payment updated");
+    } catch (error) {
+      console.error("Error updating coupon payment:", error);
+      throw this.handleError(error);
+    }
+  }
+
+  async deleteCouponPayment(id: number): Promise<void> {
+    try {
+      console.log("[Tauri IPC] delete_coupon_payment", id);
+      await invoke<void>("delete_coupon_payment", { id });
+      console.log("[Tauri IPC Response] Coupon payment deleted");
+    } catch (error) {
+      console.error("Error deleting coupon payment:", error);
       throw this.handleError(error);
     }
   }

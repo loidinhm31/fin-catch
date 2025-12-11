@@ -9,7 +9,7 @@ use fin_catch_data::{
     ExchangeRateRequest, ExchangeRateResponse,
     GoldPremiumRequest, GoldPremiumResponse,
 };
-use db::{Database, Portfolio, PortfolioEntry};
+use db::{Database, Portfolio, PortfolioEntry, BondCouponPayment};
 
 // Application state that holds the data source gateway and database
 pub struct AppState {
@@ -151,6 +151,27 @@ fn delete_entry(id: i64, state: State<'_, AppState>) -> Result<(), String> {
     state.db.delete_entry(id).map_err(|e| e.to_string())
 }
 
+// Bond Coupon Payment commands
+#[tauri::command]
+fn create_coupon_payment(payment: BondCouponPayment, state: State<'_, AppState>) -> Result<i64, String> {
+    state.db.create_coupon_payment(&payment).map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+fn list_coupon_payments(entry_id: i64, state: State<'_, AppState>) -> Result<Vec<BondCouponPayment>, String> {
+    state.db.list_coupon_payments(entry_id).map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+fn update_coupon_payment(payment: BondCouponPayment, state: State<'_, AppState>) -> Result<(), String> {
+    state.db.update_coupon_payment(&payment).map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+fn delete_coupon_payment(id: i64, state: State<'_, AppState>) -> Result<(), String> {
+    state.db.delete_coupon_payment(id).map_err(|e| e.to_string())
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
@@ -188,6 +209,10 @@ pub fn run() {
             list_entries,
             update_entry,
             delete_entry,
+            create_coupon_payment,
+            list_coupon_payments,
+            update_coupon_payment,
+            delete_coupon_payment,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

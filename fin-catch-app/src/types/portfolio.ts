@@ -12,7 +12,7 @@ export interface Portfolio {
 export interface PortfolioEntry {
   id?: number;
   portfolio_id: number;
-  asset_type: "stock" | "gold";
+  asset_type: "stock" | "gold" | "bond";
   symbol: string;
   quantity: number;
   purchase_price: number;
@@ -26,6 +26,14 @@ export interface PortfolioEntry {
   // Gold-specific fields
   unit?: "gram" | "mace" | "tael" | "ounce" | "kg"; // Unit of quantity for gold
   gold_type?: string; // Type of gold (e.g., "1" for SJC HCMC, "2" for SJC Hanoi, "49" for SJC rings)
+  // Bond-specific fields
+  face_value?: number; // Par/nominal value
+  coupon_rate?: number; // Annual rate as percentage (e.g., 5.0)
+  maturity_date?: number; // Unix timestamp
+  coupon_frequency?: "annual" | "semiannual" | "quarterly" | "monthly";
+  current_market_price?: number; // User-entered current price
+  last_price_update?: number; // Unix timestamp of last price update
+  ytm?: number; // Yield to Maturity as percentage (used in calculated mode)
 }
 
 // Portfolio with entries
@@ -65,9 +73,20 @@ export interface PortfolioHistoricalValue {
   gain_loss_percentage: number;
 }
 
+// Bond coupon payment tracking
+export interface BondCouponPayment {
+  id?: number;
+  entry_id: number; // References PortfolioEntry.id
+  payment_date: number; // Unix timestamp
+  amount: number; // Coupon amount received
+  currency: CurrencyCode; // Payment currency
+  notes?: string;
+  created_at: number;
+}
+
 // Form data for creating/editing entries
 export interface PortfolioEntryFormData {
-  asset_type: "stock" | "gold";
+  asset_type: "stock" | "gold" | "bond";
   symbol: string;
   quantity: string;
   purchase_price: string;
@@ -82,7 +101,7 @@ export interface PortfolioEntryFormData {
 // Asset allocation data for pie chart
 export interface AssetAllocation {
   symbol: string;
-  asset_type: "stock" | "gold";
+  asset_type: "stock" | "gold" | "bond";
   value: number;
   percentage: number;
   color: string;

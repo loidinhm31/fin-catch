@@ -435,6 +435,69 @@ h6 {
   }
 }
 
+/* Radix UI animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes fadeOut {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes zoomIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes zoomOut {
+  from {
+    opacity: 1;
+    transform: scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+}
+
+@keyframes slideInFromTop {
+  from {
+    transform: translateY(-48%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideOutToTop {
+  from {
+    transform: translateY(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateY(-48%);
+    opacity: 0;
+  }
+}
+
 .animate-float {
   animation: float 6s ease-in-out infinite;
 }
@@ -452,6 +515,48 @@ h6 {
   );
   background-size: 1000px 100%;
   animation: shimmer 3s infinite;
+}
+
+.animate-in {
+  animation-duration: 150ms;
+  animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.animate-out {
+  animation-duration: 150ms;
+  animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.fade-in-0 {
+  animation-name: fadeIn;
+}
+
+.fade-out-0 {
+  animation-name: fadeOut;
+}
+
+.zoom-in-95 {
+  animation-name: zoomIn;
+}
+
+.zoom-out-95 {
+  animation-name: zoomOut;
+}
+
+.slide-in-from-top-\[48\%\] {
+  animation-name: slideInFromTop;
+}
+
+.slide-out-to-top-\[48\%\] {
+  animation-name: slideOutToTop;
+}
+
+.slide-in-from-left-1\/2 {
+  animation-name: slideInFromTop;
+}
+
+.slide-out-to-left-1\/2 {
+  animation-name: slideOutToTop;
 }
 
 /* ===== SCREEN BACKGROUNDS - DARK GRADIENTS ===== */
@@ -703,4 +808,62 @@ input[type="datetime-local"]::-webkit-calendar-picker-indicator {
 option {
   color: #111827;
   background: white;
+}
+
+/* ===== SELECT DROPDOWN POSITIONING FIX ===== */
+
+/* CRITICAL: Native select dropdowns require clean stacking contexts */
+/* Any transform, filter, perspective, or contain on ancestors breaks positioning */
+
+/* Fix for select dropdown positioning issues caused by backdrop-filter in parent elements */
+select {
+  position: static !important;
+  transform: none !important;
+  filter: none !important;
+  perspective: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  will-change: auto !important;
+  contain: none !important;
+}
+
+/* Remove backdrop-filter from glass-input selects */
+select.glass-input {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+/* Prevent modal and all ancestors from creating new containing blocks */
+[role="dialog"],
+[role="dialog"] > *,
+[role="dialog"] > * > *,
+.glass-container,
+.fixed,
+.flex,
+.items-end,
+.items-center,
+.justify-center,
+div:has(> [role="dialog"]) {
+  transform: none !important;
+  filter: none !important;
+  perspective: none !important;
+  contain: none !important;
+  will-change: auto !important;
+  -webkit-transform: none !important;
+  -webkit-filter: none !important;
+  -webkit-perspective: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+/* Ensure select parent wrappers don't interfere */
+select:focus,
+select:active {
+  z-index: 999999 !important;
+  position: static !important;
+}
+
+/* Radix Select Portal renders outside modal, so we can restore scrolling */
+[role="dialog"] .overflow-y-auto {
+  overflow-y: auto;
+  overflow-x: hidden;
 }

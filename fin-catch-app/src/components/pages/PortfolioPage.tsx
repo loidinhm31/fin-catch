@@ -32,6 +32,7 @@ export const PortfolioPage: React.FC = () => {
   const {
     entries,
     isLoading: isEntriesLoading,
+    loadEntries,
     deleteEntry,
   } = usePortfolioEntries(selectedPortfolioId);
 
@@ -203,6 +204,11 @@ export const PortfolioPage: React.FC = () => {
                 }}
                 onEdit={handleEditEntry}
                 onDelete={deleteEntry}
+                onPaymentsChange={() => {
+                  if (selectedPortfolioId) {
+                    loadEntries(selectedPortfolioId);
+                  }
+                }}
                 formatCurrency={formatCurrency}
                 formatPercentage={formatPercentage}
                 formatDate={formatDate}
@@ -256,6 +262,10 @@ export const PortfolioPage: React.FC = () => {
         onSuccess={() => {
           setShowAddEntry(false);
           setEditingEntry(null);
+          // Reload entries to show the newly created/updated item
+          if (selectedPortfolioId) {
+            loadEntries(selectedPortfolioId);
+          }
         }}
         portfolioId={selectedPortfolioId!}
         editingEntry={editingEntry}

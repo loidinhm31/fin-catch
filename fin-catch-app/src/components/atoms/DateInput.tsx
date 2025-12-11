@@ -1,6 +1,5 @@
-import React, { forwardRef, useEffect, useRef } from "react";
-import { format } from "date-fns";
-import { formatDateWithOrdinal } from "../../utils/dateUtils";
+import * as React from "react";
+import { DatePicker } from "./DatePicker";
 
 export interface DateInputProps extends Omit<
   React.InputHTMLAttributes<HTMLInputElement>,
@@ -9,111 +8,47 @@ export interface DateInputProps extends Omit<
   value?: Date;
   onChange?: (date: Date | null) => void;
   error?: boolean;
-  fullWidth?: boolean;
+  fullWidth?: boolean; // Deprecated but kept for backward compatibility
 }
 
-export const DateInput = forwardRef<HTMLInputElement, DateInputProps>(
+/**
+ * Backward-compatible DateInput wrapper
+ * Now uses the new DatePicker component with Calendar internally
+ */
+export const DateInput = React.forwardRef<HTMLInputElement, DateInputProps>(
   (
     {
       value,
       onChange,
       error = false,
-      fullWidth = false,
+      fullWidth: _fullWidth, // Ignored (always full width now)
       className = "",
-      ...props
+      placeholder = "Select a date",
+      disabled,
+      id,
+      name,
     },
-    ref,
+    _ref
   ) => {
-    const widthStyle = fullWidth ? "w-full" : "";
-    const dateInputRef = useRef<HTMLInputElement>(null);
-    const closeTimerRef = useRef<NodeJS.Timeout | null>(null);
-
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-      const newValue = e.target.value;
-
-      if (newValue && onChange) {
-        onChange(new Date(newValue));
-      } else if (onChange) {
-        onChange(null);
-      }
-
-      // Clear any existing timer
-      if (closeTimerRef.current) {
-        clearTimeout(closeTimerRef.current);
-      }
-
-      // Force blur to close picker after date selection
-      closeTimerRef.current = setTimeout(() => {
-        if (dateInputRef.current) {
-          dateInputRef.current.blur();
-        }
-      }, 150);
+    const handleDateChange = (date: Date | undefined) => {
+      onChange?.(date || null);
     };
-
-    const handleClick = () => {
-      // Open the date picker when clicking on the display
-      if (dateInputRef.current) {
-        dateInputRef.current.focus();
-        dateInputRef.current.showPicker?.();
-      }
-    };
-
-    const handleBlur = () => {
-      // Clean up timer on blur
-      if (closeTimerRef.current) {
-        clearTimeout(closeTimerRef.current);
-      }
-    };
-
-    // Cleanup timer on unmount
-    useEffect(() => {
-      return () => {
-        if (closeTimerRef.current) {
-          clearTimeout(closeTimerRef.current);
-        }
-      };
-    }, []);
-
-    // Display value in ordinal format
-    const displayValue = value ? formatDateWithOrdinal(value) : "";
-
-    // Value for the date input
-    const inputValue = value ? format(value, "yyyy-MM-dd") : "";
 
     return (
-      <div className={`relative ${widthStyle}`}>
-        {/* Display input with formatted date */}
-        <input
-          ref={ref}
-          type="text"
-          value={displayValue}
-          onClick={handleClick}
-          readOnly
-          placeholder="Select a date"
-          className={`glass-input ${widthStyle} ${error ? "border-2 border-red-500" : ""} ${className} cursor-pointer`}
-          style={{ color: "var(--cube-gray-900)" }}
-          {...props}
-        />
-
-        {/* Hidden date input - positioned off-screen but functional */}
-        <input
-          ref={dateInputRef}
-          type="date"
-          value={inputValue}
-          onChange={handleChange}
-          onBlur={handleBlur}
-          className="absolute"
-          style={{
-            left: "-9999px",
-            position: "absolute",
-            colorScheme: "light",
-            color: "#111827",
-          }}
-          tabIndex={-1}
+      <div className="w-full">
+        <DatePicker
+          date={value || undefined}
+          onDateChange={handleDateChange}
+          placeholder={placeholder}
+          disabled={disabled}
+          error={error}
+          className={className}
+          id={id}
+          name={name}
         />
       </div>
     );
-  },
+  }
 );
 
 DateInput.displayName = "DateInput";

@@ -4,48 +4,43 @@ import { cn } from "@/utils/cn";
 import {
   AlertDialog,
   AlertDialogAction,
-  AlertDialogCancel,
   AlertDialogContent,
   AlertDialogDescription,
-  AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
 } from "./AlertDialog";
 
-interface ConfirmDialogProps {
+interface SimpleAlertDialogProps {
   isOpen: boolean;
   onClose: () => void;
-  onConfirm: () => void;
   title: string;
   message: string;
-  confirmText?: string;
-  cancelText?: string;
-  type?: "warning" | "danger";
+  type?: "info" | "warning" | "error" | "success";
 }
 
-export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
+/**
+ * Backward-compatible AlertDialog wrapper
+ * This component maintains the old API while using the refactored AlertDialog components
+ */
+export const SimpleAlertDialog: React.FC<SimpleAlertDialogProps> = ({
   isOpen,
   onClose,
-  onConfirm,
   title,
   message,
-  confirmText = "Confirm",
-  cancelText = "Cancel",
-  type = "warning",
+  type = "info",
 }) => {
   const iconColors = {
+    info: "text-blue-400 bg-blue-900/30",
     warning: "text-amber-400 bg-amber-900/30",
-    danger: "text-red-400 bg-red-900/30",
+    error: "text-red-400 bg-red-900/30",
+    success: "text-green-400 bg-green-900/30",
   };
 
-  const confirmButtonColors = {
+  const buttonColors = {
+    info: "bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700",
     warning: "bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600",
-    danger: "bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700",
-  };
-
-  const handleConfirm = () => {
-    onConfirm();
-    onClose();
+    error: "bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700",
+    success: "bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700",
   };
 
   return (
@@ -65,15 +60,14 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
             <AlertDialogDescription>{message}</AlertDialogDescription>
           </div>
         </AlertDialogHeader>
-        <AlertDialogFooter className="flex gap-3 sm:gap-2">
-          <AlertDialogCancel onClick={onClose}>{cancelText}</AlertDialogCancel>
+        <div className="flex justify-center mt-4">
           <AlertDialogAction
-            className={cn("text-white", confirmButtonColors[type])}
-            onClick={handleConfirm}
+            className={cn("w-full text-white", buttonColors[type])}
+            onClick={onClose}
           >
-            {confirmText}
+            OK
           </AlertDialogAction>
-        </AlertDialogFooter>
+        </div>
       </AlertDialogContent>
     </AlertDialog>
   );
