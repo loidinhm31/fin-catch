@@ -2,11 +2,7 @@ import React, { useEffect, useState } from "react";
 import { finCatchAPI } from "@/services/api";
 import { CurrencyCode, PortfolioEntry } from "@/types";
 import { dateToUnixTimestamp } from "@/utils/dateUtils";
-import { formatCurrency } from "@/utils/currency";
-import {
-  getGoldUnitByIdAndSource,
-  getUnitLabel,
-} from "@/utils/goldConversions";
+import { getGoldUnitByIdAndSource } from "@/utils/goldConversions";
 import {
   Button,
   CurrencySelect,
@@ -18,6 +14,9 @@ import {
   SimpleSelect as Select,
   Textarea,
 } from "../atoms";
+import { StockEntryForm } from "../molecules/StockEntryForm";
+import { GoldEntryForm } from "../molecules/GoldEntryForm";
+import { BondEntryForm } from "../molecules/BondEntryForm";
 
 export interface AddEditEntryModalProps {
   isOpen: boolean;
@@ -356,11 +355,6 @@ export const AddEditEntryModal: React.FC<AddEditEntryModalProps> = ({
     onClose();
   };
 
-  const totalCost =
-      quantity && purchasePrice
-          ? parseFloat(purchasePrice) * parseFloat(quantity)
-          : 0;
-
   return (
       <Modal
           isOpen={isOpen}
@@ -386,453 +380,61 @@ export const AddEditEntryModal: React.FC<AddEditEntryModalProps> = ({
           </div>
 
           {assetType === "bond" ? (
-              <>
-                {/* Bond-specific fields */}
-                <div>
-                  <Label required>Bond Identifier/ISIN</Label>
-                  <Input
-                      type="text"
-                      value={bondIdentifier}
-                      onChange={(e) => setBondIdentifier(e.target.value)}
-                      placeholder="e.g., US912828Z749"
-                      disabled={isSubmitting}
-                  />
-                </div>
-
-                <div>
-                  <Label required>Expected Yield (YTM %)</Label>
-                  <Input
-                      type="number"
-                      step="0.01"
-                      value={ytm}
-                      onChange={(e) => setYtm(e.target.value)}
-                      placeholder="e.g., 6.5"
-                      disabled={isSubmitting}
-                  />
-                  <p style={{ fontSize: "var(--text-xs)", color: "var(--cube-gray-500)", marginTop: "var(--space-1)" }}>
-                    Annual yield to maturity percentage
-                  </p>
-                </div>
-                {/* Input Mode Selector */}
-                <div>
-                  <Label>Input Mode</Label>
-                  <Select
-                      value={bondInputMode}
-                      onValueChange={(value) => setBondInputMode(value as "direct" | "calculated")}
-                      disabled={isSubmitting}
-                      options={[
-                        { value: "direct", label: "Direct Input (Manual Entry)" },
-                        { value: "calculated", label: "Calculate from Investment Data" },
-                      ]}
-                  />
-                  <p style={{ fontSize: "var(--text-xs)", color: "var(--cube-gray-500)", marginTop: "var(--space-1)" }}>
-                    {bondInputMode === "direct"
-                        ? "Manually enter face value, coupon rate, and prices"
-                        : "Calculate bond parameters from investment amount and expected yield"}
-                  </p>
-                </div>
-
-                <div>
-                  <Label required>Face Value</Label>
-                  <Input
-                      type="number"
-                      step="0.01"
-                      value={faceValue}
-                      onChange={(e) => setFaceValue(e.target.value)}
-                      placeholder="e.g., 1000"
-                      disabled={isSubmitting}
-                  />
-                  <p style={{ fontSize: "var(--text-xs)", color: "var(--cube-gray-500)", marginTop: "var(--space-1)" }}>
-                    Par/nominal value per bond
-                  </p>
-                </div>
-                {bondInputMode === "calculated" ? (
-                    <>
-                      {/* Calculated Mode Inputs */}
-                      <div className="p-4" style={{ backgroundColor: "var(--cube-gray-50)", borderRadius: "var(--radius-md)", border: "1px solid var(--cube-gray-200)" }}>
-                        <p style={{ fontSize: "var(--text-sm)", fontWeight: "var(--font-medium)", marginBottom: "var(--space-3)" }}>
-                          Investment Parameters
-                        </p>
-
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                          <div>
-                            <Label required>Total Investment (P_total)</Label>
-                            <Input
-                                type="number"
-                                step="0.01"
-                                value={totalInvestment}
-                                onChange={(e) => setTotalInvestment(e.target.value)}
-                                placeholder="Total amount invested"
-                                disabled={isSubmitting}
-                            />
-                          </div>
-                          <div>
-                            <Label required>Quantity (N)</Label>
-                            <Input
-                                type="number"
-                                step="1"
-                                value={quantity}
-                                onChange={(e) => setQuantity(e.target.value)}
-                                placeholder="Number of bonds"
-                                disabled={isSubmitting}
-                            />
-                          </div>
-                        </div>
-
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4" style={{ marginTop: "var(--space-3)" }}>
-                          <div>
-                            <Label required>Purchase Price (P_buy)</Label>
-                            <Input
-                                type="number"
-                                step="0.001"
-                                value={purchasePrice}
-                                onChange={(e) => setPurchasePrice(e.target.value)}
-                                placeholder="e.g., 106.084"
-                                disabled={isSubmitting}
-                            />
-                            <p style={{ fontSize: "var(--text-xs)", color: "var(--cube-gray-500)", marginTop: "var(--space-1)" }}>
-                              Percentage of face value (e.g., 106.084 = 106.084%)
-                            </p>
-                          </div>
-                        </div>
-
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4" style={{ marginTop: "var(--space-3)" }}>
-                          <div>
-                            <Label required>Purchase Date</Label>
-                            <DatePicker
-                                date={purchaseDate}
-                                onDateChange={setPurchaseDate}
-                                placeholder="Select purchase date"
-                                disabled={isSubmitting}
-                                error={!purchaseDate && !!error}
-                            />
-                          </div>
-                          <div>
-                            <Label required>Maturity Date</Label>
-                            <DatePicker
-                                date={maturityDate}
-                                onDateChange={setMaturityDate}
-                                placeholder="Select maturity date"
-                                disabled={isSubmitting}
-                                error={!maturityDate && !!error}
-                            />
-                          </div>
-                        </div>
-
-                        <div style={{ marginTop: "var(--space-3)", padding: "var(--space-2)", backgroundColor: "var(--cube-blue-50)", borderRadius: "var(--radius-md)", border: "1px solid var(--cube-blue-200)" }}>
-                          <p style={{ fontSize: "var(--text-xs)", color: "var(--cube-blue-700)" }}>
-                            Bond parameters will be calculated automatically as you fill in the fields above.
-                          </p>
-                        </div>
-                      </div>
-
-                      {/* Calculated Results */}
-                      {faceValue && couponRate && purchasePrice && (
-                          <div className="p-4" style={{ backgroundColor: "var(--cube-green-50)", borderRadius: "var(--radius-md)", border: "1px solid var(--cube-green-200)" }}>
-                            <p style={{ fontSize: "var(--text-sm)", fontWeight: "var(--font-medium)", marginBottom: "var(--space-3)", color: "var(--cube-green-800)" }}>
-                              Calculated Results
-                            </p>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                              <div>
-                                <Label>Face Value</Label>
-                                <Input
-                                    type="text"
-                                    value={faceValue}
-                                    readOnly
-                                    style={{ backgroundColor: "#f9fafb", color: "#111827", cursor: "not-allowed", fontWeight: 600 }}
-                                />
-                              </div>
-                              <div>
-                                <Label>Purchase Price per Bond</Label>
-                                <Input
-                                    type="text"
-                                    value={purchasePrice}
-                                    readOnly
-                                    style={{ backgroundColor: "#f9fafb", color: "#111827", cursor: "not-allowed", fontWeight: 600 }}
-                                />
-                              </div>
-                            </div>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4" style={{ marginTop: "var(--space-3)" }}>
-                              <div>
-                                <Label>Coupon Rate (%)</Label>
-                                <Input
-                                    type="text"
-                                    value={couponRate}
-                                    readOnly
-                                    style={{ backgroundColor: "#f9fafb", color: "#111827", cursor: "not-allowed", fontWeight: 600 }}
-                                />
-                              </div>
-                            </div>
-                            <p style={{ fontSize: "var(--text-xs)", color: "var(--cube-green-700)", marginTop: "var(--space-2)" }}>
-                              Note: Current market value will be calculated automatically based on time to maturity and YTM when viewing portfolio performance.
-                            </p>
-                          </div>
-                      )}
-                    </>
-                ) : (
-                    <>
-                      {/* Direct Input Mode */}
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-
-                        <div>
-                          <Label required>Annual Coupon Rate (%)</Label>
-                          <Input
-                              type="number"
-                              step="0.01"
-                              value={couponRate}
-                              onChange={(e) => setCouponRate(e.target.value)}
-                              placeholder="e.g., 5.0"
-                              disabled={isSubmitting}
-                          />
-                        </div>
-                      </div>
-
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                          <Label required>Quantity</Label>
-                          <Input
-                              type="number"
-                              step="1"
-                              value={quantity}
-                              onChange={(e) => setQuantity(e.target.value)}
-                              placeholder="Number of bonds"
-                              disabled={isSubmitting}
-                          />
-                        </div>
-                        <div>
-                          <Label required>Purchase Price per Bond</Label>
-                          <Input
-                              type="number"
-                              step="0.01"
-                              value={purchasePrice}
-                              onChange={(e) => setPurchasePrice(e.target.value)}
-                              placeholder="Price paid per bond"
-                              disabled={isSubmitting}
-                          />
-                          <p style={{ fontSize: "var(--text-xs)", color: "var(--cube-gray-500)", marginTop: "var(--space-1)" }}>
-                            May differ from face value (premium/discount)
-                          </p>
-                        </div>
-                      </div>
-
-                      <div>
-                        <Label>Current Market Price (Optional)</Label>
-                        <Input
-                            type="number"
-                            step="0.01"
-                            value={currentMarketPrice}
-                            onChange={(e) => setCurrentMarketPrice(e.target.value)}
-                            placeholder="Manual price for valuation"
-                            disabled={isSubmitting}
-                        />
-                        <p style={{ fontSize: "var(--text-xs)", color: "var(--cube-gray-500)", marginTop: "var(--space-1)" }}>
-                          Leave empty to use face value
-                        </p>
-                      </div>
-
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                          <Label required>Maturity Date</Label>
-                          <DatePicker
-                              date={maturityDate}
-                              onDateChange={setMaturityDate}
-                              placeholder="Select maturity date"
-                              disabled={isSubmitting}
-                              error={!maturityDate && !!error}
-                          />
-                        </div>
-                        <div>
-                          <Label required>Coupon Frequency</Label>
-                          <Select
-                              value={couponFrequency}
-                              onValueChange={(value) => setCouponFrequency(value as any)}
-                              disabled={isSubmitting}
-                              options={[
-                                { value: "annual", label: "Annual" },
-                                { value: "semiannual", label: "Semi-Annual" },
-                                { value: "quarterly", label: "Quarterly" },
-                                { value: "monthly", label: "Monthly" },
-                              ]}
-                          />
-                        </div>
-                      </div>
-
-                      <div style={{ backgroundColor: "#f0f9ff", padding: "var(--space-3)", borderRadius: "var(--radius-md)", border: "1px solid #bae6fd" }}>
-                        <p style={{ fontSize: "var(--text-sm)", color: "#0369a1" }}>
-                          <strong>Bond Valuation:</strong><br />
-                          • Current value = current market price (or face value) × quantity<br />
-                          • Performance includes both price changes and coupon income<br />
-                          • Add coupon payments in the expanded card view after creation
-                        </p>
-                      </div>
-                    </>
-                )}
-
-                {/* Coupon Frequency - Common for both modes */}
-                {bondInputMode === "calculated" && (
-                    <div>
-                      <Label required>Coupon Frequency</Label>
-                      <Select
-                          value={couponFrequency}
-                          onValueChange={(value) => setCouponFrequency(value as any)}
-                          disabled={isSubmitting}
-                          options={[
-                            { value: "annual", label: "Annual" },
-                            { value: "semiannual", label: "Semi-Annual" },
-                            { value: "quarterly", label: "Quarterly" },
-                            { value: "monthly", label: "Monthly" },
-                          ]}
-                      />
-                    </div>
-                )}
-              </>
+            <BondEntryForm
+              bondIdentifier={bondIdentifier}
+              setBondIdentifier={setBondIdentifier}
+              bondInputMode={bondInputMode}
+              setBondInputMode={setBondInputMode}
+              faceValue={faceValue}
+              setFaceValue={setFaceValue}
+              couponRate={couponRate}
+              setCouponRate={setCouponRate}
+              maturityDate={maturityDate}
+              setMaturityDate={setMaturityDate}
+              couponFrequency={couponFrequency}
+              setCouponFrequency={setCouponFrequency}
+              currentMarketPrice={currentMarketPrice}
+              setCurrentMarketPrice={setCurrentMarketPrice}
+              ytm={ytm}
+              setYtm={setYtm}
+              totalInvestment={totalInvestment}
+              setTotalInvestment={setTotalInvestment}
+              quantity={quantity}
+              setQuantity={setQuantity}
+              purchasePrice={purchasePrice}
+              setPurchasePrice={setPurchasePrice}
+              purchaseDate={purchaseDate}
+              setPurchaseDate={setPurchaseDate}
+              error={error}
+              isSubmitting={isSubmitting}
+            />
           ) : assetType === "gold" ? (
-              <>
-                {/* Gold-specific fields */}
-                <div>
-                  <Label required>Gold Price ID</Label>
-                  <Select
-                      value={goldType}
-                      onValueChange={handleGoldTypeChange}
-                      placeholder="Select gold price ID"
-                      options={[
-                        { value: "1", label: "SJC 1L, 10L, 1KG - Ho Chi Minh (tael/lượng)" },
-                        { value: "2", label: "SJC 1L, 10L, 1KG - Ha Noi (tael/lượng)" },
-                        { value: "49", label: "SJC Nhẫn 99.99% (1 chỉ, 2 chỉ, 5 chỉ) (mace/chỉ)" },
-                      ]}
-                  />
-                  <p
-                      style={{
-                        fontSize: "var(--text-xs)",
-                        color: "var(--cube-gray-500)",
-                        marginTop: "var(--space-1)",
-                      }}
-                  >
-                    Select the gold price source to track
-                  </p>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <Label required>Unit</Label>
-                    <Select
-                        value={goldUnit}
-                        onValueChange={(value) => setGoldUnit(value as any)}
-                        options={[
-                          { value: "mace", label: "Mace/Chỉ (3.75g) - Default for VN" },
-                          { value: "tael", label: "Tael/Lượng (37.5g)" },
-                          { value: "gram", label: "Gram (g)" },
-                          { value: "ounce", label: "Troy Ounce (31.1g)" },
-                          { value: "kg", label: "Kilogram (kg)" },
-                        ]}
-                    />
-                    <p
-                        style={{
-                          fontSize: "var(--text-xs)",
-                          color: "#6366f1",
-                          marginTop: "var(--space-1)",
-                        }}
-                    >
-                      💡 You can enter in any unit - prices will be auto-converted
-                      for comparison
-                    </p>
-                    <p
-                        style={{
-                          fontSize: "var(--text-xs)",
-                          color: "#10b981",
-                          marginTop: "var(--space-1)",
-                        }}
-                    >
-                      ℹ️ {source ? source.toUpperCase() : "API"} returns prices per
-                      tael, conversion handled automatically
-                    </p>
-                  </div>
-                  <div>
-                    <Label required>Quantity</Label>
-                    <Input
-                        type="number"
-                        step="0.01"
-                        value={quantity}
-                        onChange={(e) => setQuantity(e.target.value)}
-                        placeholder={`Number of ${goldUnit}s`}
-                        disabled={isSubmitting}
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <Label required>
-                    Purchase Price per {getUnitLabel(goldUnit)}
-                  </Label>
-                  <Input
-                      type="number"
-                      step="0.01"
-                      value={purchasePrice}
-                      onChange={(e) => setPurchasePrice(e.target.value)}
-                      placeholder="Price per unit"
-                      disabled={isSubmitting}
-                  />
-                  {totalCost > 0 && (
-                      <p
-                          style={{
-                            fontSize: "var(--text-xs)",
-                            color: "var(--cube-gray-600)",
-                            marginTop: "var(--space-1)",
-                          }}
-                      >
-                        Total: {formatCurrency(totalCost, currency)}
-                      </p>
-                  )}
-                  <p
-                      style={{
-                        fontSize: "var(--text-xs)",
-                        color: "#10b981",
-                        marginTop: "var(--space-1)",
-                      }}
-                  >
-                    ✓ Enter your purchase price in your preferred unit - system
-                    handles conversion
-                  </p>
-                </div>
-              </>
+            <GoldEntryForm
+              goldType={goldType}
+              setGoldType={setGoldType}
+              goldUnit={goldUnit}
+              setGoldUnit={setGoldUnit}
+              quantity={quantity}
+              setQuantity={setQuantity}
+              purchasePrice={purchasePrice}
+              setPurchasePrice={setPurchasePrice}
+              source={source}
+              setSource={setSource}
+              currency={currency}
+              isSubmitting={isSubmitting}
+              handleGoldTypeChange={handleGoldTypeChange}
+              handleSourceChange={handleSourceChange}
+            />
           ) : (
-              <>
-                {/* Stock-specific fields */}
-                <div>
-                  <Label required>Symbol</Label>
-                  <Input
-                      type="text"
-                      value={symbol}
-                      onChange={(e) => setSymbol(e.target.value)}
-                      placeholder="e.g., AAPL, MSFT"
-                      disabled={isSubmitting}
-                  />
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <Label required>Quantity</Label>
-                    <Input
-                        type="number"
-                        step="0.01"
-                        value={quantity}
-                        onChange={(e) => setQuantity(e.target.value)}
-                        placeholder="Number of shares"
-                        disabled={isSubmitting}
-                    />
-                  </div>
-                  <div>
-                    <Label required>Purchase Price per Share</Label>
-                    <Input
-                        type="number"
-                        step="0.01"
-                        value={purchasePrice}
-                        onChange={(e) => setPurchasePrice(e.target.value)}
-                        placeholder="0.00"
-                        disabled={isSubmitting}
-                    />
-                  </div>
-                </div>
-              </>
+            <StockEntryForm
+              symbol={symbol}
+              setSymbol={setSymbol}
+              quantity={quantity}
+              setQuantity={setQuantity}
+              purchasePrice={purchasePrice}
+              setPurchasePrice={setPurchasePrice}
+              isSubmitting={isSubmitting}
+            />
           )}
 
           <div>
@@ -845,61 +447,44 @@ export const AddEditEntryModal: React.FC<AddEditEntryModalProps> = ({
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <Label required>Purchase Date</Label>
-              <DatePicker
+            {/* Only show purchase date if not bond in calculated mode (those have it in the form) */}
+            {!(assetType === "bond" && bondInputMode === "calculated") && (
+              <div>
+                <Label required>Purchase Date</Label>
+                <DatePicker
                   date={purchaseDate}
                   onDateChange={setPurchaseDate}
                   placeholder="Select purchase date"
                   disabled={isSubmitting}
                   error={!purchaseDate && !!error}
-              />
-            </div>
+                />
+              </div>
+            )}
             <div>
               <Label>Transaction Fees</Label>
               <Input
-                  type="number"
-                  step="0.01"
-                  value={fees}
-                  onChange={(e) => setFees(e.target.value)}
-                  placeholder="0.00"
-                  disabled={isSubmitting}
+                type="number"
+                step="0.01"
+                value={fees}
+                onChange={(e) => setFees(e.target.value)}
+                placeholder="0.00"
+                disabled={isSubmitting}
               />
             </div>
           </div>
 
-          <div>
-            <Label required={assetType === "gold"}>Source</Label>
-            {assetType === "gold" ? (
-                <>
-                  <Select
-                      value={source}
-                      onValueChange={handleSourceChange}
-                      placeholder="Select source"
-                      options={[
-                        { value: "sjc", label: "SJC Gold" },
-                      ]}
-                  />
-                  <p
-                      style={{
-                        fontSize: "var(--text-xs)",
-                        color: "#2563eb",
-                        marginTop: "var(--space-1)",
-                      }}
-                  >
-                    💡 Source determines which API to use for current prices
-                  </p>
-                </>
-            ) : (
-                <Input
-                    type="text"
-                    value={source}
-                    onChange={(e) => setSource(e.target.value)}
-                    placeholder="e.g., yahoo_finance"
-                    disabled={isSubmitting}
-                />
-            )}
-          </div>
+          {assetType !== "gold" && (
+            <div>
+              <Label>Source</Label>
+              <Input
+                type="text"
+                value={source}
+                onChange={(e) => setSource(e.target.value)}
+                placeholder="e.g., yahoo_finance"
+                disabled={isSubmitting}
+              />
+            </div>
+          )}
 
           <div>
             <Label>Tags</Label>

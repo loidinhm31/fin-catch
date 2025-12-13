@@ -61,7 +61,7 @@ export const HoldingsSection: React.FC<HoldingsSectionProps> = ({
         </h2>
         <button
           onClick={onAdd}
-          className="bg-gradient-to-r from-cyan-300 to-blue-700 text-white px-4 py-2 rounded-xl font-bold shadow-lg hover:shadow-xl transition-all flex items-center gap-2"
+          className="bg-linear-to-r from-cyan-300 to-blue-700 text-white px-4 py-2 rounded-xl font-bold shadow-lg hover:shadow-xl transition-all flex items-center gap-2"
           style={{ fontSize: "var(--text-sm)" }}
         >
           <Plus className="w-4 h-4" />
