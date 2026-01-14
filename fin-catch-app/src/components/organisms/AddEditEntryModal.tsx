@@ -66,6 +66,7 @@ export const AddEditEntryModal: React.FC<AddEditEntryModalProps> = ({
   const [totalInvestment, setTotalInvestment] = useState(""); // P_total
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [stockSources, setStockSources] = useState<string[]>([]);
 
   // Initialize form with editing entry data
   useEffect(() => {
@@ -148,6 +149,23 @@ export const AddEditEntryModal: React.FC<AddEditEntryModalProps> = ({
     faceValue,
   ]);
 
+  // Fetch available stock sources on mount
+  useEffect(() => {
+    const fetchSources = async () => {
+      try {
+        const sources = await finCatchAPI.getSources();
+        if (sources.stock) {
+          setStockSources(sources.stock);
+        }
+      } catch (err) {
+        console.error("Failed to fetch stock sources:", err);
+        // Fallback to common sources if fetch fails
+        setStockSources(["vndirect", "ssi", "yahoo_finance"]);
+      }
+    };
+    fetchSources();
+  }, []);
+
   const resetForm = () => {
     setAssetType("stock");
     setSymbol("");
@@ -185,7 +203,8 @@ export const AddEditEntryModal: React.FC<AddEditEntryModalProps> = ({
       setCouponFrequency("semiannual");
     } else {
       setCurrency("USD");
-      setSource("");
+      // Set default stock source to vndirect if available
+      setSource(stockSources.length > 0 ? stockSources[0] : "vndirect");
     }
   };
 
@@ -544,14 +563,30 @@ export const AddEditEntryModal: React.FC<AddEditEntryModalProps> = ({
           </div>
         </div>
 
-        {assetType !== "gold" && (
+        {assetType === "stock" && (
+          <div>
+            <Label>Source</Label>
+            <Select
+              value={source}
+              onValueChange={setSource}
+              options={stockSources.map((src) => ({
+                value: src,
+                label: src,
+              }))}
+              placeholder="Select source"
+              disabled={isSubmitting}
+            />
+          </div>
+        )}
+
+        {assetType === "bond" && (
           <div>
             <Label>Source</Label>
             <Input
               type="text"
               value={source}
               onChange={(e) => setSource(e.target.value)}
-              placeholder="e.g., yahoo_finance"
+              placeholder="e.g., manual"
               disabled={isSubmitting}
             />
           </div>
