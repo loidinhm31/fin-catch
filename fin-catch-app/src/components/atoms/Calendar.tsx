@@ -1,6 +1,8 @@
+"use client";
+
 import * as React from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { DayPicker } from "react-day-picker";
+import { DayPicker, getDefaultClassNames } from "react-day-picker";
 import { cn } from "@/utils/cn";
 import { buttonVariants } from "./Button";
 
@@ -12,58 +14,83 @@ function Calendar({
   showOutsideDays = true,
   ...props
 }: CalendarProps) {
+  const defaultClassNames = getDefaultClassNames();
+
   return (
     <DayPicker
       showOutsideDays={showOutsideDays}
-      className={cn("p-3", className)}
+      className={cn(
+        "p-3 [--rdp-cell-size:2.25rem]",
+        className
+      )}
       classNames={{
-        months: "flex flex-col sm:flex-row space-y-4 sm:space-x-4 sm:space-y-0",
-        month: "space-y-4",
-        caption: "flex justify-center pt-1 relative items-center",
-        caption_label: "text-sm font-semibold",
-        nav: "space-x-1 flex items-center",
-        nav_button: cn(
+        months: cn(
+          "relative flex flex-col gap-4 sm:flex-row",
+          defaultClassNames.months
+        ),
+        month: cn("flex w-full flex-col gap-4", defaultClassNames.month),
+        month_caption: cn(
+          "flex h-[--rdp-cell-size] w-full items-center justify-center relative",
+          defaultClassNames.month_caption
+        ),
+        caption_label: cn(
+          "text-sm font-semibold text-[var(--color-text-primary)]",
+          defaultClassNames.caption_label
+        ),
+        nav: cn(
+          "absolute inset-x-0 top-0 flex w-full items-center justify-between",
+          defaultClassNames.nav
+        ),
+        button_previous: cn(
           buttonVariants({ variant: "outline", size: "icon" }),
-          "h-7 w-7 bg-transparent p-0 opacity-80 hover:opacity-100",
+          "h-7 w-7 bg-transparent p-0 opacity-80 hover:opacity-100 text-[var(--color-text-primary)] absolute left-0",
+          defaultClassNames.button_previous
         ),
-        nav_button_previous: "absolute left-1",
-        nav_button_next: "absolute right-1",
-        table: "w-full border-collapse space-y-1",
-        head_row: "flex",
-        head_cell:
-          "text-[var(--color-text-muted)] rounded-md w-9 font-normal text-[0.8rem]",
-        row: "flex w-full mt-2",
-        cell: cn(
-          "relative p-0 text-center text-sm focus-within:relative focus-within:z-20",
-          "[&:has([aria-selected])]:bg-[rgba(139,92,246,0.1)]",
-          "[&:has([aria-selected].day-outside)]:bg-[rgba(139,92,246,0.05)]",
-          "[&:has([aria-selected].day-range-end)]:rounded-r-md",
+        button_next: cn(
+          buttonVariants({ variant: "outline", size: "icon" }),
+          "h-7 w-7 bg-transparent p-0 opacity-80 hover:opacity-100 text-[var(--color-text-primary)] absolute right-0",
+          defaultClassNames.button_next
         ),
+        table: cn("w-full border-collapse", defaultClassNames.table),
+        weekdays: cn("flex", defaultClassNames.weekdays),
+        weekday: cn(
+          "text-[var(--color-text-secondary)] flex-1 select-none text-center text-[0.8rem] font-medium uppercase",
+          defaultClassNames.weekday
+        ),
+        week: cn("mt-2 flex w-full", defaultClassNames.week),
         day: cn(
-          buttonVariants({ variant: "ghost" }),
-          "h-9 w-9 p-0 font-normal aria-selected:opacity-100",
-          "hover:bg-[rgba(139,92,246,0.2)]",
-          "focus:bg-[rgba(139,92,246,0.2)]",
+          "relative aspect-square h-full w-full flex-1 select-none p-0 text-center text-sm",
+          "hover:bg-[rgba(139,92,246,0.2)] hover:text-[var(--color-text-primary)] rounded-md",
+          "focus:bg-[rgba(139,92,246,0.2)] focus:text-[var(--color-text-primary)]",
+          "aria-selected:bg-gradient-to-r aria-selected:from-violet-500 aria-selected:to-violet-600",
+          "aria-selected:text-white aria-selected:hover:bg-violet-600",
+          defaultClassNames.day
         ),
-        day_range_start: "day-range-start",
-        day_range_end: "day-range-end",
-        day_selected: cn(
+        day_button: cn(
+          "h-[--rdp-cell-size] w-[--rdp-cell-size] p-0 font-normal text-[var(--color-text-primary)]",
+          buttonVariants({ variant: "ghost" })
+        ),
+        selected: cn(
           "bg-gradient-to-r from-violet-500 to-violet-600",
           "text-white hover:bg-violet-600 hover:text-white",
           "focus:bg-violet-600 focus:text-white",
+          defaultClassNames.selected
         ),
-        day_today: cn(
-          "bg-[rgba(34,211,238,0.2)] text-cyan-400",
+        today: cn(
+          "bg-[rgba(34,211,238,0.2)] text-cyan-400 font-semibold",
           "border border-cyan-500/40",
+          defaultClassNames.today
         ),
-        day_outside:
-          "day-outside text-[var(--color-text-muted)] opacity-50 aria-selected:bg-[rgba(139,92,246,0.1)] aria-selected:opacity-30",
-        day_disabled: "text-[var(--color-text-muted)] opacity-50",
-        day_range_middle: cn(
-          "aria-selected:bg-[rgba(139,92,246,0.1)]",
-          "aria-selected:text-[var(--color-text-primary)]",
+        outside: cn(
+          "text-[var(--color-text-muted)] opacity-50",
+          "aria-selected:bg-[rgba(139,92,246,0.1)] aria-selected:opacity-30",
+          defaultClassNames.outside
         ),
-        day_hidden: "invisible",
+        disabled: cn(
+          "text-[var(--color-text-muted)] opacity-50",
+          defaultClassNames.disabled
+        ),
+        hidden: cn("invisible", defaultClassNames.hidden),
         ...classNames,
       }}
       components={{
