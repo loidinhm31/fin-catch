@@ -32,8 +32,10 @@ export const CouponPaymentsSection: React.FC<CouponPaymentsSectionProps> = ({
   } = useCouponPayments(entryId);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [editingPayment, setEditingPayment] = useState<BondCouponPayment | null>(null);
-  const [totalInDisplayCurrency, setTotalInDisplayCurrency] = useState<number>(0);
+  const [editingPayment, setEditingPayment] =
+    useState<BondCouponPayment | null>(null);
+  const [totalInDisplayCurrency, setTotalInDisplayCurrency] =
+    useState<number>(0);
 
   // Calculate total coupon income in display currency
   React.useEffect(() => {
@@ -63,7 +65,9 @@ export const CouponPaymentsSection: React.FC<CouponPaymentsSectionProps> = ({
   };
 
   const handleDeletePayment = async (paymentId: number) => {
-    if (!window.confirm("Are you sure you want to delete this coupon payment?")) {
+    if (
+      !window.confirm("Are you sure you want to delete this coupon payment?")
+    ) {
       return;
     }
 
@@ -96,9 +100,28 @@ export const CouponPaymentsSection: React.FC<CouponPaymentsSectionProps> = ({
 
   return (
     <>
-      <div style={{ marginTop: "var(--space-4)", paddingTop: "var(--space-4)", borderTop: "1px solid rgba(0, 0, 0, 0.1)" }}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "var(--space-3)" }}>
-          <h4 style={{ fontSize: "var(--text-sm)", fontWeight: "var(--font-semibold)", color: "var(--cube-gray-900)" }}>
+      <div
+        style={{
+          marginTop: "var(--space-4)",
+          paddingTop: "var(--space-4)",
+          borderTop: "1px solid rgba(0, 0, 0, 0.1)",
+        }}
+      >
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            marginBottom: "var(--space-3)",
+          }}
+        >
+          <h4
+            style={{
+              fontSize: "var(--text-sm)",
+              fontWeight: "var(--font-semibold)",
+              color: "var(--cube-gray-900)",
+            }}
+          >
             Coupon Payments
           </h4>
           <button
@@ -119,7 +142,8 @@ export const CouponPaymentsSection: React.FC<CouponPaymentsSectionProps> = ({
             }}
             onMouseEnter={(e) => {
               e.currentTarget.style.transform = "translateY(-1px)";
-              e.currentTarget.style.boxShadow = "0 4px 12px rgba(59, 130, 246, 0.3)";
+              e.currentTarget.style.boxShadow =
+                "0 4px 12px rgba(59, 130, 246, 0.3)";
             }}
             onMouseLeave={(e) => {
               e.currentTarget.style.transform = "translateY(0)";
@@ -132,15 +156,32 @@ export const CouponPaymentsSection: React.FC<CouponPaymentsSectionProps> = ({
         </div>
 
         {isLoading ? (
-          <p style={{ fontSize: "var(--text-sm)", color: "var(--cube-gray-500)" }}>
+          <p
+            style={{
+              fontSize: "var(--text-sm)",
+              color: "var(--cube-gray-500)",
+            }}
+          >
             Loading payments...
           </p>
         ) : payments.length === 0 ? (
-          <p style={{ fontSize: "var(--text-sm)", color: "var(--cube-gray-500)", fontStyle: "italic" }}>
+          <p
+            style={{
+              fontSize: "var(--text-sm)",
+              color: "var(--cube-gray-500)",
+              fontStyle: "italic",
+            }}
+          >
             No coupon payments recorded yet
           </p>
         ) : (
-          <div style={{ display: "flex", flexDirection: "column", gap: "var(--space-2)" }}>
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              gap: "var(--space-2)",
+            }}
+          >
             {payments.map((payment) => (
               <div
                 key={payment.id}
@@ -155,16 +196,40 @@ export const CouponPaymentsSection: React.FC<CouponPaymentsSectionProps> = ({
                 }}
               >
                 <div style={{ flex: 1 }}>
-                  <div style={{ display: "flex", gap: "var(--space-2)", alignItems: "center" }}>
-                    <p style={{ fontSize: "var(--text-sm)", fontWeight: "var(--font-medium)", color: "var(--cube-gray-900)" }}>
+                  <div
+                    style={{
+                      display: "flex",
+                      gap: "var(--space-2)",
+                      alignItems: "center",
+                    }}
+                  >
+                    <p
+                      style={{
+                        fontSize: "var(--text-sm)",
+                        fontWeight: "var(--font-medium)",
+                        color: "var(--cube-gray-900)",
+                      }}
+                    >
                       {formatDate(payment.payment_date)}
                     </p>
-                    <p style={{ fontSize: "var(--text-sm)", fontWeight: "var(--font-semibold)", color: "#10b981" }}>
+                    <p
+                      style={{
+                        fontSize: "var(--text-sm)",
+                        fontWeight: "var(--font-semibold)",
+                        color: "#10b981",
+                      }}
+                    >
                       {formatCurrency(payment.amount, payment.currency)}
                     </p>
                   </div>
                   {payment.notes && (
-                    <p style={{ fontSize: "var(--text-xs)", color: "var(--cube-gray-500)", marginTop: "var(--space-1)" }}>
+                    <p
+                      style={{
+                        fontSize: "var(--text-xs)",
+                        color: "var(--cube-gray-500)",
+                        marginTop: "var(--space-1)",
+                      }}
+                    >
                       {payment.notes}
                     </p>
                   )}
@@ -201,10 +266,22 @@ export const CouponPaymentsSection: React.FC<CouponPaymentsSectionProps> = ({
               alignItems: "center",
             }}
           >
-            <p style={{ fontSize: "var(--text-sm)", fontWeight: "var(--font-medium)", color: "var(--cube-gray-900)" }}>
+            <p
+              style={{
+                fontSize: "var(--text-sm)",
+                fontWeight: "var(--font-medium)",
+                color: "var(--cube-gray-900)",
+              }}
+            >
               Total Coupon Income
             </p>
-            <p style={{ fontSize: "var(--text-base)", fontWeight: "var(--font-bold)", color: "#10b981" }}>
+            <p
+              style={{
+                fontSize: "var(--text-base)",
+                fontWeight: "var(--font-bold)",
+                color: "#10b981",
+              }}
+            >
               {formatCurrency(totalInDisplayCurrency, displayCurrency)}
             </p>
           </div>

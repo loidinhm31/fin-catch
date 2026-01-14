@@ -13,7 +13,9 @@ export interface BondEntryFormProps {
   maturityDate: Date | undefined;
   setMaturityDate: (date: Date | undefined) => void;
   couponFrequency: "annual" | "semiannual" | "quarterly" | "monthly";
-  setCouponFrequency: (value: "annual" | "semiannual" | "quarterly" | "monthly") => void;
+  setCouponFrequency: (
+    value: "annual" | "semiannual" | "quarterly" | "monthly",
+  ) => void;
   currentMarketPrice: string;
   setCurrentMarketPrice: (value: string) => void;
   ytm: string;
@@ -81,7 +83,13 @@ export const BondEntryForm: React.FC<BondEntryFormProps> = ({
           placeholder="e.g., 6.5"
           disabled={isSubmitting}
         />
-        <p style={{ fontSize: "var(--text-xs)", color: "var(--cube-gray-500)", marginTop: "var(--space-1)" }}>
+        <p
+          style={{
+            fontSize: "var(--text-xs)",
+            color: "var(--cube-gray-500)",
+            marginTop: "var(--space-1)",
+          }}
+        >
           Annual yield to maturity percentage
         </p>
       </div>
@@ -90,14 +98,22 @@ export const BondEntryForm: React.FC<BondEntryFormProps> = ({
         <Label>Input Mode</Label>
         <Select
           value={bondInputMode}
-          onValueChange={(value) => setBondInputMode(value as "direct" | "calculated")}
+          onValueChange={(value) =>
+            setBondInputMode(value as "direct" | "calculated")
+          }
           disabled={isSubmitting}
           options={[
             { value: "direct", label: "Direct Input (Manual Entry)" },
             { value: "calculated", label: "Calculate from Investment Data" },
           ]}
         />
-        <p style={{ fontSize: "var(--text-xs)", color: "var(--cube-gray-500)", marginTop: "var(--space-1)" }}>
+        <p
+          style={{
+            fontSize: "var(--text-xs)",
+            color: "var(--cube-gray-500)",
+            marginTop: "var(--space-1)",
+          }}
+        >
           {bondInputMode === "direct"
             ? "Manually enter face value, coupon rate, and prices"
             : "Calculate bond parameters from investment amount and expected yield"}
@@ -114,7 +130,13 @@ export const BondEntryForm: React.FC<BondEntryFormProps> = ({
           placeholder="e.g., 1000"
           disabled={isSubmitting}
         />
-        <p style={{ fontSize: "var(--text-xs)", color: "var(--cube-gray-500)", marginTop: "var(--space-1)" }}>
+        <p
+          style={{
+            fontSize: "var(--text-xs)",
+            color: "var(--cube-gray-500)",
+            marginTop: "var(--space-1)",
+          }}
+        >
           Par/nominal value per bond
         </p>
       </div>
@@ -122,8 +144,21 @@ export const BondEntryForm: React.FC<BondEntryFormProps> = ({
       {bondInputMode === "calculated" ? (
         <>
           {/* Calculated Mode Inputs */}
-          <div className="p-4" style={{ backgroundColor: "var(--cube-gray-50)", borderRadius: "var(--radius-md)", border: "1px solid var(--cube-gray-200)" }}>
-            <p style={{ fontSize: "var(--text-sm)", fontWeight: "var(--font-medium)", marginBottom: "var(--space-3)" }}>
+          <div
+            className="p-4"
+            style={{
+              backgroundColor: "var(--cube-gray-50)",
+              borderRadius: "var(--radius-md)",
+              border: "1px solid var(--cube-gray-200)",
+            }}
+          >
+            <p
+              style={{
+                fontSize: "var(--text-sm)",
+                fontWeight: "var(--font-medium)",
+                marginBottom: "var(--space-3)",
+              }}
+            >
               Investment Parameters
             </p>
 
@@ -152,7 +187,10 @@ export const BondEntryForm: React.FC<BondEntryFormProps> = ({
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4" style={{ marginTop: "var(--space-3)" }}>
+            <div
+              className="grid grid-cols-1 md:grid-cols-2 gap-4"
+              style={{ marginTop: "var(--space-3)" }}
+            >
               <div>
                 <Label required>Purchase Price (P_buy)</Label>
                 <Input
@@ -163,13 +201,22 @@ export const BondEntryForm: React.FC<BondEntryFormProps> = ({
                   placeholder="e.g., 106.084"
                   disabled={isSubmitting}
                 />
-                <p style={{ fontSize: "var(--text-xs)", color: "var(--cube-gray-500)", marginTop: "var(--space-1)" }}>
+                <p
+                  style={{
+                    fontSize: "var(--text-xs)",
+                    color: "var(--cube-gray-500)",
+                    marginTop: "var(--space-1)",
+                  }}
+                >
                   Percentage of face value (e.g., 106.084 = 106.084%)
                 </p>
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4" style={{ marginTop: "var(--space-3)" }}>
+            <div
+              className="grid grid-cols-1 md:grid-cols-2 gap-4"
+              style={{ marginTop: "var(--space-3)" }}
+            >
               <div>
                 <Label required>Purchase Date</Label>
                 <DatePicker
@@ -192,17 +239,45 @@ export const BondEntryForm: React.FC<BondEntryFormProps> = ({
               </div>
             </div>
 
-            <div style={{ marginTop: "var(--space-3)", padding: "var(--space-2)", backgroundColor: "var(--cube-blue-50)", borderRadius: "var(--radius-md)", border: "1px solid var(--cube-blue-200)" }}>
-              <p style={{ fontSize: "var(--text-xs)", color: "var(--cube-blue-700)" }}>
-                Bond parameters will be calculated automatically as you fill in the fields above.
+            <div
+              style={{
+                marginTop: "var(--space-3)",
+                padding: "var(--space-2)",
+                backgroundColor: "var(--cube-blue-50)",
+                borderRadius: "var(--radius-md)",
+                border: "1px solid var(--cube-blue-200)",
+              }}
+            >
+              <p
+                style={{
+                  fontSize: "var(--text-xs)",
+                  color: "var(--cube-blue-700)",
+                }}
+              >
+                Bond parameters will be calculated automatically as you fill in
+                the fields above.
               </p>
             </div>
           </div>
 
           {/* Calculated Results */}
           {faceValue && couponRate && purchasePrice && (
-            <div className="p-4" style={{ backgroundColor: "var(--cube-green-50)", borderRadius: "var(--radius-md)", border: "1px solid var(--cube-green-200)" }}>
-              <p style={{ fontSize: "var(--text-sm)", fontWeight: "var(--font-medium)", marginBottom: "var(--space-3)", color: "var(--cube-green-800)" }}>
+            <div
+              className="p-4"
+              style={{
+                backgroundColor: "var(--cube-green-50)",
+                borderRadius: "var(--radius-md)",
+                border: "1px solid var(--cube-green-200)",
+              }}
+            >
+              <p
+                style={{
+                  fontSize: "var(--text-sm)",
+                  fontWeight: "var(--font-medium)",
+                  marginBottom: "var(--space-3)",
+                  color: "var(--cube-green-800)",
+                }}
+              >
                 Calculated Results
               </p>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -212,7 +287,12 @@ export const BondEntryForm: React.FC<BondEntryFormProps> = ({
                     type="text"
                     value={faceValue}
                     readOnly
-                    style={{ backgroundColor: "#f9fafb", color: "#111827", cursor: "not-allowed", fontWeight: 600 }}
+                    style={{
+                      backgroundColor: "#f9fafb",
+                      color: "#111827",
+                      cursor: "not-allowed",
+                      fontWeight: 600,
+                    }}
                   />
                 </div>
                 <div>
@@ -221,23 +301,44 @@ export const BondEntryForm: React.FC<BondEntryFormProps> = ({
                     type="text"
                     value={purchasePrice}
                     readOnly
-                    style={{ backgroundColor: "#f9fafb", color: "#111827", cursor: "not-allowed", fontWeight: 600 }}
+                    style={{
+                      backgroundColor: "#f9fafb",
+                      color: "#111827",
+                      cursor: "not-allowed",
+                      fontWeight: 600,
+                    }}
                   />
                 </div>
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4" style={{ marginTop: "var(--space-3)" }}>
+              <div
+                className="grid grid-cols-1 md:grid-cols-2 gap-4"
+                style={{ marginTop: "var(--space-3)" }}
+              >
                 <div>
                   <Label>Coupon Rate (%)</Label>
                   <Input
                     type="text"
                     value={couponRate}
                     readOnly
-                    style={{ backgroundColor: "#f9fafb", color: "#111827", cursor: "not-allowed", fontWeight: 600 }}
+                    style={{
+                      backgroundColor: "#f9fafb",
+                      color: "#111827",
+                      cursor: "not-allowed",
+                      fontWeight: 600,
+                    }}
                   />
                 </div>
               </div>
-              <p style={{ fontSize: "var(--text-xs)", color: "var(--cube-green-700)", marginTop: "var(--space-2)" }}>
-                Note: Current market value will be calculated automatically based on time to maturity and YTM when viewing portfolio performance.
+              <p
+                style={{
+                  fontSize: "var(--text-xs)",
+                  color: "var(--cube-green-700)",
+                  marginTop: "var(--space-2)",
+                }}
+              >
+                Note: Current market value will be calculated automatically
+                based on time to maturity and YTM when viewing portfolio
+                performance.
               </p>
             </div>
           )}
@@ -296,7 +397,13 @@ export const BondEntryForm: React.FC<BondEntryFormProps> = ({
                 placeholder="Price paid per bond"
                 disabled={isSubmitting}
               />
-              <p style={{ fontSize: "var(--text-xs)", color: "var(--cube-gray-500)", marginTop: "var(--space-1)" }}>
+              <p
+                style={{
+                  fontSize: "var(--text-xs)",
+                  color: "var(--cube-gray-500)",
+                  marginTop: "var(--space-1)",
+                }}
+              >
                 May differ from face value (premium/discount)
               </p>
             </div>
@@ -312,7 +419,13 @@ export const BondEntryForm: React.FC<BondEntryFormProps> = ({
               placeholder="Manual price for valuation"
               disabled={isSubmitting}
             />
-            <p style={{ fontSize: "var(--text-xs)", color: "var(--cube-gray-500)", marginTop: "var(--space-1)" }}>
+            <p
+              style={{
+                fontSize: "var(--text-xs)",
+                color: "var(--cube-gray-500)",
+                marginTop: "var(--space-1)",
+              }}
+            >
               Leave empty to use face value
             </p>
           </div>
@@ -344,12 +457,22 @@ export const BondEntryForm: React.FC<BondEntryFormProps> = ({
             </div>
           </div>
 
-          <div style={{ backgroundColor: "#f0f9ff", padding: "var(--space-3)", borderRadius: "var(--radius-md)", border: "1px solid #bae6fd" }}>
+          <div
+            style={{
+              backgroundColor: "#f0f9ff",
+              padding: "var(--space-3)",
+              borderRadius: "var(--radius-md)",
+              border: "1px solid #bae6fd",
+            }}
+          >
             <p style={{ fontSize: "var(--text-sm)", color: "#0369a1" }}>
-              <strong>Bond Valuation:</strong><br />
-              • Current value = current market price (or face value) × quantity<br />
-              • Performance includes both price changes and coupon income<br />
-              • Add coupon payments in the expanded card view after creation
+              <strong>Bond Valuation:</strong>
+              <br />
+              • Current value = current market price (or face value) × quantity
+              <br />
+              • Performance includes both price changes and coupon income
+              <br />• Add coupon payments in the expanded card view after
+              creation
             </p>
           </div>
         </>

@@ -19,7 +19,8 @@ export const useCouponPayments = (entryId: number | null) => {
       const data = await finCatchAPI.listCouponPayments(entryId);
       setPayments(data);
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : "Failed to load coupon payments";
+      const errorMessage =
+        err instanceof Error ? err.message : "Failed to load coupon payments";
       setError(errorMessage);
       console.error("Error loading coupon payments:", err);
     } finally {
@@ -37,7 +38,8 @@ export const useCouponPayments = (entryId: number | null) => {
       await finCatchAPI.createCouponPayment(payment);
       await loadPayments(); // Reload to get updated list
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : "Failed to create coupon payment";
+      const errorMessage =
+        err instanceof Error ? err.message : "Failed to create coupon payment";
       setError(errorMessage);
       throw err;
     }
@@ -49,7 +51,8 @@ export const useCouponPayments = (entryId: number | null) => {
       await finCatchAPI.updateCouponPayment(payment);
       await loadPayments(); // Reload to get updated list
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : "Failed to update coupon payment";
+      const errorMessage =
+        err instanceof Error ? err.message : "Failed to update coupon payment";
       setError(errorMessage);
       throw err;
     }
@@ -61,7 +64,8 @@ export const useCouponPayments = (entryId: number | null) => {
       await finCatchAPI.deleteCouponPayment(paymentId);
       await loadPayments(); // Reload to get updated list
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : "Failed to delete coupon payment";
+      const errorMessage =
+        err instanceof Error ? err.message : "Failed to delete coupon payment";
       setError(errorMessage);
       throw err;
     }

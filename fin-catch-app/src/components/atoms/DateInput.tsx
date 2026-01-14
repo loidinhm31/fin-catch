@@ -28,7 +28,7 @@ export const DateInput = React.forwardRef<HTMLInputElement, DateInputProps>(
       id,
       name,
     },
-    _ref
+    _ref,
   ) => {
     const handleDateChange = (date: Date | undefined) => {
       onChange?.(date || null);
@@ -48,7 +48,7 @@ export const DateInput = React.forwardRef<HTMLInputElement, DateInputProps>(
         />
       </div>
     );
-  }
+  },
 );
 
 DateInput.displayName = "DateInput";

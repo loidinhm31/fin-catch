@@ -42,7 +42,7 @@ export const AddEditCouponModal: React.FC<AddEditCouponModalProps> = ({
       setPaymentDate(
         editingPayment.payment_date
           ? new Date(editingPayment.payment_date * 1000)
-          : undefined
+          : undefined,
       );
       setAmount(editingPayment.amount?.toString() || "");
       setCurrency(editingPayment.currency || defaultCurrency);
@@ -96,7 +96,9 @@ export const AddEditCouponModal: React.FC<AddEditCouponModalProps> = ({
       resetForm();
       onClose();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to save coupon payment");
+      setError(
+        err instanceof Error ? err.message : "Failed to save coupon payment",
+      );
     } finally {
       setIsSubmitting(false);
     }

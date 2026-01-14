@@ -39,8 +39,10 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
   };
 
   const confirmButtonColors = {
-    warning: "bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600",
-    danger: "bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700",
+    warning:
+      "bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600",
+    danger:
+      "bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700",
   };
 
   const handleConfirm = () => {
@@ -56,7 +58,7 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
             <div
               className={cn(
                 "w-16 h-16 rounded-full flex items-center justify-center",
-                iconColors[type]
+                iconColors[type],
               )}
             >
               <AlertCircle className="w-8 h-8" />

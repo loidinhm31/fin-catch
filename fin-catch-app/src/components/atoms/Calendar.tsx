@@ -24,7 +24,7 @@ function Calendar({
         nav: "space-x-1 flex items-center",
         nav_button: cn(
           buttonVariants({ variant: "outline", size: "icon" }),
-          "h-7 w-7 bg-transparent p-0 opacity-80 hover:opacity-100"
+          "h-7 w-7 bg-transparent p-0 opacity-80 hover:opacity-100",
         ),
         nav_button_previous: "absolute left-1",
         nav_button_next: "absolute right-1",
@@ -37,31 +37,31 @@ function Calendar({
           "relative p-0 text-center text-sm focus-within:relative focus-within:z-20",
           "[&:has([aria-selected])]:bg-[rgba(139,92,246,0.1)]",
           "[&:has([aria-selected].day-outside)]:bg-[rgba(139,92,246,0.05)]",
-          "[&:has([aria-selected].day-range-end)]:rounded-r-md"
+          "[&:has([aria-selected].day-range-end)]:rounded-r-md",
         ),
         day: cn(
           buttonVariants({ variant: "ghost" }),
           "h-9 w-9 p-0 font-normal aria-selected:opacity-100",
           "hover:bg-[rgba(139,92,246,0.2)]",
-          "focus:bg-[rgba(139,92,246,0.2)]"
+          "focus:bg-[rgba(139,92,246,0.2)]",
         ),
         day_range_start: "day-range-start",
         day_range_end: "day-range-end",
         day_selected: cn(
           "bg-gradient-to-r from-violet-500 to-violet-600",
           "text-white hover:bg-violet-600 hover:text-white",
-          "focus:bg-violet-600 focus:text-white"
+          "focus:bg-violet-600 focus:text-white",
         ),
         day_today: cn(
           "bg-[rgba(34,211,238,0.2)] text-cyan-400",
-          "border border-cyan-500/40"
+          "border border-cyan-500/40",
         ),
         day_outside:
           "day-outside text-[var(--color-text-muted)] opacity-50 aria-selected:bg-[rgba(139,92,246,0.1)] aria-selected:opacity-30",
         day_disabled: "text-[var(--color-text-muted)] opacity-50",
         day_range_middle: cn(
           "aria-selected:bg-[rgba(139,92,246,0.1)]",
-          "aria-selected:text-[var(--color-text-primary)]"
+          "aria-selected:text-[var(--color-text-primary)]",
         ),
         day_hidden: "invisible",
         ...classNames,

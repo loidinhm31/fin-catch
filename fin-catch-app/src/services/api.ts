@@ -1,5 +1,7 @@
 import { invoke } from "@tauri-apps/api/core";
 import {
+  AuthResponse,
+  AuthStatus,
   BondCouponPayment,
   ExchangeRateRequest,
   ExchangeRateResponse,
@@ -11,6 +13,9 @@ import {
   PortfolioEntry,
   StockHistoryRequest,
   StockHistoryResponse,
+  SyncConfig,
+  SyncResult,
+  SyncStatus,
 } from "@/types";
 
 class FinCatchAPI {
@@ -281,9 +286,12 @@ class FinCatchAPI {
   async listCouponPayments(entryId: number): Promise<BondCouponPayment[]> {
     try {
       console.log("[Tauri IPC] list_coupon_payments", entryId);
-      const payments = await invoke<BondCouponPayment[]>("list_coupon_payments", {
-        entryId,
-      });
+      const payments = await invoke<BondCouponPayment[]>(
+        "list_coupon_payments",
+        {
+          entryId,
+        },
+      );
       console.log("[Tauri IPC Response]", payments);
       return payments;
     } catch (error) {
@@ -310,6 +318,136 @@ class FinCatchAPI {
       console.log("[Tauri IPC Response] Coupon payment deleted");
     } catch (error) {
       console.error("Error deleting coupon payment:", error);
+      throw this.handleError(error);
+    }
+  }
+
+  /**
+   * Authentication operations
+   */
+  async authConfigureSync(config: SyncConfig): Promise<void> {
+    try {
+      console.log("[Tauri IPC] auth_configure_sync", config);
+      await invoke<void>("auth_configure_sync", {
+        serverUrl: config.serverUrl ?? null,
+        appId: config.appId ?? null,
+        apiKey: config.apiKey ?? null,
+      });
+      console.log("[Tauri IPC Response] Sync configured");
+    } catch (error) {
+      console.error("Error configuring sync:", error);
+      throw this.handleError(error);
+    }
+  }
+
+  async authRegister(
+    username: string,
+    email: string,
+    password: string,
+    appId?: string,
+    apiKey?: string,
+  ): Promise<AuthResponse> {
+    try {
+      console.log("[Tauri IPC] auth_register", { username, email, appId });
+      const response = await invoke<AuthResponse>("auth_register", {
+        username,
+        email,
+        password,
+        appId: appId ?? null,
+        apiKey: apiKey ?? null,
+      });
+      console.log("[Tauri IPC Response]", response);
+      return response;
+    } catch (error) {
+      console.error("Error registering user:", error);
+      throw this.handleError(error);
+    }
+  }
+
+  async authLogin(email: string, password: string): Promise<AuthResponse> {
+    try {
+      console.log("[Tauri IPC] auth_login", { email });
+      const response = await invoke<AuthResponse>("auth_login", {
+        email,
+        password,
+      });
+      console.log("[Tauri IPC Response]", response);
+      return response;
+    } catch (error) {
+      console.error("Error logging in:", error);
+      throw this.handleError(error);
+    }
+  }
+
+  async authLogout(): Promise<void> {
+    try {
+      console.log("[Tauri IPC] auth_logout");
+      await invoke<void>("auth_logout");
+      console.log("[Tauri IPC Response] Logged out");
+    } catch (error) {
+      console.error("Error logging out:", error);
+      throw this.handleError(error);
+    }
+  }
+
+  async authRefreshToken(): Promise<void> {
+    try {
+      console.log("[Tauri IPC] auth_refresh_token");
+      await invoke<void>("auth_refresh_token");
+      console.log("[Tauri IPC Response] Token refreshed");
+    } catch (error) {
+      console.error("Error refreshing token:", error);
+      throw this.handleError(error);
+    }
+  }
+
+  async authGetStatus(): Promise<AuthStatus> {
+    try {
+      console.log("[Tauri IPC] auth_get_status");
+      const status = await invoke<AuthStatus>("auth_get_status");
+      console.log("[Tauri IPC Response]", status);
+      return status;
+    } catch (error) {
+      console.error("Error getting auth status:", error);
+      throw this.handleError(error);
+    }
+  }
+
+  async authIsAuthenticated(): Promise<boolean> {
+    try {
+      console.log("[Tauri IPC] auth_is_authenticated");
+      const isAuth = await invoke<boolean>("auth_is_authenticated");
+      console.log("[Tauri IPC Response]", isAuth);
+      return isAuth;
+    } catch (error) {
+      console.error("Error checking authentication:", error);
+      throw this.handleError(error);
+    }
+  }
+
+  /**
+   * Sync operations (placeholder - will be implemented when sync.rs is ready)
+   */
+  async syncNow(): Promise<SyncResult> {
+    try {
+      console.log("[Tauri IPC] sync_now");
+      const result = await invoke<SyncResult>("sync_now");
+      console.log("[Tauri IPC Response]", result);
+      return result;
+    } catch (error) {
+      console.error("Error syncing:", error);
+      throw this.handleError(error);
+    }
+  }
+
+  async syncGetStatus(): Promise<SyncStatus> {
+    try {
+      console.log("[Tauri IPC] sync_get_status");
+      const status = await invoke<SyncStatus>("sync_get_status");
+      console.log("[Tauri IPC Response]", status);
+      return status;
+    } catch (error) {
+      console.error("Error getting sync status:", error);
       throw this.handleError(error);
     }
   }

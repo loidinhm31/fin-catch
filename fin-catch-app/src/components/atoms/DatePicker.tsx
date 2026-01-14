@@ -46,7 +46,7 @@ export function DatePicker({
             "w-full justify-start text-left font-normal",
             !date && "text-[var(--color-text-muted)]",
             error && "border-2 border-red-500",
-            className
+            className,
           )}
           disabled={disabled}
         >

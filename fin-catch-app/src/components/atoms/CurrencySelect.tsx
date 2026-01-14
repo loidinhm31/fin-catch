@@ -1,7 +1,13 @@
 import * as React from "react";
 import type { CurrencyCode } from "../../types";
 import { CURRENCY_LABELS, CURRENCY_SYMBOLS } from "../../types";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./Select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "./Select";
 
 interface CurrencySelectProps {
   /**
@@ -70,14 +76,20 @@ export const CurrencySelect: React.FC<CurrencySelectProps> = ({
           {label}
         </label>
       )}
-      <Select value={value} onValueChange={handleChange} disabled={disabled} name={id}>
+      <Select
+        value={value}
+        onValueChange={handleChange}
+        disabled={disabled}
+        name={id}
+      >
         <SelectTrigger id={id}>
           <SelectValue placeholder="Select currency" />
         </SelectTrigger>
         <SelectContent>
           {currencies.map((currency) => (
             <SelectItem key={currency} value={currency}>
-              {CURRENCY_SYMBOLS[currency]} {currency} - {CURRENCY_LABELS[currency]}
+              {CURRENCY_SYMBOLS[currency]} {currency} -{" "}
+              {CURRENCY_LABELS[currency]}
             </SelectItem>
           ))}
         </SelectContent>

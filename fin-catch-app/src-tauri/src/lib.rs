@@ -1,6 +1,8 @@
 mod db;
+mod auth;
+mod sync;
 
-use std::sync::Arc;
+use std::sync::{Arc, Mutex};
 use tauri::{Manager, State};
 use fin_catch_data::{
     DataSourceGateway,
@@ -10,11 +12,15 @@ use fin_catch_data::{
     GoldPremiumRequest, GoldPremiumResponse,
 };
 use db::{Database, Portfolio, PortfolioEntry, BondCouponPayment};
+use auth::{AuthService, AuthResponse, AuthStatus};
+use sync::{SyncService, SyncResult, SyncStatus};
 
-// Application state that holds the data source gateway and database
+// Application state that holds the data source gateway, database, auth service, and sync service
 pub struct AppState {
     gateway: Arc<DataSourceGateway>,
     db: Arc<Database>,
+    auth: Arc<Mutex<AuthService>>,
+    sync: Arc<Mutex<SyncService>>,
 }
 
 // Stock history command
@@ -172,11 +178,121 @@ fn delete_coupon_payment(id: i64, state: State<'_, AppState>) -> Result<(), Stri
     state.db.delete_coupon_payment(id).map_err(|e| e.to_string())
 }
 
+// Auth commands
+#[tauri::command]
+async fn auth_configure_sync(
+    server_url: Option<String>,
+    app_id: Option<String>,
+    api_key: Option<String>,
+    app_handle: tauri::AppHandle,
+    state: State<'_, AppState>,
+) -> Result<(), String> {
+    let mut auth = state.auth.lock().map_err(|e| format!("Failed to lock auth service: {}", e))?.clone();
+    let result = auth.configure_sync(&app_handle, server_url, app_id, api_key).await;
+
+    // Update the shared state with the new configuration
+    if result.is_ok() {
+        *state.auth.lock().map_err(|e| format!("Failed to lock auth service: {}", e))? = auth;
+    }
+
+    result
+}
+
+#[tauri::command]
+async fn auth_register(
+    username: String,
+    email: String,
+    password: String,
+    app_handle: tauri::AppHandle,
+    state: State<'_, AppState>,
+) -> Result<AuthResponse, String> {
+    let auth = state.auth.lock().map_err(|e| format!("Failed to lock auth service: {}", e))?.clone();
+    auth.register(&app_handle, username, email, password).await
+}
+
+#[tauri::command]
+async fn auth_login(
+    email: String,
+    password: String,
+    app_handle: tauri::AppHandle,
+    state: State<'_, AppState>,
+) -> Result<AuthResponse, String> {
+    let auth = state.auth.lock().map_err(|e| format!("Failed to lock auth service: {}", e))?.clone();
+    auth.login(&app_handle, email, password).await
+}
+
+#[tauri::command]
+async fn auth_logout(
+    app_handle: tauri::AppHandle,
+    state: State<'_, AppState>,
+) -> Result<(), String> {
+    let auth = state.auth.lock().map_err(|e| format!("Failed to lock auth service: {}", e))?.clone();
+    auth.logout(&app_handle).await
+}
+
+#[tauri::command]
+async fn auth_refresh_token(
+    app_handle: tauri::AppHandle,
+    state: State<'_, AppState>,
+) -> Result<(), String> {
+    let auth = state.auth.lock().map_err(|e| format!("Failed to lock auth service: {}", e))?.clone();
+    auth.refresh_token(&app_handle).await
+}
+
+#[tauri::command]
+async fn auth_get_status(
+    app_handle: tauri::AppHandle,
+    state: State<'_, AppState>,
+) -> Result<AuthStatus, String> {
+    let auth = state.auth.lock().map_err(|e| format!("Failed to lock auth service: {}", e))?.clone();
+    Ok(auth.get_auth_status(&app_handle).await)
+}
+
+#[tauri::command]
+async fn auth_is_authenticated(
+    app_handle: tauri::AppHandle,
+    state: State<'_, AppState>,
+) -> Result<bool, String> {
+    let auth = state.auth.lock().map_err(|e| format!("Failed to lock auth service: {}", e))?.clone();
+    Ok(auth.is_authenticated(&app_handle).await)
+}
+
+// Sync commands
+#[tauri::command]
+async fn sync_now(
+    app_handle: tauri::AppHandle,
+    state: State<'_, AppState>,
+) -> Result<SyncResult, String> {
+    let sync = state.sync.lock().map_err(|e| format!("Failed to lock sync service: {}", e))?.clone();
+    sync.sync_now(&app_handle).await
+}
+
+#[tauri::command]
+async fn sync_get_status(
+    app_handle: tauri::AppHandle,
+    state: State<'_, AppState>,
+) -> Result<SyncStatus, String> {
+    let sync = state.sync.lock().map_err(|e| format!("Failed to lock sync service: {}", e))?.clone();
+    sync.get_sync_status(&app_handle).await
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_opener::init())
+        .plugin(tauri_plugin_store::Builder::new().build())
         .setup(|app| {
+            // Load environment variables from .env file (ignore errors if file doesn't exist)
+            let _ = dotenvy::dotenv();
+
+            // Get sync-center configuration from environment variables
+            let sync_center_url = std::env::var("SYNC_CENTER_URL")
+                .unwrap_or_else(|_| "http://localhost:3000".to_string());
+            let sync_center_app_id = std::env::var("SYNC_CENTER_APP_ID")
+                .unwrap_or_else(|_| "your_app_id_here".to_string());
+            let sync_center_api_key = std::env::var("SYNC_CENTER_API_KEY")
+                .unwrap_or_else(|_| "your_api_key_here".to_string());
+
             // Initialize the data source gateway with all sources
             let gateway = Arc::new(DataSourceGateway::with_all_sources());
 
@@ -186,7 +302,21 @@ pub fn run() {
             let db_path = app_data_dir.join("portfolio.db");
             let db = Arc::new(Database::new(db_path).expect("failed to initialize database"));
 
-            let app_state = AppState { gateway, db };
+            // Initialize auth service with configuration from environment
+            let auth = Arc::new(Mutex::new(AuthService::new(
+                sync_center_url.clone(),
+                sync_center_app_id,
+                sync_center_api_key,
+            )));
+
+            // Initialize sync service
+            let sync = Arc::new(Mutex::new(SyncService::new(
+                sync_center_url,
+                db.clone(),
+                auth.clone(),
+            )));
+
+            let app_state = AppState { gateway, db, auth, sync };
             app.manage(app_state);
 
             Ok(())
@@ -213,6 +343,15 @@ pub fn run() {
             list_coupon_payments,
             update_coupon_payment,
             delete_coupon_payment,
+            auth_configure_sync,
+            auth_register,
+            auth_login,
+            auth_logout,
+            auth_refresh_token,
+            auth_get_status,
+            auth_is_authenticated,
+            sync_now,
+            sync_get_status,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

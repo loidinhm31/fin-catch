@@ -10,6 +10,11 @@ pub struct Portfolio {
     pub description: Option<String>,
     pub base_currency: Option<String>, // Base currency for portfolio (e.g., "USD", "VND")
     pub created_at: i64, // Unix timestamp
+    // Sync fields
+    pub sync_uuid: Option<String>,
+    pub sync_version: Option<i64>,
+    pub synced_at: Option<i64>,
+    pub is_deleted: Option<i64>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -38,6 +43,11 @@ pub struct PortfolioEntry {
     pub current_market_price: Option<f64>, // User-entered current price
     pub last_price_update: Option<i64>, // Unix timestamp of last price update
     pub ytm: Option<f64>, // Yield to Maturity as percentage (used in calculated mode)
+    // Sync fields
+    pub sync_uuid: Option<String>,
+    pub sync_version: Option<i64>,
+    pub synced_at: Option<i64>,
+    pub is_deleted: Option<i64>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -49,6 +59,11 @@ pub struct BondCouponPayment {
     pub currency: String, // Payment currency
     pub notes: Option<String>,
     pub created_at: i64,
+    // Sync fields
+    pub sync_uuid: Option<String>,
+    pub sync_version: Option<i64>,
+    pub synced_at: Option<i64>,
+    pub is_deleted: Option<i64>,
 }
 
 pub struct Database {
@@ -59,19 +74,23 @@ impl Database {
     pub fn new(db_path: PathBuf) -> Result<Self> {
         let conn = Connection::open(db_path)?;
 
-        // Create portfolios table with all columns
+        // Create portfolios table with sync columns included
         conn.execute(
             "CREATE TABLE IF NOT EXISTS portfolios (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 name TEXT NOT NULL,
                 description TEXT,
                 base_currency TEXT,
-                created_at INTEGER NOT NULL
+                created_at INTEGER NOT NULL,
+                sync_uuid TEXT,
+                sync_version INTEGER DEFAULT 1,
+                synced_at INTEGER,
+                is_deleted INTEGER DEFAULT 0
             )",
             [],
         )?;
 
-        // Create portfolio_entries table with all columns
+        // Create portfolio_entries table with sync columns included
         conn.execute(
             "CREATE TABLE IF NOT EXISTS portfolio_entries (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -96,12 +115,16 @@ impl Database {
                 current_market_price REAL,
                 last_price_update INTEGER,
                 ytm REAL,
+                sync_uuid TEXT,
+                sync_version INTEGER DEFAULT 1,
+                synced_at INTEGER,
+                is_deleted INTEGER DEFAULT 0,
                 FOREIGN KEY (portfolio_id) REFERENCES portfolios(id) ON DELETE CASCADE
             )",
             [],
         )?;
 
-        // Create bond_coupon_payments table
+        // Create bond_coupon_payments table with sync columns included
         conn.execute(
             "CREATE TABLE IF NOT EXISTS bond_coupon_payments (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -111,12 +134,56 @@ impl Database {
                 currency TEXT NOT NULL,
                 notes TEXT,
                 created_at INTEGER NOT NULL,
+                sync_uuid TEXT,
+                sync_version INTEGER DEFAULT 1,
+                synced_at INTEGER,
+                is_deleted INTEGER DEFAULT 0,
                 FOREIGN KEY (entry_id) REFERENCES portfolio_entries(id) ON DELETE CASCADE
             )",
             [],
         )?;
 
-        // Create indexes
+        // Create sync_metadata table
+        conn.execute(
+            "CREATE TABLE IF NOT EXISTS sync_metadata (
+                table_name TEXT PRIMARY KEY,
+                last_sync_timestamp TEXT,
+                app_id TEXT,
+                api_key TEXT
+            )",
+            [],
+        )?;
+
+        // Create sync_id_mapping table
+        conn.execute(
+            "CREATE TABLE IF NOT EXISTS sync_id_mapping (
+                table_name TEXT NOT NULL,
+                local_id INTEGER NOT NULL,
+                sync_uuid TEXT NOT NULL,
+                PRIMARY KEY (table_name, local_id)
+            )",
+            [],
+        )?;
+
+        // Create indexes - use partial unique indexes for sync_uuid (WHERE sync_uuid IS NOT NULL)
+        conn.execute(
+            "CREATE UNIQUE INDEX IF NOT EXISTS idx_portfolios_sync_uuid
+             ON portfolios(sync_uuid) WHERE sync_uuid IS NOT NULL",
+            [],
+        )?;
+
+        conn.execute(
+            "CREATE UNIQUE INDEX IF NOT EXISTS idx_entries_sync_uuid
+             ON portfolio_entries(sync_uuid) WHERE sync_uuid IS NOT NULL",
+            [],
+        )?;
+
+        conn.execute(
+            "CREATE UNIQUE INDEX IF NOT EXISTS idx_payments_sync_uuid
+             ON bond_coupon_payments(sync_uuid) WHERE sync_uuid IS NOT NULL",
+            [],
+        )?;
+
         conn.execute(
             "CREATE INDEX IF NOT EXISTS idx_entries_portfolio_id ON portfolio_entries(portfolio_id)",
             [],
@@ -140,7 +207,7 @@ impl Database {
     pub fn get_portfolio(&self, id: i64) -> Result<Portfolio> {
         let conn = self.conn.lock().unwrap();
         conn.query_row(
-            "SELECT id, name, description, base_currency, created_at FROM portfolios WHERE id = ?1",
+            "SELECT id, name, description, base_currency, created_at, sync_uuid, sync_version, synced_at, is_deleted FROM portfolios WHERE id = ?1",
             params![id],
             |row| {
                 Ok(Portfolio {
@@ -149,6 +216,10 @@ impl Database {
                     description: row.get(2)?,
                     base_currency: row.get(3)?,
                     created_at: row.get(4)?,
+                    sync_uuid: row.get(5)?,
+                    sync_version: row.get(6)?,
+                    synced_at: row.get(7)?,
+                    is_deleted: row.get(8)?,
                 })
             },
         )
@@ -156,7 +227,7 @@ impl Database {
 
     pub fn list_portfolios(&self) -> Result<Vec<Portfolio>> {
         let conn = self.conn.lock().unwrap();
-        let mut stmt = conn.prepare("SELECT id, name, description, base_currency, created_at FROM portfolios ORDER BY created_at DESC")?;
+        let mut stmt = conn.prepare("SELECT id, name, description, base_currency, created_at, sync_uuid, sync_version, synced_at, is_deleted FROM portfolios ORDER BY created_at DESC")?;
         let portfolios = stmt.query_map([], |row| {
             Ok(Portfolio {
                 id: Some(row.get(0)?),
@@ -164,6 +235,10 @@ impl Database {
                 description: row.get(2)?,
                 base_currency: row.get(3)?,
                 created_at: row.get(4)?,
+                sync_uuid: row.get(5)?,
+                sync_version: row.get(6)?,
+                synced_at: row.get(7)?,
+                is_deleted: row.get(8)?,
             })
         })?;
 
@@ -226,7 +301,8 @@ impl Database {
         conn.query_row(
             "SELECT id, portfolio_id, asset_type, symbol, quantity, purchase_price, currency,
                     purchase_date, notes, tags, transaction_fees, source, created_at, unit, gold_type,
-                    face_value, coupon_rate, maturity_date, coupon_frequency, current_market_price, last_price_update, ytm
+                    face_value, coupon_rate, maturity_date, coupon_frequency, current_market_price, last_price_update, ytm,
+                    sync_uuid, sync_version, synced_at, is_deleted
              FROM portfolio_entries WHERE id = ?1",
             params![id],
             |row| {
@@ -253,6 +329,10 @@ impl Database {
                     current_market_price: row.get(19)?,
                     last_price_update: row.get(20)?,
                     ytm: row.get(21)?,
+                    sync_uuid: row.get(22)?,
+                    sync_version: row.get(23)?,
+                    synced_at: row.get(24)?,
+                    is_deleted: row.get(25)?,
                 })
             },
         )
@@ -263,7 +343,8 @@ impl Database {
         let mut stmt = conn.prepare(
             "SELECT id, portfolio_id, asset_type, symbol, quantity, purchase_price, currency,
                     purchase_date, notes, tags, transaction_fees, source, created_at, unit, gold_type,
-                    face_value, coupon_rate, maturity_date, coupon_frequency, current_market_price, last_price_update, ytm
+                    face_value, coupon_rate, maturity_date, coupon_frequency, current_market_price, last_price_update, ytm,
+                    sync_uuid, sync_version, synced_at, is_deleted
              FROM portfolio_entries WHERE portfolio_id = ?1 ORDER BY created_at DESC"
         )?;
         let entries = stmt.query_map(params![portfolio_id], |row| {
@@ -290,6 +371,10 @@ impl Database {
                 current_market_price: row.get(19)?,
                 last_price_update: row.get(20)?,
                 ytm: row.get(21)?,
+                sync_uuid: row.get(22)?,
+                sync_version: row.get(23)?,
+                synced_at: row.get(24)?,
+                is_deleted: row.get(25)?,
             })
         })?;
 
@@ -359,7 +444,7 @@ impl Database {
     pub fn list_coupon_payments(&self, entry_id: i64) -> Result<Vec<BondCouponPayment>> {
         let conn = self.conn.lock().unwrap();
         let mut stmt = conn.prepare(
-            "SELECT id, entry_id, payment_date, amount, currency, notes, created_at
+            "SELECT id, entry_id, payment_date, amount, currency, notes, created_at, sync_uuid, sync_version, synced_at, is_deleted
              FROM bond_coupon_payments WHERE entry_id = ?1 ORDER BY payment_date DESC"
         )?;
         let payments = stmt.query_map(params![entry_id], |row| {
@@ -371,6 +456,10 @@ impl Database {
                 currency: row.get(4)?,
                 notes: row.get(5)?,
                 created_at: row.get(6)?,
+                sync_uuid: row.get(7)?,
+                sync_version: row.get(8)?,
+                synced_at: row.get(9)?,
+                is_deleted: row.get(10)?,
             })
         })?;
 
@@ -398,5 +487,32 @@ impl Database {
         let conn = self.conn.lock().unwrap();
         conn.execute("DELETE FROM bond_coupon_payments WHERE id = ?1", params![id])?;
         Ok(())
+    }
+
+    // Helper methods for sync operations
+
+    pub fn execute_sql(&self, query: &str, params: &[&str]) -> Result<()> {
+        let conn = self.conn.lock().unwrap();
+        let mut stmt = conn.prepare(query)?;
+        stmt.execute(rusqlite::params_from_iter(params.iter()))?;
+        Ok(())
+    }
+
+    pub fn query_optional_i64(&self, query: &str, params: &[&str]) -> Result<Option<i64>> {
+        let conn = self.conn.lock().unwrap();
+        let mut stmt = conn.prepare(query)?;
+        let result = stmt.query_row(rusqlite::params_from_iter(params.iter()), |row| row.get(0));
+        match result {
+            Ok(value) => Ok(Some(value)),
+            Err(rusqlite::Error::QueryReturnedNoRows) => Ok(None),
+            Err(e) => Err(e),
+        }
+    }
+
+    pub fn query_count(&self, query: &str) -> Result<usize> {
+        let conn = self.conn.lock().unwrap();
+        let mut stmt = conn.prepare(query)?;
+        let count: i64 = stmt.query_row([], |row| row.get(0))?;
+        Ok(count as usize)
     }
 }

@@ -21,14 +21,14 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
           "focus:shadow-[0_0_0_3px_rgba(139,92,246,0.3),0_0_15px_rgba(139,92,246,0.2)]",
           "disabled:cursor-not-allowed disabled:opacity-50",
           error && "border-2 border-red-500 focus:border-red-500",
-          className
+          className,
         )}
         style={{ color: "var(--color-text-primary)" }}
         ref={ref}
         {...props}
       />
     );
-  }
+  },
 );
 
 Input.displayName = "Input";

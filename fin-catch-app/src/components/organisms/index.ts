@@ -12,3 +12,4 @@ export * from "./PortfolioSelector";
 export * from "./CurrencySelectorSection";
 export * from "./HoldingsSection";
 export * from "./HoldingsChartSection";
+export * from "./SyncSettings";

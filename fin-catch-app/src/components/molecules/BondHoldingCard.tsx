@@ -260,46 +260,112 @@ export const BondHoldingCard: React.FC<BondHoldingCardProps> = ({
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <p style={{ fontSize: "var(--text-xs)", color: "var(--cube-gray-500)" }}>
+              <p
+                style={{
+                  fontSize: "var(--text-xs)",
+                  color: "var(--cube-gray-500)",
+                }}
+              >
                 Face Value
               </p>
-              <p style={{ fontSize: "var(--text-sm)", fontWeight: "var(--font-medium)", color: "var(--cube-gray-900)" }}>
-                {entry.face_value ? formatCurrency(entry.face_value, entry.currency) : "N/A"}
+              <p
+                style={{
+                  fontSize: "var(--text-sm)",
+                  fontWeight: "var(--font-medium)",
+                  color: "var(--cube-gray-900)",
+                }}
+              >
+                {entry.face_value
+                  ? formatCurrency(entry.face_value, entry.currency)
+                  : "N/A"}
               </p>
             </div>
             <div>
-              <p style={{ fontSize: "var(--text-xs)", color: "var(--cube-gray-500)" }}>
+              <p
+                style={{
+                  fontSize: "var(--text-xs)",
+                  color: "var(--cube-gray-500)",
+                }}
+              >
                 Coupon Rate
               </p>
-              <p style={{ fontSize: "var(--text-sm)", fontWeight: "var(--font-medium)", color: "var(--cube-gray-900)" }}>
+              <p
+                style={{
+                  fontSize: "var(--text-sm)",
+                  fontWeight: "var(--font-medium)",
+                  color: "var(--cube-gray-900)",
+                }}
+              >
                 {entry.coupon_rate ? `${entry.coupon_rate.toFixed(2)}%` : "N/A"}
               </p>
             </div>
             <div>
-              <p style={{ fontSize: "var(--text-xs)", color: "var(--cube-gray-500)" }}>
+              <p
+                style={{
+                  fontSize: "var(--text-xs)",
+                  color: "var(--cube-gray-500)",
+                }}
+              >
                 Maturity Date
               </p>
-              <p style={{ fontSize: "var(--text-sm)", fontWeight: "var(--font-medium)", color: "var(--cube-gray-900)" }}>
+              <p
+                style={{
+                  fontSize: "var(--text-sm)",
+                  fontWeight: "var(--font-medium)",
+                  color: "var(--cube-gray-900)",
+                }}
+              >
                 {entry.maturity_date ? formatDate(entry.maturity_date) : "N/A"}
               </p>
             </div>
             <div>
-              <p style={{ fontSize: "var(--text-xs)", color: "var(--cube-gray-500)" }}>
+              <p
+                style={{
+                  fontSize: "var(--text-xs)",
+                  color: "var(--cube-gray-500)",
+                }}
+              >
                 Frequency
               </p>
-              <p style={{ fontSize: "var(--text-sm)", fontWeight: "var(--font-medium)", color: "var(--cube-gray-900)" }}>
-                {entry.coupon_frequency ? entry.coupon_frequency.charAt(0).toUpperCase() + entry.coupon_frequency.slice(1) : "N/A"}
+              <p
+                style={{
+                  fontSize: "var(--text-sm)",
+                  fontWeight: "var(--font-medium)",
+                  color: "var(--cube-gray-900)",
+                }}
+              >
+                {entry.coupon_frequency
+                  ? entry.coupon_frequency.charAt(0).toUpperCase() +
+                    entry.coupon_frequency.slice(1)
+                  : "N/A"}
               </p>
             </div>
             {entry.current_market_price && (
               <div className="col-span-2">
-                <p style={{ fontSize: "var(--text-xs)", color: "var(--cube-gray-500)" }}>
+                <p
+                  style={{
+                    fontSize: "var(--text-xs)",
+                    color: "var(--cube-gray-500)",
+                  }}
+                >
                   Current Market Price (Manual)
                 </p>
-                <p style={{ fontSize: "var(--text-sm)", fontWeight: "var(--font-medium)", color: "var(--cube-gray-900)" }}>
+                <p
+                  style={{
+                    fontSize: "var(--text-sm)",
+                    fontWeight: "var(--font-medium)",
+                    color: "var(--cube-gray-900)",
+                  }}
+                >
                   {formatCurrency(entry.current_market_price, entry.currency)}
                   {entry.last_price_update && (
-                    <span style={{ fontSize: "var(--text-xs)", color: "var(--cube-gray-500)", marginLeft: "4px" }}>
+                    <span
+                      style={{
+                        fontSize: "var(--text-xs)",
+                        color: "var(--cube-gray-500)",
+                        marginLeft: "4px",
+                      }}
+                    >
                       (Updated: {formatDate(entry.last_price_update)})
                     </span>
                   )}

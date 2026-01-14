@@ -26,6 +26,7 @@ export const PortfolioPage: React.FC = () => {
     selectedPortfolio,
     setSelectedPortfolioId,
     deletePortfolio,
+    loadPortfolios,
     error: portfolioError,
   } = usePortfolios();
 
@@ -250,7 +251,13 @@ export const PortfolioPage: React.FC = () => {
       <CreatePortfolioModal
         isOpen={showCreatePortfolio}
         onClose={() => setShowCreatePortfolio(false)}
-        onSuccess={() => setShowCreatePortfolio(false)}
+        onSuccess={(portfolio) => {
+          setShowCreatePortfolio(false);
+          loadPortfolios();
+          if (portfolio.id) {
+            setSelectedPortfolioId(portfolio.id);
+          }
+        }}
       />
 
       <AddEditEntryModal

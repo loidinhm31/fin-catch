@@ -1,6 +1,11 @@
-import {CurrencyCode, EntryPerformance, PortfolioEntry, PortfolioPerformance,} from "@/types";
-import {finCatchAPI} from "@/services/api";
-import {convertCurrency} from "./currency";
+import {
+  CurrencyCode,
+  EntryPerformance,
+  PortfolioEntry,
+  PortfolioPerformance,
+} from "@/types";
+import { finCatchAPI } from "@/services/api";
+import { convertCurrency } from "./currency";
 
 /**
  * Calculate the current market value of a bond based on present value formula
@@ -11,7 +16,7 @@ const calculateBondPresentValue = (
   couponRate: number,
   ytm: number,
   maturityDate: number,
-  couponFrequency: "annual" | "semiannual" | "quarterly" | "monthly"
+  couponFrequency: "annual" | "semiannual" | "quarterly" | "monthly",
 ): number => {
   const now = Math.floor(Date.now() / 1000);
   const timeToMaturityYears = (maturityDate - now) / (365 * 24 * 60 * 60);
@@ -56,24 +61,29 @@ const calculateBondPresentValue = (
     if (t > 1) {
       pvCoupons += periodicCoupon / Math.pow(1 + periodicYTM, t);
     } else {
-      pvCoupons += periodicCoupon / (1 + periodicYTM * getTargetDateProgressRatio(maturityDate));
+      pvCoupons +=
+        periodicCoupon /
+        (1 + periodicYTM * getTargetDateProgressRatio(maturityDate));
     }
   }
 
   // Calculate present value of face value
   let pvFaceValue: number;
   if (remainingPeriods > 1) {
-    pvFaceValue = faceValue / Math.pow(1 + periodicYTM, remainingPeriods)
+    pvFaceValue = faceValue / Math.pow(1 + periodicYTM, remainingPeriods);
   } else {
-    pvFaceValue = faceValue / (1 + periodicYTM * getTargetDateProgressRatio(maturityDate))
+    pvFaceValue =
+      faceValue / (1 + periodicYTM * getTargetDateProgressRatio(maturityDate));
   }
 
-  console.log('sss', pvCoupons, pvFaceValue, periodicYTM, ytm)
+  console.log("sss", pvCoupons, pvFaceValue, periodicYTM, ytm);
   // Total present value
   return pvCoupons + pvFaceValue;
 };
 
-const getTargetDateProgressRatio = (targetTimestampInSeconds: number): number => {
+const getTargetDateProgressRatio = (
+  targetTimestampInSeconds: number,
+): number => {
   const targetTimestampInMs = targetTimestampInSeconds * 1000;
 
   const now = new Date();
@@ -91,7 +101,7 @@ const getTargetDateProgressRatio = (targetTimestampInSeconds: number): number =>
 
   // Round to 3 decimal places and convert back to number
   return Number(ratio.toFixed(3));
-}
+};
 
 export const calculatePortfolioPerformance = async (
   entries: PortfolioEntry[],
@@ -158,10 +168,13 @@ export const calculatePortfolioPerformance = async (
             entry.coupon_rate,
             entry.ytm,
             entry.maturity_date,
-            entry.coupon_frequency
+            entry.coupon_frequency,
           );
-          console.log('curre', currentPrice)
-        } else if (entry.current_market_price !== undefined && entry.current_market_price > 0) {
+          console.log("curre", currentPrice);
+        } else if (
+          entry.current_market_price !== undefined &&
+          entry.current_market_price > 0
+        ) {
           // Fallback to manual current_market_price if calculation data is not available
           currentPrice = entry.current_market_price;
         } else if (entry.face_value) {
@@ -246,7 +259,10 @@ export const calculatePortfolioPerformance = async (
             couponIncomeInDisplayCurrency += convertedAmount;
           }
         } catch (err) {
-          console.warn(`Failed to fetch coupon payments for entry ${entry.id}:`, err);
+          console.warn(
+            `Failed to fetch coupon payments for entry ${entry.id}:`,
+            err,
+          );
         }
       }
 
@@ -257,7 +273,13 @@ export const calculatePortfolioPerformance = async (
 
       let priceSource: string;
       if (entry.asset_type === "bond") {
-        if (entry.face_value && entry.coupon_rate !== undefined && entry.ytm !== undefined && entry.maturity_date && entry.coupon_frequency) {
+        if (
+          entry.face_value &&
+          entry.coupon_rate !== undefined &&
+          entry.ytm !== undefined &&
+          entry.maturity_date &&
+          entry.coupon_frequency
+        ) {
           priceSource = "calculated";
         } else if (entry.current_market_price) {
           priceSource = "manual";

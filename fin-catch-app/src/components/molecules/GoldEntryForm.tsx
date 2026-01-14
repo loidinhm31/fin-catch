@@ -35,9 +35,10 @@ export const GoldEntryForm: React.FC<GoldEntryFormProps> = ({
   handleGoldTypeChange,
   handleSourceChange,
 }) => {
-  const totalCost = quantity && purchasePrice
-    ? parseFloat(purchasePrice) * parseFloat(quantity)
-    : 0;
+  const totalCost =
+    quantity && purchasePrice
+      ? parseFloat(purchasePrice) * parseFloat(quantity)
+      : 0;
 
   return (
     <>
@@ -48,9 +49,15 @@ export const GoldEntryForm: React.FC<GoldEntryFormProps> = ({
           onValueChange={handleGoldTypeChange}
           placeholder="Select gold price ID"
           options={[
-            { value: "1", label: "SJC 1L, 10L, 1KG - Ho Chi Minh (tael/lượng)" },
+            {
+              value: "1",
+              label: "SJC 1L, 10L, 1KG - Ho Chi Minh (tael/lượng)",
+            },
             { value: "2", label: "SJC 1L, 10L, 1KG - Ha Noi (tael/lượng)" },
-            { value: "49", label: "SJC Nhẫn 99.99% (1 chỉ, 2 chỉ, 5 chỉ) (mace/chỉ)" },
+            {
+              value: "49",
+              label: "SJC Nhẫn 99.99% (1 chỉ, 2 chỉ, 5 chỉ) (mace/chỉ)",
+            },
           ]}
         />
         <p
@@ -85,7 +92,8 @@ export const GoldEntryForm: React.FC<GoldEntryFormProps> = ({
               marginTop: "var(--space-1)",
             }}
           >
-            💡 You can enter in any unit - prices will be auto-converted for comparison
+            💡 You can enter in any unit - prices will be auto-converted for
+            comparison
           </p>
           <p
             style={{

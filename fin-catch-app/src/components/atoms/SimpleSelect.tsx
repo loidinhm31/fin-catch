@@ -1,5 +1,11 @@
 import * as React from "react";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./Select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "./Select";
 
 export interface SelectOption {
   value: string;
@@ -25,7 +31,10 @@ export interface SimpleSelectProps {
  * Backward-compatible Select wrapper that uses the new shadcn composition pattern internally
  * This component maintains the old API while using the refactored Select components
  */
-export const SimpleSelect = React.forwardRef<HTMLButtonElement, SimpleSelectProps>(
+export const SimpleSelect = React.forwardRef<
+  HTMLButtonElement,
+  SimpleSelectProps
+>(
   (
     {
       options,
@@ -41,7 +50,7 @@ export const SimpleSelect = React.forwardRef<HTMLButtonElement, SimpleSelectProp
       fullWidth: _fullWidth, // Accepted for backward compatibility but not used
       onBlur,
     },
-    ref
+    ref,
   ) => {
     // Support both onValueChange and onChange callbacks
     const handleValueChange = (newValue: string) => {
@@ -53,13 +62,13 @@ export const SimpleSelect = React.forwardRef<HTMLButtonElement, SimpleSelectProp
     // but not actively used in the new composition pattern
 
     return (
-      <Select value={value} onValueChange={handleValueChange} disabled={disabled} name={name}>
-        <SelectTrigger
-          ref={ref}
-          id={id}
-          onBlur={onBlur}
-          className={className}
-        >
+      <Select
+        value={value}
+        onValueChange={handleValueChange}
+        disabled={disabled}
+        name={name}
+      >
+        <SelectTrigger ref={ref} id={id} onBlur={onBlur} className={className}>
           <SelectValue placeholder={placeholder} />
         </SelectTrigger>
         <SelectContent>
@@ -71,7 +80,7 @@ export const SimpleSelect = React.forwardRef<HTMLButtonElement, SimpleSelectProp
         </SelectContent>
       </Select>
     );
-  }
+  },
 );
 
 SimpleSelect.displayName = "SimpleSelect";

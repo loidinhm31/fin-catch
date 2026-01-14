@@ -30,3 +30,5 @@ keystore.properties
 src-tauri/gen/android/keystore.properties
 src-tauri/gen/android/keystore.jks
 src-tauri/gen/android/*.keystore
+
+src-tauri/gen/android/fin-catch-keystore.jks

@@ -1,7 +1,11 @@
 import React, { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { TrendingUp } from "lucide-react";
-import { SimpleAlertDialog as AlertDialog, Input, SimpleSelect as Select } from "@/components/atoms";
+import {
+  SimpleAlertDialog as AlertDialog,
+  Input,
+  SimpleSelect as Select,
+} from "@/components/atoms";
 import { DateRangePicker, FormField } from "@/components/molecules";
 import {
   Resolution,
