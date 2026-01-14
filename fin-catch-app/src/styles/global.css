@@ -834,16 +834,11 @@ select.glass-input {
 }
 
 /* Prevent modal and all ancestors from creating new containing blocks */
-[role="dialog"],
-[role="dialog"] > *,
-[role="dialog"] > * > *,
-.glass-container,
-.fixed,
-.flex,
-.items-end,
-.items-center,
-.justify-center,
-div:has(> [role="dialog"]) {
+/* IMPORTANT: Be very specific here to avoid breaking Radix Popover positioning */
+/* Only apply to native select dropdowns, not Radix components */
+[role="dialog"] > select,
+[role="dialog"] select,
+.glass-container select {
   transform: none !important;
   filter: none !important;
   perspective: none !important;
@@ -867,3 +862,16 @@ select:active {
   overflow-y: auto;
   overflow-x: hidden;
 }
+
+/* ===== RADIX POPOVER POSITIONING FIX ===== */
+/* Ensure Radix Popover content has correct positioning */
+[data-radix-popper-content-wrapper] {
+  position: fixed !important;
+  z-index: 99999 !important;
+}
+
+/* Ensure the popover content itself is properly styled */
+[data-radix-popper-content-wrapper] > [data-state] {
+  position: relative !important;
+}
+

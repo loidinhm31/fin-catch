@@ -30,7 +30,7 @@ function Calendar({
         ),
         month: cn("flex w-full flex-col gap-4", defaultClassNames.month),
         month_caption: cn(
-          "flex h-[--rdp-cell-size] w-full items-center justify-center relative",
+          "flex h-8 w-full items-center justify-center relative px-8",
           defaultClassNames.month_caption
         ),
         caption_label: cn(
@@ -38,23 +38,22 @@ function Calendar({
           defaultClassNames.caption_label
         ),
         nav: cn(
-          "absolute inset-x-0 top-0 flex w-full items-center justify-between",
+          "absolute inset-x-0 top-0 flex w-full items-center justify-between h-8 px-1",
           defaultClassNames.nav
         ),
         button_previous: cn(
           buttonVariants({ variant: "outline", size: "icon" }),
-          "h-7 w-7 bg-transparent p-0 opacity-80 hover:opacity-100 text-[var(--color-text-primary)] absolute left-0",
+          "h-7 w-7 bg-transparent p-0 opacity-80 hover:opacity-100 text-[var(--color-text-primary)] z-10",
           defaultClassNames.button_previous
         ),
         button_next: cn(
           buttonVariants({ variant: "outline", size: "icon" }),
-          "h-7 w-7 bg-transparent p-0 opacity-80 hover:opacity-100 text-[var(--color-text-primary)] absolute right-0",
+          "h-7 w-7 bg-transparent p-0 opacity-80 hover:opacity-100 text-[var(--color-text-primary)] z-10",
           defaultClassNames.button_next
         ),
-        table: cn("w-full border-collapse", defaultClassNames.table),
         weekdays: cn("flex", defaultClassNames.weekdays),
         weekday: cn(
-          "text-[var(--color-text-secondary)] flex-1 select-none text-center text-[0.8rem] font-medium uppercase",
+          "text-[var(--color-text-secondary)] flex-1 select-none text-center text-[0.8rem] font-medium",
           defaultClassNames.weekday
         ),
         week: cn("mt-2 flex w-full", defaultClassNames.week),
@@ -68,6 +67,7 @@ function Calendar({
         ),
         day_button: cn(
           "h-[--rdp-cell-size] w-[--rdp-cell-size] p-0 font-normal text-[var(--color-text-primary)]",
+          "cursor-pointer",
           buttonVariants({ variant: "ghost" })
         ),
         selected: cn(
