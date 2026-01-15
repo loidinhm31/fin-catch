@@ -13,10 +13,10 @@ import {
   Modal,
   SimpleSelect as Select,
   Textarea,
-} from "../atoms";
-import { StockEntryForm } from "../molecules/StockEntryForm";
-import { GoldEntryForm } from "../molecules/GoldEntryForm";
-import { BondEntryForm } from "../molecules/BondEntryForm";
+} from "@/components/atoms";
+import { StockEntryForm } from "@/components/molecules/StockEntryForm";
+import { GoldEntryForm } from "@/components/molecules/GoldEntryForm";
+import { BondEntryForm } from "@/components/molecules/BondEntryForm";
 
 export interface AddEditEntryModalProps {
   isOpen: boolean;

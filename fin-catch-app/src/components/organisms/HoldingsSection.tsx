@@ -28,7 +28,7 @@ export const HoldingsSection: React.FC<HoldingsSectionProps> = ({
   formatPercentage,
   formatDate,
 }) => {
-  const [expandedEntries, setExpandedEntries] = useState<Set<number>>(
+  const [expandedEntries, setExpandedEntries] = useState<Set<string>>(
     new Set(),
   );
 

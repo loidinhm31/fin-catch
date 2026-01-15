@@ -1,4 +1,4 @@
-import { CurrencyCode } from "./api";
+import { CurrencyCode } from "@/types/api";
 
 // Portfolio types
 export interface Portfolio {

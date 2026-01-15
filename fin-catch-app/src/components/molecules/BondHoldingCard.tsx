@@ -1,7 +1,7 @@
 import React from "react";
 import { ChevronDown, ChevronUp, Edit, Trash2 } from "lucide-react";
 import { CurrencyCode, EntryPerformance, PortfolioEntry } from "@/types";
-import { CouponPaymentsSection } from "./CouponPaymentsSection";
+import { CouponPaymentsSection } from "@/components/molecules/CouponPaymentsSection";
 
 export interface BondHoldingCardProps {
   entryPerf: EntryPerformance;

@@ -57,7 +57,7 @@ export const PortfolioPage: React.FC = () => {
   const [showAddEntry, setShowAddEntry] = useState(false);
   const [editingEntry, setEditingEntry] = useState<PortfolioEntry | null>(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
-  const [portfolioToDelete, setPortfolioToDelete] = useState<number | null>(
+  const [portfolioToDelete, setPortfolioToDelete] = useState<string | null>(
     null,
   );
 

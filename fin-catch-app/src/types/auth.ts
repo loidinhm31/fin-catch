@@ -17,6 +17,8 @@ export interface AuthResponse {
 export interface AuthStatus {
   isAuthenticated: boolean;
   userId?: string;
+  username?: string;
+  email?: string;
   apps?: string[];
   isAdmin?: boolean;
   serverUrl?: string;

@@ -2,7 +2,7 @@ import React from "react";
 import { CurrencyCode } from "@/types";
 import { formatCurrency } from "@/utils/currency";
 import { getUnitLabel } from "@/utils/goldConversions";
-import { Input, Label, SimpleSelect as Select } from "../atoms";
+import { Input, Label, SimpleSelect as Select } from "@/components/atoms";
 
 export interface GoldEntryFormProps {
   goldType: string;

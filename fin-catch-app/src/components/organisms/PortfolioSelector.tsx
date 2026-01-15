@@ -1,10 +1,10 @@
 import React from "react";
 import { Plus, X } from "lucide-react";
-import { Portfolio } from "../../types";
+import { Portfolio } from "@/types";
 
 export interface PortfolioSelectorProps {
   portfolios: Portfolio[];
-  selectedPortfolioId: number | null;
+  selectedPortfolioId: string | null;
   onSelect: (portfolioId: string) => void;
   onDelete: (portfolioId: string) => void;
   onCreateNew: () => void;

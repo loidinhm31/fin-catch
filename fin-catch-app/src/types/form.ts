@@ -1,4 +1,4 @@
-import { GoldSource, Resolution, StockSource } from "./api";
+import { GoldSource, Resolution, StockSource } from "@/types/api";
 
 // Stock query form data
 export interface StockFormData {

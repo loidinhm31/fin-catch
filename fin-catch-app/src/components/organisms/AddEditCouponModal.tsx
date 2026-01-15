@@ -10,7 +10,7 @@ import {
   Label,
   Modal,
   Textarea,
-} from "../atoms";
+} from "@/components/atoms";
 
 export interface AddEditCouponModalProps {
   isOpen: boolean;

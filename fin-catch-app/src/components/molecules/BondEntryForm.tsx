@@ -1,5 +1,10 @@
 import React from "react";
-import { DatePicker, Input, Label, SimpleSelect as Select } from "../atoms";
+import {
+  DatePicker,
+  Input,
+  Label,
+  SimpleSelect as Select,
+} from "@/components/atoms";
 
 export interface BondEntryFormProps {
   bondIdentifier: string;

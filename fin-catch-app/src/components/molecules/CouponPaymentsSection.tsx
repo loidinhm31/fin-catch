@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Plus, Edit, Trash2 } from "lucide-react";
 import { BondCouponPayment, CurrencyCode } from "@/types";
 import { useCouponPayments } from "@/hooks/useCouponPayments";
-import { AddEditCouponModal } from "../organisms/AddEditCouponModal";
+import { AddEditCouponModal } from "@/components/organisms/AddEditCouponModal";
 import { convertCurrency } from "@/utils/currency";
 
 export interface CouponPaymentsSectionProps {
@@ -64,7 +64,7 @@ export const CouponPaymentsSection: React.FC<CouponPaymentsSectionProps> = ({
     setIsModalOpen(true);
   };
 
-  const handleDeletePayment = async (paymentId: number) => {
+  const handleDeletePayment = async (paymentId: string) => {
     if (
       !window.confirm("Are you sure you want to delete this coupon payment?")
     ) {

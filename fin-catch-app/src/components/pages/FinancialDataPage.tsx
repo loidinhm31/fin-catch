@@ -6,7 +6,7 @@ import {
   GoldQueryForm,
   StockChartResponsive,
   StockQueryForm,
-} from "../organisms";
+} from "@/components/organisms";
 import {
   GoldPremiumRequest,
   GoldPremiumResponse,

@@ -5,7 +5,7 @@ import {
   PortfolioPerformance,
 } from "@/types";
 import { finCatchAPI } from "@/services/api";
-import { convertCurrency } from "./currency";
+import { convertCurrency } from "@/utils/currency";
 
 /**
  * Calculate the current market value of a bond based on present value formula

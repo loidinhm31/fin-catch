@@ -1,5 +1,5 @@
-import { CurrencyCode } from "./api";
-import { PortfolioEntry } from "./portfolio";
+import { CurrencyCode } from "@/types/api";
+import { PortfolioEntry } from "@/types/portfolio";
 
 // Holdings performance chart types
 export interface HoldingPerformanceData {

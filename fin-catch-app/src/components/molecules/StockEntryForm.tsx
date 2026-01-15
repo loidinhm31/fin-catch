@@ -1,5 +1,5 @@
 import React from "react";
-import { Input, Label } from "../atoms";
+import { Input, Label } from "@/components/atoms";
 
 export interface StockEntryFormProps {
   symbol: string;

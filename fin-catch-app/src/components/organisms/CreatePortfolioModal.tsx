@@ -2,7 +2,14 @@ import React, { useState } from "react";
 import { Wallet } from "lucide-react";
 import { finCatchAPI } from "@/services/api";
 import { Portfolio } from "@/types";
-import { Button, ErrorAlert, Input, Label, Modal, Textarea } from "../atoms";
+import {
+  Button,
+  ErrorAlert,
+  Input,
+  Label,
+  Modal,
+  Textarea,
+} from "@/components/atoms";
 
 export interface CreatePortfolioModalProps {
   isOpen: boolean;

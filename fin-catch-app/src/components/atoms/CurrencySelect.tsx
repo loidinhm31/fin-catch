@@ -1,13 +1,13 @@
 import * as React from "react";
-import type { CurrencyCode } from "../../types";
-import { CURRENCY_LABELS, CURRENCY_SYMBOLS } from "../../types";
+import type { CurrencyCode } from "@/types";
+import { CURRENCY_LABELS, CURRENCY_SYMBOLS } from "@/types";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "./Select";
+} from "@/components/atoms/Select";
 
 interface CurrencySelectProps {
   /**

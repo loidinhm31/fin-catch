@@ -1,4 +1,4 @@
-import { CurrencyCode } from "./api";
+import { CurrencyCode } from "@/types/api";
 
 // Benchmark types for portfolio comparison
 export interface BenchmarkData {

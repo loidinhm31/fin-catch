@@ -6,7 +6,7 @@ import {
   PortfolioBenchmarkComparison,
   PortfolioEntry,
 } from "@/types";
-import { convertCurrency } from "./currency";
+import { convertCurrency } from "@/utils/currency";
 
 /**
  * Calculate normalized portfolio value over time

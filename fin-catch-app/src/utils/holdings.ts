@@ -5,7 +5,7 @@ import {
   PortfolioEntry,
   PortfolioHoldingsPerformance,
 } from "@/types";
-import { convertCurrency } from "./currency";
+import { convertCurrency } from "@/utils/currency";
 
 // Chart colors for holdings
 const CHART_COLORS = [

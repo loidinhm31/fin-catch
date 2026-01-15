@@ -1,8 +1,8 @@
 import React from "react";
 import { CurrencyCode, EntryPerformance, PortfolioEntry } from "@/types";
-import { StockHoldingCard } from "./StockHoldingCard";
-import { GoldHoldingCard } from "./GoldHoldingCard";
-import { BondHoldingCard } from "./BondHoldingCard";
+import { StockHoldingCard } from "@/components/molecules/StockHoldingCard";
+import { GoldHoldingCard } from "@/components/molecules/GoldHoldingCard";
+import { BondHoldingCard } from "@/components/molecules/BondHoldingCard";
 
 export interface HoldingCardProps {
   entryPerf: EntryPerformance;

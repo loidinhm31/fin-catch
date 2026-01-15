@@ -10,7 +10,7 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "./AlertDialog";
+} from "@/components/atoms/AlertDialog";
 
 interface ConfirmDialogProps {
   isOpen: boolean;
