@@ -157,15 +157,15 @@ export const HoldingsPerformanceChartResponsive: React.FC<
               label={
                 !isMobile
                   ? {
-                      value: "Performance (Base 100)",
-                      angle: -90,
-                      position: "insideBottomLeft",
-                      style: {
-                        fill: "#ffffff",
-                        fontWeight: "600",
-                        fontSize: `${activeDimensions.labelFontSize}px`,
-                      },
-                    }
+                    value: "Performance (Base 100)",
+                    angle: -90,
+                    position: "insideBottomLeft",
+                    style: {
+                      fill: "#ffffff",
+                      fontWeight: "600",
+                      fontSize: `${activeDimensions.labelFontSize}px`,
+                    },
+                  }
                   : undefined
               }
               domain={["auto", "auto"]}
@@ -189,13 +189,13 @@ export const HoldingsPerformanceChartResponsive: React.FC<
                 marginBottom: "8px",
                 fontSize: `${activeDimensions.fontSize}px`,
               }}
-              formatter={(value: any, name: string) => {
+              formatter={(value: any, name: string | number | undefined) => {
                 const change = ((Number(value) - 100) / 100) * 100;
                 return [
                   `${Number(value).toFixed(2)} (${change >= 0 ? "+" : ""}${change.toFixed(
                     2,
                   )}%)`,
-                  name,
+                  String(name ?? ""),
                 ];
               }}
               labelFormatter={(label) => `Time: ${label}`}

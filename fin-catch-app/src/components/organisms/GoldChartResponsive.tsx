@@ -123,15 +123,15 @@ export const GoldChartResponsive: React.FC<GoldChartResponsiveProps> = ({
             label={
               !isMobile
                 ? {
-                    value: "Price (VND)",
-                    angle: -90,
-                    position: "insideLeft",
-                    style: {
-                      fill: "#ffffff",
-                      fontWeight: "600",
-                      fontSize: `${activeDimensions.labelFontSize}px`,
-                    },
-                  }
+                  value: "Price (VND)",
+                  angle: -90,
+                  position: "insideLeft",
+                  style: {
+                    fill: "#ffffff",
+                    fontWeight: "600",
+                    fontSize: `${activeDimensions.labelFontSize}px`,
+                  },
+                }
                 : undefined
             }
             tickFormatter={formatCurrencyCompact}
@@ -155,7 +155,7 @@ export const GoldChartResponsive: React.FC<GoldChartResponsiveProps> = ({
               marginBottom: "8px",
               fontSize: `${activeDimensions.fontSize}px`,
             }}
-            formatter={(value: any, name: string) => {
+            formatter={(value: any, name: string | number | undefined) => {
               const label = name === "buy" ? "Buy Price" : "Sell Price";
               return [formatCurrencyValue(Number(value)) + " VND", label];
             }}

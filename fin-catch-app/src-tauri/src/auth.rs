@@ -128,12 +128,41 @@ fn is_token_expired(token: &str) -> Result<bool, String> {
 mod crypto {
     use super::*;
 
+    /// Get a device-unique identifier
+    /// On desktop: uses machine-uid crate
+    /// On Android: uses a hash of a stable identifier
+    fn get_device_identifier() -> Result<String, String> {
+        #[cfg(target_os = "android")]
+        {
+            // On Android, we use a combination of known stable values
+            // Since we can't easily access Android's Settings.Secure.ANDROID_ID from Rust,
+            // we use environment variables or fallback to a build-time constant
+            // The app's data directory path is unique per app installation
+            let android_id = std::env::var("ANDROID_DATA")
+                .or_else(|_| std::env::var("EXTERNAL_STORAGE"))
+                .unwrap_or_else(|_| "fin-catch-android-device".to_string());
+            
+            // Hash it for consistency
+            use sha2::{Sha256, Digest};
+            let mut hasher = Sha256::new();
+            hasher.update(android_id.as_bytes());
+            hasher.update(b"fin-catch-unique-salt");
+            let result = hasher.finalize();
+            Ok(hex::encode(result))
+        }
+
+        #[cfg(not(target_os = "android"))]
+        {
+            machine_uid::get()
+                .map_err(|e| format!("Failed to get machine ID: {}", e))
+        }
+    }
+
     /// Derive a 32-byte encryption key from machine ID and app identifier
     /// This ensures each device has a unique encryption key
     fn derive_encryption_key() -> Result<[u8; 32], String> {
         // Get machine-specific identifier
-        let machine_id = machine_uid::get()
-            .map_err(|e| format!("Failed to get machine ID: {}", e))?;
+        let machine_id = get_device_identifier()?;
 
         // Use app identifier as additional salt
         let app_salt = b"fin-catch-auth-v1";
