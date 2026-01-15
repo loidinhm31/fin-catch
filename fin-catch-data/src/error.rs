@@ -4,7 +4,6 @@ use axum::{
     response::{IntoResponse, Response},
     Json,
 };
-use serde::Serialize;
 
 #[derive(Debug, thiserror::Error)]
 pub enum ApiError {

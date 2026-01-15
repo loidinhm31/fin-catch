@@ -2,16 +2,18 @@ import { CurrencyCode } from "./api";
 
 // Portfolio types
 export interface Portfolio {
-  id?: number;
+  id: string; // UUID
   name: string;
   description?: string;
   base_currency?: CurrencyCode; // Portfolio's base currency for valuation
   created_at: number; // Unix timestamp in seconds
+  sync_version: number;
+  synced_at?: number;
 }
 
 export interface PortfolioEntry {
-  id?: number;
-  portfolio_id: number;
+  id: string; // UUID
+  portfolio_id: string; // UUID reference
   asset_type: "stock" | "gold" | "bond";
   symbol: string;
   quantity: number;
@@ -34,6 +36,8 @@ export interface PortfolioEntry {
   current_market_price?: number; // User-entered current price
   last_price_update?: number; // Unix timestamp of last price update
   ytm?: number; // Yield to Maturity as percentage (used in calculated mode)
+  sync_version: number;
+  synced_at?: number;
 }
 
 // Portfolio with entries
@@ -75,13 +79,15 @@ export interface PortfolioHistoricalValue {
 
 // Bond coupon payment tracking
 export interface BondCouponPayment {
-  id?: number;
-  entry_id: number; // References PortfolioEntry.id
+  id: string; // UUID
+  entry_id: string; // UUID reference to PortfolioEntry.id
   payment_date: number; // Unix timestamp
   amount: number; // Coupon amount received
   currency: CurrencyCode; // Payment currency
   notes?: string;
   created_at: number;
+  sync_version: number;
+  synced_at?: number;
 }
 
 // Form data for creating/editing entries

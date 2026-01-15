@@ -67,7 +67,7 @@ export const PortfolioPage: React.FC = () => {
     setPreference("displayCurrency", currency);
   };
 
-  const handleDeletePortfolioClick = (portfolioId: number) => {
+  const handleDeletePortfolioClick = (portfolioId: string) => {
     setPortfolioToDelete(portfolioId);
     setShowDeleteConfirm(true);
   };

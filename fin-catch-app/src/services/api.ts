@@ -147,10 +147,10 @@ class FinCatchAPI {
   /**
    * Portfolio operations
    */
-  async createPortfolio(portfolio: Portfolio): Promise<number> {
+  async createPortfolio(portfolio: Portfolio): Promise<string> {
     try {
       console.log("[Tauri IPC] create_portfolio", portfolio);
-      const id = await invoke<number>("create_portfolio", { portfolio });
+      const id = await invoke<string>("create_portfolio", { portfolio });
       console.log("[Tauri IPC Response]", id);
       return id;
     } catch (error) {
@@ -159,7 +159,7 @@ class FinCatchAPI {
     }
   }
 
-  async getPortfolio(id: number): Promise<Portfolio> {
+  async getPortfolio(id: string): Promise<Portfolio> {
     try {
       console.log("[Tauri IPC] get_portfolio", id);
       const portfolio = await invoke<Portfolio>("get_portfolio", { id });
@@ -194,7 +194,7 @@ class FinCatchAPI {
     }
   }
 
-  async deletePortfolio(id: number): Promise<void> {
+  async deletePortfolio(id: string): Promise<void> {
     try {
       console.log("[Tauri IPC] delete_portfolio", id);
       await invoke<void>("delete_portfolio", { id });
@@ -208,10 +208,10 @@ class FinCatchAPI {
   /**
    * Portfolio Entry operations
    */
-  async createEntry(entry: PortfolioEntry): Promise<number> {
+  async createEntry(entry: PortfolioEntry): Promise<string> {
     try {
       console.log("[Tauri IPC] create_entry", entry);
-      const id = await invoke<number>("create_entry", { entry });
+      const id = await invoke<string>("create_entry", { entry });
       console.log("[Tauri IPC Response]", id);
       return id;
     } catch (error) {
@@ -220,7 +220,7 @@ class FinCatchAPI {
     }
   }
 
-  async getEntry(id: number): Promise<PortfolioEntry> {
+  async getEntry(id: string): Promise<PortfolioEntry> {
     try {
       console.log("[Tauri IPC] get_entry", id);
       const entry = await invoke<PortfolioEntry>("get_entry", { id });
@@ -232,7 +232,7 @@ class FinCatchAPI {
     }
   }
 
-  async listEntries(portfolioId: number): Promise<PortfolioEntry[]> {
+  async listEntries(portfolioId: string): Promise<PortfolioEntry[]> {
     try {
       console.log("[Tauri IPC] list_entries", portfolioId);
       const entries = await invoke<PortfolioEntry[]>("list_entries", {
@@ -257,7 +257,7 @@ class FinCatchAPI {
     }
   }
 
-  async deleteEntry(id: number): Promise<void> {
+  async deleteEntry(id: string): Promise<void> {
     try {
       console.log("[Tauri IPC] delete_entry", id);
       await invoke<void>("delete_entry", { id });
@@ -271,10 +271,10 @@ class FinCatchAPI {
   /**
    * Bond Coupon Payment operations
    */
-  async createCouponPayment(payment: BondCouponPayment): Promise<number> {
+  async createCouponPayment(payment: BondCouponPayment): Promise<string> {
     try {
       console.log("[Tauri IPC] create_coupon_payment", payment);
-      const id = await invoke<number>("create_coupon_payment", { payment });
+      const id = await invoke<string>("create_coupon_payment", { payment });
       console.log("[Tauri IPC Response]", id);
       return id;
     } catch (error) {
@@ -283,7 +283,7 @@ class FinCatchAPI {
     }
   }
 
-  async listCouponPayments(entryId: number): Promise<BondCouponPayment[]> {
+  async listCouponPayments(entryId: string): Promise<BondCouponPayment[]> {
     try {
       console.log("[Tauri IPC] list_coupon_payments", entryId);
       const payments = await invoke<BondCouponPayment[]>(
@@ -311,7 +311,7 @@ class FinCatchAPI {
     }
   }
 
-  async deleteCouponPayment(id: number): Promise<void> {
+  async deleteCouponPayment(id: string): Promise<void> {
     try {
       console.log("[Tauri IPC] delete_coupon_payment", id);
       await invoke<void>("delete_coupon_payment", { id });

@@ -8,7 +8,7 @@ export interface StockHoldingCardProps {
   isExpanded: boolean;
   onToggleExpand: () => void;
   onEdit: (entry: PortfolioEntry) => void;
-  onDelete: (entryId: number) => void;
+  onDelete: (entryId: string) => void;
   formatCurrency: (value: number, currency?: CurrencyCode) => string;
   formatPercentage: (value: number) => string;
   formatDate: (timestamp: number) => string;

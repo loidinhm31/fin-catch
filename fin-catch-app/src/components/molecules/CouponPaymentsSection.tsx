@@ -6,7 +6,7 @@ import { AddEditCouponModal } from "../organisms/AddEditCouponModal";
 import { convertCurrency } from "@/utils/currency";
 
 export interface CouponPaymentsSectionProps {
-  entryId: number;
+  entryId: string;
   entryCurrency: CurrencyCode;
   displayCurrency: CurrencyCode;
   formatCurrency: (value: number, currency?: CurrencyCode) => string;

@@ -9,7 +9,7 @@ export interface HoldingsSectionProps {
   displayCurrency: CurrencyCode;
   onAdd: () => void;
   onEdit: (entry: PortfolioEntry) => void;
-  onDelete: (entryId: number) => void;
+  onDelete: (entryId: string) => void;
   onPaymentsChange?: () => void; // Callback for when coupon payments change
   formatCurrency: (value: number, currency?: CurrencyCode) => string;
   formatPercentage: (value: number) => string;
@@ -32,7 +32,7 @@ export const HoldingsSection: React.FC<HoldingsSectionProps> = ({
     new Set(),
   );
 
-  const toggleExpanded = (entryId: number) => {
+  const toggleExpanded = (entryId: string) => {
     const newExpanded = new Set(expandedEntries);
     if (newExpanded.has(entryId)) {
       newExpanded.delete(entryId);

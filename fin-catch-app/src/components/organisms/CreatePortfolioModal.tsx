@@ -32,9 +32,11 @@ export const CreatePortfolioModal: React.FC<CreatePortfolioModalProps> = ({
     setIsSubmitting(true);
     try {
       const portfolioId = await finCatchAPI.createPortfolio({
+        id: "", // Backend will generate UUID
         name: name.trim(),
         description: description.trim() || undefined,
         created_at: Math.floor(Date.now() / 1000),
+        sync_version: 1,
       });
 
       // Reset form
@@ -47,6 +49,7 @@ export const CreatePortfolioModal: React.FC<CreatePortfolioModalProps> = ({
         name: name.trim(),
         description: description.trim() || undefined,
         created_at: Math.floor(Date.now() / 1000),
+        sync_version: 1,
       });
       onClose();
     } catch (err) {

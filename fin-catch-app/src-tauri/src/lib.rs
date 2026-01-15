@@ -107,13 +107,17 @@ async fn health_check_source(
 
 // Portfolio commands
 #[tauri::command]
-fn create_portfolio(portfolio: Portfolio, state: State<'_, AppState>) -> Result<i64, String> {
+fn create_portfolio(mut portfolio: Portfolio, state: State<'_, AppState>) -> Result<String, String> {
+    // Generate UUID if not provided
+    if portfolio.id.is_empty() {
+        portfolio.id = uuid::Uuid::new_v4().to_string();
+    }
     state.db.create_portfolio(&portfolio).map_err(|e| e.to_string())
 }
 
 #[tauri::command]
-fn get_portfolio(id: i64, state: State<'_, AppState>) -> Result<Portfolio, String> {
-    state.db.get_portfolio(id).map_err(|e| e.to_string())
+fn get_portfolio(id: String, state: State<'_, AppState>) -> Result<Portfolio, String> {
+    state.db.get_portfolio(&id).map_err(|e| e.to_string())
 }
 
 #[tauri::command]
@@ -127,24 +131,28 @@ fn update_portfolio(portfolio: Portfolio, state: State<'_, AppState>) -> Result<
 }
 
 #[tauri::command]
-fn delete_portfolio(id: i64, state: State<'_, AppState>) -> Result<(), String> {
-    state.db.delete_portfolio(id).map_err(|e| e.to_string())
+fn delete_portfolio(id: String, state: State<'_, AppState>) -> Result<(), String> {
+    state.db.delete_portfolio(&id).map_err(|e| e.to_string())
 }
 
 // Portfolio Entry commands
 #[tauri::command]
-fn create_entry(entry: PortfolioEntry, state: State<'_, AppState>) -> Result<i64, String> {
+fn create_entry(mut entry: PortfolioEntry, state: State<'_, AppState>) -> Result<String, String> {
+    // Generate UUID if not provided
+    if entry.id.is_empty() {
+        entry.id = uuid::Uuid::new_v4().to_string();
+    }
     state.db.create_entry(&entry).map_err(|e| e.to_string())
 }
 
 #[tauri::command]
-fn get_entry(id: i64, state: State<'_, AppState>) -> Result<PortfolioEntry, String> {
-    state.db.get_entry(id).map_err(|e| e.to_string())
+fn get_entry(id: String, state: State<'_, AppState>) -> Result<PortfolioEntry, String> {
+    state.db.get_entry(&id).map_err(|e| e.to_string())
 }
 
 #[tauri::command]
-fn list_entries(portfolio_id: i64, state: State<'_, AppState>) -> Result<Vec<PortfolioEntry>, String> {
-    state.db.list_entries(portfolio_id).map_err(|e| e.to_string())
+fn list_entries(portfolio_id: String, state: State<'_, AppState>) -> Result<Vec<PortfolioEntry>, String> {
+    state.db.list_entries(&portfolio_id).map_err(|e| e.to_string())
 }
 
 #[tauri::command]
@@ -153,19 +161,23 @@ fn update_entry(entry: PortfolioEntry, state: State<'_, AppState>) -> Result<(),
 }
 
 #[tauri::command]
-fn delete_entry(id: i64, state: State<'_, AppState>) -> Result<(), String> {
-    state.db.delete_entry(id).map_err(|e| e.to_string())
+fn delete_entry(id: String, state: State<'_, AppState>) -> Result<(), String> {
+    state.db.delete_entry(&id).map_err(|e| e.to_string())
 }
 
 // Bond Coupon Payment commands
 #[tauri::command]
-fn create_coupon_payment(payment: BondCouponPayment, state: State<'_, AppState>) -> Result<i64, String> {
+fn create_coupon_payment(mut payment: BondCouponPayment, state: State<'_, AppState>) -> Result<String, String> {
+    // Generate UUID if not provided
+    if payment.id.is_empty() {
+        payment.id = uuid::Uuid::new_v4().to_string();
+    }
     state.db.create_coupon_payment(&payment).map_err(|e| e.to_string())
 }
 
 #[tauri::command]
-fn list_coupon_payments(entry_id: i64, state: State<'_, AppState>) -> Result<Vec<BondCouponPayment>, String> {
-    state.db.list_coupon_payments(entry_id).map_err(|e| e.to_string())
+fn list_coupon_payments(entry_id: String, state: State<'_, AppState>) -> Result<Vec<BondCouponPayment>, String> {
+    state.db.list_coupon_payments(&entry_id).map_err(|e| e.to_string())
 }
 
 #[tauri::command]
@@ -174,8 +186,8 @@ fn update_coupon_payment(payment: BondCouponPayment, state: State<'_, AppState>)
 }
 
 #[tauri::command]
-fn delete_coupon_payment(id: i64, state: State<'_, AppState>) -> Result<(), String> {
-    state.db.delete_coupon_payment(id).map_err(|e| e.to_string())
+fn delete_coupon_payment(id: String, state: State<'_, AppState>) -> Result<(), String> {
+    state.db.delete_coupon_payment(&id).map_err(|e| e.to_string())
 }
 
 // Auth commands

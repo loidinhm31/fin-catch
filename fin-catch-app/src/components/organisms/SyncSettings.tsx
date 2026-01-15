@@ -10,6 +10,9 @@ import {
   AlertCircle,
   LogOut,
   Clock,
+  ArrowUpCircle,
+  ArrowDownCircle,
+  AlertTriangle,
 } from "lucide-react";
 import { Button } from "@/components/atoms/Button";
 import { Input } from "@/components/atoms/Input";
@@ -103,10 +106,14 @@ export const SyncSettings: React.FC<SyncSettingsProps> = ({ onLogout }) => {
     }
   };
 
-  const formatTimestamp = (timestamp?: string) => {
+  const formatTimestamp = (timestamp?: string | number) => {
     if (!timestamp) return "Never";
     try {
-      const date = new Date(timestamp);
+      // Handle Unix timestamp (number in seconds) or ISO string
+      const date =
+        typeof timestamp === "number"
+          ? new Date(timestamp * 1000)
+          : new Date(timestamp);
       return date.toLocaleString();
     } catch {
       return "Invalid date";
@@ -171,21 +178,21 @@ export const SyncSettings: React.FC<SyncSettingsProps> = ({ onLogout }) => {
             <p className="text-sm font-semibold text-[var(--color-text-primary)]">
               {getStatusText()}
             </p>
-            {syncStatus?.lastSyncTimestamp && (
+            {syncStatus?.lastSyncAt && (
               <div className="flex items-center gap-1 mt-1">
                 <Clock className="w-3 h-3 text-[var(--color-text-tertiary)]" />
                 <p className="text-xs text-[var(--color-text-tertiary)]">
-                  Last sync: {formatTimestamp(syncStatus.lastSyncTimestamp)}
+                  Last sync: {formatTimestamp(syncStatus.lastSyncAt)}
                 </p>
               </div>
             )}
           </div>
         </div>
 
-        {/* Sync Result */}
+        {/* Sync Result - Enhanced Display */}
         {syncResult && (
           <div
-            className="mt-3 p-3 rounded-lg text-xs border"
+            className="mt-3 p-4 rounded-lg border"
             style={{
               background: syncResult.success
                 ? "rgba(0, 255, 136, 0.1)"
@@ -193,20 +200,106 @@ export const SyncSettings: React.FC<SyncSettingsProps> = ({ onLogout }) => {
               borderColor: syncResult.success
                 ? "rgba(0, 255, 136, 0.3)"
                 : "rgba(255, 51, 102, 0.3)",
-              color: syncResult.success ? "#00ff88" : "#ff3366",
             }}
           >
-            <p className="font-semibold mb-1">{syncResult.message}</p>
-            {syncResult.pushedCount !== undefined && (
-              <p>Pushed: {syncResult.pushedCount} records</p>
-            )}
-            {syncResult.pulledCount !== undefined && (
-              <p>Pulled: {syncResult.pulledCount} records</p>
-            )}
-            {syncResult.conflictsCount !== undefined &&
-              syncResult.conflictsCount > 0 && (
-                <p>Conflicts: {syncResult.conflictsCount}</p>
+            {/* Summary Message */}
+            <div className="flex items-center gap-2 mb-3">
+              {syncResult.success ? (
+                <CheckCircle2
+                  className="w-4 h-4"
+                  style={{ color: "#00ff88" }}
+                />
+              ) : (
+                <AlertCircle className="w-4 h-4" style={{ color: "#ff3366" }} />
               )}
+              <span
+                className="font-semibold text-sm"
+                style={{ color: syncResult.success ? "#00ff88" : "#ff3366" }}
+              >
+                {syncResult.success
+                  ? `Sync completed successfully`
+                  : `Sync failed${syncResult.error ? `: ${syncResult.error}` : ""}`}
+              </span>
+            </div>
+
+            {/* Sync Statistics Grid */}
+            {syncResult.success && (
+              <div className="grid grid-cols-3 gap-3">
+                {/* Pushed */}
+                <div
+                  className="flex flex-col items-center p-2 rounded-lg"
+                  style={{ background: "rgba(0, 0, 0, 0.2)" }}
+                >
+                  <ArrowUpCircle
+                    className="w-4 h-4 mb-1"
+                    style={{ color: "#00d4ff" }}
+                  />
+                  <span className="text-lg font-bold text-[var(--color-text-primary)]">
+                    {syncResult.pushed}
+                  </span>
+                  <span className="text-xs text-[var(--color-text-secondary)]">
+                    Pushed
+                  </span>
+                </div>
+
+                {/* Pulled */}
+                <div
+                  className="flex flex-col items-center p-2 rounded-lg"
+                  style={{ background: "rgba(0, 0, 0, 0.2)" }}
+                >
+                  <ArrowDownCircle
+                    className="w-4 h-4 mb-1"
+                    style={{ color: "#7b61ff" }}
+                  />
+                  <span className="text-lg font-bold text-[var(--color-text-primary)]">
+                    {syncResult.pulled}
+                  </span>
+                  <span className="text-xs text-[var(--color-text-secondary)]">
+                    Pulled
+                  </span>
+                </div>
+
+                {/* Conflicts */}
+                <div
+                  className="flex flex-col items-center p-2 rounded-lg"
+                  style={{ background: "rgba(0, 0, 0, 0.2)" }}
+                >
+                  <AlertTriangle
+                    className="w-4 h-4 mb-1"
+                    style={{
+                      color: syncResult.conflicts > 0 ? "#ffb800" : "#4a5568",
+                    }}
+                  />
+                  <span
+                    className="text-lg font-bold"
+                    style={{
+                      color:
+                        syncResult.conflicts > 0
+                          ? "#ffb800"
+                          : "var(--color-text-primary)",
+                    }}
+                  >
+                    {syncResult.conflicts}
+                  </span>
+                  <span className="text-xs text-[var(--color-text-secondary)]">
+                    Conflicts
+                  </span>
+                </div>
+              </div>
+            )}
+
+            {/* Sync Time */}
+            {syncResult.success && syncResult.syncedAt && (
+              <div
+                className="flex items-center gap-1 mt-3 pt-2 border-t"
+                style={{ borderColor: "rgba(255, 255, 255, 0.1)" }}
+              >
+                <Clock className="w-3 h-3 text-[var(--color-text-tertiary)]" />
+                <span className="text-xs text-[var(--color-text-tertiary)]">
+                  Completed at {formatTimestamp(syncResult.syncedAt)}
+                </span>
+              </div>
+            )}
           </div>
         )}
 

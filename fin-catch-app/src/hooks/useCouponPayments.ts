@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { BondCouponPayment } from "@/types";
 import { finCatchAPI } from "@/services/api";
 
-export const useCouponPayments = (entryId: number | null) => {
+export const useCouponPayments = (entryId: string | null) => {
   const [payments, setPayments] = useState<BondCouponPayment[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -58,7 +58,7 @@ export const useCouponPayments = (entryId: number | null) => {
     }
   };
 
-  const deletePayment = async (paymentId: number): Promise<void> => {
+  const deletePayment = async (paymentId: string): Promise<void> => {
     setError(null);
     try {
       await finCatchAPI.deleteCouponPayment(paymentId);

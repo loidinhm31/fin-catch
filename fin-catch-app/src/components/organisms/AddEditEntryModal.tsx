@@ -22,7 +22,7 @@ export interface AddEditEntryModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSuccess: () => void;
-  portfolioId: number;
+  portfolioId: string;
   editingEntry?: PortfolioEntry | null;
 }
 
@@ -380,7 +380,7 @@ export const AddEditEntryModal: React.FC<AddEditEntryModalProps> = ({
       }
 
       const entryData: PortfolioEntry = {
-        id: editingEntry?.id,
+        id: editingEntry?.id || "", // Backend will generate UUID for new entries
         portfolio_id: portfolioId,
         asset_type: assetType,
         symbol:
@@ -422,6 +422,8 @@ export const AddEditEntryModal: React.FC<AddEditEntryModalProps> = ({
             ? Math.floor(Date.now() / 1000)
             : undefined,
         ytm: assetType === "bond" && ytm ? parseFloat(ytm) : undefined,
+        sync_version: editingEntry?.sync_version || 1,
+        synced_at: editingEntry?.synced_at,
       };
 
       if (editingEntry) {

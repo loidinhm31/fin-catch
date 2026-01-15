@@ -16,7 +16,7 @@ export interface AddEditCouponModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSave: (payment: BondCouponPayment) => Promise<void>;
-  entryId: number;
+  entryId: string;
   defaultCurrency: CurrencyCode;
   editingPayment?: BondCouponPayment | null;
 }
@@ -83,13 +83,15 @@ export const AddEditCouponModal: React.FC<AddEditCouponModalProps> = ({
     setIsSubmitting(true);
     try {
       const paymentData: BondCouponPayment = {
-        id: editingPayment?.id,
+        id: editingPayment?.id || "", // Backend will generate UUID for new payments
         entry_id: entryId,
         payment_date: paymentTimestamp,
         amount: parseFloat(amount),
         currency,
         notes: notes.trim() || undefined,
         created_at: editingPayment?.created_at || Math.floor(Date.now() / 1000),
+        sync_version: editingPayment?.sync_version || 1,
+        synced_at: editingPayment?.synced_at,
       };
 
       await onSave(paymentData);

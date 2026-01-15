@@ -2,12 +2,12 @@ import { useEffect, useState } from "react";
 import { PortfolioEntry } from "@/types";
 import { finCatchAPI } from "@/services/api";
 
-export const usePortfolioEntries = (portfolioId: number | null) => {
+export const usePortfolioEntries = (portfolioId: string | null) => {
   const [entries, setEntries] = useState<PortfolioEntry[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const loadEntries = async (id: number) => {
+  const loadEntries = async (id: string) => {
     setIsLoading(true);
     try {
       const entryList = await finCatchAPI.listEntries(id);
@@ -34,7 +34,7 @@ export const usePortfolioEntries = (portfolioId: number | null) => {
     }
   };
 
-  const deleteEntry = async (entryId: number) => {
+  const deleteEntry = async (entryId: string) => {
     await finCatchAPI.deleteEntry(entryId);
     if (portfolioId) {
       await loadEntries(portfolioId);

@@ -4,7 +4,7 @@ import { finCatchAPI } from "@/services/api";
 
 export const usePortfolios = () => {
   const [portfolios, setPortfolios] = useState<Portfolio[]>([]);
-  const [selectedPortfolioId, setSelectedPortfolioId] = useState<number | null>(
+  const [selectedPortfolioId, setSelectedPortfolioId] = useState<string | null>(
     null,
   );
   const [isLoading, setIsLoading] = useState(false);
@@ -16,7 +16,7 @@ export const usePortfolios = () => {
       const portfolioList = await finCatchAPI.listPortfolios();
       setPortfolios(portfolioList);
       if (portfolioList.length > 0 && !selectedPortfolioId) {
-        setSelectedPortfolioId(portfolioList[0].id!);
+        setSelectedPortfolioId(portfolioList[0].id);
       }
       setError(null);
     } catch (err) {
@@ -28,18 +28,18 @@ export const usePortfolios = () => {
     }
   };
 
-  const createPortfolio = async (portfolio: Portfolio): Promise<number> => {
+  const createPortfolio = async (portfolio: Portfolio): Promise<string> => {
     const portfolioId = await finCatchAPI.createPortfolio(portfolio);
     await loadPortfolios();
     setSelectedPortfolioId(portfolioId);
     return portfolioId;
   };
 
-  const deletePortfolio = async (portfolioId: number) => {
+  const deletePortfolio = async (portfolioId: string) => {
     await finCatchAPI.deletePortfolio(portfolioId);
     await loadPortfolios();
     if (selectedPortfolioId === portfolioId) {
-      setSelectedPortfolioId(portfolios.length > 1 ? portfolios[0].id! : null);
+      setSelectedPortfolioId(portfolios.length > 1 ? portfolios[0].id : null);
     }
   };
 

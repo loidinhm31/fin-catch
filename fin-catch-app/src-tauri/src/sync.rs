@@ -1,7 +1,6 @@
 use reqwest::Client;
 use serde::{Deserialize, Serialize};
 use std::sync::Arc;
-use uuid::Uuid;
 
 use crate::auth::AuthService;
 use crate::db::{Database, Portfolio, PortfolioEntry, BondCouponPayment};
@@ -23,6 +22,7 @@ pub struct SyncRecord {
     pub row_id: String, // UUID
     pub data: serde_json::Value,
     pub version: i64,
+    #[serde(default)]
     pub deleted: bool,
 }
 
@@ -76,16 +76,20 @@ struct DeltaSyncRequest {
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 struct DeltaSyncResponse {
-    push_result: PushResult,
-    pull_result: PullResult,
+    #[serde(alias = "pushResult")]
+    push: PushResult,
+    #[serde(alias = "pullResult")]
+    pull: PullResult,
 }
 
 /// Push result from server
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 struct PushResult {
-    accepted: usize,
+    synced: usize,
     conflicts: Vec<ConflictInfo>,
+    #[serde(default)]
+    server_timestamp: Option<String>,
 }
 
 /// Pull result from server
@@ -93,7 +97,9 @@ struct PushResult {
 #[serde(rename_all = "camelCase")]
 struct PullResult {
     records: Vec<SyncRecord>,
-    server_timestamp: i64,
+    #[serde(default)]
+    table_timestamps: Option<serde_json::Value>,
+    server_timestamp: String,
 }
 
 /// Conflict information
@@ -134,7 +140,7 @@ impl SyncService {
         // Get last sync timestamp from metadata
         let last_sync_at = self.get_last_sync_timestamp()?;
 
-        // Count pending changes (records with synced_at = NULL or is_deleted = 1)
+        // Count pending changes (records with synced_at = NULL)
         let pending_changes = self.count_pending_changes()?;
 
         Ok(SyncStatus {
@@ -179,14 +185,17 @@ impl SyncService {
             },
         };
 
-        // Get app_id from auth service (stored during login/configure)
+        // Get app_id and api_key from auth service (stored during login/configure)
         let app_id = self.get_app_id(app_handle).await?;
+        let api_key = self.get_api_key(app_handle)?;
 
+        println!("{:?}", request);
         // Send delta sync request
         let response = self
             .client
             .post(format!("{}/api/v1/sync/{}/delta", self.server_url, app_id))
             .header("Authorization", format!("Bearer {}", access_token))
+            .header("X-API-Key", api_key)
             .json(&request)
             .send()
             .await
@@ -198,24 +207,32 @@ impl SyncService {
             return Err(format!("Sync failed ({}): {}", status, error_text));
         }
 
-        let sync_response: DeltaSyncResponse = response
-            .json()
-            .await
-            .map_err(|e| format!("Failed to parse sync response: {}", e))?;
+        // Read response as text first for debugging
+        let response_text = response.text().await
+            .map_err(|e| format!("Failed to read response body: {}", e))?;
+
+        println!("Sync response body: {}", response_text);
+
+        // Parse the response
+        let sync_response: DeltaSyncResponse = serde_json::from_str(&response_text)
+            .map_err(|e| format!("Failed to parse sync response: {}. Response: {}", e, response_text))?;
 
         // Mark pushed records as synced
         self.mark_records_synced(&local_changes, start_time)?;
 
         // Apply remote changes
-        self.apply_remote_changes(&sync_response.pull_result.records).await?;
+        self.apply_remote_changes(&sync_response.pull.records).await?;
+
+        // Parse server timestamp from ISO 8601 string to Unix timestamp
+        let server_timestamp = Self::parse_iso8601_to_unix(&sync_response.pull.server_timestamp)?;
 
         // Update sync metadata
-        self.update_last_sync_timestamp(sync_response.pull_result.server_timestamp)?;
+        self.update_last_sync_timestamp(server_timestamp)?;
 
         Ok(SyncResult {
-            pushed: sync_response.push_result.accepted,
-            pulled: sync_response.pull_result.records.len(),
-            conflicts: sync_response.push_result.conflicts.len(),
+            pushed: sync_response.push.synced,
+            pulled: sync_response.pull.records.len(),
+            conflicts: sync_response.push.conflicts.len(),
             success: true,
             error: None,
             synced_at: start_time,
@@ -226,33 +243,65 @@ impl SyncService {
     async fn collect_local_changes(&self) -> Result<Vec<SyncRecord>, String> {
         let mut records = Vec::new();
 
-        // Collect portfolio changes
+        // Collect unsynced deleted portfolios
+        let deleted_portfolios = self.db.query_deleted_portfolios().map_err(|e| e.to_string())?;
+        for portfolio in deleted_portfolios {
+            records.push(SyncRecord {
+                table_name: "portfolios".to_string(),
+                row_id: portfolio.id,
+                data: serde_json::json!({}),
+                version: portfolio.sync_version,
+                deleted: true,
+            });
+        }
+
+        // Collect portfolio changes (active records)
         let portfolios = self.db.list_portfolios().map_err(|e| e.to_string())?;
         for portfolio in portfolios {
-            if portfolio.synced_at.is_none() || portfolio.is_deleted == Some(1) {
-                records.push(self.portfolio_to_sync_record(&portfolio)?);
+            if portfolio.synced_at.is_none() {
+                records.push(self.portfolio_to_sync_record(&portfolio, false)?);
             }
         }
 
-        // Collect portfolio entry changes (need to iterate through all portfolios)
-        for portfolio in self.db.list_portfolios().map_err(|e| e.to_string())? {
-            if let Some(portfolio_id) = portfolio.id {
-                let entries = self.db.list_entries(portfolio_id).map_err(|e| e.to_string())?;
-                for entry in entries {
-                    if entry.synced_at.is_none() || entry.is_deleted == Some(1) {
-                        records.push(self.entry_to_sync_record(&entry, &portfolio).await?);
-                    }
-                }
+        // Collect unsynced deleted entries
+        let deleted_entries = self.db.query_deleted_entries().map_err(|e| e.to_string())?;
+        for entry in deleted_entries {
+            records.push(SyncRecord {
+                table_name: "portfolio_entries".to_string(),
+                row_id: entry.id,
+                data: serde_json::json!({}),
+                version: entry.sync_version,
+                deleted: true,
+            });
+        }
 
-                // Collect bond coupon payment changes
-                for entry in self.db.list_entries(portfolio_id).map_err(|e| e.to_string())? {
-                    if let Some(entry_id) = entry.id {
-                        let payments = self.db.list_coupon_payments(entry_id).map_err(|e| e.to_string())?;
-                        for payment in payments {
-                            if payment.synced_at.is_none() || payment.is_deleted == Some(1) {
-                                records.push(self.payment_to_sync_record(&payment, &entry).await?);
-                            }
-                        }
+        // Collect portfolio entry changes (active records)
+        for portfolio in self.db.list_portfolios().map_err(|e| e.to_string())? {
+            let entries = self.db.list_entries(&portfolio.id).map_err(|e| e.to_string())?;
+            for entry in entries {
+                if entry.synced_at.is_none() {
+                    records.push(self.entry_to_sync_record(&entry, &portfolio, false).await?);
+                }
+            }
+
+            // Collect unsynced deleted payments
+            let deleted_payments = self.db.query_deleted_payments(&portfolio.id).map_err(|e| e.to_string())?;
+            for payment in deleted_payments {
+                records.push(SyncRecord {
+                    table_name: "bond_coupon_payments".to_string(),
+                    row_id: payment.id,
+                    data: serde_json::json!({}),
+                    version: payment.sync_version,
+                    deleted: true,
+                });
+            }
+
+            // Collect bond coupon payment changes (active records)
+            for entry in self.db.list_entries(&portfolio.id).map_err(|e| e.to_string())? {
+                let payments = self.db.list_coupon_payments(&entry.id).map_err(|e| e.to_string())?;
+                for payment in payments {
+                    if payment.synced_at.is_none() {
+                        records.push(self.payment_to_sync_record(&payment, &entry, false).await?);
                     }
                 }
             }
@@ -262,20 +311,7 @@ impl SyncService {
     }
 
     /// Convert Portfolio to SyncRecord
-    fn portfolio_to_sync_record(&self, portfolio: &Portfolio) -> Result<SyncRecord, String> {
-        // Get or generate UUID
-        let sync_uuid = match &portfolio.sync_uuid {
-            Some(uuid) => uuid.clone(),
-            None => {
-                let new_uuid = Uuid::new_v4().to_string();
-                // Store mapping
-                if let Some(id) = portfolio.id {
-                    self.store_uuid_mapping("portfolios", id, &new_uuid)?;
-                }
-                new_uuid
-            }
-        };
-
+    fn portfolio_to_sync_record(&self, portfolio: &Portfolio, deleted: bool) -> Result<SyncRecord, String> {
         let mut data = serde_json::json!({
             "name": portfolio.name,
             "description": portfolio.description,
@@ -290,10 +326,10 @@ impl SyncService {
 
         Ok(SyncRecord {
             table_name: "portfolios".to_string(),
-            row_id: sync_uuid,
+            row_id: portfolio.id.clone(),
             data,
-            version: portfolio.sync_version.unwrap_or(1),
-            deleted: portfolio.is_deleted == Some(1),
+            version: portfolio.sync_version,
+            deleted,
         })
     }
 
@@ -302,27 +338,10 @@ impl SyncService {
         &self,
         entry: &PortfolioEntry,
         portfolio: &Portfolio,
+        deleted: bool,
     ) -> Result<SyncRecord, String> {
-        // Get or generate UUID for entry
-        let sync_uuid = match &entry.sync_uuid {
-            Some(uuid) => uuid.clone(),
-            None => {
-                let new_uuid = Uuid::new_v4().to_string();
-                if let Some(id) = entry.id {
-                    self.store_uuid_mapping("portfolio_entries", id, &new_uuid)?;
-                }
-                new_uuid
-            }
-        };
-
-        // Get portfolio UUID
-        let portfolio_sync_uuid = match &portfolio.sync_uuid {
-            Some(uuid) => uuid.clone(),
-            None => return Err("Portfolio must have sync_uuid before syncing entries".to_string()),
-        };
-
         let mut data = serde_json::json!({
-            "portfolioSyncUuid": portfolio_sync_uuid,
+            "portfolioSyncUuid": portfolio.id,
             "assetType": entry.asset_type,
             "symbol": entry.symbol,
             "quantity": entry.quantity,
@@ -352,10 +371,10 @@ impl SyncService {
 
         Ok(SyncRecord {
             table_name: "portfolio_entries".to_string(),
-            row_id: sync_uuid,
+            row_id: entry.id.clone(),
             data,
-            version: entry.sync_version.unwrap_or(1),
-            deleted: entry.is_deleted == Some(1),
+            version: entry.sync_version,
+            deleted,
         })
     }
 
@@ -364,27 +383,10 @@ impl SyncService {
         &self,
         payment: &BondCouponPayment,
         entry: &PortfolioEntry,
+        deleted: bool,
     ) -> Result<SyncRecord, String> {
-        // Get or generate UUID for payment
-        let sync_uuid = match &payment.sync_uuid {
-            Some(uuid) => uuid.clone(),
-            None => {
-                let new_uuid = Uuid::new_v4().to_string();
-                if let Some(id) = payment.id {
-                    self.store_uuid_mapping("bond_coupon_payments", id, &new_uuid)?;
-                }
-                new_uuid
-            }
-        };
-
-        // Get entry UUID
-        let entry_sync_uuid = match &entry.sync_uuid {
-            Some(uuid) => uuid.clone(),
-            None => return Err("Entry must have sync_uuid before syncing payments".to_string()),
-        };
-
         let mut data = serde_json::json!({
-            "entrySyncUuid": entry_sync_uuid,
+            "entrySyncUuid": entry.id,
             "paymentDate": payment.payment_date,
             "amount": payment.amount,
             "currency": payment.currency,
@@ -399,16 +401,41 @@ impl SyncService {
 
         Ok(SyncRecord {
             table_name: "bond_coupon_payments".to_string(),
-            row_id: sync_uuid,
+            row_id: payment.id.clone(),
             data,
-            version: payment.sync_version.unwrap_or(1),
-            deleted: payment.is_deleted == Some(1),
+            version: payment.sync_version,
+            deleted,
         })
     }
 
     /// Apply remote changes to local database
+    /// 
+    /// Records are sorted to handle FK constraints properly:
+    /// - For non-deleted records: parents first (portfolios -> entries -> payments)
+    /// - For deleted records: children first (payments -> entries -> portfolios)
     async fn apply_remote_changes(&self, records: &[SyncRecord]) -> Result<(), String> {
-        for record in records {
+        // Separate records by deleted status
+        let mut non_deleted: Vec<&SyncRecord> = records.iter().filter(|r| !r.deleted).collect();
+        let mut deleted: Vec<&SyncRecord> = records.iter().filter(|r| r.deleted).collect();
+
+        // Sort non-deleted: parents first (portfolios=0, entries=1, payments=2)
+        non_deleted.sort_by_key(|r| match r.table_name.as_str() {
+            "portfolios" => 0,
+            "portfolio_entries" => 1,
+            "bond_coupon_payments" => 2,
+            _ => 3,
+        });
+
+        // Sort deleted: children first (payments=0, entries=1, portfolios=2)
+        deleted.sort_by_key(|r| match r.table_name.as_str() {
+            "bond_coupon_payments" => 0,
+            "portfolio_entries" => 1,
+            "portfolios" => 2,
+            _ => 3,
+        });
+
+        // Apply non-deleted records first (inserts/updates)
+        for record in non_deleted {
             match record.table_name.as_str() {
                 "portfolios" => self.apply_portfolio_change(record)?,
                 "portfolio_entries" => self.apply_entry_change(record).await?,
@@ -418,34 +445,50 @@ impl SyncService {
                 }
             }
         }
+
+        // Apply deleted records (children first to avoid FK violations)
+        for record in deleted {
+            match record.table_name.as_str() {
+                "portfolios" => self.apply_portfolio_change(record)?,
+                "portfolio_entries" => self.apply_entry_change(record).await?,
+                "bond_coupon_payments" => self.apply_payment_change(record).await?,
+                _ => {
+                    eprintln!("Unknown table: {}", record.table_name);
+                }
+            }
+        }
+
         Ok(())
     }
 
     /// Apply portfolio change from remote
     fn apply_portfolio_change(&self, record: &SyncRecord) -> Result<(), String> {
-        // Check if portfolio exists locally by sync_uuid
-        let existing = self.find_local_id_by_uuid("portfolios", &record.row_id)?;
+        // If deleted, hard delete locally
+        if record.deleted {
+            self.db.hard_delete_portfolio(&record.row_id).map_err(|e| e.to_string())?;
+            return Ok(());
+        }
+
+        // Check if portfolio exists locally by id
+        let exists = self.db.get_portfolio(&record.row_id).is_ok();
 
         let data = &record.data;
         let portfolio = Portfolio {
-            id: existing,
+            id: record.row_id.clone(),
             name: data["name"].as_str().unwrap_or("").to_string(),
             description: data["description"].as_str().map(|s| s.to_string()),
             base_currency: data["baseCurrency"].as_str().map(|s| s.to_string()),
             created_at: data["createdAt"].as_i64().unwrap_or(0),
-            sync_uuid: Some(record.row_id.clone()),
-            sync_version: Some(record.version),
+            sync_version: record.version,
             synced_at: Some(chrono::Utc::now().timestamp()),
-            is_deleted: Some(if record.deleted { 1 } else { 0 }),
         };
 
-        if let Some(_id) = existing {
+        if exists {
             // Update existing
             self.db.update_portfolio(&portfolio).map_err(|e| e.to_string())?;
         } else {
             // Insert new
-            let new_id = self.db.create_portfolio(&portfolio).map_err(|e| e.to_string())?;
-            self.store_uuid_mapping("portfolios", new_id, &record.row_id)?;
+            self.db.create_portfolio(&portfolio).map_err(|e| e.to_string())?;
         }
 
         Ok(())
@@ -453,18 +496,23 @@ impl SyncService {
 
     /// Apply entry change from remote
     async fn apply_entry_change(&self, record: &SyncRecord) -> Result<(), String> {
-        let existing = self.find_local_id_by_uuid("portfolio_entries", &record.row_id)?;
+        // If deleted, hard delete locally
+        if record.deleted {
+            self.db.hard_delete_entry(&record.row_id).map_err(|e| e.to_string())?;
+            return Ok(());
+        }
+
+        let exists = self.db.get_entry(&record.row_id).is_ok();
 
         let data = &record.data;
 
         // Get portfolio_id from portfolioSyncUuid
-        let portfolio_sync_uuid = data["portfolioSyncUuid"].as_str()
-            .ok_or("Missing portfolioSyncUuid")?;
-        let portfolio_id = self.find_local_id_by_uuid("portfolios", portfolio_sync_uuid)?
-            .ok_or("Portfolio not found for entry")?;
+        let portfolio_id = data["portfolioSyncUuid"].as_str()
+            .ok_or("Missing portfolioSyncUuid")?
+            .to_string();
 
         let entry = PortfolioEntry {
-            id: existing,
+            id: record.row_id.clone(),
             portfolio_id,
             asset_type: data["assetType"].as_str().unwrap_or("").to_string(),
             symbol: data["symbol"].as_str().unwrap_or("").to_string(),
@@ -486,17 +534,14 @@ impl SyncService {
             current_market_price: data["currentMarketPrice"].as_f64(),
             last_price_update: data["lastPriceUpdate"].as_i64(),
             ytm: data["ytm"].as_f64(),
-            sync_uuid: Some(record.row_id.clone()),
-            sync_version: Some(record.version),
+            sync_version: record.version,
             synced_at: Some(chrono::Utc::now().timestamp()),
-            is_deleted: Some(if record.deleted { 1 } else { 0 }),
         };
 
-        if let Some(_id) = existing {
+        if exists {
             self.db.update_entry(&entry).map_err(|e| e.to_string())?;
         } else {
-            let new_id = self.db.create_entry(&entry).map_err(|e| e.to_string())?;
-            self.store_uuid_mapping("portfolio_entries", new_id, &record.row_id)?;
+            self.db.create_entry(&entry).map_err(|e| e.to_string())?;
         }
 
         Ok(())
@@ -504,70 +549,64 @@ impl SyncService {
 
     /// Apply payment change from remote
     async fn apply_payment_change(&self, record: &SyncRecord) -> Result<(), String> {
-        let existing = self.find_local_id_by_uuid("bond_coupon_payments", &record.row_id)?;
+        // If deleted, hard delete locally
+        if record.deleted {
+            self.db.hard_delete_payment(&record.row_id).map_err(|e| e.to_string())?;
+            return Ok(());
+        }
+
+        let exists = self.db.list_coupon_payments(&record.row_id).is_ok();
 
         let data = &record.data;
 
         // Get entry_id from entrySyncUuid
-        let entry_sync_uuid = data["entrySyncUuid"].as_str()
-            .ok_or("Missing entrySyncUuid")?;
-        let entry_id = self.find_local_id_by_uuid("portfolio_entries", entry_sync_uuid)?
-            .ok_or("Entry not found for payment")?;
+        let entry_id = data["entrySyncUuid"].as_str()
+            .ok_or("Missing entrySyncUuid")?
+            .to_string();
 
         let payment = BondCouponPayment {
-            id: existing,
+            id: record.row_id.clone(),
             entry_id,
             payment_date: data["paymentDate"].as_i64().unwrap_or(0),
             amount: data["amount"].as_f64().unwrap_or(0.0),
             currency: data["currency"].as_str().unwrap_or("").to_string(),
             notes: data["notes"].as_str().map(|s| s.to_string()),
             created_at: data["createdAt"].as_i64().unwrap_or(0),
-            sync_uuid: Some(record.row_id.clone()),
-            sync_version: Some(record.version),
+            sync_version: record.version,
             synced_at: Some(chrono::Utc::now().timestamp()),
-            is_deleted: Some(if record.deleted { 1 } else { 0 }),
         };
 
-        if let Some(_id) = existing {
+        if exists {
             self.db.update_coupon_payment(&payment).map_err(|e| e.to_string())?;
         } else {
-            let new_id = self.db.create_coupon_payment(&payment).map_err(|e| e.to_string())?;
-            self.store_uuid_mapping("bond_coupon_payments", new_id, &record.row_id)?;
+            self.db.create_coupon_payment(&payment).map_err(|e| e.to_string())?;
         }
 
         Ok(())
     }
 
-    /// Store UUID mapping in sync_id_mapping table
-    fn store_uuid_mapping(&self, table_name: &str, local_id: i64, sync_uuid: &str) -> Result<(), String> {
-        self.db
-            .execute_sql(
-                "INSERT OR REPLACE INTO sync_id_mapping (table_name, local_id, sync_uuid) VALUES (?, ?, ?)",
-                &[table_name, &local_id.to_string(), sync_uuid],
-            )
-            .map_err(|e| e.to_string())
-    }
-
-    /// Find local ID by sync UUID
-    fn find_local_id_by_uuid(&self, table_name: &str, sync_uuid: &str) -> Result<Option<i64>, String> {
-        self.db
-            .query_optional_i64(
-                "SELECT local_id FROM sync_id_mapping WHERE table_name = ? AND sync_uuid = ?",
-                &[table_name, sync_uuid],
-            )
-            .map_err(|e| e.to_string())
-    }
-
-    /// Mark records as synced
+    /// Mark records as synced (or hard-delete if they were deleted records)
     fn mark_records_synced(&self, records: &[SyncRecord], synced_at: i64) -> Result<(), String> {
         for record in records {
-            let query = format!(
-                "UPDATE {} SET synced_at = ?, sync_version = sync_version + 1 WHERE sync_uuid = ?",
-                record.table_name
-            );
-            self.db
-                .execute_sql(&query, &[&synced_at.to_string(), &record.row_id])
-                .map_err(|e| e.to_string())?;
+            if record.deleted {
+                // Hard-delete locally after successful push of deleted record
+                // This ensures local SQLite doesn't accumulate orphaned soft-deleted records
+                match record.table_name.as_str() {
+                    "portfolios" => self.db.hard_delete_portfolio(&record.row_id),
+                    "portfolio_entries" => self.db.hard_delete_entry(&record.row_id),
+                    "bond_coupon_payments" => self.db.hard_delete_payment(&record.row_id),
+                    _ => Ok(()),
+                }.map_err(|e| e.to_string())?;
+            } else {
+                // Normal: update synced_at for active records
+                let query = format!(
+                    "UPDATE {} SET synced_at = ?, sync_version = sync_version + 1 WHERE id = ?",
+                    record.table_name
+                );
+                self.db
+                    .execute_sql(&query, &[&synced_at.to_string(), &record.row_id])
+                    .map_err(|e| e.to_string())?;
+            }
         }
         Ok(())
     }
@@ -598,17 +637,17 @@ impl SyncService {
 
         // Count portfolios
         count += self.db
-            .query_count("SELECT COUNT(*) FROM portfolios WHERE synced_at IS NULL OR is_deleted = 1")
+            .query_count("SELECT COUNT(*) FROM portfolios WHERE synced_at IS NULL")
             .map_err(|e| e.to_string())?;
 
         // Count entries
         count += self.db
-            .query_count("SELECT COUNT(*) FROM portfolio_entries WHERE synced_at IS NULL OR is_deleted = 1")
+            .query_count("SELECT COUNT(*) FROM portfolio_entries WHERE synced_at IS NULL")
             .map_err(|e| e.to_string())?;
 
         // Count payments
         count += self.db
-            .query_count("SELECT COUNT(*) FROM bond_coupon_payments WHERE synced_at IS NULL OR is_deleted = 1")
+            .query_count("SELECT COUNT(*) FROM bond_coupon_payments WHERE synced_at IS NULL")
             .map_err(|e| e.to_string())?;
 
         Ok(count)
@@ -626,5 +665,21 @@ impl SyncService {
             .get("app_id")
             .and_then(|v| v.as_str().map(|s| s.to_string()))
             .ok_or_else(|| "No app ID found".to_string())
+    }
+
+    /// Get API key from stored auth data (encrypted)
+    fn get_api_key(&self, app_handle: &tauri::AppHandle) -> Result<String, String> {
+        // Use the auth service's decrypt method through the lock
+        let auth = self.auth.lock().unwrap();
+        auth.get_stored_api_key(app_handle)
+    }
+
+    /// Parse ISO 8601 timestamp string to Unix timestamp (seconds)
+    fn parse_iso8601_to_unix(timestamp: &str) -> Result<i64, String> {
+        use chrono::{DateTime, Utc};
+
+        DateTime::parse_from_rfc3339(timestamp)
+            .map(|dt| dt.with_timezone(&Utc).timestamp())
+            .map_err(|e| format!("Failed to parse timestamp '{}': {}", timestamp, e))
     }
 }

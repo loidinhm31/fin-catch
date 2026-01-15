@@ -5,8 +5,8 @@ import { Portfolio } from "../../types";
 export interface PortfolioSelectorProps {
   portfolios: Portfolio[];
   selectedPortfolioId: number | null;
-  onSelect: (portfolioId: number) => void;
-  onDelete: (portfolioId: number) => void;
+  onSelect: (portfolioId: string) => void;
+  onDelete: (portfolioId: string) => void;
   onCreateNew: () => void;
 }
 

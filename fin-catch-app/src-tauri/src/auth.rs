@@ -333,7 +333,7 @@ impl AuthService {
         // Get stored refresh token, app_id, and api_key
         let refresh_token = self.get_refresh_token(app_handle).await?;
         let app_id = self.get_stored_app_id(app_handle).await?;
-        let api_key = self.get_stored_api_key(app_handle).await?;
+        let api_key = self.get_stored_api_key(app_handle)?;
 
         let request = RefreshRequest { refresh_token };
 
@@ -430,7 +430,7 @@ impl AuthService {
     }
 
     /// Get the stored API key (decrypts automatically)
-    async fn get_stored_api_key(&self, app_handle: &tauri::AppHandle) -> Result<String, String> {
+    pub fn get_stored_api_key(&self, app_handle: &tauri::AppHandle) -> Result<String, String> {
         let store = app_handle
             .store(STORE_FILE)
             .map_err(|e| format!("Failed to access store: {}", e))?;
