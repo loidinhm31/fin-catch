@@ -137,13 +137,12 @@ impl Database {
             [],
         )?;
 
-        // Create sync_metadata table
+        // Create sync_metadata table with checkpoint columns
         conn.execute(
             "CREATE TABLE IF NOT EXISTS sync_metadata (
-                table_name TEXT PRIMARY KEY,
-                last_sync_timestamp TEXT,
-                app_id TEXT,
-                api_key TEXT
+                key TEXT PRIMARY KEY,
+                checkpoint_updated_at TEXT,
+                checkpoint_id TEXT
             )",
             [],
         )?;
@@ -668,6 +667,35 @@ impl Database {
     pub fn hard_delete_payment(&self, id: &str) -> Result<()> {
         let conn = self.conn.lock().unwrap();
         conn.execute("DELETE FROM bond_coupon_payments WHERE id = ?1", params![id])?;
+        Ok(())
+    }
+
+    // Checkpoint management for sync
+    pub fn get_checkpoint(&self) -> Result<Option<(String, String)>> {
+        let conn = self.conn.lock().unwrap();
+        let result = conn.query_row(
+            "SELECT checkpoint_updated_at, checkpoint_id FROM sync_metadata WHERE key = 'global'",
+            [],
+            |row| {
+                let updated_at: Option<String> = row.get(0)?;
+                let id: Option<String> = row.get(1)?;
+                Ok((updated_at, id))
+            },
+        );
+        match result {
+            Ok((Some(updated_at), Some(id))) => Ok(Some((updated_at, id))),
+            Ok(_) => Ok(None),
+            Err(rusqlite::Error::QueryReturnedNoRows) => Ok(None),
+            Err(e) => Err(e),
+        }
+    }
+
+    pub fn save_checkpoint(&self, updated_at: &str, id: &str) -> Result<()> {
+        let conn = self.conn.lock().unwrap();
+        conn.execute(
+            "INSERT OR REPLACE INTO sync_metadata (key, checkpoint_updated_at, checkpoint_id) VALUES ('global', ?1, ?2)",
+            params![updated_at, id],
+        )?;
         Ok(())
     }
 }

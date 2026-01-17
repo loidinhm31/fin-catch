@@ -1,29 +1,18 @@
-use reqwest::Client;
-use serde::{Deserialize, Serialize};
 use std::sync::Arc;
 
+use chrono::{DateTime, Utc};
+use serde::{Deserialize, Serialize};
+
+use qm_sync_client::{Checkpoint, SyncClient, SyncClientConfig, SyncRecord};
+
 use crate::auth::AuthService;
-use crate::db::{Database, Portfolio, PortfolioEntry, BondCouponPayment};
+use crate::db::{BondCouponPayment, Database, Portfolio, PortfolioEntry};
 
 /// Sync service for synchronizing local data with sync-center
 #[derive(Clone)]
 pub struct SyncService {
-    server_url: String,
-    client: Client,
     db: Arc<Database>,
     auth: Arc<std::sync::Mutex<AuthService>>,
-}
-
-/// Sync record in the format expected by sync-center
-#[derive(Debug, Serialize, Deserialize, Clone)]
-#[serde(rename_all = "camelCase")]
-pub struct SyncRecord {
-    pub table_name: String,
-    pub row_id: String, // UUID
-    pub data: serde_json::Value,
-    pub version: i64,
-    #[serde(default)]
-    pub deleted: bool,
 }
 
 /// Result of a sync operation
@@ -49,81 +38,13 @@ pub struct SyncStatus {
     pub server_url: Option<String>,
 }
 
-/// Push request to sync-center
-#[derive(Debug, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
-struct PushRequest {
-    records: Vec<SyncRecord>,
-    client_timestamp: i64,
-}
-
-/// Pull request to sync-center
-#[derive(Debug, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
-struct PullRequest {
-    last_sync_timestamp: Option<i64>,
-}
-
-/// Delta sync request (combined push and pull)
-#[derive(Debug, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
-struct DeltaSyncRequest {
-    push: PushRequest,
-    pull: PullRequest,
-}
-
-/// Delta sync response
-#[derive(Debug, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
-struct DeltaSyncResponse {
-    #[serde(alias = "pushResult")]
-    push: PushResult,
-    #[serde(alias = "pullResult")]
-    pull: PullResult,
-}
-
-/// Push result from server
-#[derive(Debug, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
-struct PushResult {
-    synced: usize,
-    conflicts: Vec<ConflictInfo>,
-    #[serde(default)]
-    server_timestamp: Option<String>,
-}
-
-/// Pull result from server
-#[derive(Debug, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
-struct PullResult {
-    records: Vec<SyncRecord>,
-    #[serde(default)]
-    table_timestamps: Option<serde_json::Value>,
-    server_timestamp: String,
-}
-
-/// Conflict information
-#[derive(Debug, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
-struct ConflictInfo {
-    table_name: String,
-    row_id: String,
-    reason: String,
-}
-
 impl SyncService {
     /// Create a new SyncService
     pub fn new(
-        server_url: String,
         db: Arc<Database>,
         auth: Arc<std::sync::Mutex<AuthService>>,
     ) -> Self {
-        Self {
-            server_url,
-            client: Client::new(),
-            db,
-            auth,
-        }
+        Self { db, auth }
     }
 
     /// Get sync status
@@ -137,18 +58,21 @@ impl SyncService {
             auth.is_authenticated(app_handle).await
         };
 
-        // Get last sync timestamp from metadata
+        // Get last sync timestamp from checkpoint
         let last_sync_at = self.get_last_sync_timestamp()?;
 
         // Count pending changes (records with synced_at = NULL)
         let pending_changes = self.count_pending_changes()?;
 
+        // Get server URL from env
+        let server_url = std::env::var("SYNC_SERVER_URL").ok();
+
         Ok(SyncStatus {
-            configured: !self.server_url.is_empty(),
+            configured: server_url.is_some(),
             authenticated: is_authenticated,
             last_sync_at,
             pending_changes,
-            server_url: Some(self.server_url.clone()),
+            server_url,
         })
     }
 
@@ -162,77 +86,75 @@ impl SyncService {
             .map_err(|e| format!("Time error: {}", e))?
             .as_secs() as i64;
 
-        // Check authentication
-        let access_token = {
+        // Get config from auth/env
+        let (server_url, app_id, api_key, access_token, refresh_token) = {
             let auth = self.auth.lock().map_err(|e| format!("Failed to lock auth: {}", e))?.clone();
-            auth.get_access_token(app_handle).await?
+            let access_token = auth.get_access_token(app_handle).await?;
+            let refresh_token = auth.get_refresh_token(app_handle).await?;
+            let server_url = std::env::var("SYNC_SERVER_URL")
+                .map_err(|_| "SYNC_SERVER_URL not configured")?;
+            let app_id = self.get_app_id(app_handle).await?;
+            let api_key = auth.get_stored_api_key(app_handle)?;
+            (server_url, app_id, api_key, access_token, refresh_token)
         };
+
+        // Create SyncClient
+        let config = SyncClientConfig::new(&server_url, &app_id, &api_key);
+        let client = SyncClient::new(config);
+
+        // Set tokens from our AuthService
+        client.set_tokens(access_token, refresh_token, None).await;
 
         // Collect local changes
         let local_changes = self.collect_local_changes().await?;
 
-        // Get last sync timestamp
-        let last_sync_timestamp = self.get_last_sync_timestamp()?;
+        // Get checkpoint
+        let checkpoint = self.get_checkpoint()?;
 
-        // Build delta sync request
-        let request = DeltaSyncRequest {
-            push: PushRequest {
-                records: local_changes.clone(),
-                client_timestamp: start_time,
-            },
-            pull: PullRequest {
-                last_sync_timestamp,
-            },
-        };
-
-        // Get app_id and api_key from auth service (stored during login/configure)
-        let app_id = self.get_app_id(app_handle).await?;
-        let api_key = self.get_api_key(app_handle)?;
-
-        println!("{:?}", request);
-        // Send delta sync request
-        let response = self
-            .client
-            .post(format!("{}/api/v1/sync/{}/delta", self.server_url, app_id))
-            .header("Authorization", format!("Bearer {}", access_token))
-            .header("X-API-Key", api_key)
-            .json(&request)
-            .send()
-            .await
-            .map_err(|e| format!("Failed to send sync request: {}", e))?;
-
-        if !response.status().is_success() {
-            let status = response.status();
-            let error_text = response.text().await.unwrap_or_default();
-            return Err(format!("Sync failed ({}): {}", status, error_text));
+        println!("Syncing {} local changes, checkpoint: {:?}", local_changes.len(), checkpoint);
+        for record in &local_changes {
+            println!("DEBUG: Sending record: table={}, row_id={}, deleted={}, version={}", 
+                record.table_name, record.row_id, record.deleted, record.version);
         }
 
-        // Read response as text first for debugging
-        let response_text = response.text().await
-            .map_err(|e| format!("Failed to read response body: {}", e))?;
+        // Call delta sync via client library
+        let response = client.delta(local_changes.clone(), checkpoint).await
+            .map_err(|e| format!("Sync failed: {}", e))?;
 
-        println!("Sync response body: {}", response_text);
+        let mut pushed = 0;
+        let mut conflicts = 0;
+        let mut pulled = 0;
 
-        // Parse the response
-        let sync_response: DeltaSyncResponse = serde_json::from_str(&response_text)
-            .map_err(|e| format!("Failed to parse sync response: {}. Response: {}", e, response_text))?;
+        // Process push result
+        if let Some(push) = &response.push {
+            pushed = push.synced;
+            conflicts = push.conflicts.len();
+            self.mark_records_synced(&local_changes, start_time)?;
+        }
 
-        // Mark pushed records as synced
-        self.mark_records_synced(&local_changes, start_time)?;
-
-        // Apply remote changes
-        self.apply_remote_changes(&sync_response.pull.records).await?;
-
-        // Parse server timestamp from ISO 8601 string to Unix timestamp
-        let server_timestamp = Self::parse_iso8601_to_unix(&sync_response.pull.server_timestamp)?;
-
-        // Update sync metadata
-        self.update_last_sync_timestamp(server_timestamp)?;
+        // Process pull result
+        if let Some(pull) = &response.pull {
+            pulled = pull.records.len();
+            
+            // Convert PullRecords to SyncRecords and apply
+            let sync_records: Vec<SyncRecord> = pull.records.iter().map(|r| SyncRecord {
+                table_name: r.table_name.clone(),
+                row_id: r.row_id.clone(),
+                data: r.data.clone(),
+                version: r.version,
+                deleted: r.deleted,
+            }).collect();
+            
+            self.apply_remote_changes(&sync_records).await?;
+            
+            // Save new checkpoint
+            self.save_checkpoint(&pull.checkpoint)?;
+        }
 
         Ok(SyncResult {
-            pushed: sync_response.push.synced,
-            pulled: sync_response.pull.records.len(),
-            conflicts: sync_response.push.conflicts.len(),
+            pushed,
+            pulled,
+            conflicts,
             success: true,
             error: None,
             synced_at: start_time,
@@ -245,6 +167,10 @@ impl SyncService {
 
         // Collect unsynced deleted portfolios
         let deleted_portfolios = self.db.query_deleted_portfolios().map_err(|e| e.to_string())?;
+        println!("DEBUG: Found {} deleted portfolios to sync", deleted_portfolios.len());
+        for portfolio in &deleted_portfolios {
+            println!("DEBUG: Deleted portfolio: id={}, synced_at={:?}", portfolio.id, portfolio.synced_at);
+        }
         for portfolio in deleted_portfolios {
             records.push(SyncRecord {
                 table_name: "portfolios".to_string(),
@@ -590,7 +516,6 @@ impl SyncService {
         for record in records {
             if record.deleted {
                 // Hard-delete locally after successful push of deleted record
-                // This ensures local SQLite doesn't accumulate orphaned soft-deleted records
                 match record.table_name.as_str() {
                     "portfolios" => self.db.hard_delete_portfolio(&record.row_id),
                     "portfolio_entries" => self.db.hard_delete_entry(&record.row_id),
@@ -611,24 +536,39 @@ impl SyncService {
         Ok(())
     }
 
-    /// Get last sync timestamp from metadata
-    fn get_last_sync_timestamp(&self) -> Result<Option<i64>, String> {
-        self.db
-            .query_optional_i64(
-                "SELECT last_sync_timestamp FROM sync_metadata WHERE table_name = 'global' LIMIT 1",
-                &[],
-            )
+    /// Get checkpoint from database
+    fn get_checkpoint(&self) -> Result<Option<Checkpoint>, String> {
+        let result = self.db.get_checkpoint().map_err(|e| e.to_string())?;
+        match result {
+            Some((updated_at_str, id)) => {
+                let updated_at = DateTime::parse_from_rfc3339(&updated_at_str)
+                    .map(|dt| dt.with_timezone(&Utc))
+                    .map_err(|e| format!("Failed to parse checkpoint timestamp: {}", e))?;
+                Ok(Some(Checkpoint::new(updated_at, id)))
+            }
+            None => Ok(None),
+        }
+    }
+
+    /// Save checkpoint to database
+    fn save_checkpoint(&self, checkpoint: &Checkpoint) -> Result<(), String> {
+        let updated_at_str = checkpoint.updated_at.to_rfc3339();
+        self.db.save_checkpoint(&updated_at_str, &checkpoint.id)
             .map_err(|e| e.to_string())
     }
 
-    /// Update last sync timestamp
-    fn update_last_sync_timestamp(&self, timestamp: i64) -> Result<(), String> {
-        self.db
-            .execute_sql(
-                "INSERT OR REPLACE INTO sync_metadata (table_name, last_sync_timestamp) VALUES ('global', ?)",
-                &[&timestamp.to_string()],
-            )
-            .map_err(|e| e.to_string())
+    /// Get last sync timestamp from checkpoint (for status display)
+    fn get_last_sync_timestamp(&self) -> Result<Option<i64>, String> {
+        let result = self.db.get_checkpoint().map_err(|e| e.to_string())?;
+        match result {
+            Some((updated_at_str, _)) => {
+                let updated_at = DateTime::parse_from_rfc3339(&updated_at_str)
+                    .map(|dt| dt.with_timezone(&Utc))
+                    .map_err(|e| format!("Failed to parse checkpoint timestamp: {}", e))?;
+                Ok(Some(updated_at.timestamp()))
+            }
+            None => Ok(None),
+        }
     }
 
     /// Count pending changes
@@ -665,21 +605,5 @@ impl SyncService {
             .get("app_id")
             .and_then(|v| v.as_str().map(|s| s.to_string()))
             .ok_or_else(|| "No app ID found".to_string())
-    }
-
-    /// Get API key from stored auth data (encrypted)
-    fn get_api_key(&self, app_handle: &tauri::AppHandle) -> Result<String, String> {
-        // Use the auth service's decrypt method through the lock
-        let auth = self.auth.lock().unwrap();
-        auth.get_stored_api_key(app_handle)
-    }
-
-    /// Parse ISO 8601 timestamp string to Unix timestamp (seconds)
-    fn parse_iso8601_to_unix(timestamp: &str) -> Result<i64, String> {
-        use chrono::{DateTime, Utc};
-
-        DateTime::parse_from_rfc3339(timestamp)
-            .map(|dt| dt.with_timezone(&Utc).timestamp())
-            .map_err(|e| format!("Failed to parse timestamp '{}': {}", timestamp, e))
     }
 }

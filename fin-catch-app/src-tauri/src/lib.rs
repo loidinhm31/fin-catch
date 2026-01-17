@@ -298,7 +298,7 @@ pub fn run() {
             let _ = dotenvy::dotenv();
 
             // Get sync-center configuration from environment variables
-            let sync_center_url = std::env::var("SYNC_CENTER_URL")
+            let SYNC_SERVER_URL = std::env::var("SYNC_SERVER_URL")
                 .unwrap_or_else(|_| "http://localhost:3000".to_string());
             let sync_center_app_id = std::env::var("SYNC_CENTER_APP_ID")
                 .unwrap_or_else(|_| "your_app_id_here".to_string());
@@ -316,14 +316,13 @@ pub fn run() {
 
             // Initialize auth service with configuration from environment
             let auth = Arc::new(Mutex::new(AuthService::new(
-                sync_center_url.clone(),
+                SYNC_SERVER_URL.clone(),
                 sync_center_app_id,
                 sync_center_api_key,
             )));
 
             // Initialize sync service
             let sync = Arc::new(Mutex::new(SyncService::new(
-                sync_center_url,
                 db.clone(),
                 auth.clone(),
             )));

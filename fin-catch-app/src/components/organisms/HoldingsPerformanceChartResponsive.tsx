@@ -157,15 +157,15 @@ export const HoldingsPerformanceChartResponsive: React.FC<
               label={
                 !isMobile
                   ? {
-                    value: "Performance (Base 100)",
-                    angle: -90,
-                    position: "insideBottomLeft",
-                    style: {
-                      fill: "#ffffff",
-                      fontWeight: "600",
-                      fontSize: `${activeDimensions.labelFontSize}px`,
-                    },
-                  }
+                      value: "Performance (Base 100)",
+                      angle: -90,
+                      position: "insideBottomLeft",
+                      style: {
+                        fill: "#ffffff",
+                        fontWeight: "600",
+                        fontSize: `${activeDimensions.labelFontSize}px`,
+                      },
+                    }
                   : undefined
               }
               domain={["auto", "auto"]}

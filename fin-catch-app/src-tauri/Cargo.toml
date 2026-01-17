@@ -28,9 +28,17 @@ serde_json = "1"
 rusqlite = { version = "0.32", features = ["bundled"] }
 tokio = { version = "1", features = ["sync"] }
 
-# HTTP client for sync-center communication
+# Sync client library (uses reqwest internally)
+qm-sync-client = { path = "../../../sync-center/qm-sync-client" }
+qm-sync-engine = { path = "../../../sync-center/qm-sync-engine" }
+
+# Required by qm-sync-client
+thiserror = "1"
+async-trait = "0.1"
+
+# HTTP client for auth service
 # Using rustls-tls instead of native-tls for Android cross-compilation support
-reqwest = { version = "0.11", default-features = false, features = ["json", "rustls-tls"] }
+reqwest = { version = "0.12", default-features = false, features = ["json", "rustls-tls"] }
 
 # UUID generation for sync
 uuid = { version = "1.0", features = ["v4", "serde"] }
@@ -58,3 +66,4 @@ fin-catch-data = { path = "../../fin-catch-data" }
 # Machine ID for encryption key derivation (desktop only)
 [target.'cfg(not(target_os = "android"))'.dependencies]
 machine-uid = "0.5"
+

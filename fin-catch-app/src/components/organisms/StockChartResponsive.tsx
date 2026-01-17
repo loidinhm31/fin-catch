@@ -121,15 +121,15 @@ export const StockChartResponsive: React.FC<StockChartResponsiveProps> = ({
             label={
               !isMobile
                 ? {
-                  value: "Price",
-                  angle: -90,
-                  position: "insideLeft",
-                  style: {
-                    fill: "#ffffff",
-                    fontWeight: "600",
-                    fontSize: `${activeDimensions.labelFontSize}px`,
-                  },
-                }
+                    value: "Price",
+                    angle: -90,
+                    position: "insideLeft",
+                    style: {
+                      fill: "#ffffff",
+                      fontWeight: "600",
+                      fontSize: `${activeDimensions.labelFontSize}px`,
+                    },
+                  }
                 : undefined
             }
             tickFormatter={formatCurrencyCompact}
@@ -148,15 +148,15 @@ export const StockChartResponsive: React.FC<StockChartResponsiveProps> = ({
             label={
               !isMobile
                 ? {
-                  value: "Volume",
-                  angle: 90,
-                  position: "insideRight",
-                  style: {
-                    fill: "#ffffff",
-                    fontWeight: "600",
-                    fontSize: `${activeDimensions.labelFontSize}px`,
-                  },
-                }
+                    value: "Volume",
+                    angle: 90,
+                    position: "insideRight",
+                    style: {
+                      fill: "#ffffff",
+                      fontWeight: "600",
+                      fontSize: `${activeDimensions.labelFontSize}px`,
+                    },
+                  }
                 : undefined
             }
             tickFormatter={formatVolume}
@@ -185,7 +185,9 @@ export const StockChartResponsive: React.FC<StockChartResponsiveProps> = ({
                 return [new Intl.NumberFormat().format(value), "Volume"];
               }
               const nameStr = String(name ?? "");
-              const label = nameStr ? nameStr.charAt(0).toUpperCase() + nameStr.slice(1) : "";
+              const label = nameStr
+                ? nameStr.charAt(0).toUpperCase() + nameStr.slice(1)
+                : "";
               return [Number(value).toFixed(2), label];
             }}
             labelFormatter={(label) => `Time: ${label}`}

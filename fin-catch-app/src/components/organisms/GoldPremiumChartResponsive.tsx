@@ -80,10 +80,11 @@ export const GoldPremiumChartResponsive: React.FC<
       <div className="w-full">
         {/* Compact Premium Rate Badge */}
         <div
-          className={`p-3 sm:p-4 rounded-xl mb-3 ${isPremiumPositive
-            ? "bg-gradient-to-r from-yellow-100 to-orange-100"
-            : "bg-gradient-to-r from-blue-100 to-cyan-100"
-            } border-2 ${isPremiumPositive ? "border-yellow-300" : "border-blue-300"}`}
+          className={`p-3 sm:p-4 rounded-xl mb-3 ${
+            isPremiumPositive
+              ? "bg-gradient-to-r from-yellow-100 to-orange-100"
+              : "bg-gradient-to-r from-blue-100 to-cyan-100"
+          } border-2 ${isPremiumPositive ? "border-yellow-300" : "border-blue-300"}`}
         >
           <div className="flex items-center justify-between flex-wrap gap-2">
             <div className="flex items-baseline gap-2">
@@ -280,15 +281,15 @@ export const GoldPremiumChartResponsive: React.FC<
             label={
               !isMobile
                 ? {
-                  value: "Price (VND)",
-                  angle: -90,
-                  position: "insideLeft",
-                  style: {
-                    fill: "#ffffff",
-                    fontWeight: "600",
-                    fontSize: `${activeDimensions.labelFontSize}px`,
-                  },
-                }
+                    value: "Price (VND)",
+                    angle: -90,
+                    position: "insideLeft",
+                    style: {
+                      fill: "#ffffff",
+                      fontWeight: "600",
+                      fontSize: `${activeDimensions.labelFontSize}px`,
+                    },
+                  }
                 : undefined
             }
             tickFormatter={formatCurrencyCompact}
@@ -306,15 +307,15 @@ export const GoldPremiumChartResponsive: React.FC<
             label={
               !isMobile
                 ? {
-                  value: "Premium (%)",
-                  angle: 90,
-                  position: "insideRight",
-                  style: {
-                    fill: "#ffffff",
-                    fontWeight: "600",
-                    fontSize: `${activeDimensions.labelFontSize}px`,
-                  },
-                }
+                    value: "Premium (%)",
+                    angle: 90,
+                    position: "insideRight",
+                    style: {
+                      fill: "#ffffff",
+                      fontWeight: "600",
+                      fontSize: `${activeDimensions.labelFontSize}px`,
+                    },
+                  }
                 : undefined
             }
             tickFormatter={(value) => value.toFixed(1) + "%"}
