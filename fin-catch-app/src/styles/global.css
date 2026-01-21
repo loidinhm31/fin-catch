@@ -8,62 +8,70 @@
 @theme {
   /* ===== FINTECH COLOR PALETTE (Dark Mode OLED) ===== */
   /* Background Colors - Deep Black & Midnight Blue */
-  --color-bg-primary: #0f172a; /* slate-900 - Primary dark background */
-  --color-bg-secondary: #0a0e27; /* Midnight blue - Secondary areas */
-  --color-bg-tertiary: #121212; /* Deep black - OLED optimization */
+  --color-bg-primary: #0f172a;
+  /* slate-900 - Primary dark background */
+  --color-bg-secondary: #0a0e27;
+  /* Midnight blue - Secondary areas */
+  --color-bg-tertiary: #121212;
+  /* Deep black - OLED optimization */
   /* Fintech Brand Colors */
-  --color-amber-400: #fbbf24; /* Secondary accent - Gold/Success */
-  --color-amber-500: #f59e0b; /* Primary accent - Gold */
-  --color-amber-600: #d97706; /* Hover state */
-  --color-violet-500: #8b5cf6; /* CTA Primary */
-  --color-violet-600: #7c3aed; /* CTA Hover */
-  --color-violet-700: #6d28d9; /* CTA Active */
+  --color-amber-400: #fbbf24;
+  /* Secondary accent - Gold/Success */
+  --color-amber-500: #f59e0b;
+  /* Primary accent - Gold */
+  --color-amber-600: #d97706;
+  /* Hover state */
+  --color-violet-500: #8b5cf6;
+  /* CTA Primary */
+  --color-violet-600: #7c3aed;
+  /* CTA Hover */
+  --color-violet-700: #6d28d9;
+  /* CTA Active */
   /* Crypto Accent Colors */
-  --color-cyan-400: #22d3ee; /* Tech accent - Bright cyan */
-  --color-cyan-500: #06b6d4; /* Tech accent - Primary */
-  --color-blue-400: #60a5fa; /* Secondary tech accent */
-  --color-blue-500: #3b82f6; /* Links and highlights */
+  --color-cyan-400: #22d3ee;
+  /* Tech accent - Bright cyan */
+  --color-cyan-500: #06b6d4;
+  /* Tech accent - Primary */
+  --color-blue-400: #60a5fa;
+  /* Secondary tech accent */
+  --color-blue-500: #3b82f6;
+  /* Links and highlights */
   /* Status Colors */
-  --color-green-400: #4ade80; /* Success/Gain */
-  --color-green-500: #22c55e; /* Success primary */
-  --color-red-400: #f87171; /* Error/Loss */
-  --color-red-500: #ef4444; /* Error primary */
+  --color-green-400: #4ade80;
+  /* Success/Gain */
+  --color-green-500: #22c55e;
+  /* Success primary */
+  --color-red-400: #f87171;
+  /* Error/Loss */
+  --color-red-500: #ef4444;
+  /* Error primary */
   /* Text Colors - High Contrast for Readability */
-  --color-text-primary: #f8fafc; /* slate-50 - Primary text */
-  --color-text-secondary: #cbd5e1; /* slate-300 - Secondary text */
-  --color-text-muted: #64748b; /* slate-500 - Muted text */
+  --color-text-primary: #f8fafc;
+  /* slate-50 - Primary text */
+  --color-text-secondary: #cbd5e1;
+  /* slate-300 - Secondary text */
+  --color-text-muted: #64748b;
+  /* slate-500 - Muted text */
   /* Border Colors */
-  --color-border-primary: #334155; /* slate-700 - Primary borders */
-  --color-border-secondary: #1e293b; /* slate-800 - Subtle borders */
+  --color-border-primary: #334155;
+  /* slate-700 - Primary borders */
+  --color-border-secondary: #1e293b;
+  /* slate-800 - Subtle borders */
   /* ===== GLASSMORPHISM - DARK MODE ===== */
   /* Glass backgrounds with dark tint - Increased opacity for better text contrast */
-  --glass-bg-dark: rgba(
-    15,
-    23,
-    42,
-    0.85
-  ); /* Primary glass - increased from 0.7 */
-  --glass-bg-dark-strong: rgba(
-    15,
-    23,
-    42,
-    0.95
-  ); /* Strong glass - increased from 0.85 */
-  --glass-bg-darker: rgba(
-    10,
-    14,
-    39,
-    0.9
-  ); /* Deeper glass - increased from 0.8 */
+  --glass-bg-dark: rgba(15, 23, 42, 0.85);
+  /* Primary glass - increased from 0.7 */
+  --glass-bg-dark-strong: rgba(15, 23, 42, 0.95);
+  /* Strong glass - increased from 0.85 */
+  --glass-bg-darker: rgba(10, 14, 39, 0.9);
+  /* Deeper glass - increased from 0.8 */
   /* Glass borders - More visible for better definition */
-  --glass-border-light: rgba(255, 255, 255, 0.15); /* Increased from 0.1 */
-  --glass-border-medium: rgba(255, 255, 255, 0.2); /* Increased from 0.15 */
-  --glass-border-glow: rgba(
-    139,
-    92,
-    246,
-    0.4
-  ); /* Violet glow - increased from 0.3 */
+  --glass-border-light: rgba(255, 255, 255, 0.15);
+  /* Increased from 0.1 */
+  --glass-border-medium: rgba(255, 255, 255, 0.2);
+  /* Increased from 0.15 */
+  --glass-border-glow: rgba(139, 92, 246, 0.4);
+  /* Violet glow - increased from 0.3 */
   /* ===== BACKDROP BLUR ===== */
   --blur-xs: blur(4px);
   --blur-sm: blur(8px);
@@ -76,15 +84,24 @@
   --font-body: "DM Sans", "Inter", system-ui, sans-serif;
 
   /* Font Sizes */
-  --text-xs: 0.75rem; /* 12px */
-  --text-sm: 0.875rem; /* 14px */
-  --text-base: 1rem; /* 16px */
-  --text-lg: 1.125rem; /* 18px */
-  --text-xl: 1.25rem; /* 20px */
-  --text-2xl: 1.5rem; /* 24px */
-  --text-3xl: 1.875rem; /* 30px */
-  --text-4xl: 2.25rem; /* 36px */
-  --text-5xl: 3rem; /* 48px */
+  --text-xs: 0.75rem;
+  /* 12px */
+  --text-sm: 0.875rem;
+  /* 14px */
+  --text-base: 1rem;
+  /* 16px */
+  --text-lg: 1.125rem;
+  /* 18px */
+  --text-xl: 1.25rem;
+  /* 20px */
+  --text-2xl: 1.5rem;
+  /* 24px */
+  --text-3xl: 1.875rem;
+  /* 30px */
+  --text-4xl: 2.25rem;
+  /* 36px */
+  --text-5xl: 3rem;
+  /* 48px */
   /* Font Weights */
   --font-normal: 400;
   --font-medium: 500;
@@ -93,22 +110,37 @@
   --font-extrabold: 800;
 
   /* ===== SPACING ===== */
-  --space-1: 0.25rem; /* 4px */
-  --space-2: 0.5rem; /* 8px */
-  --space-3: 0.75rem; /* 12px */
-  --space-4: 1rem; /* 16px */
-  --space-5: 1.25rem; /* 20px */
-  --space-6: 1.5rem; /* 24px */
-  --space-8: 2rem; /* 32px */
-  --space-10: 2.5rem; /* 40px */
-  --space-12: 3rem; /* 48px */
-  --space-16: 4rem; /* 64px */
+  --space-1: 0.25rem;
+  /* 4px */
+  --space-2: 0.5rem;
+  /* 8px */
+  --space-3: 0.75rem;
+  /* 12px */
+  --space-4: 1rem;
+  /* 16px */
+  --space-5: 1.25rem;
+  /* 20px */
+  --space-6: 1.5rem;
+  /* 24px */
+  --space-8: 2rem;
+  /* 32px */
+  --space-10: 2.5rem;
+  /* 40px */
+  --space-12: 3rem;
+  /* 48px */
+  --space-16: 4rem;
+  /* 64px */
   /* ===== BORDER RADIUS ===== */
-  --radius-sm: 0.5rem; /* 8px */
-  --radius-md: 0.75rem; /* 12px */
-  --radius-lg: 1rem; /* 16px */
-  --radius-xl: 1.5rem; /* 24px */
-  --radius-2xl: 2rem; /* 32px */
+  --radius-sm: 0.5rem;
+  /* 8px */
+  --radius-md: 0.75rem;
+  /* 12px */
+  --radius-lg: 1rem;
+  /* 16px */
+  --radius-xl: 1.5rem;
+  /* 24px */
+  --radius-2xl: 2rem;
+  /* 32px */
   --radius-full: 9999px;
 
   /* ===== SHADOWS - Subtle depth in dark mode ===== */
@@ -192,12 +224,8 @@ h6 {
 }
 
 .glass-input {
-  background: rgba(
-    15,
-    23,
-    42,
-    0.8
-  ); /* Increased from 0.6 for better contrast */
+  background: rgba(15, 23, 42, 0.8);
+  /* Increased from 0.6 for better contrast */
   backdrop-filter: var(--blur-sm);
   -webkit-backdrop-filter: var(--blur-sm);
   border-radius: var(--radius-lg);
@@ -213,7 +241,8 @@ h6 {
   box-shadow:
     0 0 0 3px rgba(139, 92, 246, 0.3),
     0 0 15px rgba(139, 92, 246, 0.2);
-  background: rgba(15, 23, 42, 0.95); /* Increased from 0.8 */
+  background: rgba(15, 23, 42, 0.95);
+  /* Increased from 0.8 */
 }
 
 .glass-button {
@@ -406,9 +435,11 @@ h6 {
   100% {
     transform: translateY(0px) rotate(0deg);
   }
+
   33% {
     transform: translateY(-15px) rotate(2deg);
   }
+
   66% {
     transform: translateY(-8px) rotate(-2deg);
   }
@@ -420,6 +451,7 @@ h6 {
     opacity: 1;
     box-shadow: var(--shadow-glow-violet);
   }
+
   50% {
     opacity: 0.7;
     box-shadow: 0 0 30px rgba(139, 92, 246, 0.6);
@@ -430,6 +462,7 @@ h6 {
   0% {
     background-position: -1000px 0;
   }
+
   100% {
     background-position: 1000px 0;
   }
@@ -440,6 +473,7 @@ h6 {
   from {
     opacity: 0;
   }
+
   to {
     opacity: 1;
   }
@@ -449,6 +483,7 @@ h6 {
   from {
     opacity: 1;
   }
+
   to {
     opacity: 0;
   }
@@ -459,6 +494,7 @@ h6 {
     opacity: 0;
     transform: scale(0.95);
   }
+
   to {
     opacity: 1;
     transform: scale(1);
@@ -470,6 +506,7 @@ h6 {
     opacity: 1;
     transform: scale(1);
   }
+
   to {
     opacity: 0;
     transform: scale(0.95);
@@ -481,6 +518,7 @@ h6 {
     transform: translateY(-48%);
     opacity: 0;
   }
+
   to {
     transform: translateY(0);
     opacity: 1;
@@ -492,6 +530,7 @@ h6 {
     transform: translateY(0);
     opacity: 1;
   }
+
   to {
     transform: translateY(-48%);
     opacity: 0;
@@ -557,6 +596,35 @@ h6 {
 
 .slide-out-to-left-1\/2 {
   animation-name: slideOutToTop;
+}
+
+/* Accordion animations */
+@keyframes accordion-down {
+  from {
+    height: 0;
+  }
+
+  to {
+    height: var(--radix-accordion-content-height);
+  }
+}
+
+@keyframes accordion-up {
+  from {
+    height: var(--radix-accordion-content-height);
+  }
+
+  to {
+    height: 0;
+  }
+}
+
+.animate-accordion-down {
+  animation: accordion-down 0.2s ease-out;
+}
+
+.animate-accordion-up {
+  animation: accordion-up 0.2s ease-out;
 }
 
 /* ===== SCREEN BACKGROUNDS - DARK GRADIENTS ===== */
@@ -631,28 +699,29 @@ h6 {
 
 /* Instead of using opacity on white text, use specific gray shades for better contrast */
 .text-primary {
-  color: var(--color-text-primary); /* #F8FAFC - Full white */
+  color: var(--color-text-primary);
+  /* #F8FAFC - Full white */
 }
 
 .text-secondary {
-  color: var(
-    --color-text-secondary
-  ); /* #CBD5E1 - Light gray - better than white @ 70% opacity */
+  color: var(--color-text-secondary);
+  /* #CBD5E1 - Light gray - better than white @ 70% opacity */
 }
 
 .text-muted {
-  color: var(
-    --color-text-muted
-  ); /* #64748B - Muted gray - better than white @ 60% opacity */
+  color: var(--color-text-muted);
+  /* #64748B - Muted gray - better than white @ 60% opacity */
 }
 
 /* Specific opacity levels that maintain WCAG AA contrast (4.5:1 minimum) */
 .text-opacity-90 {
-  color: rgba(248, 250, 252, 0.9); /* Still very readable */
+  color: rgba(248, 250, 252, 0.9);
+  /* Still very readable */
 }
 
 .text-opacity-80 {
-  color: rgba(248, 250, 252, 0.8); /* Minimum for body text */
+  color: rgba(248, 250, 252, 0.8);
+  /* Minimum for body text */
 }
 
 /* ===== FOCUS STATES - ACCESSIBILITY ===== */
@@ -744,18 +813,26 @@ h6 {
   --cube-pink-light: #f9a8d4;
 
   /* Text colors - ensure high contrast */
-  --cube-gray-900: var(
-    --color-text-primary
-  ); /* #F8FAFC - White text for dark mode */
-  --cube-gray-800: var(--color-text-secondary); /* #CBD5E1 - Light gray */
-  --cube-gray-700: var(--color-text-secondary); /* #CBD5E1 - Light gray */
-  --cube-gray-600: var(--color-text-secondary); /* #CBD5E1 - Light gray */
-  --cube-gray-500: var(--color-text-muted); /* #64748B - Muted but visible */
-  --cube-gray-400: var(--color-text-muted); /* #64748B - Muted but visible */
-  --cube-gray-300: var(--color-text-secondary); /* #CBD5E1 - Light gray */
-  --cube-gray-200: var(--color-border-primary); /* #334155 - Borders */
-  --cube-gray-100: var(--color-border-secondary); /* #1E293B - Subtle borders */
-  --cube-white: var(--color-text-primary); /* #F8FAFC - White */
+  --cube-gray-900: var(--color-text-primary);
+  /* #F8FAFC - White text for dark mode */
+  --cube-gray-800: var(--color-text-secondary);
+  /* #CBD5E1 - Light gray */
+  --cube-gray-700: var(--color-text-secondary);
+  /* #CBD5E1 - Light gray */
+  --cube-gray-600: var(--color-text-secondary);
+  /* #CBD5E1 - Light gray */
+  --cube-gray-500: var(--color-text-muted);
+  /* #64748B - Muted but visible */
+  --cube-gray-400: var(--color-text-muted);
+  /* #64748B - Muted but visible */
+  --cube-gray-300: var(--color-text-secondary);
+  /* #CBD5E1 - Light gray */
+  --cube-gray-200: var(--color-border-primary);
+  /* #334155 - Borders */
+  --cube-gray-100: var(--color-border-secondary);
+  /* #1E293B - Subtle borders */
+  --cube-white: var(--color-text-primary);
+  /* #F8FAFC - White */
 
   /* Old gradient variables */
   --gradient-explore: linear-gradient(
@@ -780,7 +857,8 @@ input[type="date"]::-webkit-calendar-picker-indicator {
   cursor: pointer;
   position: relative;
   z-index: 2;
-  filter: invert(1); /* Make calendar icon visible on dark background */
+  filter: invert(1);
+  /* Make calendar icon visible on dark background */
 }
 
 /* Make sure the native date picker appears above modals */
@@ -801,7 +879,8 @@ input[type="datetime-local"]::-webkit-calendar-picker-indicator {
   cursor: pointer;
   position: relative;
   z-index: 2;
-  filter: invert(1); /* Make calendar icon visible on dark background */
+  filter: invert(1);
+  /* Make calendar icon visible on dark background */
 }
 
 /* Option elements in dropdowns - use light background for readability */

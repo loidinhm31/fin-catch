@@ -1,4 +1,4 @@
-// Authentication types for sync-center integration
+// Authentication types for qm-sync integration
 
 /**
  * Response from register/login endpoints

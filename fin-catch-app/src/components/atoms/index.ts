@@ -11,6 +11,7 @@ export * from "./Calendar";
 export * from "./CurrencySelect";
 export * from "./ErrorText";
 export * from "./Popover";
+export * from "./Accordion";
 
 // Layout Components
 export * from "./Card";

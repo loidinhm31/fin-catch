@@ -1,5 +1,18 @@
 import { invoke } from "@tauri-apps/api/core";
 import {
+  isTauri,
+  hasAuthSupport,
+  isOpenedFromDesktop,
+  getSessionToken,
+  WEB_SERVER_PORT,
+} from "@/utils/platform";
+import {
+  getPortfolioService,
+  getPortfolioEntryService,
+  getCouponPaymentService,
+  getDataService,
+} from "@/adapters";
+import {
   AuthResponse,
   AuthStatus,
   BondCouponPayment,
@@ -20,19 +33,13 @@ import {
 
 class FinCatchAPI {
   /**
-   * Fetch stock history data via Tauri IPC
+   * Fetch stock history data
    */
   async fetchStockHistory(
     request: StockHistoryRequest,
   ): Promise<StockHistoryResponse> {
     try {
-      console.log("[Tauri IPC] fetch_stock_history", request);
-      const response = await invoke<StockHistoryResponse>(
-        "fetch_stock_history",
-        { request },
-      );
-      console.log("[Tauri IPC Response]", response);
-      return response;
+      return await getDataService().fetchStockHistory(request);
     } catch (error) {
       console.error("Error fetching stock history:", error);
       throw this.handleError(error);
@@ -40,16 +47,11 @@ class FinCatchAPI {
   }
 
   /**
-   * Fetch gold price data via Tauri IPC
+   * Fetch gold price data
    */
   async fetchGoldPrice(request: GoldPriceRequest): Promise<GoldPriceResponse> {
     try {
-      console.log("[Tauri IPC] fetch_gold_price", request);
-      const response = await invoke<GoldPriceResponse>("fetch_gold_price", {
-        request,
-      });
-      console.log("[Tauri IPC Response]", response);
-      return response;
+      return await getDataService().fetchGoldPrice(request);
     } catch (error) {
       console.error("Error fetching gold price:", error);
       throw this.handleError(error);
@@ -57,19 +59,13 @@ class FinCatchAPI {
   }
 
   /**
-   * Fetch exchange rate data via Tauri IPC
+   * Fetch exchange rate data
    */
   async fetchExchangeRate(
     request: ExchangeRateRequest,
   ): Promise<ExchangeRateResponse> {
     try {
-      console.log("[Tauri IPC] fetch_exchange_rate", request);
-      const response = await invoke<ExchangeRateResponse>(
-        "fetch_exchange_rate",
-        { request },
-      );
-      console.log("[Tauri IPC Response]", response);
-      return response;
+      return await getDataService().fetchExchangeRate(request);
     } catch (error) {
       console.error("Error fetching exchange rate:", error);
       throw this.handleError(error);
@@ -77,19 +73,14 @@ class FinCatchAPI {
   }
 
   /**
-   * Fetch gold premium data via Tauri IPC
+   * Fetch gold premium data
    */
   async fetchGoldPremium(
     request: GoldPremiumRequest,
     _signal?: AbortSignal,
   ): Promise<GoldPremiumResponse> {
     try {
-      console.log("[Tauri IPC] fetch_gold_premium", request);
-      const response = await invoke<GoldPremiumResponse>("fetch_gold_premium", {
-        request,
-      });
-      console.log("[Tauri IPC Response]", response);
-      return response;
+      return await getDataService().fetchGoldPremium(request);
     } catch (error) {
       console.error("Error fetching gold premium:", error);
       throw this.handleError(error);
@@ -97,14 +88,11 @@ class FinCatchAPI {
   }
 
   /**
-   * Get list of available sources via Tauri IPC
+   * Get list of available sources
    */
   async getSources(): Promise<Record<string, string[]>> {
     try {
-      console.log("[Tauri IPC] get_sources");
-      const response = await invoke<Record<string, string[]>>("get_sources");
-      console.log("[Tauri IPC Response]", response);
-      return response;
+      return await getDataService().getSources();
     } catch (error) {
       console.error("Error fetching sources:", error);
       throw this.handleError(error);
@@ -112,15 +100,11 @@ class FinCatchAPI {
   }
 
   /**
-   * Health check for all sources via Tauri IPC
+   * Health check for all sources
    */
   async healthCheckAll(): Promise<Record<string, boolean>> {
     try {
-      console.log("[Tauri IPC] health_check_all");
-      const response =
-        await invoke<Record<string, boolean>>("health_check_all");
-      console.log("[Tauri IPC Response]", response);
-      return response;
+      return await getDataService().healthCheckAll();
     } catch (error) {
       console.error("Error checking health:", error);
       throw this.handleError(error);
@@ -128,16 +112,11 @@ class FinCatchAPI {
   }
 
   /**
-   * Health check for a specific source via Tauri IPC
+   * Health check for a specific source
    */
   async healthCheckSource(sourceName: string): Promise<boolean> {
     try {
-      console.log("[Tauri IPC] health_check_source", sourceName);
-      const response = await invoke<boolean>("health_check_source", {
-        sourceName,
-      });
-      console.log("[Tauri IPC Response]", response);
-      return response;
+      return await getDataService().healthCheckSource(sourceName);
     } catch (error) {
       console.error(`Error checking health for ${sourceName}:`, error);
       throw this.handleError(error);
@@ -149,10 +128,7 @@ class FinCatchAPI {
    */
   async createPortfolio(portfolio: Portfolio): Promise<string> {
     try {
-      console.log("[Tauri IPC] create_portfolio", portfolio);
-      const id = await invoke<string>("create_portfolio", { portfolio });
-      console.log("[Tauri IPC Response]", id);
-      return id;
+      return await getPortfolioService().createPortfolio(portfolio);
     } catch (error) {
       console.error("Error creating portfolio:", error);
       throw this.handleError(error);
@@ -161,10 +137,7 @@ class FinCatchAPI {
 
   async getPortfolio(id: string): Promise<Portfolio> {
     try {
-      console.log("[Tauri IPC] get_portfolio", id);
-      const portfolio = await invoke<Portfolio>("get_portfolio", { id });
-      console.log("[Tauri IPC Response]", portfolio);
-      return portfolio;
+      return await getPortfolioService().getPortfolio(id);
     } catch (error) {
       console.error("Error getting portfolio:", error);
       throw this.handleError(error);
@@ -173,10 +146,7 @@ class FinCatchAPI {
 
   async listPortfolios(): Promise<Portfolio[]> {
     try {
-      console.log("[Tauri IPC] list_portfolios");
-      const portfolios = await invoke<Portfolio[]>("list_portfolios");
-      console.log("[Tauri IPC Response]", portfolios);
-      return portfolios;
+      return await getPortfolioService().listPortfolios();
     } catch (error) {
       console.error("Error listing portfolios:", error);
       throw this.handleError(error);
@@ -185,9 +155,7 @@ class FinCatchAPI {
 
   async updatePortfolio(portfolio: Portfolio): Promise<void> {
     try {
-      console.log("[Tauri IPC] update_portfolio", portfolio);
-      await invoke<void>("update_portfolio", { portfolio });
-      console.log("[Tauri IPC Response] Portfolio updated");
+      return await getPortfolioService().updatePortfolio(portfolio);
     } catch (error) {
       console.error("Error updating portfolio:", error);
       throw this.handleError(error);
@@ -196,9 +164,7 @@ class FinCatchAPI {
 
   async deletePortfolio(id: string): Promise<void> {
     try {
-      console.log("[Tauri IPC] delete_portfolio", id);
-      await invoke<void>("delete_portfolio", { id });
-      console.log("[Tauri IPC Response] Portfolio deleted");
+      return await getPortfolioService().deletePortfolio(id);
     } catch (error) {
       console.error("Error deleting portfolio:", error);
       throw this.handleError(error);
@@ -210,10 +176,7 @@ class FinCatchAPI {
    */
   async createEntry(entry: PortfolioEntry): Promise<string> {
     try {
-      console.log("[Tauri IPC] create_entry", entry);
-      const id = await invoke<string>("create_entry", { entry });
-      console.log("[Tauri IPC Response]", id);
-      return id;
+      return await getPortfolioEntryService().createEntry(entry);
     } catch (error) {
       console.error("Error creating entry:", error);
       throw this.handleError(error);
@@ -222,10 +185,7 @@ class FinCatchAPI {
 
   async getEntry(id: string): Promise<PortfolioEntry> {
     try {
-      console.log("[Tauri IPC] get_entry", id);
-      const entry = await invoke<PortfolioEntry>("get_entry", { id });
-      console.log("[Tauri IPC Response]", entry);
-      return entry;
+      return await getPortfolioEntryService().getEntry(id);
     } catch (error) {
       console.error("Error getting entry:", error);
       throw this.handleError(error);
@@ -234,12 +194,7 @@ class FinCatchAPI {
 
   async listEntries(portfolioId: string): Promise<PortfolioEntry[]> {
     try {
-      console.log("[Tauri IPC] list_entries", portfolioId);
-      const entries = await invoke<PortfolioEntry[]>("list_entries", {
-        portfolioId,
-      });
-      console.log("[Tauri IPC Response]", entries);
-      return entries;
+      return await getPortfolioEntryService().listEntries(portfolioId);
     } catch (error) {
       console.error("Error listing entries:", error);
       throw this.handleError(error);
@@ -248,9 +203,7 @@ class FinCatchAPI {
 
   async updateEntry(entry: PortfolioEntry): Promise<void> {
     try {
-      console.log("[Tauri IPC] update_entry", entry);
-      await invoke<void>("update_entry", { entry });
-      console.log("[Tauri IPC Response] Entry updated");
+      return await getPortfolioEntryService().updateEntry(entry);
     } catch (error) {
       console.error("Error updating entry:", error);
       throw this.handleError(error);
@@ -259,9 +212,7 @@ class FinCatchAPI {
 
   async deleteEntry(id: string): Promise<void> {
     try {
-      console.log("[Tauri IPC] delete_entry", id);
-      await invoke<void>("delete_entry", { id });
-      console.log("[Tauri IPC Response] Entry deleted");
+      return await getPortfolioEntryService().deleteEntry(id);
     } catch (error) {
       console.error("Error deleting entry:", error);
       throw this.handleError(error);
@@ -273,10 +224,7 @@ class FinCatchAPI {
    */
   async createCouponPayment(payment: BondCouponPayment): Promise<string> {
     try {
-      console.log("[Tauri IPC] create_coupon_payment", payment);
-      const id = await invoke<string>("create_coupon_payment", { payment });
-      console.log("[Tauri IPC Response]", id);
-      return id;
+      return await getCouponPaymentService().createCouponPayment(payment);
     } catch (error) {
       console.error("Error creating coupon payment:", error);
       throw this.handleError(error);
@@ -285,15 +233,7 @@ class FinCatchAPI {
 
   async listCouponPayments(entryId: string): Promise<BondCouponPayment[]> {
     try {
-      console.log("[Tauri IPC] list_coupon_payments", entryId);
-      const payments = await invoke<BondCouponPayment[]>(
-        "list_coupon_payments",
-        {
-          entryId,
-        },
-      );
-      console.log("[Tauri IPC Response]", payments);
-      return payments;
+      return await getCouponPaymentService().listCouponPayments(entryId);
     } catch (error) {
       console.error("Error listing coupon payments:", error);
       throw this.handleError(error);
@@ -302,9 +242,7 @@ class FinCatchAPI {
 
   async updateCouponPayment(payment: BondCouponPayment): Promise<void> {
     try {
-      console.log("[Tauri IPC] update_coupon_payment", payment);
-      await invoke<void>("update_coupon_payment", { payment });
-      console.log("[Tauri IPC Response] Coupon payment updated");
+      return await getCouponPaymentService().updateCouponPayment(payment);
     } catch (error) {
       console.error("Error updating coupon payment:", error);
       throw this.handleError(error);
@@ -313,9 +251,7 @@ class FinCatchAPI {
 
   async deleteCouponPayment(id: string): Promise<void> {
     try {
-      console.log("[Tauri IPC] delete_coupon_payment", id);
-      await invoke<void>("delete_coupon_payment", { id });
-      console.log("[Tauri IPC Response] Coupon payment deleted");
+      return await getCouponPaymentService().deleteCouponPayment(id);
     } catch (error) {
       console.error("Error deleting coupon payment:", error);
       throw this.handleError(error);
@@ -324,8 +260,12 @@ class FinCatchAPI {
 
   /**
    * Authentication operations
+   * Note: Auth is only available in Tauri mode
    */
   async authConfigureSync(config: SyncConfig): Promise<void> {
+    if (!hasAuthSupport()) {
+      throw new Error("Authentication is only available in the desktop app.");
+    }
     try {
       console.log("[Tauri IPC] auth_configure_sync", config);
       await invoke<void>("auth_configure_sync", {
@@ -347,6 +287,9 @@ class FinCatchAPI {
     appId?: string,
     apiKey?: string,
   ): Promise<AuthResponse> {
+    if (!hasAuthSupport()) {
+      throw new Error("Authentication is only available in the desktop app.");
+    }
     try {
       console.log("[Tauri IPC] auth_register", { username, email, appId });
       const response = await invoke<AuthResponse>("auth_register", {
@@ -365,6 +308,9 @@ class FinCatchAPI {
   }
 
   async authLogin(email: string, password: string): Promise<AuthResponse> {
+    if (!hasAuthSupport()) {
+      throw new Error("Authentication is only available in the desktop app.");
+    }
     try {
       console.log("[Tauri IPC] auth_login", { email });
       const response = await invoke<AuthResponse>("auth_login", {
@@ -380,6 +326,9 @@ class FinCatchAPI {
   }
 
   async authLogout(): Promise<void> {
+    if (!hasAuthSupport()) {
+      throw new Error("Authentication is only available in the desktop app.");
+    }
     try {
       console.log("[Tauri IPC] auth_logout");
       await invoke<void>("auth_logout");
@@ -391,6 +340,9 @@ class FinCatchAPI {
   }
 
   async authRefreshToken(): Promise<void> {
+    if (!hasAuthSupport()) {
+      throw new Error("Authentication is only available in the desktop app.");
+    }
     try {
       console.log("[Tauri IPC] auth_refresh_token");
       await invoke<void>("auth_refresh_token");
@@ -402,18 +354,65 @@ class FinCatchAPI {
   }
 
   async authGetStatus(): Promise<AuthStatus> {
-    try {
-      console.log("[Tauri IPC] auth_get_status");
-      const status = await invoke<AuthStatus>("auth_get_status");
-      console.log("[Tauri IPC Response]", status);
-      return status;
-    } catch (error) {
-      console.error("Error getting auth status:", error);
-      throw this.handleError(error);
+    // In Tauri mode, use invoke
+    if (isTauri()) {
+      try {
+        console.log("[Tauri IPC] auth_get_status");
+        const status = await invoke<AuthStatus>("auth_get_status");
+        console.log("[Tauri IPC Response]", status);
+        return status;
+      } catch (error) {
+        console.error("Error getting auth status:", error);
+        return { isAuthenticated: false };
+      }
     }
+
+    // In browser mode opened from desktop, try to call web server API
+    if (isOpenedFromDesktop()) {
+      try {
+        const token = getSessionToken();
+        if (!token) {
+          // No token means the session expired or URL was manually modified
+          return { isAuthenticated: false };
+        }
+
+        const url = `http://localhost:${WEB_SERVER_PORT}/api/auth/status?token=${encodeURIComponent(token)}`;
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 3000); // 3 second timeout
+
+        const response = await fetch(url, { signal: controller.signal });
+        clearTimeout(timeoutId);
+
+        if (!response.ok) {
+          // Server responded but with error - return unauthenticated
+          return { isAuthenticated: false };
+        }
+
+        const result = await response.json();
+        if (!result.success) {
+          return { isAuthenticated: false };
+        }
+
+        console.log("[Web API] Auth status:", result.data);
+        return result.data;
+      } catch (error) {
+        // Connection refused or timeout - server not running, silently return unauthenticated
+        // This is expected when browser was opened but desktop closed the server
+        if ((error as Error).name !== "AbortError") {
+          console.log("[Web API] Server not available, using offline mode");
+        }
+        return { isAuthenticated: false };
+      }
+    }
+
+    // Pure web mode without desktop connection
+    return { isAuthenticated: false };
   }
 
   async authIsAuthenticated(): Promise<boolean> {
+    if (!hasAuthSupport()) {
+      return false;
+    }
     try {
       console.log("[Tauri IPC] auth_is_authenticated");
       const isAuth = await invoke<boolean>("auth_is_authenticated");
@@ -426,28 +425,245 @@ class FinCatchAPI {
   }
 
   /**
-   * Sync operations (placeholder - will be implemented when sync.rs is ready)
+   * Sync operations
+   * Works in both Tauri and browser mode (when opened from desktop)
    */
   async syncNow(): Promise<SyncResult> {
+    // In Tauri mode, use invoke
+    if (isTauri()) {
+      try {
+        console.log("[Tauri IPC] sync_now");
+        const result = await invoke<SyncResult>("sync_now");
+        console.log("[Tauri IPC Response]", result);
+        return result;
+      } catch (error) {
+        console.error("Error syncing:", error);
+        throw this.handleError(error);
+      }
+    }
+
+    // In browser mode opened from desktop, call web server API
+    if (isOpenedFromDesktop()) {
+      try {
+        const token = getSessionToken();
+        if (!token) {
+          throw new Error(
+            "Session expired. Please reopen from the desktop app.",
+          );
+        }
+
+        const url = `http://localhost:${WEB_SERVER_PORT}/api/sync/now?token=${encodeURIComponent(token)}`;
+        console.log("[Web API] POST /api/sync/now");
+
+        const response = await fetch(url, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({}));
+          throw new Error(errorData.error || `Sync failed: ${response.status}`);
+        }
+
+        const result = await response.json();
+        if (!result.success) {
+          throw new Error(result.error || "Sync failed");
+        }
+
+        console.log("[Web API Response]", result.data);
+        return result.data;
+      } catch (error) {
+        console.error("Error syncing via web server:", error);
+        throw this.handleError(error);
+      }
+    }
+
+    // Pure web mode
+    throw new Error(
+      "Sync requires the desktop app. Please open this page from the desktop app using 'Open in Browser'.",
+    );
+  }
+
+  async syncGetStatus(): Promise<SyncStatus> {
+    // In Tauri mode, use invoke
+    if (isTauri()) {
+      try {
+        console.log("[Tauri IPC] sync_get_status");
+        const status = await invoke<SyncStatus>("sync_get_status");
+        console.log("[Tauri IPC Response]", status);
+        return status;
+      } catch (error) {
+        console.error("Error getting sync status:", error);
+        return {
+          configured: false,
+          authenticated: false,
+          pendingChanges: 0,
+        };
+      }
+    }
+
+    // In browser mode opened from desktop, try to call web server API
+    if (isOpenedFromDesktop()) {
+      try {
+        const token = getSessionToken();
+        if (!token) {
+          return { configured: false, authenticated: false, pendingChanges: 0 };
+        }
+
+        const url = `http://localhost:${WEB_SERVER_PORT}/api/sync/status?token=${encodeURIComponent(token)}`;
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 3000);
+
+        const response = await fetch(url, { signal: controller.signal });
+        clearTimeout(timeoutId);
+
+        if (!response.ok) {
+          return { configured: false, authenticated: false, pendingChanges: 0 };
+        }
+
+        const result = await response.json();
+        if (!result.success) {
+          return { configured: false, authenticated: false, pendingChanges: 0 };
+        }
+
+        console.log("[Web API] Sync status:", result.data);
+        return result.data;
+      } catch (error) {
+        // Connection refused or timeout - server not running
+        if ((error as Error).name !== "AbortError") {
+          console.log("[Web API] Server not available for sync status");
+        }
+        return { configured: false, authenticated: false, pendingChanges: 0 };
+      }
+    }
+
+    // Pure web mode without desktop connection
+    return { configured: false, authenticated: false, pendingChanges: 0 };
+  }
+
+  //==========================================================================
+  // Price Alert Operations
+  // Note: Only available in Tauri mode (desktop app)
+  //==========================================================================
+
+  /**
+   * Set alerts for a portfolio entry
+   */
+  async setEntryAlerts(
+    entryId: string,
+    targetPrice: number | null,
+    stopLoss: number | null,
+    alertEnabled: boolean | null,
+  ): Promise<void> {
+    if (!isTauri()) {
+      throw new Error(
+        "Price alerts can only be configured in the desktop app.",
+      );
+    }
     try {
-      console.log("[Tauri IPC] sync_now");
-      const result = await invoke<SyncResult>("sync_now");
-      console.log("[Tauri IPC Response]", result);
-      return result;
+      console.log("[Tauri IPC] set_entry_alerts", {
+        entryId,
+        targetPrice,
+        stopLoss,
+        alertEnabled,
+      });
+      await invoke<void>("set_entry_alerts", {
+        entryId,
+        targetPrice,
+        stopLoss,
+        alertEnabled,
+      });
+      console.log("[Tauri IPC Response] Entry alerts set");
     } catch (error) {
-      console.error("Error syncing:", error);
+      console.error("Error setting entry alerts:", error);
       throw this.handleError(error);
     }
   }
 
-  async syncGetStatus(): Promise<SyncStatus> {
+  /**
+   * Reset triggered alert for an entry
+   */
+  async resetEntryAlert(entryId: string): Promise<void> {
+    if (!isTauri()) {
+      throw new Error(
+        "Price alerts can only be configured in the desktop app.",
+      );
+    }
     try {
-      console.log("[Tauri IPC] sync_get_status");
-      const status = await invoke<SyncStatus>("sync_get_status");
-      console.log("[Tauri IPC Response]", status);
-      return status;
+      console.log("[Tauri IPC] reset_entry_alert", { entryId });
+      await invoke<void>("reset_entry_alert", { entryId });
+      console.log("[Tauri IPC Response] Entry alert reset");
     } catch (error) {
-      console.error("Error getting sync status:", error);
+      console.error("Error resetting entry alert:", error);
+      throw this.handleError(error);
+    }
+  }
+
+  /**
+   * Get all entries with triggered alerts
+   */
+  async getTriggeredAlerts(): Promise<PortfolioEntry[]> {
+    if (!isTauri()) {
+      return [];
+    }
+    try {
+      console.log("[Tauri IPC] get_triggered_alerts");
+      const entries = await invoke<PortfolioEntry[]>("get_triggered_alerts");
+      console.log("[Tauri IPC Response]", entries);
+      return entries;
+    } catch (error) {
+      console.error("Error getting triggered alerts:", error);
+      throw this.handleError(error);
+    }
+  }
+
+  /**
+   * Get alert settings
+   */
+  async getAlertSettings(): Promise<{
+    check_interval: number;
+    cooldown: number;
+  }> {
+    if (!isTauri()) {
+      return { check_interval: 60, cooldown: 3600 };
+    }
+    try {
+      console.log("[Tauri IPC] get_alert_settings");
+      const settings = await invoke<{
+        check_interval: number;
+        cooldown: number;
+      }>("get_alert_settings");
+      console.log("[Tauri IPC Response]", settings);
+      return settings;
+    } catch (error) {
+      console.error("Error getting alert settings:", error);
+      throw this.handleError(error);
+    }
+  }
+
+  /**
+   * Set alert settings
+   */
+  async setAlertSettings(
+    checkInterval: number,
+    cooldown: number,
+  ): Promise<void> {
+    if (!isTauri()) {
+      throw new Error(
+        "Alert settings can only be configured in the desktop app.",
+      );
+    }
+    try {
+      console.log("[Tauri IPC] set_alert_settings", {
+        checkInterval,
+        cooldown,
+      });
+      await invoke<void>("set_alert_settings", { checkInterval, cooldown });
+      console.log("[Tauri IPC Response] Alert settings updated");
+    } catch (error) {
+      console.error("Error setting alert settings:", error);
       throw this.handleError(error);
     }
   }
@@ -455,7 +671,7 @@ class FinCatchAPI {
   /**
    * Handle API errors
    */
-  private handleError(error: any): Error {
+  private handleError(error: unknown): Error {
     if (typeof error === "string") {
       return new Error(error);
     }

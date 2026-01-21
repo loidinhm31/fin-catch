@@ -248,7 +248,7 @@ Consistent spacing scale for margins, padding:
 
 ## FinCatch App Sync Schema
 
-The **fin-catch-app** integrates with **sync-center** for cross-device data synchronization. The following schema must be registered with sync-center for the application to sync properly.
+The **fin-catch-app** integrates with **qm-sync** for cross-device data synchronization. The following schema must be registered with qm-sync for the application to sync properly.
 
 ### App Registration Schema
 

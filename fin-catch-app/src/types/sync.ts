@@ -1,4 +1,4 @@
-// Sync types for data synchronization with sync-center
+// Sync types for data synchronization with qm-sync
 
 /**
  * Sync configuration status

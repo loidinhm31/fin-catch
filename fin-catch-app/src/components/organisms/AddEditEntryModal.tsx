@@ -67,6 +67,10 @@ export const AddEditEntryModal: React.FC<AddEditEntryModalProps> = ({
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [stockSources, setStockSources] = useState<string[]>([]);
+  // Price alert fields (stock only)
+  const [targetPrice, setTargetPrice] = useState("");
+  const [stopLoss, setStopLoss] = useState("");
+  const [alertEnabled, setAlertEnabled] = useState(true);
 
   // Initialize form with editing entry data
   useEffect(() => {
@@ -89,6 +93,12 @@ export const AddEditEntryModal: React.FC<AddEditEntryModalProps> = ({
       setGoldType(
         editingEntry.asset_type === "gold" ? editingEntry.symbol : "",
       );
+      // Initialize price alert fields (stock only)
+      if (editingEntry.asset_type === "stock") {
+        setTargetPrice(editingEntry.target_price?.toString() || "");
+        setStopLoss(editingEntry.stop_loss?.toString() || "");
+        setAlertEnabled(editingEntry.alert_enabled !== false);
+      }
       // Initialize bond fields
       if (editingEntry.asset_type === "bond") {
         setBondIdentifier(editingEntry.symbol);
@@ -189,6 +199,10 @@ export const AddEditEntryModal: React.FC<AddEditEntryModalProps> = ({
     setCurrentMarketPrice("");
     setYtm("");
     setTotalInvestment("");
+    // Reset alert fields
+    setTargetPrice("");
+    setStopLoss("");
+    setAlertEnabled(true);
     setError(null);
   };
 
@@ -422,6 +436,17 @@ export const AddEditEntryModal: React.FC<AddEditEntryModalProps> = ({
             ? Math.floor(Date.now() / 1000)
             : undefined,
         ytm: assetType === "bond" && ytm ? parseFloat(ytm) : undefined,
+        // Price alert fields (stock only)
+        target_price:
+          assetType === "stock" && targetPrice
+            ? parseFloat(targetPrice)
+            : undefined,
+        stop_loss:
+          assetType === "stock" && stopLoss ? parseFloat(stopLoss) : undefined,
+        alert_enabled:
+          assetType === "stock" && (targetPrice || stopLoss)
+            ? alertEnabled
+            : undefined,
         sync_version: editingEntry?.sync_version || 1,
         synced_at: editingEntry?.synced_at,
       };
@@ -526,6 +551,12 @@ export const AddEditEntryModal: React.FC<AddEditEntryModalProps> = ({
             purchasePrice={purchasePrice}
             setPurchasePrice={setPurchasePrice}
             isSubmitting={isSubmitting}
+            targetPrice={targetPrice}
+            setTargetPrice={setTargetPrice}
+            stopLoss={stopLoss}
+            setStopLoss={setStopLoss}
+            alertEnabled={alertEnabled}
+            setAlertEnabled={setAlertEnabled}
           />
         )}
 

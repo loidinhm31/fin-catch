@@ -10,7 +10,7 @@ use argon2::password_hash::SaltString;
 use base64::{Engine as _, engine::general_purpose::STANDARD as BASE64};
 use jsonwebtoken::{decode, decode_header, DecodingKey, Validation};
 
-/// Authentication service for managing user authentication with sync-center
+/// Authentication service for managing user authentication with qm-sync
 #[derive(Clone)]
 pub struct AuthService {
     server_url: String,

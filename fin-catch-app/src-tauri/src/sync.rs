@@ -8,7 +8,7 @@ use qm_sync_client::{Checkpoint, SyncClient, SyncClientConfig, SyncRecord};
 use crate::auth::AuthService;
 use crate::db::{BondCouponPayment, Database, Portfolio, PortfolioEntry};
 
-/// Sync service for synchronizing local data with sync-center
+/// Sync service for synchronizing local data with qm-sync
 #[derive(Clone)]
 pub struct SyncService {
     db: Arc<Database>,
@@ -288,6 +288,10 @@ impl SyncService {
             "currentMarketPrice": entry.current_market_price,
             "lastPriceUpdate": entry.last_price_update,
             "ytm": entry.ytm,
+            // Alert fields (synced, but not last_alert_at and alert_triggered which are local-only)
+            "targetPrice": entry.target_price,
+            "stopLoss": entry.stop_loss,
+            "alertEnabled": entry.alert_enabled,
         });
 
         // Remove null fields
@@ -460,6 +464,13 @@ impl SyncService {
             current_market_price: data["currentMarketPrice"].as_f64(),
             last_price_update: data["lastPriceUpdate"].as_i64(),
             ytm: data["ytm"].as_f64(),
+            // Alert fields (target_price, stop_loss, alert_enabled are synced)
+            target_price: data["targetPrice"].as_f64(),
+            stop_loss: data["stopLoss"].as_f64(),
+            alert_enabled: data["alertEnabled"].as_bool(),
+            // Local-only fields (not synced)
+            last_alert_at: None,
+            alert_triggered: None,
             sync_version: record.version,
             synced_at: Some(chrono::Utc::now().timestamp()),
         };

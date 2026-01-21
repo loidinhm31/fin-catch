@@ -1,6 +1,11 @@
 mod db;
 mod auth;
 mod sync;
+mod session;
+mod shared_auth;
+mod shared_sync;
+mod web_server;
+mod price_monitor;
 
 use std::sync::{Arc, Mutex};
 use tauri::{Manager, State};
@@ -14,13 +19,15 @@ use fin_catch_data::{
 use db::{Database, Portfolio, PortfolioEntry, BondCouponPayment};
 use auth::{AuthService, AuthResponse, AuthStatus};
 use sync::{SyncService, SyncResult, SyncStatus};
+use price_monitor::{PriceMonitor, AlertSettings};
 
-// Application state that holds the data source gateway, database, auth service, and sync service
+// Application state that holds the data source gateway, database, auth service, sync service, and price monitor
 pub struct AppState {
     gateway: Arc<DataSourceGateway>,
     db: Arc<Database>,
     auth: Arc<Mutex<AuthService>>,
     sync: Arc<Mutex<SyncService>>,
+    price_monitor: Arc<Mutex<Option<Arc<PriceMonitor>>>>,
 }
 
 // Stock history command
@@ -228,18 +235,39 @@ async fn auth_login(
     password: String,
     app_handle: tauri::AppHandle,
     state: State<'_, AppState>,
+    auth_status_holder: State<'_, shared_auth::SharedAuthStatusHolder>,
 ) -> Result<AuthResponse, String> {
     let auth = state.auth.lock().map_err(|e| format!("Failed to lock auth service: {}", e))?.clone();
-    auth.login(&app_handle, email, password).await
+    let response = auth.login(&app_handle, email.clone(), password).await?;
+
+    // Update shared auth status for browser mode
+    let status = auth.get_auth_status(&app_handle).await;
+    auth_status_holder.update(shared_auth::SharedAuthStatus {
+        is_authenticated: status.is_authenticated,
+        user_id: status.user_id,
+        username: None, // Not provided in AuthStatus
+        email: Some(email),
+        apps: status.apps,
+        is_admin: status.is_admin,
+        server_url: status.server_url,
+    });
+
+    Ok(response)
 }
 
 #[tauri::command]
 async fn auth_logout(
     app_handle: tauri::AppHandle,
     state: State<'_, AppState>,
+    auth_status_holder: State<'_, shared_auth::SharedAuthStatusHolder>,
 ) -> Result<(), String> {
     let auth = state.auth.lock().map_err(|e| format!("Failed to lock auth service: {}", e))?.clone();
-    auth.logout(&app_handle).await
+    auth.logout(&app_handle).await?;
+
+    // Clear shared auth status
+    auth_status_holder.clear();
+
+    Ok(())
 }
 
 #[tauri::command]
@@ -255,9 +283,23 @@ async fn auth_refresh_token(
 async fn auth_get_status(
     app_handle: tauri::AppHandle,
     state: State<'_, AppState>,
+    auth_status_holder: State<'_, shared_auth::SharedAuthStatusHolder>,
 ) -> Result<AuthStatus, String> {
     let auth = state.auth.lock().map_err(|e| format!("Failed to lock auth service: {}", e))?.clone();
-    Ok(auth.get_auth_status(&app_handle).await)
+    let status = auth.get_auth_status(&app_handle).await;
+
+    // Sync shared auth status for browser mode
+    auth_status_holder.update(shared_auth::SharedAuthStatus {
+        is_authenticated: status.is_authenticated,
+        user_id: status.user_id.clone(),
+        username: None,
+        email: None,
+        apps: status.apps.clone(),
+        is_admin: status.is_admin,
+        server_url: status.server_url.clone(),
+    });
+
+    Ok(status)
 }
 
 #[tauri::command]
@@ -283,9 +325,183 @@ async fn sync_now(
 async fn sync_get_status(
     app_handle: tauri::AppHandle,
     state: State<'_, AppState>,
+    sync_status_holder: State<'_, shared_sync::SharedSyncStatusHolder>,
 ) -> Result<SyncStatus, String> {
     let sync = state.sync.lock().map_err(|e| format!("Failed to lock sync service: {}", e))?.clone();
-    sync.get_sync_status(&app_handle).await
+    let status = sync.get_sync_status(&app_handle).await?;
+
+    // Sync shared status for browser mode
+    sync_status_holder.update(shared_sync::SharedSyncStatus {
+        configured: status.configured,
+        authenticated: status.authenticated,
+        server_url: status.server_url.clone(),
+        last_sync_at: status.last_sync_at,
+        pending_changes: status.pending_changes as i32,
+    });
+
+    Ok(status)
+}
+
+//=============================================================================
+// Browser Sync Commands (On-demand web server)
+//=============================================================================
+
+/// Start the browser sync server and return the URL with session token
+#[tauri::command]
+fn start_browser_sync(
+    app_handle: tauri::AppHandle,
+    state: State<'_, AppState>,
+    session_manager: State<'_, session::SharedSessionManager>,
+    auth_status_holder: State<'_, shared_auth::SharedAuthStatusHolder>,
+    sync_status_holder: State<'_, shared_sync::SharedSyncStatusHolder>,
+    alert_broadcast_tx: State<'_, tokio::sync::broadcast::Sender<String>>,
+) -> Result<String, String> {
+    // Check if already running
+    if web_server::is_server_running() {
+        return Err("Browser sync server is already running".to_string());
+    }
+
+    // Clone what we need for the web server
+    let gateway_clone = state.gateway.clone();
+    let db_clone = state.db.clone();
+    let sync_service_clone = state.sync.clone();
+    let session_manager_clone = (*session_manager).clone();
+    let auth_status_clone = (*auth_status_holder).clone();
+    let sync_status_clone = (*sync_status_holder).clone();
+    let app_handle_clone = app_handle.clone();
+    let alert_broadcast_clone = (*alert_broadcast_tx).clone();
+
+    // Start the web server with the shared alert broadcast channel
+    let token = web_server::start_web_server(
+        gateway_clone,
+        db_clone,
+        session_manager_clone,
+        auth_status_clone,
+        sync_status_clone,
+        sync_service_clone,
+        app_handle_clone,
+        alert_broadcast_clone,
+    );
+
+    // In dev mode, open browser to Vite dev server for HMR support
+    // In production, open to the embedded web server
+    let is_dev_mode = std::env::var("TAURI_DEV_HOST").is_ok()
+        || std::env::var("CARGO_MANIFEST_DIR").is_ok();
+
+    let browser_port = if is_dev_mode {
+        1420 // Vite dev server
+    } else {
+        web_server::WEB_SERVER_PORT // Embedded server (25092)
+    };
+
+    let url = format!("http://localhost:{}?session={}", browser_port, token);
+
+    println!("[FinCatch] Browser sync started: {}", url);
+    if is_dev_mode {
+        println!("   Dev mode: Opening Vite (1420), API on {}", web_server::WEB_SERVER_PORT);
+    }
+    Ok(url)
+}
+
+/// Stop the browser sync server
+#[tauri::command]
+fn stop_browser_sync(
+    session_manager: State<'_, session::SharedSessionManager>,
+) -> Result<String, String> {
+    // Note: Price monitor continues to run independently
+    // Only stop the web server
+    web_server::stop_web_server();
+
+    // Clear the session token
+    session_manager.clear_token();
+
+    Ok("Browser sync stopped".to_string())
+}
+
+/// Check if browser sync is currently active
+#[tauri::command]
+fn is_browser_sync_active() -> bool {
+    web_server::is_server_running()
+}
+
+//=============================================================================
+// Price Alert Commands
+//=============================================================================
+
+/// Set alert settings for an entry
+#[tauri::command]
+fn set_entry_alerts(
+    entry_id: String,
+    target_price: Option<f64>,
+    stop_loss: Option<f64>,
+    alert_enabled: Option<bool>,
+    state: State<'_, AppState>,
+) -> Result<(), String> {
+    state.db.set_entry_alerts(&entry_id, target_price, stop_loss, alert_enabled)
+        .map_err(|e| e.to_string())
+}
+
+/// Reset triggered alert state for an entry
+#[tauri::command]
+fn reset_entry_alert(entry_id: String, state: State<'_, AppState>) -> Result<(), String> {
+    state.db.reset_entry_alert(&entry_id)
+        .map_err(|e| e.to_string())
+}
+
+/// Get all entries with triggered alerts
+#[tauri::command]
+fn get_triggered_alerts(state: State<'_, AppState>) -> Result<Vec<PortfolioEntry>, String> {
+    state.db.get_triggered_alerts()
+        .map_err(|e| e.to_string())
+}
+
+/// Get alert settings
+#[tauri::command]
+fn get_alert_settings(state: State<'_, AppState>) -> Result<AlertSettings, String> {
+    // Get from price monitor if available, otherwise from database
+    if let Some(monitor) = state.price_monitor.lock().unwrap().as_ref() {
+        Ok(monitor.get_settings())
+    } else {
+        // Load directly from database
+        let mut settings = AlertSettings::default();
+        if let Ok(Some(val)) = state.db.get_setting("alert_check_interval") {
+            if let Ok(interval) = val.parse::<u64>() {
+                settings.check_interval = interval;
+            }
+        }
+        if let Ok(Some(val)) = state.db.get_setting("alert_cooldown") {
+            if let Ok(cooldown) = val.parse::<u64>() {
+                settings.cooldown = cooldown;
+            }
+        }
+        Ok(settings)
+    }
+}
+
+/// Set alert settings
+#[tauri::command]
+fn set_alert_settings(
+    check_interval: u64,
+    cooldown: u64,
+    state: State<'_, AppState>,
+) -> Result<(), String> {
+    let settings = AlertSettings {
+        check_interval,
+        cooldown,
+    };
+
+    // Update price monitor if running
+    if let Some(monitor) = state.price_monitor.lock().unwrap().as_ref() {
+        monitor.set_settings(settings)?;
+    } else {
+        // Save directly to database
+        state.db.set_setting("alert_check_interval", &check_interval.to_string())
+            .map_err(|e| e.to_string())?;
+        state.db.set_setting("alert_cooldown", &cooldown.to_string())
+            .map_err(|e| e.to_string())?;
+    }
+
+    Ok(())
 }
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
@@ -297,8 +513,8 @@ pub fn run() {
             // Load environment variables from .env file (ignore errors if file doesn't exist)
             let _ = dotenvy::dotenv();
 
-            // Get sync-center configuration from environment variables
-            let SYNC_SERVER_URL = std::env::var("SYNC_SERVER_URL")
+            // Get qm-sync configuration from environment variables
+            let sync_server_url = std::env::var("SYNC_SERVER_URL")
                 .unwrap_or_else(|_| "http://localhost:3000".to_string());
             let sync_center_app_id = std::env::var("SYNC_CENTER_APP_ID")
                 .unwrap_or_else(|_| "your_app_id_here".to_string());
@@ -316,7 +532,7 @@ pub fn run() {
 
             // Initialize auth service with configuration from environment
             let auth = Arc::new(Mutex::new(AuthService::new(
-                SYNC_SERVER_URL.clone(),
+                sync_server_url.clone(),
                 sync_center_app_id,
                 sync_center_api_key,
             )));
@@ -327,8 +543,48 @@ pub fn run() {
                 auth.clone(),
             )));
 
-            let app_state = AppState { gateway, db, auth, sync };
+            // Create alert broadcast channel (will be used by price monitor and web server)
+            let (alert_broadcast_tx, _) = tokio::sync::broadcast::channel::<String>(16);
+
+            // Initialize price monitor with alert broadcast (starts immediately for desktop alerts)
+            let monitor = price_monitor::init_price_monitor(
+                db.clone(),
+                gateway.clone(),
+                Some(alert_broadcast_tx.clone()),
+            );
+
+            // Store the price monitor in app state
+            let price_monitor = Arc::new(Mutex::new(Some(monitor.clone())));
+
+            let app_state = AppState { gateway, db, auth, sync, price_monitor };
             app.manage(app_state);
+
+            // Store the alert broadcast sender for web server to use later
+            app.manage(alert_broadcast_tx);
+
+            // Start the price monitor in a background task
+            let app_handle_for_monitor = app.handle().clone();
+            std::thread::spawn(move || {
+                let rt = tokio::runtime::Runtime::new().expect("Failed to create runtime for price monitor");
+                rt.block_on(async {
+                    monitor.start(app_handle_for_monitor).await;
+                });
+            });
+
+            // Initialize session manager for browser sync (started on-demand)
+            let session_manager = session::create_session_manager();
+            app.manage(session_manager);
+
+            // Initialize shared auth status holder for browser mode
+            let auth_status_holder = shared_auth::create_auth_status_holder();
+            app.manage(auth_status_holder);
+
+            // Initialize shared sync status holder for browser mode
+            let sync_status_holder = shared_sync::create_sync_status_holder();
+            app.manage(sync_status_holder);
+
+            println!("[FinCatch] Price monitor started");
+            println!("[FinCatch] Browser sync available - use 'Open in Browser' to start");
 
             Ok(())
         })
@@ -363,6 +619,16 @@ pub fn run() {
             auth_is_authenticated,
             sync_now,
             sync_get_status,
+            // Browser sync
+            start_browser_sync,
+            stop_browser_sync,
+            is_browser_sync_active,
+            // Price alerts
+            set_entry_alerts,
+            reset_entry_alert,
+            get_triggered_alerts,
+            get_alert_settings,
+            set_alert_settings,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
