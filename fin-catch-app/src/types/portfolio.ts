@@ -36,8 +36,22 @@ export interface PortfolioEntry {
   current_market_price?: number; // User-entered current price
   last_price_update?: number; // Unix timestamp of last price update
   ytm?: number; // Yield to Maturity as percentage (used in calculated mode)
+  // Stock alert fields (synced to server, monitoring handled by qm-sync)
+  target_price?: number; // Take-profit price
+  stop_loss?: number; // Stop-loss price
+  alert_enabled?: boolean; // Alerts active (default true when prices set)
   sync_version: number;
   synced_at?: number;
+}
+
+// Price alert event data (received from qm-sync server)
+export interface PriceAlertEvent {
+  entry_id: string;
+  symbol: string;
+  alert_type: "target" | "stop_loss";
+  current_price: number;
+  threshold_price: number;
+  triggered_at: number;
 }
 
 // Portfolio with entries

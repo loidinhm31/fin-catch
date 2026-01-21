@@ -2,9 +2,11 @@
  * useServerConnection Hook
  *
  * Maintains an SSE connection to the desktop server when running in browser mode.
- * Listens for shutdown events and price alerts, and updates connection state accordingly.
+ * Listens for shutdown events and updates connection state accordingly.
  * When the server shuts down, sets the disconnected state which triggers a UI overlay.
- * Price alerts are dispatched to the global toast handler.
+ *
+ * Note: Price alerts are now handled by qm-sync server via push/email/SSE notifications.
+ * This hook only manages the browser-mode connection to the local desktop server.
  */
 
 import { useState, useEffect, useCallback } from "react";
@@ -13,7 +15,6 @@ import {
   getSessionToken,
   WEB_SERVER_PORT,
 } from "@/utils/platform";
-import { PriceAlertEvent } from "@/types/portfolio";
 
 export interface ServerConnectionState {
   isConnected: boolean;
@@ -86,19 +87,8 @@ export function useServerConnection() {
       console.log("[SSE] Received: ping -", event.data);
     });
 
-    // Handle price alert events
-    eventSource.addEventListener("price-alert", (event) => {
-      console.log("[SSE] Received: price-alert -", event.data);
-      try {
-        const alert: PriceAlertEvent = JSON.parse(event.data);
-        // Dispatch to global toast handler
-        if (window.__priceAlertToast?.addToast) {
-          window.__priceAlertToast.addToast(alert);
-        }
-      } catch (e) {
-        console.error("[SSE] Failed to parse price alert:", e);
-      }
-    });
+    // Note: price-alert events removed - alerts now come from qm-sync server
+    // via push notifications, email, or qm-sync SSE subscription
 
     eventSource.onerror = (error) => {
       console.error("[SSE] Connection error:", error);

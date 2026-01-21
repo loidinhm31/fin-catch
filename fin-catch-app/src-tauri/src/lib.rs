@@ -5,7 +5,6 @@ mod session;
 mod shared_auth;
 mod shared_sync;
 mod web_server;
-mod price_monitor;
 
 use std::sync::{Arc, Mutex};
 use tauri::{Manager, State};
@@ -19,15 +18,13 @@ use fin_catch_data::{
 use db::{Database, Portfolio, PortfolioEntry, BondCouponPayment};
 use auth::{AuthService, AuthResponse, AuthStatus};
 use sync::{SyncService, SyncResult, SyncStatus};
-use price_monitor::{PriceMonitor, AlertSettings};
 
-// Application state that holds the data source gateway, database, auth service, sync service, and price monitor
+// Application state that holds the data source gateway, database, auth service, and sync service
 pub struct AppState {
     gateway: Arc<DataSourceGateway>,
     db: Arc<Database>,
     auth: Arc<Mutex<AuthService>>,
     sync: Arc<Mutex<SyncService>>,
-    price_monitor: Arc<Mutex<Option<Arc<PriceMonitor>>>>,
 }
 
 // Stock history command
@@ -354,7 +351,6 @@ fn start_browser_sync(
     session_manager: State<'_, session::SharedSessionManager>,
     auth_status_holder: State<'_, shared_auth::SharedAuthStatusHolder>,
     sync_status_holder: State<'_, shared_sync::SharedSyncStatusHolder>,
-    alert_broadcast_tx: State<'_, tokio::sync::broadcast::Sender<String>>,
 ) -> Result<String, String> {
     // Check if already running
     if web_server::is_server_running() {
@@ -369,9 +365,8 @@ fn start_browser_sync(
     let auth_status_clone = (*auth_status_holder).clone();
     let sync_status_clone = (*sync_status_holder).clone();
     let app_handle_clone = app_handle.clone();
-    let alert_broadcast_clone = (*alert_broadcast_tx).clone();
 
-    // Start the web server with the shared alert broadcast channel
+    // Start the web server (price alerts now come from qm-sync server, not local)
     let token = web_server::start_web_server(
         gateway_clone,
         db_clone,
@@ -380,7 +375,6 @@ fn start_browser_sync(
         sync_status_clone,
         sync_service_clone,
         app_handle_clone,
-        alert_broadcast_clone,
     );
 
     // In dev mode, open browser to Vite dev server for HMR support
@@ -408,8 +402,6 @@ fn start_browser_sync(
 fn stop_browser_sync(
     session_manager: State<'_, session::SharedSessionManager>,
 ) -> Result<String, String> {
-    // Note: Price monitor continues to run independently
-    // Only stop the web server
     web_server::stop_web_server();
 
     // Clear the session token
@@ -425,10 +417,10 @@ fn is_browser_sync_active() -> bool {
 }
 
 //=============================================================================
-// Price Alert Commands
+// Price Alert Commands (alert config syncs to server, monitoring on qm-sync)
 //=============================================================================
 
-/// Set alert settings for an entry
+/// Set alert settings for an entry (target_price, stop_loss, alert_enabled sync to server)
 #[tauri::command]
 fn set_entry_alerts(
     entry_id: String,
@@ -439,69 +431,6 @@ fn set_entry_alerts(
 ) -> Result<(), String> {
     state.db.set_entry_alerts(&entry_id, target_price, stop_loss, alert_enabled)
         .map_err(|e| e.to_string())
-}
-
-/// Reset triggered alert state for an entry
-#[tauri::command]
-fn reset_entry_alert(entry_id: String, state: State<'_, AppState>) -> Result<(), String> {
-    state.db.reset_entry_alert(&entry_id)
-        .map_err(|e| e.to_string())
-}
-
-/// Get all entries with triggered alerts
-#[tauri::command]
-fn get_triggered_alerts(state: State<'_, AppState>) -> Result<Vec<PortfolioEntry>, String> {
-    state.db.get_triggered_alerts()
-        .map_err(|e| e.to_string())
-}
-
-/// Get alert settings
-#[tauri::command]
-fn get_alert_settings(state: State<'_, AppState>) -> Result<AlertSettings, String> {
-    // Get from price monitor if available, otherwise from database
-    if let Some(monitor) = state.price_monitor.lock().unwrap().as_ref() {
-        Ok(monitor.get_settings())
-    } else {
-        // Load directly from database
-        let mut settings = AlertSettings::default();
-        if let Ok(Some(val)) = state.db.get_setting("alert_check_interval") {
-            if let Ok(interval) = val.parse::<u64>() {
-                settings.check_interval = interval;
-            }
-        }
-        if let Ok(Some(val)) = state.db.get_setting("alert_cooldown") {
-            if let Ok(cooldown) = val.parse::<u64>() {
-                settings.cooldown = cooldown;
-            }
-        }
-        Ok(settings)
-    }
-}
-
-/// Set alert settings
-#[tauri::command]
-fn set_alert_settings(
-    check_interval: u64,
-    cooldown: u64,
-    state: State<'_, AppState>,
-) -> Result<(), String> {
-    let settings = AlertSettings {
-        check_interval,
-        cooldown,
-    };
-
-    // Update price monitor if running
-    if let Some(monitor) = state.price_monitor.lock().unwrap().as_ref() {
-        monitor.set_settings(settings)?;
-    } else {
-        // Save directly to database
-        state.db.set_setting("alert_check_interval", &check_interval.to_string())
-            .map_err(|e| e.to_string())?;
-        state.db.set_setting("alert_cooldown", &cooldown.to_string())
-            .map_err(|e| e.to_string())?;
-    }
-
-    Ok(())
 }
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
@@ -543,33 +472,8 @@ pub fn run() {
                 auth.clone(),
             )));
 
-            // Create alert broadcast channel (will be used by price monitor and web server)
-            let (alert_broadcast_tx, _) = tokio::sync::broadcast::channel::<String>(16);
-
-            // Initialize price monitor with alert broadcast (starts immediately for desktop alerts)
-            let monitor = price_monitor::init_price_monitor(
-                db.clone(),
-                gateway.clone(),
-                Some(alert_broadcast_tx.clone()),
-            );
-
-            // Store the price monitor in app state
-            let price_monitor = Arc::new(Mutex::new(Some(monitor.clone())));
-
-            let app_state = AppState { gateway, db, auth, sync, price_monitor };
+            let app_state = AppState { gateway, db, auth, sync };
             app.manage(app_state);
-
-            // Store the alert broadcast sender for web server to use later
-            app.manage(alert_broadcast_tx);
-
-            // Start the price monitor in a background task
-            let app_handle_for_monitor = app.handle().clone();
-            std::thread::spawn(move || {
-                let rt = tokio::runtime::Runtime::new().expect("Failed to create runtime for price monitor");
-                rt.block_on(async {
-                    monitor.start(app_handle_for_monitor).await;
-                });
-            });
 
             // Initialize session manager for browser sync (started on-demand)
             let session_manager = session::create_session_manager();
@@ -583,7 +487,8 @@ pub fn run() {
             let sync_status_holder = shared_sync::create_sync_status_holder();
             app.manage(sync_status_holder);
 
-            println!("[FinCatch] Price monitor started");
+            println!("[FinCatch] Application initialized");
+            println!("[FinCatch] Price alerts now managed by qm-sync server");
             println!("[FinCatch] Browser sync available - use 'Open in Browser' to start");
 
             Ok(())
@@ -623,12 +528,8 @@ pub fn run() {
             start_browser_sync,
             stop_browser_sync,
             is_browser_sync_active,
-            // Price alerts
+            // Price alerts (alert configs sync to server, monitoring handled by qm-sync)
             set_entry_alerts,
-            reset_entry_alert,
-            get_triggered_alerts,
-            get_alert_settings,
-            set_alert_settings,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

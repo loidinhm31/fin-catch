@@ -1,5 +1,12 @@
 import React from "react";
-import { ChevronDown, ChevronUp, Edit, Trash2 } from "lucide-react";
+import {
+  ChevronDown,
+  ChevronUp,
+  Edit,
+  Trash2,
+  Bell,
+  BellOff,
+} from "lucide-react";
 import { CurrencyCode, EntryPerformance, PortfolioEntry } from "@/types";
 
 export interface StockHoldingCardProps {
@@ -12,6 +19,7 @@ export interface StockHoldingCardProps {
   formatCurrency: (value: number, currency?: CurrencyCode) => string;
   formatPercentage: (value: number) => string;
   formatDate: (timestamp: number) => string;
+  // Note: onResetAlert removed - alert state now managed by qm-sync server
 }
 
 export const StockHoldingCard: React.FC<StockHoldingCardProps> = ({
@@ -27,6 +35,21 @@ export const StockHoldingCard: React.FC<StockHoldingCardProps> = ({
 }) => {
   const entry = entryPerf.entry;
   const isPositive = entryPerf.gain_loss >= 0;
+
+  // Alert status helpers
+  const hasAlerts = entry.target_price || entry.stop_loss;
+  const alertsEnabled = entry.alert_enabled !== false;
+  // Note: alert_triggered state now managed by qm-sync server
+  // Triggered alerts are shown via PriceAlertToast component
+
+  // Calculate distance to thresholds
+  const currentPrice = entryPerf.current_price;
+  const targetDistance = entry.target_price
+    ? ((entry.target_price - currentPrice) / currentPrice) * 100
+    : null;
+  const stopLossDistance = entry.stop_loss
+    ? ((entry.stop_loss - currentPrice) / currentPrice) * 100
+    : null;
 
   return (
     <div className="glass-card p-4">
@@ -54,6 +77,20 @@ export const StockHoldingCard: React.FC<StockHoldingCardProps> = ({
               >
                 {entry.currency}
               </span>
+            )}
+            {/* Alert indicator badges */}
+            {hasAlerts && (
+              <>
+                {alertsEnabled ? (
+                  <span title="Alerts enabled - monitored by server">
+                    <Bell className="w-4 h-4" style={{ color: "#6b7280" }} />
+                  </span>
+                ) : (
+                  <span title="Alerts disabled">
+                    <BellOff className="w-4 h-4" style={{ color: "#d1d5db" }} />
+                  </span>
+                )}
+              </>
             )}
             <h3
               style={{
@@ -254,6 +291,97 @@ export const StockHoldingCard: React.FC<StockHoldingCardProps> = ({
                 </div>
               )}
           </div>
+
+          {/* Price Alerts Section */}
+          {hasAlerts && (
+            <div
+              className="p-3 rounded-lg"
+              style={{
+                backgroundColor: "#f9fafb",
+              }}
+            >
+              <div className="flex items-center justify-between mb-2">
+                <p
+                  style={{
+                    fontSize: "var(--text-xs)",
+                    fontWeight: "var(--font-medium)",
+                    color: "var(--cube-gray-700)",
+                  }}
+                >
+                  Price Alerts
+                </p>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                {entry.target_price && (
+                  <div>
+                    <p
+                      style={{
+                        fontSize: "var(--text-xs)",
+                        color: "var(--cube-gray-500)",
+                      }}
+                    >
+                      🎯 Target Price
+                    </p>
+                    <p
+                      style={{
+                        fontSize: "var(--text-sm)",
+                        fontWeight: "var(--font-medium)",
+                        color: "var(--cube-gray-900)",
+                      }}
+                    >
+                      {formatCurrency(entry.target_price)}
+                      {targetDistance !== null && (
+                        <span
+                          style={{
+                            fontSize: "var(--text-xs)",
+                            color: targetDistance > 0 ? "#6b7280" : "#065f46",
+                            marginLeft: "4px",
+                          }}
+                        >
+                          ({targetDistance > 0 ? "+" : ""}
+                          {targetDistance.toFixed(1)}%)
+                        </span>
+                      )}
+                    </p>
+                  </div>
+                )}
+                {entry.stop_loss && (
+                  <div>
+                    <p
+                      style={{
+                        fontSize: "var(--text-xs)",
+                        color: "var(--cube-gray-500)",
+                      }}
+                    >
+                      🛑 Stop Loss
+                    </p>
+                    <p
+                      style={{
+                        fontSize: "var(--text-sm)",
+                        fontWeight: "var(--font-medium)",
+                        color: "var(--cube-gray-900)",
+                      }}
+                    >
+                      {formatCurrency(entry.stop_loss)}
+                      {stopLossDistance !== null && (
+                        <span
+                          style={{
+                            fontSize: "var(--text-xs)",
+                            color: stopLossDistance < 0 ? "#6b7280" : "#991b1b",
+                            marginLeft: "4px",
+                          }}
+                        >
+                          ({stopLossDistance > 0 ? "+" : ""}
+                          {stopLossDistance.toFixed(1)}%)
+                        </span>
+                      )}
+                    </p>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
           {entry.notes && (
             <div>
               <p

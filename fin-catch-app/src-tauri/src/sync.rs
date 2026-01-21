@@ -464,13 +464,10 @@ impl SyncService {
             current_market_price: data["currentMarketPrice"].as_f64(),
             last_price_update: data["lastPriceUpdate"].as_i64(),
             ytm: data["ytm"].as_f64(),
-            // Alert fields (target_price, stop_loss, alert_enabled are synced)
+            // Alert fields (synced to server for qm-sync monitoring)
             target_price: data["targetPrice"].as_f64(),
             stop_loss: data["stopLoss"].as_f64(),
             alert_enabled: data["alertEnabled"].as_bool(),
-            // Local-only fields (not synced)
-            last_alert_at: None,
-            alert_triggered: None,
             sync_version: record.version,
             synced_at: Some(chrono::Utc::now().timestamp()),
         };

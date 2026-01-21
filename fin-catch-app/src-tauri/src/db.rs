@@ -41,6 +41,10 @@ pub struct PortfolioEntry {
     pub current_market_price: Option<f64>, // User-entered current price
     pub last_price_update: Option<i64>, // Unix timestamp of last price update
     pub ytm: Option<f64>, // Yield to Maturity as percentage (used in calculated mode)
+    // Stock alert fields (synced to server, monitoring handled by qm-sync)
+    pub target_price: Option<f64>,      // Take-profit price
+    pub stop_loss: Option<f64>,         // Stop-loss price
+    pub alert_enabled: Option<bool>,    // Alerts active (default true when prices set)
     // Sync fields
     pub sync_version: i64,
     pub synced_at: Option<i64>,
@@ -109,6 +113,11 @@ impl Database {
                 current_market_price REAL,
                 last_price_update INTEGER,
                 ytm REAL,
+                target_price REAL,
+                stop_loss REAL,
+                alert_enabled INTEGER DEFAULT 1,
+                last_alert_at INTEGER,
+                alert_triggered TEXT,
                 sync_version INTEGER DEFAULT 1,
                 synced_at INTEGER,
                 deleted INTEGER DEFAULT 0,
@@ -117,6 +126,18 @@ impl Database {
             )",
             [],
         )?;
+
+        // Create settings table for alert configuration
+        conn.execute(
+            "CREATE TABLE IF NOT EXISTS settings (
+                key TEXT PRIMARY KEY,
+                value TEXT NOT NULL
+            )",
+            [],
+        )?;
+
+        // Run migrations for existing databases
+        Self::run_migrations(&conn)?;
 
         // Create bond_coupon_payments table with UUID primary key
         conn.execute(
@@ -161,6 +182,29 @@ impl Database {
         Ok(Self {
             conn: Mutex::new(conn),
         })
+    }
+
+    /// Run database migrations for existing databases
+    fn run_migrations(conn: &Connection) -> Result<()> {
+        // Check if alert columns exist, add them if not
+        let columns: Vec<String> = conn
+            .prepare("PRAGMA table_info(portfolio_entries)")?
+            .query_map([], |row| row.get::<_, String>(1))?
+            .filter_map(|r| r.ok())
+            .collect();
+
+        if !columns.contains(&"target_price".to_string()) {
+            conn.execute("ALTER TABLE portfolio_entries ADD COLUMN target_price REAL", [])?;
+        }
+        if !columns.contains(&"stop_loss".to_string()) {
+            conn.execute("ALTER TABLE portfolio_entries ADD COLUMN stop_loss REAL", [])?;
+        }
+        if !columns.contains(&"alert_enabled".to_string()) {
+            conn.execute("ALTER TABLE portfolio_entries ADD COLUMN alert_enabled INTEGER DEFAULT 1", [])?;
+        }
+        // Note: last_alert_at and alert_triggered columns removed - now managed by qm-sync server
+
+        Ok(())
     }
 
     // Portfolio CRUD operations
@@ -270,8 +314,9 @@ impl Database {
                 id, portfolio_id, asset_type, symbol, quantity, purchase_price, currency,
                 purchase_date, notes, tags, transaction_fees, source, created_at, unit, gold_type,
                 face_value, coupon_rate, maturity_date, coupon_frequency, current_market_price, last_price_update, ytm,
+                target_price, stop_loss, alert_enabled,
                 sync_version, synced_at
-            ) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14, ?15, ?16, ?17, ?18, ?19, ?20, ?21, ?22, ?23, ?24)",
+            ) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14, ?15, ?16, ?17, ?18, ?19, ?20, ?21, ?22, ?23, ?24, ?25, ?26, ?27)",
             params![
                 id,
                 entry.portfolio_id,
@@ -295,6 +340,9 @@ impl Database {
                 entry.current_market_price,
                 entry.last_price_update,
                 entry.ytm,
+                entry.target_price,
+                entry.stop_loss,
+                entry.alert_enabled,
                 entry.sync_version,
                 entry.synced_at
             ],
@@ -308,6 +356,7 @@ impl Database {
             "SELECT id, portfolio_id, asset_type, symbol, quantity, purchase_price, currency,
                     purchase_date, notes, tags, transaction_fees, source, created_at, unit, gold_type,
                     face_value, coupon_rate, maturity_date, coupon_frequency, current_market_price, last_price_update, ytm,
+                    target_price, stop_loss, alert_enabled,
                     sync_version, synced_at
              FROM portfolio_entries WHERE id = ?1",
             params![id],
@@ -335,9 +384,11 @@ impl Database {
                     current_market_price: row.get(19)?,
                     last_price_update: row.get(20)?,
                     ytm: row.get(21)?,
-                    sync_version: row.get(22)?,
-                    synced_at: row.get(23)?,
-                    
+                    target_price: row.get(22)?,
+                    stop_loss: row.get(23)?,
+                    alert_enabled: row.get(24)?,
+                    sync_version: row.get(25)?,
+                    synced_at: row.get(26)?,
                 })
             },
         )
@@ -349,6 +400,7 @@ impl Database {
             "SELECT id, portfolio_id, asset_type, symbol, quantity, purchase_price, currency,
                     purchase_date, notes, tags, transaction_fees, source, created_at, unit, gold_type,
                     face_value, coupon_rate, maturity_date, coupon_frequency, current_market_price, last_price_update, ytm,
+                    target_price, stop_loss, alert_enabled,
                     sync_version, synced_at
              FROM portfolio_entries WHERE portfolio_id = ?1 AND deleted = 0 ORDER BY created_at DESC"
         )?;
@@ -376,9 +428,11 @@ impl Database {
                 current_market_price: row.get(19)?,
                 last_price_update: row.get(20)?,
                 ytm: row.get(21)?,
-                sync_version: row.get(22)?,
-                synced_at: row.get(23)?,
-                
+                target_price: row.get(22)?,
+                stop_loss: row.get(23)?,
+                alert_enabled: row.get(24)?,
+                sync_version: row.get(25)?,
+                synced_at: row.get(26)?,
             })
         })?;
 
@@ -392,8 +446,9 @@ impl Database {
                 asset_type = ?1, symbol = ?2, quantity = ?3, purchase_price = ?4, currency = ?5,
                 purchase_date = ?6, notes = ?7, tags = ?8, transaction_fees = ?9, source = ?10,
                 unit = ?11, gold_type = ?12, face_value = ?13, coupon_rate = ?14, maturity_date = ?15,
-                coupon_frequency = ?16, current_market_price = ?17, last_price_update = ?18, ytm = ?19
-             WHERE id = ?20",
+                coupon_frequency = ?16, current_market_price = ?17, last_price_update = ?18, ytm = ?19,
+                target_price = ?20, stop_loss = ?21, alert_enabled = ?22
+             WHERE id = ?23",
             params![
                 entry.asset_type,
                 entry.symbol,
@@ -414,6 +469,9 @@ impl Database {
                 entry.current_market_price,
                 entry.last_price_update,
                 entry.ytm,
+                entry.target_price,
+                entry.stop_loss,
+                entry.alert_enabled,
                 entry.id,
             ],
         )?;
@@ -584,6 +642,7 @@ impl Database {
             "SELECT id, portfolio_id, asset_type, symbol, quantity, purchase_price, currency,
                     purchase_date, notes, tags, transaction_fees, source, created_at, unit, gold_type,
                     face_value, coupon_rate, maturity_date, coupon_frequency, current_market_price, last_price_update, ytm,
+                    target_price, stop_loss, alert_enabled,
                     sync_version, synced_at
              FROM portfolio_entries WHERE deleted = 1 AND synced_at IS NULL"
         )?;
@@ -611,8 +670,11 @@ impl Database {
                 current_market_price: row.get(19)?,
                 last_price_update: row.get(20)?,
                 ytm: row.get(21)?,
-                sync_version: row.get(22)?,
-                synced_at: row.get(23)?,
+                target_price: row.get(22)?,
+                stop_loss: row.get(23)?,
+                alert_enabled: row.get(24)?,
+                sync_version: row.get(25)?,
+                synced_at: row.get(26)?,
             })
         })?;
         entries.collect()
@@ -695,6 +757,55 @@ impl Database {
         conn.execute(
             "INSERT OR REPLACE INTO sync_metadata (key, checkpoint_updated_at, checkpoint_id) VALUES ('global', ?1, ?2)",
             params![updated_at, id],
+        )?;
+        Ok(())
+    }
+
+    //==========================================================================
+    // Alert-related methods (monitoring moved to qm-sync server)
+    //==========================================================================
+
+    /// Update alert settings for a specific entry (synced to server for monitoring)
+    pub fn set_entry_alerts(
+        &self,
+        entry_id: &str,
+        target_price: Option<f64>,
+        stop_loss: Option<f64>,
+        alert_enabled: Option<bool>,
+    ) -> Result<()> {
+        let conn = self.conn.lock().unwrap();
+        conn.execute(
+            "UPDATE portfolio_entries SET target_price = ?1, stop_loss = ?2, alert_enabled = ?3 WHERE id = ?4",
+            params![target_price, stop_loss, alert_enabled, entry_id],
+        )?;
+        Ok(())
+    }
+
+    //==========================================================================
+    // Settings methods
+    //==========================================================================
+
+    /// Get a setting value
+    pub fn get_setting(&self, key: &str) -> Result<Option<String>> {
+        let conn = self.conn.lock().unwrap();
+        let result = conn.query_row(
+            "SELECT value FROM settings WHERE key = ?1",
+            params![key],
+            |row| row.get::<_, String>(0),
+        );
+        match result {
+            Ok(value) => Ok(Some(value)),
+            Err(rusqlite::Error::QueryReturnedNoRows) => Ok(None),
+            Err(e) => Err(e),
+        }
+    }
+
+    /// Set a setting value
+    pub fn set_setting(&self, key: &str, value: &str) -> Result<()> {
+        let conn = self.conn.lock().unwrap();
+        conn.execute(
+            "INSERT OR REPLACE INTO settings (key, value) VALUES (?1, ?2)",
+            params![key, value],
         )?;
         Ok(())
     }

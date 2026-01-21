@@ -69,8 +69,7 @@ pub struct WebServerState {
     pub app_handle: tauri::AppHandle,
     /// Broadcast channel for SSE shutdown notifications
     pub shutdown_broadcast: broadcast::Sender<String>,
-    /// Broadcast channel for price alert notifications
-    pub alert_broadcast: broadcast::Sender<String>,
+    // Note: price alerts now handled by qm-sync server, not local web server
 }
 
 /// Handle for graceful shutdown
@@ -113,6 +112,7 @@ struct TokenQuery {
 
 /// Start the embedded web server in a background thread.
 /// Returns the session token for the browser URL.
+/// Note: Price alerts are now handled by qm-sync server, not this local server.
 pub fn start_web_server(
     gateway: Arc<DataSourceGateway>,
     db: Arc<Database>,
@@ -121,7 +121,6 @@ pub fn start_web_server(
     sync_status: SharedSyncStatusHolder,
     sync_service: Arc<std::sync::Mutex<SyncService>>,
     app_handle: tauri::AppHandle,
-    alert_broadcast_tx: broadcast::Sender<String>,
 ) -> String {
     // Generate a new session token
     let token = session_manager.generate_token();
@@ -132,9 +131,6 @@ pub fn start_web_server(
     let (shutdown_broadcast_tx, _) = broadcast::channel::<String>(16);
     let shutdown_broadcast_for_state = shutdown_broadcast_tx.clone();
 
-    // Use the provided alert broadcast channel
-    let alert_broadcast_for_state = alert_broadcast_tx.clone();
-
     let state = WebServerState {
         gateway,
         db,
@@ -144,7 +140,6 @@ pub fn start_web_server(
         sync_service,
         app_handle,
         shutdown_broadcast: shutdown_broadcast_for_state,
-        alert_broadcast: alert_broadcast_for_state,
     };
 
     let thread_handle = std::thread::spawn(move || {
@@ -348,15 +343,14 @@ async fn api_health() -> impl IntoResponse {
     Json(ApiResponse::success("OK"))
 }
 
-/// SSE endpoint for shutdown notifications and price alerts
+/// SSE endpoint for shutdown notifications
 /// Browsers connect to this endpoint and receive events when:
 /// - The server is about to shut down
-/// - A price alert is triggered
+/// Note: Price alerts are now handled by qm-sync server via push/email/SSE
 async fn sse_handler(
     State(state): State<WebServerState>,
 ) -> Sse<impl Stream<Item = Result<Event, Infallible>>> {
     let mut shutdown_rx = state.shutdown_broadcast.subscribe();
-    let mut alert_rx = state.alert_broadcast.subscribe();
 
     let stream = async_stream::stream! {
         // Send an initial "connected" event
@@ -376,21 +370,6 @@ async fn sse_handler(
                         Err(broadcast::error::RecvError::Closed) => {
                             yield Ok(Event::default().event("shutdown").data("Server connection closed"));
                             break;
-                        }
-                        Err(broadcast::error::RecvError::Lagged(_)) => {
-                            continue;
-                        }
-                    }
-                }
-                // Check for price alert broadcast
-                result = alert_rx.recv() => {
-                    match result {
-                        Ok(alert_json) => {
-                            println!("[WebServer] SSE: Sending price-alert event to browser");
-                            yield Ok(Event::default().event("price-alert").data(alert_json));
-                        }
-                        Err(broadcast::error::RecvError::Closed) => {
-                            // Alert channel closed, continue listening for other events
                         }
                         Err(broadcast::error::RecvError::Lagged(_)) => {
                             continue;

@@ -582,91 +582,11 @@ class FinCatchAPI {
     }
   }
 
-  /**
-   * Reset triggered alert for an entry
-   */
-  async resetEntryAlert(entryId: string): Promise<void> {
-    if (!isTauri()) {
-      throw new Error(
-        "Price alerts can only be configured in the desktop app.",
-      );
-    }
-    try {
-      console.log("[Tauri IPC] reset_entry_alert", { entryId });
-      await invoke<void>("reset_entry_alert", { entryId });
-      console.log("[Tauri IPC Response] Entry alert reset");
-    } catch (error) {
-      console.error("Error resetting entry alert:", error);
-      throw this.handleError(error);
-    }
-  }
-
-  /**
-   * Get all entries with triggered alerts
-   */
-  async getTriggeredAlerts(): Promise<PortfolioEntry[]> {
-    if (!isTauri()) {
-      return [];
-    }
-    try {
-      console.log("[Tauri IPC] get_triggered_alerts");
-      const entries = await invoke<PortfolioEntry[]>("get_triggered_alerts");
-      console.log("[Tauri IPC Response]", entries);
-      return entries;
-    } catch (error) {
-      console.error("Error getting triggered alerts:", error);
-      throw this.handleError(error);
-    }
-  }
-
-  /**
-   * Get alert settings
-   */
-  async getAlertSettings(): Promise<{
-    check_interval: number;
-    cooldown: number;
-  }> {
-    if (!isTauri()) {
-      return { check_interval: 60, cooldown: 3600 };
-    }
-    try {
-      console.log("[Tauri IPC] get_alert_settings");
-      const settings = await invoke<{
-        check_interval: number;
-        cooldown: number;
-      }>("get_alert_settings");
-      console.log("[Tauri IPC Response]", settings);
-      return settings;
-    } catch (error) {
-      console.error("Error getting alert settings:", error);
-      throw this.handleError(error);
-    }
-  }
-
-  /**
-   * Set alert settings
-   */
-  async setAlertSettings(
-    checkInterval: number,
-    cooldown: number,
-  ): Promise<void> {
-    if (!isTauri()) {
-      throw new Error(
-        "Alert settings can only be configured in the desktop app.",
-      );
-    }
-    try {
-      console.log("[Tauri IPC] set_alert_settings", {
-        checkInterval,
-        cooldown,
-      });
-      await invoke<void>("set_alert_settings", { checkInterval, cooldown });
-      console.log("[Tauri IPC Response] Alert settings updated");
-    } catch (error) {
-      console.error("Error setting alert settings:", error);
-      throw this.handleError(error);
-    }
-  }
+  // Note: Alert monitoring methods removed - now handled by qm-sync server
+  // - resetEntryAlert: Server tracks alert state
+  // - getTriggeredAlerts: Server provides triggered alerts via notifications
+  // - getAlertSettings: Server manages check interval and cooldown
+  // - setAlertSettings: Server manages check interval and cooldown
 
   /**
    * Handle API errors
