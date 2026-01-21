@@ -381,13 +381,85 @@ impl GoldDataSource for SjcSource {
             "provider": "SJC Gold Company",
             "country": "Vietnam",
             "currency": "VND",
-            "default_unit": "mace",
-            "unit_label": "Depends on gold type",
-            "supported_gold_types": [
-                {"id": "1", "name": "Vàng SJC 1L, 10L, 1KG - HCMC", "unit": "tael", "unit_label": "Tael/Lượng (37.5g)"},
-                {"id": "2", "name": "Vàng SJC 1L, 10L, 1KG - Hanoi", "unit": "tael", "unit_label": "Tael/Lượng (37.5g)"},
-                {"id": "49", "name": "Vàng nhẫn SJC 99.99% 1 chỉ, 2 chỉ, 5 chỉ", "unit": "mace", "unit_label": "Mace/Chỉ (3.75g)"}
-            ]
+            "default_unit": "tael",
+            "unit_label": "Tael/Lượng (37.5g)",
+            "note": "All API prices are returned per tael (37.5g), regardless of gold type",
+            "gold_type_categories": [
+                {
+                    "category": "Gold Bars (1L, 10L, 1KG)",
+                    "description": "Large gold bars - Vàng SJC 1L, 10L, 1KG",
+                    "unit": "tael",
+                    "unit_label": "Tael/Lượng (37.5g)",
+                    "locations": [
+                        {"id": "1", "location": "Hồ Chí Minh"},
+                        {"id": "2", "location": "Miền Bắc"},
+                        {"id": "4", "location": "Nha Trang"},
+                        {"id": "5", "location": "Cà Mau"},
+                        {"id": "7", "location": "Huế"},
+                        {"id": "8", "location": "Biên Hòa"},
+                        {"id": "9", "location": "Miền Tây"},
+                        {"id": "10", "location": "Quảng Ngãi"},
+                        {"id": "13", "location": "Hạ Long"},
+                        {"id": "16", "location": "Bạc Liêu"}
+                    ]
+                },
+                {
+                    "category": "5 Chỉ Gold",
+                    "description": "Medium-sized gold pieces - Vàng SJC 5 chỉ",
+                    "unit": "tael",
+                    "unit_label": "Tael/Lượng (37.5g)",
+                    "locations": [
+                        {"id": "17", "location": "Hồ Chí Minh"},
+                        {"id": "18", "location": "Miền Bắc"},
+                        {"id": "20", "location": "Nha Trang"},
+                        {"id": "21", "location": "Cà Mau"},
+                        {"id": "23", "location": "Huế"},
+                        {"id": "24", "location": "Biên Hòa"},
+                        {"id": "25", "location": "Miền Tây"},
+                        {"id": "26", "location": "Quảng Ngãi"},
+                        {"id": "29", "location": "Hạ Long"},
+                        {"id": "32", "location": "Bạc Liêu"}
+                    ]
+                },
+                {
+                    "category": "Small Gold (0.5-2 Chỉ)",
+                    "description": "Smaller gold pieces - Vàng SJC 0.5 chỉ, 1 chỉ, 2 chỉ",
+                    "unit": "tael",
+                    "unit_label": "Tael/Lượng (37.5g)",
+                    "locations": [
+                        {"id": "33", "location": "Hồ Chí Minh"},
+                        {"id": "34", "location": "Miền Bắc"},
+                        {"id": "36", "location": "Nha Trang"},
+                        {"id": "37", "location": "Cà Mau"},
+                        {"id": "39", "location": "Huế"},
+                        {"id": "40", "location": "Biên Hòa"},
+                        {"id": "41", "location": "Miền Tây"},
+                        {"id": "42", "location": "Quảng Ngãi"},
+                        {"id": "45", "location": "Hạ Long"},
+                        {"id": "48", "location": "Bạc Liêu"}
+                    ]
+                },
+                {
+                    "category": "Gold Rings",
+                    "description": "Gold jewelry/rings - Vàng nhẫn SJC 99.99% 1 chỉ, 2 chỉ, 5 chỉ",
+                    "unit": "tael",
+                    "unit_label": "Tael/Lượng (37.5g) - API format",
+                    "typical_display_unit": "mace",
+                    "typical_display_label": "Mace/Chỉ (3.75g) - User display",
+                    "locations": [
+                        {"id": "49", "location": "Hồ Chí Minh"},
+                        {"id": "50", "location": "Miền Bắc"},
+                        {"id": "52", "location": "Nha Trang"},
+                        {"id": "53", "location": "Cà Mau"},
+                        {"id": "55", "location": "Huế"},
+                        {"id": "56", "location": "Biên Hòa"},
+                        {"id": "57", "location": "Miền Tây"},
+                        {"id": "58", "location": "Quảng Ngãi"}
+                    ]
+                }
+            ],
+            "total_supported_ids": 38,
+            "documentation": "See docs/SJC_GOLD_PRICE_IDS.md for complete reference"
         })
     }
 }
