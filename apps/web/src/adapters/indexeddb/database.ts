@@ -1,0 +1,141 @@
+/**
+ * IndexedDB Database Setup using Dexie
+ *
+ * Dexie provides a minimalistic wrapper for IndexedDB with a powerful
+ * and intuitive API. Database schema matches the SQLite schema used in the Tauri app.
+ */
+
+import Dexie, { type EntityTable, type Table } from "dexie";
+import type {
+  Portfolio,
+  PortfolioEntry,
+  BondCouponPayment,
+} from "@fin-catch/shared/types";
+
+// =============================================================================
+// Sync Metadata Types
+// =============================================================================
+
+/**
+ * Sync metadata stored in IndexedDB
+ */
+export interface SyncMeta {
+  key: string;
+  value: string;
+}
+
+/**
+ * Pending change record for tracking local modifications
+ */
+export interface PendingChange {
+  id?: number; // Auto-increment
+  tableName: string;
+  rowId: string;
+  operation: "create" | "update" | "delete";
+  data: Record<string, unknown>;
+  version: number;
+  createdAt: number;
+}
+
+// =============================================================================
+// Database Class
+// =============================================================================
+
+/**
+ * FinCatch Database class extending Dexie
+ */
+export class FinCatchDatabase extends Dexie {
+  // Entity tables
+  portfolios!: EntityTable<Portfolio, "id">;
+  portfolioEntries!: EntityTable<PortfolioEntry, "id">;
+  couponPayments!: EntityTable<BondCouponPayment, "id">;
+
+  // Sync tables
+  _syncMeta!: Table<SyncMeta, string>;
+  _pendingChanges!: Table<PendingChange, number>;
+
+  constructor() {
+    super("FinCatchDB");
+
+    // Define schema
+    // Version 1: Initial schema
+    this.version(1).stores({
+      // Primary key is id, indexed by created_at
+      portfolios: "id, created_at, sync_version",
+      // Primary key is id, indexed by portfolio_id and created_at
+      portfolioEntries:
+        "id, portfolio_id, asset_type, symbol, created_at, sync_version",
+      // Primary key is id, indexed by entry_id
+      couponPayments: "id, entry_id, payment_date, sync_version",
+    });
+
+    // Version 2: Add sync metadata tables
+    this.version(2).stores({
+      portfolios: "id, created_at, sync_version, synced_at",
+      portfolioEntries:
+        "id, portfolio_id, asset_type, symbol, created_at, sync_version, synced_at",
+      couponPayments: "id, entry_id, payment_date, sync_version, synced_at",
+      // Sync metadata (checkpoint, config, etc.)
+      _syncMeta: "key",
+      // Pending changes queue
+      _pendingChanges: "++id, tableName, rowId",
+    });
+
+    // Map table names
+    this.portfolios = this.table("portfolios");
+    this.portfolioEntries = this.table("portfolioEntries");
+    this.couponPayments = this.table("couponPayments");
+    this._syncMeta = this.table("_syncMeta");
+    this._pendingChanges = this.table("_pendingChanges");
+  }
+
+  /**
+   * Get a sync meta value by key
+   */
+  async getSyncMeta(key: string): Promise<string | undefined> {
+    const record = await this._syncMeta.get(key);
+    return record?.value;
+  }
+
+  /**
+   * Set a sync meta value
+   */
+  async setSyncMeta(key: string, value: string): Promise<void> {
+    await this._syncMeta.put({ key, value });
+  }
+
+  /**
+   * Delete a sync meta value
+   */
+  async deleteSyncMeta(key: string): Promise<void> {
+    await this._syncMeta.delete(key);
+  }
+}
+
+// Singleton database instance
+export const db = new FinCatchDatabase();
+
+/**
+ * Generate a UUID v4
+ */
+export function generateId(): string {
+  return crypto.randomUUID();
+}
+
+/**
+ * Get current Unix timestamp in seconds
+ */
+export function getCurrentTimestamp(): number {
+  return Math.floor(Date.now() / 1000);
+}
+
+// =============================================================================
+// Sync Meta Keys
+// =============================================================================
+
+export const SYNC_META_KEYS = {
+  CHECKPOINT: "checkpoint",
+  LAST_SYNC_AT: "lastSyncAt",
+  // Note: Token storage has been moved to auth service (localStorage)
+  // for unified token management across auth and sync services
+} as const;

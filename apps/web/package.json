@@ -1,0 +1,39 @@
+{
+  "name": "@fin-catch/web",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview",
+    "clean": "rimraf dist .turbo"
+  },
+  "dependencies": {
+    "@fin-catch/shared": "workspace:*",
+    "@fin-catch/ui": "workspace:*",
+    "@radix-ui/react-icons": "^1.3.2",
+    "@tailwindcss/vite": "^4.1.17",
+    "axios": "^1.13.2",
+    "clsx": "^2.1.1",
+    "date-fns": "^4.1.0",
+    "framer-motion": "^12.23.24",
+    "dexie": "^4.0.11",
+    "lucide-react": "^0.553.0",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0",
+    "react-hook-form": "^7.66.0",
+    "react-i18next": "^16.3.3",
+    "react-router-dom": "^7.9.6",
+    "tailwind-merge": "^3.4.0",
+    "tailwindcss": "^4.1.17"
+  },
+  "devDependencies": {
+    "@types/node": "^24.10.1",
+    "@types/react": "^19.1.8",
+    "@types/react-dom": "^19.1.6",
+    "@vitejs/plugin-react": "^4.6.0",
+    "typescript": "~5.8.3",
+    "vite": "^7.0.4"
+  }
+}

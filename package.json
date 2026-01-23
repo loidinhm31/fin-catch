@@ -1,0 +1,23 @@
+{
+  "name": "fin-catch-monorepo",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev:tauri": "turbo run dev --filter=@fin-catch/tauri",
+    "dev:web": "turbo run dev --filter=@fin-catch/web",
+    "build": "turbo run build",
+    "build:tauri": "turbo run build --filter=@fin-catch/tauri",
+    "build:web": "turbo run build --filter=@fin-catch/web",
+    "lint": "turbo run lint",
+    "clean": "turbo run clean",
+    "format": "prettier --write \"**/*.{ts,tsx,md,json}\""
+  },
+  "devDependencies": {
+    "turbo": "^2.5.4",
+    "prettier": "^3.2.5"
+  },
+  "packageManager": "pnpm@9.1.0"
+}

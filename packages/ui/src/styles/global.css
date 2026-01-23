@@ -1,0 +1,927 @@
+@import "tailwindcss";
+@import "./fonts.css";
+
+@source "../**/*.{ts,tsx}";
+
+/* ============================================
+   FINCATCH - DARK MODE FINTECH/CRYPTO THEME
+   Glassmorphism + Security-Focused Design
+   ============================================ */
+
+@theme {
+  /* ===== FINTECH COLOR PALETTE (Dark Mode OLED) ===== */
+  /* Background Colors - Deep Black & Midnight Blue */
+  --color-bg-primary: #0f172a;
+  /* slate-900 - Primary dark background */
+  --color-bg-secondary: #0a0e27;
+  /* Midnight blue - Secondary areas */
+  --color-bg-tertiary: #121212;
+  /* Deep black - OLED optimization */
+  /* Fintech Brand Colors */
+  --color-amber-400: #fbbf24;
+  /* Secondary accent - Gold/Success */
+  --color-amber-500: #f59e0b;
+  /* Primary accent - Gold */
+  --color-amber-600: #d97706;
+  /* Hover state */
+  --color-violet-500: #8b5cf6;
+  /* CTA Primary */
+  --color-violet-600: #7c3aed;
+  /* CTA Hover */
+  --color-violet-700: #6d28d9;
+  /* CTA Active */
+  /* Crypto Accent Colors */
+  --color-cyan-400: #22d3ee;
+  /* Tech accent - Bright cyan */
+  --color-cyan-500: #06b6d4;
+  /* Tech accent - Primary */
+  --color-blue-400: #60a5fa;
+  /* Secondary tech accent */
+  --color-blue-500: #3b82f6;
+  /* Links and highlights */
+  /* Status Colors */
+  --color-green-400: #4ade80;
+  /* Success/Gain */
+  --color-green-500: #22c55e;
+  /* Success primary */
+  --color-red-400: #f87171;
+  /* Error/Loss */
+  --color-red-500: #ef4444;
+  /* Error primary */
+  /* Text Colors - High Contrast for Readability */
+  --color-text-primary: #f8fafc;
+  /* slate-50 - Primary text */
+  --color-text-secondary: #cbd5e1;
+  /* slate-300 - Secondary text */
+  --color-text-muted: #64748b;
+  /* slate-500 - Muted text */
+  /* Border Colors */
+  --color-border-primary: #334155;
+  /* slate-700 - Primary borders */
+  --color-border-secondary: #1e293b;
+  /* slate-800 - Subtle borders */
+  /* ===== GLASSMORPHISM - DARK MODE ===== */
+  /* Glass backgrounds with dark tint - Increased opacity for better text contrast */
+  --glass-bg-dark: rgba(15, 23, 42, 0.85);
+  /* Primary glass - increased from 0.7 */
+  --glass-bg-dark-strong: rgba(15, 23, 42, 0.95);
+  /* Strong glass - increased from 0.85 */
+  --glass-bg-darker: rgba(10, 14, 39, 0.9);
+  /* Deeper glass - increased from 0.8 */
+  /* Glass borders - More visible for better definition */
+  --glass-border-light: rgba(255, 255, 255, 0.15);
+  /* Increased from 0.1 */
+  --glass-border-medium: rgba(255, 255, 255, 0.2);
+  /* Increased from 0.15 */
+  --glass-border-glow: rgba(139, 92, 246, 0.4);
+  /* Violet glow - increased from 0.3 */
+  /* ===== BACKDROP BLUR ===== */
+  --blur-xs: blur(4px);
+  --blur-sm: blur(8px);
+  --blur-md: blur(12px);
+  --blur-lg: blur(16px);
+  --blur-xl: blur(20px);
+
+  /* ===== TYPOGRAPHY - Tech Startup ===== */
+  --font-heading: "Space Grotesk", "Inter", system-ui, sans-serif;
+  --font-body: "DM Sans", "Inter", system-ui, sans-serif;
+
+  /* Font Sizes */
+  --text-xs: 0.75rem;
+  /* 12px */
+  --text-sm: 0.875rem;
+  /* 14px */
+  --text-base: 1rem;
+  /* 16px */
+  --text-lg: 1.125rem;
+  /* 18px */
+  --text-xl: 1.25rem;
+  /* 20px */
+  --text-2xl: 1.5rem;
+  /* 24px */
+  --text-3xl: 1.875rem;
+  /* 30px */
+  --text-4xl: 2.25rem;
+  /* 36px */
+  --text-5xl: 3rem;
+  /* 48px */
+  /* Font Weights */
+  --font-normal: 400;
+  --font-medium: 500;
+  --font-semibold: 600;
+  --font-bold: 700;
+  --font-extrabold: 800;
+
+  /* ===== SPACING ===== */
+  --space-1: 0.25rem;
+  /* 4px */
+  --space-2: 0.5rem;
+  /* 8px */
+  --space-3: 0.75rem;
+  /* 12px */
+  --space-4: 1rem;
+  /* 16px */
+  --space-5: 1.25rem;
+  /* 20px */
+  --space-6: 1.5rem;
+  /* 24px */
+  --space-8: 2rem;
+  /* 32px */
+  --space-10: 2.5rem;
+  /* 40px */
+  --space-12: 3rem;
+  /* 48px */
+  --space-16: 4rem;
+  /* 64px */
+  /* ===== BORDER RADIUS ===== */
+  --radius-sm: 0.5rem;
+  /* 8px */
+  --radius-md: 0.75rem;
+  /* 12px */
+  --radius-lg: 1rem;
+  /* 16px */
+  --radius-xl: 1.5rem;
+  /* 24px */
+  --radius-2xl: 2rem;
+  /* 32px */
+  --radius-full: 9999px;
+
+  /* ===== SHADOWS - Subtle depth in dark mode ===== */
+  --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.6);
+  --shadow-glow-violet: 0 0 20px rgba(139, 92, 246, 0.4);
+  --shadow-glow-cyan: 0 0 20px rgba(34, 211, 238, 0.3);
+
+  /* ===== TRANSITIONS ===== */
+  --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-base: 200ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-slow: 300ms cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* ===== Z-INDEX LAYERS ===== */
+  --z-background: -1;
+  --z-base: 0;
+  --z-dropdown: 10;
+  --z-sticky: 20;
+  --z-overlay: 30;
+  --z-modal: 40;
+  --z-tooltip: 50;
+}
+
+/* ===== BODY & HTML - DARK MODE BASE ===== */
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: var(--font-body);
+  color: var(--color-text-primary);
+  background: var(--color-bg-primary);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* All headings use Space Grotesk */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: var(--font-heading);
+  font-weight: var(--font-bold);
+  color: var(--color-text-primary);
+}
+
+/* ===== GLASSMORPHISM COMPONENTS (DARK MODE) ===== */
+
+.glass-container {
+  background: var(--glass-bg-dark-strong);
+  backdrop-filter: var(--blur-lg);
+  -webkit-backdrop-filter: var(--blur-lg);
+  border-radius: var(--radius-2xl);
+  border: 1px solid var(--glass-border-medium);
+  box-shadow: var(--shadow-xl);
+}
+
+.glass-card {
+  background: var(--glass-bg-dark);
+  backdrop-filter: var(--blur-md);
+  -webkit-backdrop-filter: var(--blur-md);
+  border-radius: var(--radius-xl);
+  border: 1px solid var(--glass-border-light);
+  transition: all var(--transition-base);
+  cursor: pointer;
+}
+
+.glass-card:hover {
+  background: var(--glass-bg-dark-strong);
+  border-color: var(--glass-border-medium);
+  box-shadow:
+    var(--shadow-lg),
+    0 0 15px rgba(139, 92, 246, 0.2);
+  transform: translateY(-2px);
+}
+
+.glass-input {
+  background: rgba(15, 23, 42, 0.8);
+  /* Increased from 0.6 for better contrast */
+  backdrop-filter: var(--blur-sm);
+  -webkit-backdrop-filter: var(--blur-sm);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--glass-border-light);
+  padding: var(--space-3) var(--space-4);
+  color: var(--color-text-primary);
+  transition: all var(--transition-base);
+}
+
+.glass-input:focus {
+  outline: none;
+  border-color: var(--color-violet-500);
+  box-shadow:
+    0 0 0 3px rgba(139, 92, 246, 0.3),
+    0 0 15px rgba(139, 92, 246, 0.2);
+  background: rgba(15, 23, 42, 0.95);
+  /* Increased from 0.8 */
+}
+
+.glass-button {
+  background: var(--glass-bg-dark);
+  backdrop-filter: var(--blur-md);
+  -webkit-backdrop-filter: var(--blur-md);
+  border-radius: var(--radius-xl);
+  padding: var(--space-3) var(--space-6);
+  border: 1px solid var(--glass-border-light);
+  transition: all var(--transition-base);
+  cursor: pointer;
+  color: var(--color-text-primary);
+  font-weight: var(--font-semibold);
+  font-family: var(--font-heading);
+}
+
+.glass-button:hover {
+  background: var(--glass-bg-dark-strong);
+  border-color: var(--glass-border-medium);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+}
+
+/* ===== BUTTONS - FINTECH STYLE ===== */
+
+.btn-primary {
+  background: linear-gradient(135deg,
+      var(--color-violet-500) 0%,
+      var(--color-violet-600) 100%);
+  color: var(--color-text-primary);
+  font-weight: var(--font-bold);
+  font-family: var(--font-heading);
+  border-radius: var(--radius-lg);
+  padding: var(--space-3) var(--space-8);
+  border: none;
+  box-shadow: var(--shadow-glow-violet);
+  cursor: pointer;
+  transition: all var(--transition-base);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.btn-primary:hover {
+  background: linear-gradient(135deg,
+      var(--color-violet-600) 0%,
+      var(--color-violet-700) 100%);
+  box-shadow: var(--shadow-xl), var(--shadow-glow-violet);
+  transform: translateY(-2px);
+}
+
+.btn-secondary {
+  background: transparent;
+  color: var(--color-text-primary);
+  font-weight: var(--font-semibold);
+  font-family: var(--font-heading);
+  border-radius: var(--radius-lg);
+  padding: var(--space-3) var(--space-6);
+  border: 2px solid var(--glass-border-medium);
+  cursor: pointer;
+  transition: all var(--transition-base);
+}
+
+.btn-secondary:hover {
+  background: var(--glass-bg-dark);
+  border-color: var(--color-violet-500);
+}
+
+/* ===== SECURITY BADGE ===== */
+
+.security-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  background: var(--glass-bg-darker);
+  backdrop-filter: var(--blur-sm);
+  -webkit-backdrop-filter: var(--blur-sm);
+  border: 1px solid var(--glass-border-glow);
+  border-radius: var(--radius-full);
+  padding: var(--space-2) var(--space-4);
+  font-size: var(--text-xs);
+  font-weight: var(--font-semibold);
+  color: var(--color-violet-500);
+  box-shadow: var(--shadow-glow-violet);
+}
+
+/* ===== GEOMETRIC CRYPTO ELEMENTS ===== */
+
+.crypto-decoration {
+  position: relative;
+  width: 4rem;
+  height: 4rem;
+}
+
+.crypto-decoration::before,
+.crypto-decoration::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: var(--radius-sm);
+}
+
+.crypto-decoration::before {
+  background: linear-gradient(135deg,
+      var(--color-cyan-400) 0%,
+      var(--color-blue-500) 100%);
+  transform: rotate(45deg);
+  opacity: 0.6;
+  box-shadow: var(--shadow-glow-cyan);
+}
+
+.crypto-decoration::after {
+  background: linear-gradient(135deg,
+      var(--color-violet-500) 0%,
+      var(--color-violet-600) 100%);
+  transform: rotate(-12deg);
+  opacity: 0.5;
+}
+
+.crypto-decoration.gold::before {
+  background: linear-gradient(135deg,
+      var(--color-amber-400) 0%,
+      var(--color-amber-500) 100%);
+}
+
+.crypto-decoration.pink::before {
+  background: linear-gradient(135deg, var(--color-violet-500) 0%, #ec4899 100%);
+}
+
+/* Backwards compatibility aliases */
+.cube-decoration {
+  position: relative;
+  width: 4rem;
+  height: 4rem;
+}
+
+.cube-decoration::before,
+.cube-decoration::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: var(--radius-sm);
+}
+
+.cube-decoration::before {
+  background: linear-gradient(135deg,
+      var(--color-cyan-400) 0%,
+      var(--color-blue-500) 100%);
+  transform: rotate(45deg);
+  opacity: 0.6;
+}
+
+.cube-decoration::after {
+  background: linear-gradient(135deg,
+      var(--color-violet-500) 0%,
+      var(--color-violet-600) 100%);
+  transform: rotate(-12deg);
+  opacity: 0.5;
+}
+
+.cube-decoration.cube-yellow::before {
+  background: linear-gradient(135deg,
+      var(--color-amber-400) 0%,
+      var(--color-amber-500) 100%);
+}
+
+.cube-decoration.cube-pink::before {
+  background: linear-gradient(135deg, var(--color-violet-500) 0%, #ec4899 100%);
+}
+
+/* ===== ANIMATIONS ===== */
+
+@keyframes float {
+
+  0%,
+  100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+
+  33% {
+    transform: translateY(-15px) rotate(2deg);
+  }
+
+  66% {
+    transform: translateY(-8px) rotate(-2deg);
+  }
+}
+
+@keyframes pulse-glow {
+
+  0%,
+  100% {
+    opacity: 1;
+    box-shadow: var(--shadow-glow-violet);
+  }
+
+  50% {
+    opacity: 0.7;
+    box-shadow: 0 0 30px rgba(139, 92, 246, 0.6);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -1000px 0;
+  }
+
+  100% {
+    background-position: 1000px 0;
+  }
+}
+
+/* Radix UI animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes fadeOut {
+  from {
+    opacity: 1;
+  }
+
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes zoomIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes zoomOut {
+  from {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  to {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+}
+
+@keyframes slideInFromTop {
+  from {
+    transform: translateY(-48%);
+    opacity: 0;
+  }
+
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideOutToTop {
+  from {
+    transform: translateY(0);
+    opacity: 1;
+  }
+
+  to {
+    transform: translateY(-48%);
+    opacity: 0;
+  }
+}
+
+.animate-float {
+  animation: float 6s ease-in-out infinite;
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 3s ease-in-out infinite;
+}
+
+.animate-shimmer {
+  background: linear-gradient(90deg,
+      transparent,
+      rgba(139, 92, 246, 0.2),
+      transparent);
+  background-size: 1000px 100%;
+  animation: shimmer 3s infinite;
+}
+
+.animate-in {
+  animation-duration: 150ms;
+  animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.animate-out {
+  animation-duration: 150ms;
+  animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.fade-in-0 {
+  animation-name: fadeIn;
+}
+
+.fade-out-0 {
+  animation-name: fadeOut;
+}
+
+.zoom-in-95 {
+  animation-name: zoomIn;
+}
+
+.zoom-out-95 {
+  animation-name: zoomOut;
+}
+
+.slide-in-from-top-\[48\%\] {
+  animation-name: slideInFromTop;
+}
+
+.slide-out-to-top-\[48\%\] {
+  animation-name: slideOutToTop;
+}
+
+.slide-in-from-left-1\/2 {
+  animation-name: slideInFromTop;
+}
+
+.slide-out-to-left-1\/2 {
+  animation-name: slideOutToTop;
+}
+
+/* Accordion animations */
+@keyframes accordion-down {
+  from {
+    height: 0;
+  }
+
+  to {
+    height: var(--radix-accordion-content-height);
+  }
+}
+
+@keyframes accordion-up {
+  from {
+    height: var(--radix-accordion-content-height);
+  }
+
+  to {
+    height: 0;
+  }
+}
+
+.animate-accordion-down {
+  animation: accordion-down 0.2s ease-out;
+}
+
+.animate-accordion-up {
+  animation: accordion-up 0.2s ease-out;
+}
+
+/* ===== SCREEN BACKGROUNDS - DARK GRADIENTS ===== */
+
+.screen-welcome {
+  background: linear-gradient(135deg,
+      var(--color-bg-secondary) 0%,
+      var(--color-bg-primary) 50%,
+      #1e1b4b 100%);
+  min-height: 100vh;
+  position: relative;
+  overflow: hidden;
+}
+
+.screen-explore {
+  background: linear-gradient(135deg,
+      var(--color-bg-primary) 0%,
+      var(--color-bg-secondary) 50%,
+      #0f172a 100%);
+  min-height: 100vh;
+  position: relative;
+  overflow: hidden;
+}
+
+.screen-detail {
+  background: linear-gradient(135deg,
+      var(--color-bg-secondary) 0%,
+      var(--color-bg-tertiary) 50%,
+      var(--color-bg-primary) 100%);
+  min-height: 100vh;
+  position: relative;
+  overflow: hidden;
+}
+
+/* ===== UTILITY CLASSES ===== */
+
+.container-app {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: var(--space-4);
+}
+
+.text-gradient-cyber {
+  background: linear-gradient(135deg,
+      var(--color-cyan-400) 0%,
+      var(--color-violet-500) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.text-gradient-gold {
+  background: linear-gradient(135deg,
+      var(--color-amber-400) 0%,
+      var(--color-amber-500) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* ===== TEXT OPACITY HELPERS - HIGH CONTRAST ===== */
+
+/* Instead of using opacity on white text, use specific gray shades for better contrast */
+.text-primary {
+  color: var(--color-text-primary);
+  /* #F8FAFC - Full white */
+}
+
+.text-secondary {
+  color: var(--color-text-secondary);
+  /* #CBD5E1 - Light gray - better than white @ 70% opacity */
+}
+
+.text-muted {
+  color: var(--color-text-muted);
+  /* #64748B - Muted gray - better than white @ 60% opacity */
+}
+
+/* Specific opacity levels that maintain WCAG AA contrast (4.5:1 minimum) */
+.text-opacity-90 {
+  color: rgba(248, 250, 252, 0.9);
+  /* Still very readable */
+}
+
+.text-opacity-80 {
+  color: rgba(248, 250, 252, 0.8);
+  /* Minimum for body text */
+}
+
+/* ===== FOCUS STATES - ACCESSIBILITY ===== */
+
+*:focus {
+  outline: none;
+}
+
+*:focus-visible {
+  outline: 2px solid var(--color-violet-500);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+
+/* ===== CUSTOM SCROLLBAR - DARK MODE ===== */
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-bg-secondary);
+  border-radius: var(--radius-sm);
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg,
+      var(--color-violet-500) 0%,
+      var(--color-violet-600) 100%);
+  border-radius: var(--radius-sm);
+  border: 2px solid var(--color-bg-secondary);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg,
+      var(--color-violet-600) 0%,
+      var(--color-violet-700) 100%);
+}
+
+/* ===== REDUCED MOTION - ACCESSIBILITY ===== */
+
+@media (prefers-reduced-motion: reduce) {
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ===== RESPONSIVE BREAKPOINTS ===== */
+
+@media (max-width: 640px) {
+  :root {
+    --text-5xl: 2.5rem;
+    --text-3xl: 1.75rem;
+    --text-2xl: 1.375rem;
+  }
+
+  .glass-card {
+    border-radius: var(--radius-lg);
+  }
+
+  .container-app {
+    padding: var(--space-3);
+  }
+}
+
+/* ===== BACKWARDS COMPATIBILITY ===== */
+
+:root {
+  /* Keep old color variable names for existing components */
+  --cube-cyan: var(--color-cyan-400);
+  --cube-cyan-light: var(--color-cyan-400);
+  --cube-cyan-dark: var(--color-cyan-500);
+  --cube-blue: var(--color-blue-500);
+  --cube-blue-light: var(--color-blue-400);
+  --cube-blue-dark: var(--color-blue-500);
+  --cube-yellow: var(--color-amber-400);
+  --cube-yellow-light: var(--color-amber-400);
+  --cube-pink: #ec4899;
+  --cube-pink-light: #f9a8d4;
+
+  /* Text colors - ensure high contrast */
+  --cube-gray-900: var(--color-text-primary);
+  /* #F8FAFC - White text for dark mode */
+  --cube-gray-800: var(--color-text-secondary);
+  /* #CBD5E1 - Light gray */
+  --cube-gray-700: var(--color-text-secondary);
+  /* #CBD5E1 - Light gray */
+  --cube-gray-600: var(--color-text-secondary);
+  /* #CBD5E1 - Light gray */
+  --cube-gray-500: var(--color-text-muted);
+  /* #64748B - Muted but visible */
+  --cube-gray-400: var(--color-text-muted);
+  /* #64748B - Muted but visible */
+  --cube-gray-300: var(--color-text-secondary);
+  /* #CBD5E1 - Light gray */
+  --cube-gray-200: var(--color-border-primary);
+  /* #334155 - Borders */
+  --cube-gray-100: var(--color-border-secondary);
+  /* #1E293B - Subtle borders */
+  --cube-white: var(--color-text-primary);
+  /* #F8FAFC - White */
+
+  /* Old gradient variables */
+  --gradient-explore: linear-gradient(135deg,
+      var(--color-bg-primary) 0%,
+      var(--color-bg-secondary) 100%);
+}
+
+/* ===== DATE PICKER FIXES ===== */
+
+/* Dark mode date inputs - allow text color to inherit from parent */
+input[type="date"],
+input[type="time"],
+input[type="datetime-local"] {
+  color-scheme: dark;
+  position: relative;
+}
+
+/* Ensure date picker calendar closes after selection */
+input[type="date"]::-webkit-calendar-picker-indicator {
+  cursor: pointer;
+  position: relative;
+  z-index: 2;
+  filter: invert(1);
+  /* Make calendar icon visible on dark background */
+}
+
+/* Make sure the native date picker appears above modals */
+input[type="date"]::-webkit-datetime-edit,
+input[type="date"]::-webkit-datetime-edit-fields-wrapper {
+  position: relative;
+}
+
+/* Ensure the calendar popup appears above everything */
+input[type="date"]:focus,
+input[type="datetime-local"]:focus {
+  position: relative;
+  z-index: 9999;
+}
+
+/* Fix datetime-local picker */
+input[type="datetime-local"]::-webkit-calendar-picker-indicator {
+  cursor: pointer;
+  position: relative;
+  z-index: 2;
+  filter: invert(1);
+  /* Make calendar icon visible on dark background */
+}
+
+/* Option elements in dropdowns - use light background for readability */
+option {
+  color: #111827;
+  background: white;
+}
+
+/* ===== SELECT DROPDOWN POSITIONING FIX ===== */
+
+/* CRITICAL: Native select dropdowns require clean stacking contexts */
+/* Any transform, filter, perspective, or contain on ancestors breaks positioning */
+
+/* Fix for select dropdown positioning issues caused by backdrop-filter in parent elements */
+select {
+  position: static !important;
+  transform: none !important;
+  filter: none !important;
+  perspective: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  will-change: auto !important;
+  contain: none !important;
+}
+
+/* Remove backdrop-filter from glass-input selects */
+select.glass-input {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+/* Prevent modal and all ancestors from creating new containing blocks */
+/* IMPORTANT: Be very specific here to avoid breaking Radix Popover positioning */
+/* Only apply to native select dropdowns, not Radix components */
+[role="dialog"]>select,
+[role="dialog"] select,
+.glass-container select {
+  transform: none !important;
+  filter: none !important;
+  perspective: none !important;
+  contain: none !important;
+  will-change: auto !important;
+  -webkit-transform: none !important;
+  -webkit-filter: none !important;
+  -webkit-perspective: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+/* Ensure select parent wrappers don't interfere */
+select:focus,
+select:active {
+  z-index: 999999 !important;
+  position: static !important;
+}
+
+/* Radix Select Portal renders outside modal, so we can restore scrolling */
+[role="dialog"] .overflow-y-auto {
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+/* ===== RADIX POPOVER POSITIONING FIX ===== */
+/* Ensure Radix Popover content has correct positioning */
+[data-radix-popper-content-wrapper] {
+  position: fixed !important;
+  z-index: 99999 !important;
+}
+
+/* Ensure the popover content itself is properly styled */
+[data-radix-popper-content-wrapper]>[data-state] {
+  position: relative !important;
+}
