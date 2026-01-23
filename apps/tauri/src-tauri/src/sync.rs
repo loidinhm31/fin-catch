@@ -3,7 +3,7 @@ use std::sync::Arc;
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 
-use qm_sync_client::{Checkpoint, ReqwestHttpClient, SyncClient, SyncClientConfig, SyncRecord};
+use qm_sync_client::{Checkpoint, ReqwestHttpClient, QmSyncClient, SyncClientConfig, SyncRecord};
 
 use crate::auth::AuthService;
 use crate::db::{BondCouponPayment, Database, Portfolio, PortfolioEntry};
@@ -98,10 +98,10 @@ impl SyncService {
             (server_url, app_id, api_key, access_token, refresh_token)
         };
 
-        // Create SyncClient with ReqwestHttpClient
+        // Create QmSyncClient with ReqwestHttpClient
         let config = SyncClientConfig::new(&server_url, &app_id, &api_key);
         let http = ReqwestHttpClient::new();
-        let client = SyncClient::new(config, http);
+        let client = QmSyncClient::new(config, http);
 
         // Set tokens from our AuthService
         client.set_tokens(access_token, refresh_token, None).await;

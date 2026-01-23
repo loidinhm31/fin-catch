@@ -10,7 +10,7 @@ export {
   createSyncClientConfig,
   fetchHttpClient,
   type HttpClientFn,
-} from "./QmSyncClient";
+} from "@repo/shared";
 
 // Storage
 export { IndexedDBSyncStorage } from "./IndexedDBSyncStorage";

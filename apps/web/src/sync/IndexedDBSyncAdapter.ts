@@ -11,9 +11,9 @@ import {
   createSyncClientConfig,
   type HttpClientFn,
   QmSyncClient,
-} from "./QmSyncClient";
+} from "@repo/shared";
 import { IndexedDBSyncStorage } from "./IndexedDBSyncStorage";
-import { getCurrentTimestamp } from "../adapters/indexeddb/database";
+import { getCurrentTimestamp } from "@/adapters/indexeddb";
 
 /**
  * Token provider function type.

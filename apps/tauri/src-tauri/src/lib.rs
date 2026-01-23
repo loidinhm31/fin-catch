@@ -203,15 +203,9 @@ async fn auth_configure_sync(
     app_handle: tauri::AppHandle,
     state: State<'_, AppState>,
 ) -> Result<(), String> {
-    let mut auth = state.auth.lock().map_err(|e| format!("Failed to lock auth service: {}", e))?.clone();
-    let result = auth.configure_sync(&app_handle, server_url, app_id, api_key).await;
-
-    // Update the shared state with the new configuration
-    if result.is_ok() {
-        *state.auth.lock().map_err(|e| format!("Failed to lock auth service: {}", e))? = auth;
-    }
-
-    result
+    let auth = state.auth.lock()
+        .map_err(|e| format!("Failed to lock auth service: {}", e))?.clone();
+    auth.configure_sync(&app_handle, server_url, app_id, api_key).await
 }
 
 #[tauri::command]

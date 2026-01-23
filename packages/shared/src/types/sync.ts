@@ -29,6 +29,13 @@ export {
   initialCheckpoint,
 } from "@qm-center/sync-client-types";
 
+// Re-export client implementation for TypeScript/JavaScript apps
+export {
+  QmSyncClient,
+  fetchHttpClient,
+  type HttpClientFn,
+} from "@qm-center/sync-client-types";
+
 // =============================================================================
 // App-specific types (not in @qm-center/sync-client-types)
 // =============================================================================

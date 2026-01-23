@@ -1,5 +1,6 @@
-use reqwest::Client;
+use qm_sync_client::{ReqwestHttpClient, QmSyncClient, SyncClientConfig};
 use serde::{Deserialize, Serialize};
+use std::sync::Arc;
 use tauri_plugin_store::StoreExt;
 use chacha20poly1305::{
     aead::{Aead, KeyInit},
@@ -9,26 +10,42 @@ use argon2::{Argon2, PasswordHasher};
 use argon2::password_hash::SaltString;
 use base64::{Engine as _, engine::general_purpose::STANDARD as BASE64};
 use jsonwebtoken::{decode, decode_header, DecodingKey, Validation};
+use tokio::sync::RwLock;
 
 /// Authentication service for managing user authentication with qm-sync
-#[derive(Clone)]
+/// Uses qm-sync-client internally for HTTP calls, adding Tauri-specific features:
+/// - Encrypted token storage via tauri-plugin-store
+/// - JWT expiration checking with auto-refresh
+/// - Device-specific encryption key derivation
 pub struct AuthService {
+    sync_client: Arc<RwLock<QmSyncClient<ReqwestHttpClient>>>,
     server_url: String,
-    client: Client,
     default_app_id: String,
     default_api_key: String,
 }
 
+impl Clone for AuthService {
+    fn clone(&self) -> Self {
+        Self {
+            sync_client: Arc::clone(&self.sync_client),
+            server_url: self.server_url.clone(),
+            default_app_id: self.default_app_id.clone(),
+            default_api_key: self.default_api_key.clone(),
+        }
+    }
+}
+
 /// Response from register/login endpoints
+/// Re-exports from qm_sync_client::AuthResponse with optional fields for backwards compatibility
 #[derive(Debug, Serialize, Deserialize, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct AuthResponse {
     pub user_id: String,
     pub access_token: String,
     pub refresh_token: String,
-    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default)]
     pub apps: Option<Vec<String>>,
-    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default)]
     pub is_admin: Option<bool>,
 }
 
@@ -43,37 +60,7 @@ pub struct AuthStatus {
     pub server_url: Option<String>,
 }
 
-/// Register request
-#[derive(Debug, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
-struct RegisterRequest {
-    username: String,
-    email: String,
-    password: String,
-}
-
-/// Login request
-#[derive(Debug, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
-struct LoginRequest {
-    email: String,
-    password: String,
-}
-
-/// Refresh token request
-#[derive(Debug, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
-struct RefreshRequest {
-    refresh_token: String,
-}
-
-/// Refresh token response
-#[derive(Debug, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
-struct RefreshResponse {
-    access_token: String,
-    refresh_token: String,
-}
+// Note: Request/response structs are now handled internally by qm-sync-client
 
 /// Store keys for secure token storage
 const STORE_FILE: &str = "auth.json";
@@ -253,21 +240,32 @@ mod crypto {
 
 impl AuthService {
     /// Create a new AuthService with default credentials from environment
+    /// Uses qm-sync-client internally for HTTP calls
     pub fn new(server_url: String, default_app_id: String, default_api_key: String) -> Self {
+        let config = SyncClientConfig::new(&server_url, &default_app_id, &default_api_key);
+        let http = ReqwestHttpClient::new();
+        let sync_client = QmSyncClient::new(config, http);
+
         Self {
+            sync_client: Arc::new(RwLock::new(sync_client)),
             server_url,
-            client: Client::new(),
             default_app_id,
             default_api_key,
         }
     }
 
-    /// Update the server URL
-    pub fn set_server_url(&mut self, server_url: String) {
-        self.server_url = server_url;
+    /// Update the server URL (recreates the underlying QmSyncClient)
+    pub async fn set_server_url(&self, server_url: String) {
+        let config = SyncClientConfig::new(&server_url, &self.default_app_id, &self.default_api_key);
+        let http = ReqwestHttpClient::new();
+        let new_client = QmSyncClient::new(config, http);
+
+        let mut client = self.sync_client.write().await;
+        *client = new_client;
     }
 
     /// Register a new user
+    /// Delegates HTTP call to qm-sync-client and stores tokens securely
     pub async fn register(
         &self,
         app_handle: &tauri::AppHandle,
@@ -275,38 +273,26 @@ impl AuthService {
         email: String,
         password: String,
     ) -> Result<AuthResponse, String> {
-        // Use provided credentials or fall back to defaults
         let app_id = self.default_app_id.clone();
         let api_key = self.default_api_key.clone();
 
-        let request = RegisterRequest {
-            username,
-            email,
-            password,
+        // Delegate to qm-sync-client for HTTP call
+        let client = self.sync_client.read().await;
+        let result = client
+            .register(&username, &email, &password)
+            .await
+            .map_err(|e| format!("Registration failed: {}", e))?;
+
+        // Convert to our AuthResponse (with optional fields)
+        let auth_response = AuthResponse {
+            user_id: result.user_id,
+            access_token: result.access_token,
+            refresh_token: result.refresh_token,
+            apps: if result.apps.is_empty() { None } else { Some(result.apps) },
+            is_admin: if result.is_admin { Some(true) } else { None },
         };
 
-        let response = self
-            .client
-            .post(format!("{}/api/v1/auth/register", self.server_url))
-            .header("X-App-Id", &app_id)
-            .header("X-API-Key", &api_key)
-            .json(&request)
-            .send()
-            .await
-            .map_err(|e| format!("Failed to send register request: {}", e))?;
-
-        if !response.status().is_success() {
-            let status = response.status();
-            let error_text = response.text().await.unwrap_or_default();
-            return Err(format!("Registration failed ({}): {}", status, error_text));
-        }
-
-        let auth_response: AuthResponse = response
-            .json()
-            .await
-            .map_err(|e| format!("Failed to parse register response: {}", e))?;
-
-        // Store tokens and user info securely
+        // Store tokens and user info securely (Tauri-specific)
         self.store_auth_data(app_handle, &auth_response, &app_id, &api_key)
             .await?;
 
@@ -314,40 +300,33 @@ impl AuthService {
     }
 
     /// Login an existing user
+    /// Delegates HTTP call to qm-sync-client and stores tokens securely
     pub async fn login(
         &self,
         app_handle: &tauri::AppHandle,
         email: String,
         password: String,
     ) -> Result<AuthResponse, String> {
-        // Use provided credentials or fall back to defaults
         let app_id = self.default_app_id.clone();
         let api_key = self.default_api_key.clone();
 
-        let request = LoginRequest { email, password };
-
-        let response = self
-            .client
-            .post(format!("{}/api/v1/auth/login", self.server_url))
-            .header("X-App-Id", &app_id)
-            .header("X-API-Key", &api_key)
-            .json(&request)
-            .send()
+        // Delegate to qm-sync-client for HTTP call
+        let client = self.sync_client.read().await;
+        let result = client
+            .login(&email, &password)
             .await
-            .map_err(|e| format!("Failed to send login request: {}", e))?;
+            .map_err(|e| format!("Login failed: {}", e))?;
 
-        if !response.status().is_success() {
-            let status = response.status();
-            let error_text = response.text().await.unwrap_or_default();
-            return Err(format!("Login failed ({}): {}", status, error_text));
-        }
+        // Convert to our AuthResponse (with optional fields)
+        let auth_response = AuthResponse {
+            user_id: result.user_id,
+            access_token: result.access_token,
+            refresh_token: result.refresh_token,
+            apps: if result.apps.is_empty() { None } else { Some(result.apps) },
+            is_admin: if result.is_admin { Some(true) } else { None },
+        };
 
-        let auth_response: AuthResponse = response
-            .json()
-            .await
-            .map_err(|e| format!("Failed to parse login response: {}", e))?;
-
-        // Store tokens and user info securely
+        // Store tokens and user info securely (Tauri-specific)
         self.store_auth_data(app_handle, &auth_response, &app_id, &api_key)
             .await?;
 
@@ -355,40 +334,43 @@ impl AuthService {
     }
 
     /// Refresh the access token using the refresh token
+    /// Uses stored tokens from Tauri store, delegates HTTP to qm-sync-client
     pub async fn refresh_token(
         &self,
         app_handle: &tauri::AppHandle,
     ) -> Result<(), String> {
-        // Get stored refresh token, app_id, and api_key
+        // Get stored refresh token (decrypted from Tauri store)
         let refresh_token = self.get_refresh_token(app_handle).await?;
-        let app_id = self.get_stored_app_id(app_handle).await?;
-        let api_key = self.get_stored_api_key(app_handle)?;
+        let access_token = self.get_access_token(app_handle).await.unwrap_or_default();
 
-        let request = RefreshRequest { refresh_token };
-
-        let response = self
-            .client
-            .post(format!("{}/api/v1/auth/refresh", self.server_url))
-            .header("X-App-Id", &app_id)
-            .header("X-API-Key", &api_key)
-            .json(&request)
-            .send()
-            .await
-            .map_err(|e| format!("Failed to send refresh request: {}", e))?;
-
-        if !response.status().is_success() {
-            let status = response.status();
-            let error_text = response.text().await.unwrap_or_default();
-            return Err(format!("Token refresh failed ({}): {}", status, error_text));
+        // Set tokens in qm-sync-client before refresh
+        {
+            let client = self.sync_client.read().await;
+            client.set_tokens(access_token, refresh_token, None).await;
         }
 
-        let refresh_response: RefreshResponse = response
-            .json()
-            .await
-            .map_err(|e| format!("Failed to parse refresh response: {}", e))?;
+        // Delegate to qm-sync-client for HTTP call
+        {
+            let client = self.sync_client.read().await;
+            client
+                .refresh_token()
+                .await
+                .map_err(|e| format!("Token refresh failed: {}", e))?;
+        }
 
-        // Update stored tokens
-        self.update_tokens(app_handle, &refresh_response).await?;
+        // Get new tokens from qm-sync-client and store them securely
+        let (new_access, new_refresh) = {
+            let client = self.sync_client.read().await;
+            client.get_tokens().await
+        };
+
+        // Update stored tokens with encryption
+        self.update_tokens_raw(
+            app_handle,
+            &new_access.ok_or_else(|| "No access token after refresh".to_string())?,
+            &new_refresh.ok_or_else(|| "No refresh token after refresh".to_string())?,
+        )
+        .await?;
 
         Ok(())
     }
@@ -620,19 +602,20 @@ impl AuthService {
         Ok(())
     }
 
-    /// Update stored tokens after refresh (with encryption)
-    async fn update_tokens(
+    /// Update stored tokens with raw string values (with encryption)
+    async fn update_tokens_raw(
         &self,
         app_handle: &tauri::AppHandle,
-        refresh_response: &RefreshResponse,
+        access_token: &str,
+        refresh_token: &str,
     ) -> Result<(), String> {
         let store = app_handle
             .store(STORE_FILE)
             .map_err(|e| format!("Failed to access store: {}", e))?;
 
         // Encrypt tokens before storing
-        let encrypted_access_token = crypto::encrypt(&refresh_response.access_token)?;
-        let encrypted_refresh_token = crypto::encrypt(&refresh_response.refresh_token)?;
+        let encrypted_access_token = crypto::encrypt(access_token)?;
+        let encrypted_refresh_token = crypto::encrypt(refresh_token)?;
 
         store.set(KEY_ACCESS_TOKEN, serde_json::json!(encrypted_access_token));
         store.set(KEY_REFRESH_TOKEN, serde_json::json!(encrypted_refresh_token));
@@ -647,18 +630,19 @@ impl AuthService {
     /// Configure sync settings (server URL, app ID, API key)
     /// All parameters are optional and will use defaults from environment if not provided
     pub async fn configure_sync(
-        &mut self,
+        &self,
         app_handle: &tauri::AppHandle,
         server_url: Option<String>,
         app_id: Option<String>,
         api_key: Option<String>,
     ) -> Result<(), String> {
         // Use provided values or fall back to current/default values
-        let server_url = server_url.unwrap_or_else(|| self.server_url.clone());
+        let new_server_url = server_url.unwrap_or_else(|| self.server_url.clone());
         let app_id = app_id.unwrap_or_else(|| self.default_app_id.clone());
         let api_key = api_key.unwrap_or_else(|| self.default_api_key.clone());
 
-        self.set_server_url(server_url.clone());
+        // Update the underlying QmSyncClient with new server URL
+        self.set_server_url(new_server_url.clone()).await;
 
         let store = app_handle
             .store(STORE_FILE)
@@ -667,7 +651,7 @@ impl AuthService {
         // Encrypt API key before storing
         let encrypted_api_key = crypto::encrypt(&api_key)?;
 
-        store.set(KEY_SERVER_URL, serde_json::json!(server_url));
+        store.set(KEY_SERVER_URL, serde_json::json!(new_server_url));
         store.set(KEY_APP_ID, serde_json::json!(app_id));
         store.set(KEY_API_KEY, serde_json::json!(encrypted_api_key));
 
@@ -676,5 +660,11 @@ impl AuthService {
             .map_err(|e| format!("Failed to save store: {}", e))?;
 
         Ok(())
+    }
+
+    /// Get the underlying QmSyncClient for direct sync operations
+    /// This allows reuse of the authenticated client for push/pull/delta operations
+    pub fn sync_client(&self) -> Arc<RwLock<QmSyncClient<ReqwestHttpClient>>> {
+        Arc::clone(&self.sync_client)
     }
 }
