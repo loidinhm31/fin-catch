@@ -1,24 +1,22 @@
 import React, { useEffect, useState } from "react";
 import {
+  AlertCircle,
+  AlertTriangle,
+  ArrowDownCircle,
+  ArrowUpCircle,
+  CheckCircle2,
+  Clock,
   Cloud,
   CloudOff,
-  RefreshCw,
-  User,
-  Mail,
-  Server,
-  CheckCircle2,
-  AlertCircle,
   LogOut,
-  Clock,
-  ArrowUpCircle,
-  ArrowDownCircle,
-  AlertTriangle,
+  Mail,
+  RefreshCw,
+  Server,
+  User,
 } from "lucide-react";
-import { Button } from "../atoms/Button";
-import { Input } from "../atoms/Input";
-import { Label } from "../atoms/Label";
-import { finCatchAPI } from "../services/api";
-import { AuthStatus, SyncStatus, SyncResult } from "../types";
+import { Button, Input, Label } from "@repo/ui/atoms";
+import { finCatchAPI } from "@repo/ui/services";
+import { AuthStatus, SyncResult, SyncStatus } from "@repo/shared";
 
 interface SyncSettingsProps {
   onLogout?: () => void;

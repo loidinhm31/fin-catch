@@ -5,3 +5,4 @@ export * from "./ResponsiveChartContainer";
 export * from "./HoldingCard";
 export * from "./TabNavigator";
 export * from "./SyncStatusIndicator";
+export * from "./BottomNav";

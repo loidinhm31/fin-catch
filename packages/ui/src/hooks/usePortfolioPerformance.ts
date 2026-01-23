@@ -1,5 +1,9 @@
 import { useEffect, useState } from "react";
-import { CurrencyCode, PortfolioEntry, PortfolioPerformance } from "../types";
+import {
+  CurrencyCode,
+  PortfolioEntry,
+  PortfolioPerformance,
+} from "@repo/shared";
 import { calculatePortfolioPerformance } from "../utils/performanceCalculations";
 
 export const usePortfolioPerformance = (

@@ -1,6 +1,6 @@
-import { useEffect, useState, useCallback } from "react";
-import { PortfolioEntry } from "../types";
-import { finCatchAPI } from "../services/api";
+import { useCallback, useEffect, useState } from "react";
+import { PortfolioEntry } from "@repo/shared";
+import { finCatchAPI } from "@repo/ui/services";
 
 export const usePortfolioEntries = (portfolioId: string | null) => {
   const [entries, setEntries] = useState<PortfolioEntry[]>([]);

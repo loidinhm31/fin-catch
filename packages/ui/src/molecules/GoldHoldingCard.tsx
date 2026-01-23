@@ -1,7 +1,12 @@
 import React from "react";
 import { ChevronDown, ChevronUp, Edit, Trash2 } from "lucide-react";
-import { CurrencyCode, EntryPerformance, PortfolioEntry } from "../types";
-import { convertToGrams, getUnitLabel } from "@fin-catch/shared";
+import {
+  convertToGrams,
+  CurrencyCode,
+  EntryPerformance,
+  getUnitLabel,
+  PortfolioEntry,
+} from "@repo/shared";
 
 export interface GoldHoldingCardProps {
   entryPerf: EntryPerformance;

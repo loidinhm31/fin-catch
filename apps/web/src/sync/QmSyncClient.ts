@@ -21,7 +21,7 @@ import type {
   RefreshResponse,
   SyncClientConfig,
   SyncRecord,
-} from "@fin-catch/shared";
+} from "@repo/shared";
 
 /**
  * HTTP client function type.
@@ -64,7 +64,7 @@ export async function fetchHttpClient(
 }
 
 /**
- * Sync client for communicating with qm-sync-server.
+ * Sync client for communicating with qm-center-server.
  */
 export class QmSyncClient {
   private accessToken: string | null = null;

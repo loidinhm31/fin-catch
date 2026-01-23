@@ -1,10 +1,9 @@
-import type { ISyncService } from "../interfaces";
-import type { SyncResult, SyncStatus } from "../../types";
+import type { ISyncService, SyncResult, SyncStatus } from "@repo/shared";
 
 /**
- * Configuration for QmSyncServerSyncAdapter
+ * Configuration for QmServerSyncAdapter
  */
-export interface QmSyncServerSyncConfig {
+export interface QmServerSyncConfig {
   baseUrl?: string;
   appId?: string;
 }
@@ -48,20 +47,20 @@ const STORAGE_KEYS = {
 
 /**
  * Shared sync adapter for web app
- * Calls qm-sync-server directly - works in standalone web app
+ * Calls qm-center-server directly - works in standalone web app
  */
-export class QmSyncServerSyncAdapter implements ISyncService {
+export class QmServerSyncAdapter implements ISyncService {
   private readonly baseUrl: string;
   private readonly appId: string;
 
-  constructor(config?: QmSyncServerSyncConfig) {
+  constructor(config?: QmServerSyncConfig) {
     this.baseUrl = config?.baseUrl || getDefaultBaseUrl();
     this.appId =
       config?.appId ||
       this.getStoredValue(STORAGE_KEYS.APP_ID) ||
       getDefaultAppId();
     console.log(
-      `[QmSyncServerSyncAdapter] Initialized with baseUrl: ${this.baseUrl}, appId: ${this.appId}`,
+      `[QmServerSyncAdapter] Initialized with baseUrl: ${this.baseUrl}, appId: ${this.appId}`,
     );
   }
 
@@ -82,7 +81,7 @@ export class QmSyncServerSyncAdapter implements ISyncService {
       // The server-side sync requires local changes which we don't have in IndexedDB yet
 
       console.log(
-        "[QmSyncServerSyncAdapter] syncNow - web sync not fully implemented",
+        "[QmServerSyncAdapter] syncNow - web sync not fully implemented",
       );
 
       // Try to call the sync status endpoint to verify connectivity
@@ -99,7 +98,7 @@ export class QmSyncServerSyncAdapter implements ISyncService {
         syncedAt: Math.floor(Date.now() / 1000),
       };
     } catch (error) {
-      console.error("[QmSyncServerSyncAdapter] syncNow error:", error);
+      console.error("[QmServerSyncAdapter] syncNow error:", error);
       return {
         pushed: 0,
         pulled: 0,
@@ -126,7 +125,7 @@ export class QmSyncServerSyncAdapter implements ISyncService {
         serverUrl: this.baseUrl,
       };
     } catch (error) {
-      console.error("[QmSyncServerSyncAdapter] getStatus error:", error);
+      console.error("[QmServerSyncAdapter] getStatus error:", error);
       return {
         configured: false,
         authenticated: false,

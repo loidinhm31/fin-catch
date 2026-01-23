@@ -8,16 +8,16 @@ import {
   StockQueryForm,
 } from "../organisms";
 import {
+  dateToUnixTimestamp,
   GoldPremiumRequest,
   GoldPremiumResponse,
   GoldPriceRequest,
   GoldPriceResponse,
   StockHistoryRequest,
   StockHistoryResponse,
-} from "../types";
-import { finCatchAPI } from "../services/api";
-import { dateToUnixTimestamp } from "@fin-catch/shared";
-import { DateRangePicker } from "../molecules";
+} from "@repo/shared";
+import { finCatchAPI } from "@repo/ui/services";
+import { DateRangePicker } from "@repo/ui/molecules";
 
 type ActiveTab = "stock" | "gold";
 

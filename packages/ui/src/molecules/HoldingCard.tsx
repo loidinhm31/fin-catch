@@ -1,5 +1,5 @@
 import React from "react";
-import { CurrencyCode, EntryPerformance, PortfolioEntry } from "../types";
+import { CurrencyCode, EntryPerformance, PortfolioEntry } from "@repo/shared";
 import { StockHoldingCard } from "./StockHoldingCard";
 import { GoldHoldingCard } from "./GoldHoldingCard";
 import { BondHoldingCard } from "./BondHoldingCard";

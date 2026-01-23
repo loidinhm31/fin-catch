@@ -7,10 +7,10 @@
 
 import Dexie, { type EntityTable, type Table } from "dexie";
 import type {
+  BondCouponPayment,
   Portfolio,
   PortfolioEntry,
-  BondCouponPayment,
-} from "@fin-catch/shared/types";
+} from "@repo/shared/types";
 
 // =============================================================================
 // Sync Metadata Types

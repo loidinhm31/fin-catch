@@ -5,7 +5,7 @@
 //!
 //! NOTE: In the new monorepo architecture, the pure web app (apps/web) should use:
 //! - IndexedDB for local data storage
-//! - qm-sync-server APIs for financial data (stock/gold/exchange rates)
+//! - qm-center-server APIs for financial data (stock/gold/exchange rates)
 //!
 //! This embedded server is kept for development convenience when testing the Tauri app
 //! in browser mode. In production, the pure web experience should use apps/web instead.
@@ -20,7 +20,7 @@ use axum::{
     middleware::{self, Next},
     response::sse::{Event, KeepAlive, Sse},
     response::{IntoResponse, Json},
-    routing::{delete, get, post, put},
+    routing::{get, post, put},
     Router,
 };
 use fin_catch_data::{
@@ -35,7 +35,7 @@ use std::time::Duration;
 use tokio::sync::{broadcast, oneshot};
 use tower_http::cors::CorsLayer;
 
-use crate::db::{Database, Portfolio, PortfolioEntry, BondCouponPayment};
+use crate::db::{BondCouponPayment, Database, Portfolio, PortfolioEntry};
 use crate::session::SharedSessionManager;
 use crate::shared_auth::SharedAuthStatusHolder;
 use crate::shared_sync::SharedSyncStatusHolder;

@@ -1,4 +1,4 @@
-import type { PortfolioEntry } from "../types/portfolio";
+import { PortfolioEntry } from "@repo/shared/types";
 
 /**
  * Portfolio entry service interface

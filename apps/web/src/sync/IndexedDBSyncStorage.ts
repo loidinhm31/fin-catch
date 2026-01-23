@@ -8,10 +8,10 @@
 
 import {
   db,
-  SYNC_META_KEYS,
   getCurrentTimestamp,
+  SYNC_META_KEYS,
 } from "../adapters/indexeddb/database";
-import type { Checkpoint, SyncRecord, PullRecord } from "@fin-catch/shared";
+import type { Checkpoint, PullRecord, SyncRecord } from "@repo/shared";
 
 /**
  * IndexedDB implementation of sync storage.

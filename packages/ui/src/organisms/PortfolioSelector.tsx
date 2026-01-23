@@ -1,6 +1,6 @@
 import React from "react";
 import { Plus, X } from "lucide-react";
-import { Portfolio } from "../types";
+import { Portfolio } from "@repo/shared";
 
 export interface PortfolioSelectorProps {
   portfolios: Portfolio[];

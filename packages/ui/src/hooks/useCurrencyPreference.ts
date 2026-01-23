@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { CurrencyCode } from "../types";
-import { getPreference, setPreference } from "../utils/preferences";
+import { CurrencyCode } from "@repo/shared";
+import { getPreference, setPreference } from "@repo/ui/utils";
 
 export const useCurrencyPreference = () => {
   const [displayCurrency, setDisplayCurrency] = useState<CurrencyCode>(

@@ -1,4 +1,4 @@
-import type { AuthResponse, AuthStatus, SyncConfig } from "../types/auth";
+import { AuthResponse, AuthStatus, SyncConfig } from "@repo/shared";
 
 /**
  * Auth service interface for user authentication

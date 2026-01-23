@@ -1,6 +1,5 @@
 import { invoke } from "@tauri-apps/api/core";
-import type { BondCouponPayment } from "../../types";
-import type { ICouponPaymentService } from "../interfaces";
+import type { BondCouponPayment, ICouponPaymentService } from "@repo/shared";
 
 /**
  * Tauri adapter for coupon payment operations

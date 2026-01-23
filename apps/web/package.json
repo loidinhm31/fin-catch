@@ -1,5 +1,5 @@
 {
-  "name": "@fin-catch/web",
+  "name": "@repo/web",
   "private": true,
   "version": "0.1.0",
   "type": "module",
@@ -10,8 +10,8 @@
     "clean": "rimraf dist .turbo"
   },
   "dependencies": {
-    "@fin-catch/shared": "workspace:*",
-    "@fin-catch/ui": "workspace:*",
+    "@repo/shared": "workspace:*",
+    "@repo/ui": "workspace:*",
     "@radix-ui/react-icons": "^1.3.2",
     "@tailwindcss/vite": "^4.1.17",
     "axios": "^1.13.2",

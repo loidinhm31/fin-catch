@@ -1,5 +1,5 @@
-import { AppShell } from "@fin-catch/ui/templates";
-import "@fin-catch/ui/styles";
+import { AppShell } from "@repo/ui/templates";
+import "@repo/ui/styles";
 
 export default function App() {
   return <AppShell />;

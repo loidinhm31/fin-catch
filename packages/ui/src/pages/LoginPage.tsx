@@ -3,7 +3,7 @@ import { KeyRound, Lock, Mail, ShieldCheck, User } from "lucide-react";
 import { Button } from "../atoms/Button";
 import { Input } from "../atoms/Input";
 import { Label } from "../atoms/Label";
-import { finCatchAPI } from "../services/api";
+import { finCatchAPI } from "@repo/ui/services";
 
 interface LoginPageProps {
   onLoginSuccess: () => void;

@@ -10,11 +10,13 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import { PortfolioHoldingsPerformance } from "../types";
-import { formatTimestampForChart } from "@fin-catch/shared";
-import { calculateXAxisInterval } from "../utils/chartUtils";
-import { useResponsiveChart } from "../hooks/useResponsiveChart";
-import { ResponsiveChartContainer } from "../molecules";
+import {
+  formatTimestampForChart,
+  PortfolioHoldingsPerformance,
+} from "@repo/shared";
+import { calculateXAxisInterval } from "@repo/ui/utils";
+import { useResponsiveChart } from "@repo/ui/hooks";
+import { ResponsiveChartContainer } from "@repo/ui/molecules";
 
 export interface HoldingsPerformanceChartResponsiveProps {
   data: PortfolioHoldingsPerformance;

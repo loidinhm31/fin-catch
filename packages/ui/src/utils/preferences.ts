@@ -1,4 +1,4 @@
-import { CurrencyCode } from "../types";
+import { CurrencyCode } from "@repo/shared";
 
 /**
  * User preferences stored in localStorage

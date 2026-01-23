@@ -1,5 +1,5 @@
-import type { IPortfolioEntryService } from "@fin-catch/shared/services";
-import type { PortfolioEntry } from "@fin-catch/shared/types";
+import type { IPortfolioEntryService } from "@repo/shared/services";
+import type { PortfolioEntry } from "@repo/shared/types";
 import { db, generateId, getCurrentTimestamp } from "./database";
 
 /**

@@ -1,8 +1,11 @@
 import React, { useEffect, useState } from "react";
-import { finCatchAPI } from "../services/api";
-import { CurrencyCode, PortfolioEntry } from "../types";
-import { dateToUnixTimestamp } from "@fin-catch/shared";
-import { getGoldUnitByIdAndSource } from "@fin-catch/shared";
+import { finCatchAPI } from "@repo/ui/services";
+import {
+  CurrencyCode,
+  dateToUnixTimestamp,
+  getGoldUnitByIdAndSource,
+  PortfolioEntry,
+} from "@repo/shared";
 import {
   Button,
   CurrencySelect,

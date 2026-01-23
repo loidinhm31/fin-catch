@@ -1,29 +1,26 @@
+import { type IPlatformServices, PlatformProvider } from "@repo/ui/platform";
 import {
-  PlatformProvider,
-  type IPlatformServices,
-} from "@fin-catch/ui/platform";
-import {
-  setPortfolioService,
-  setPortfolioEntryService,
+  QmServerAuthAdapter,
+  QmServerDataAdapter,
+  setAuthService,
   setCouponPaymentService,
   setDataService,
-  setAuthService,
+  setPortfolioEntryService,
+  setPortfolioService,
   setSyncService,
-  QmSyncServerDataAdapter,
-  QmSyncServerAuthAdapter,
-} from "@fin-catch/ui/adapters";
-import { AppShell } from "@fin-catch/ui/templates";
+} from "@repo/ui/adapters";
+import { AppShell } from "@repo/ui/templates";
 import {
+  IndexedDBCouponPaymentAdapter,
   IndexedDBPortfolioAdapter,
   IndexedDBPortfolioEntryAdapter,
-  IndexedDBCouponPaymentAdapter,
 } from "./adapters/indexeddb";
 import { IndexedDBSyncAdapter } from "./sync";
-import "@fin-catch/ui/styles";
+import "@repo/ui/styles";
 import { useEffect } from "react";
 
 // Create auth adapter first (single source of truth for tokens)
-const authAdapter = new QmSyncServerAuthAdapter();
+const authAdapter = new QmServerAuthAdapter();
 
 // Create sync adapter with token provider from auth service
 // This ensures unified token management - auth owns tokens, sync gets them via provider
@@ -37,12 +34,12 @@ const syncAdapter = new IndexedDBSyncAdapter({
 });
 
 // Create services for web platform
-// Storage uses IndexedDB, financial data and auth use qm-sync-server
+// Storage uses IndexedDB, financial data and auth use qm-center-server
 const webServices: IPlatformServices = {
   portfolio: new IndexedDBPortfolioAdapter(),
   portfolioEntry: new IndexedDBPortfolioEntryAdapter(),
   couponPayment: new IndexedDBCouponPaymentAdapter(),
-  data: new QmSyncServerDataAdapter(),
+  data: new QmServerDataAdapter(),
   auth: authAdapter,
   sync: syncAdapter,
 };

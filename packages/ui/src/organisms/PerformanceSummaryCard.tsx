@@ -1,6 +1,6 @@
 import React from "react";
 import { TrendingDown, TrendingUp } from "lucide-react";
-import { PortfolioPerformance } from "../types";
+import { PortfolioPerformance } from "@repo/shared";
 
 export interface PerformanceSummaryCardProps {
   performance: PortfolioPerformance;

@@ -1,13 +1,13 @@
 import React from "react";
 import { Bell } from "lucide-react";
 import {
-  Input,
-  Label,
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
-} from "../atoms";
+  Input,
+  Label,
+} from "@repo/ui/atoms";
 
 export interface StockEntryFormProps {
   symbol: string;

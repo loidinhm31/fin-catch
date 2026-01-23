@@ -1,12 +1,12 @@
 export {
-  QmSyncServerDataAdapter,
-  type QmSyncServerConfig,
-} from "./QmSyncServerDataAdapter";
+  QmServerDataAdapter,
+  type QmServerConfig,
+} from "./QmServerDataAdapter";
 export {
-  QmSyncServerAuthAdapter,
-  type QmSyncServerAuthConfig,
-} from "./QmSyncServerAuthAdapter";
+  QmServerAuthAdapter,
+  type QmServerAuthConfig,
+} from "./QmServerAuthAdapter";
 export {
-  QmSyncServerSyncAdapter,
-  type QmSyncServerSyncConfig,
-} from "./QmSyncServerSyncAdapter";
+  QmServerSyncAdapter,
+  type QmServerSyncConfig,
+} from "./QmServerSyncAdapter";

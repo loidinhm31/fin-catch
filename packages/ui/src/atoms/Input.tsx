@@ -1,5 +1,5 @@
 import * as React from "react";
-import { cn } from "@fin-catch/shared";
+import { cn } from "@repo/shared";
 
 export interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   error?: boolean;

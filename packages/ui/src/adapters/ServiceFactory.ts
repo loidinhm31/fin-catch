@@ -1,36 +1,36 @@
-import { isTauri } from "../utils/platform";
+import { isTauri } from "@repo/ui/utils";
 
 // Interfaces
 import type {
-  IPortfolioService,
-  IPortfolioEntryService,
+  IAuthService,
   ICouponPaymentService,
   IDataService,
-  IAuthService,
+  IPortfolioEntryService,
+  IPortfolioService,
   ISyncService,
 } from "./interfaces";
 
 // Tauri Adapters (for storage via Tauri invoke)
 import {
+  TauriAuthAdapter,
+  TauriCouponPaymentAdapter,
   TauriPortfolioAdapter,
   TauriPortfolioEntryAdapter,
-  TauriCouponPaymentAdapter,
-  TauriAuthAdapter,
   TauriSyncAdapter,
 } from "./tauri";
 
 // HTTP Adapters (for browser debug mode - SQLite access via embedded Axum server)
 import {
+  HttpCouponPaymentAdapter,
   HttpPortfolioAdapter,
   HttpPortfolioEntryAdapter,
-  HttpCouponPaymentAdapter,
 } from "./web";
 
-// Shared adapters (calls qm-sync-server directly)
+// Shared adapters (calls qm-center-server directly)
 import {
-  QmSyncServerDataAdapter,
-  QmSyncServerAuthAdapter,
-  QmSyncServerSyncAdapter,
+  QmServerAuthAdapter,
+  QmServerDataAdapter,
+  QmServerSyncAdapter,
 } from "./shared";
 
 // Singleton instances (lazy initialized)
@@ -88,13 +88,13 @@ export const getCouponPaymentService = (): ICouponPaymentService => {
 
 /**
  * Get the Data Service for the current platform
- * All platforms use QmSyncServerDataAdapter to call qm-sync-server directly
+ * All platforms use QmServerDataAdapter to call qm-center-server directly
  */
 export const getDataService = (): IDataService => {
   if (!dataService) {
-    dataService = new QmSyncServerDataAdapter();
+    dataService = new QmServerDataAdapter();
     console.log(
-      "[ServiceFactory] Created DataService using QmSyncServerDataAdapter",
+      "[ServiceFactory] Created DataService using QmServerDataAdapter",
     );
   }
   return dataService;
@@ -103,13 +103,13 @@ export const getDataService = (): IDataService => {
 /**
  * Get the Auth Service for the current platform
  * Tauri: TauriAuthAdapter (secure encrypted storage)
- * Web/HTTP: QmSyncServerAuthAdapter (localStorage-based, calls qm-sync-server)
+ * Web/HTTP: QmServerAuthAdapter (localStorage-based, calls qm-center-server)
  */
 export const getAuthService = (): IAuthService => {
   if (!authService) {
     authService = isTauri()
       ? new TauriAuthAdapter()
-      : new QmSyncServerAuthAdapter();
+      : new QmServerAuthAdapter();
     console.log(
       `[ServiceFactory] Created AuthService for ${isTauri() ? "Tauri" : "QmSyncServer"}`,
     );
@@ -120,13 +120,13 @@ export const getAuthService = (): IAuthService => {
 /**
  * Get the Sync Service for the current platform
  * Tauri: TauriSyncAdapter (uses Tauri invoke)
- * Web: QmSyncServerSyncAdapter (calls qm-sync-server directly)
+ * Web: QmServerSyncAdapter (calls qm-center-server directly)
  */
 export const getSyncService = (): ISyncService => {
   if (!syncService) {
     syncService = isTauri()
       ? new TauriSyncAdapter()
-      : new QmSyncServerSyncAdapter();
+      : new QmServerSyncAdapter();
     console.log(
       `[ServiceFactory] Created SyncService for ${isTauri() ? "Tauri" : "QmSyncServer"}`,
     );

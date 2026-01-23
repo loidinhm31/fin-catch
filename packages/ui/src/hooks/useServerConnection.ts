@@ -9,12 +9,12 @@
  * This hook only manages the browser-mode connection to the local desktop server.
  */
 
-import { useState, useEffect, useCallback } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
-  isOpenedFromDesktop,
   getSessionToken,
+  isOpenedFromDesktop,
   WEB_SERVER_PORT,
-} from "../utils/platform";
+} from "@repo/ui/utils";
 
 export interface ServerConnectionState {
   isConnected: boolean;

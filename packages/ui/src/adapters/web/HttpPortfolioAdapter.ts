@@ -1,6 +1,5 @@
-import type { Portfolio } from "../../types";
-import type { IPortfolioService } from "../interfaces";
-import { WEB_SERVER_PORT, getSessionToken } from "../../utils/platform";
+import type { IPortfolioService, Portfolio } from "@repo/shared";
+import { getSessionToken, WEB_SERVER_PORT } from "@repo/ui/utils";
 
 /**
  * API response wrapper from embedded server

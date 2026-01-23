@@ -1,11 +1,11 @@
-import { finCatchAPI } from "../services/api";
+import { finCatchAPI } from "@repo/ui/services";
 import {
   BenchmarkData,
   BenchmarkOption,
   CurrencyCode,
   PortfolioBenchmarkComparison,
   PortfolioEntry,
-} from "../types";
+} from "@repo/shared";
 import { convertCurrency } from "./currency";
 
 /**

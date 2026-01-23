@@ -1,7 +1,6 @@
 import React from "react";
-import { CurrencyCode } from "../types";
+import { CurrencyCode, getUnitLabel } from "@repo/shared";
 import { formatCurrency } from "../utils/currency";
-import { getUnitLabel } from "@fin-catch/shared";
 import { Input, Label, SimpleSelect as Select } from "../atoms";
 
 export interface GoldEntryFormProps {

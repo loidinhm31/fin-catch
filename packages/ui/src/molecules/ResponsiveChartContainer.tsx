@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Maximize2 } from "lucide-react";
-import { ChartDialog } from "../organisms";
+import { ChartDialog } from "@repo/ui/organisms";
 
 export interface ResponsiveChartContainerProps {
   title: string;

@@ -1,17 +1,21 @@
-import type { IAuthService } from "../interfaces";
-import type { AuthResponse, AuthStatus, SyncConfig } from "../../types";
+import type {
+  AuthResponse,
+  AuthStatus,
+  IAuthService,
+  SyncConfig,
+} from "@repo/shared";
 
 /**
- * Configuration for QmSyncServerAuthAdapter
+ * Configuration for QmServerAuthAdapter
  */
-export interface QmSyncServerAuthConfig {
+export interface QmServerAuthConfig {
   baseUrl?: string;
   appId?: string;
   apiKey?: string;
 }
 
 /**
- * API response wrapper from qm-sync-server
+ * API response wrapper from qm-center-server
  */
 interface ApiResponse<T> {
   success: boolean;
@@ -80,15 +84,15 @@ function getDefaultApiKey(): string {
 
 /**
  * Shared adapter for auth APIs
- * Calls qm-sync-server directly - works in both Tauri webview and browser
+ * Calls qm-center-server directly - works in both Tauri webview and browser
  * Stores tokens in localStorage (for web) - note: less secure than Tauri's encrypted storage
  */
-export class QmSyncServerAuthAdapter implements IAuthService {
+export class QmServerAuthAdapter implements IAuthService {
   private baseUrl: string;
   private appId: string;
   private apiKey: string;
 
-  constructor(config?: QmSyncServerAuthConfig) {
+  constructor(config?: QmServerAuthConfig) {
     // Try to load from storage first, then use config, then defaults
     this.baseUrl =
       config?.baseUrl ||
@@ -104,7 +108,7 @@ export class QmSyncServerAuthAdapter implements IAuthService {
       getDefaultApiKey();
 
     console.log(
-      `[QmSyncServerAuthAdapter] Initialized with baseUrl: ${this.baseUrl}`,
+      `[QmServerAuthAdapter] Initialized with baseUrl: ${this.baseUrl}`,
     );
   }
 
@@ -129,7 +133,7 @@ export class QmSyncServerAuthAdapter implements IAuthService {
     includeAuth = false,
   ): Promise<TRes> {
     const url = `${this.baseUrl}${endpoint}`;
-    console.log(`[QmSyncServerAuthAdapter] POST ${endpoint}`, request);
+    console.log(`[QmServerAuthAdapter] POST ${endpoint}`, request);
 
     const headers: Record<string, string> = {
       "Content-Type": "application/json",
@@ -157,7 +161,7 @@ export class QmSyncServerAuthAdapter implements IAuthService {
     }
 
     const result = await response.json();
-    console.log(`[QmSyncServerAuthAdapter] Response`, result);
+    console.log(`[QmServerAuthAdapter] Response`, result);
 
     // Check if response is wrapped in ApiResponse
     if ("success" in result) {
@@ -177,7 +181,7 @@ export class QmSyncServerAuthAdapter implements IAuthService {
     includeAuth = false,
   ): Promise<TRes> {
     const url = `${this.baseUrl}${endpoint}`;
-    console.log(`[QmSyncServerAuthAdapter] GET ${endpoint}`);
+    console.log(`[QmServerAuthAdapter] GET ${endpoint}`);
 
     const headers: Record<string, string> = {
       Accept: "application/json",
@@ -203,7 +207,7 @@ export class QmSyncServerAuthAdapter implements IAuthService {
     }
 
     const result = await response.json();
-    console.log(`[QmSyncServerAuthAdapter] Response`, result);
+    console.log(`[QmServerAuthAdapter] Response`, result);
 
     // Check if response is wrapped in ApiResponse
     if ("success" in result) {
@@ -230,7 +234,7 @@ export class QmSyncServerAuthAdapter implements IAuthService {
       this.apiKey = config.apiKey;
       this.setStoredValue(STORAGE_KEYS.API_KEY, config.apiKey);
     }
-    console.log("[QmSyncServerAuthAdapter] Sync configured", {
+    console.log("[QmServerAuthAdapter] Sync configured", {
       serverUrl: this.baseUrl,
       appId: this.appId,
     });
@@ -252,7 +256,7 @@ export class QmSyncServerAuthAdapter implements IAuthService {
 
       return response;
     } catch (error) {
-      console.error("[QmSyncServerAuthAdapter] Register error:", error);
+      console.error("[QmServerAuthAdapter] Register error:", error);
       throw error;
     }
   }
@@ -269,7 +273,7 @@ export class QmSyncServerAuthAdapter implements IAuthService {
 
       return response;
     } catch (error) {
-      console.error("[QmSyncServerAuthAdapter] Login error:", error);
+      console.error("[QmServerAuthAdapter] Login error:", error);
       throw error;
     }
   }
@@ -281,7 +285,7 @@ export class QmSyncServerAuthAdapter implements IAuthService {
     this.removeStoredValue(STORAGE_KEYS.USER_ID);
     this.removeStoredValue(STORAGE_KEYS.APPS);
     this.removeStoredValue(STORAGE_KEYS.IS_ADMIN);
-    console.log("[QmSyncServerAuthAdapter] Logged out");
+    console.log("[QmServerAuthAdapter] Logged out");
   }
 
   async refreshToken(): Promise<void> {
@@ -299,9 +303,9 @@ export class QmSyncServerAuthAdapter implements IAuthService {
       // Update stored tokens
       this.setStoredValue(STORAGE_KEYS.ACCESS_TOKEN, response.accessToken);
       this.setStoredValue(STORAGE_KEYS.REFRESH_TOKEN, response.refreshToken);
-      console.log("[QmSyncServerAuthAdapter] Token refreshed");
+      console.log("[QmServerAuthAdapter] Token refreshed");
     } catch (error) {
-      console.error("[QmSyncServerAuthAdapter] Token refresh error:", error);
+      console.error("[QmServerAuthAdapter] Token refresh error:", error);
       // Clear tokens on refresh failure
       await this.logout();
       throw error;
@@ -450,6 +454,6 @@ export class QmSyncServerAuthAdapter implements IAuthService {
     this.setStoredValue(STORAGE_KEYS.ACCESS_TOKEN, accessToken);
     this.setStoredValue(STORAGE_KEYS.REFRESH_TOKEN, refreshToken);
     this.setStoredValue(STORAGE_KEYS.USER_ID, userId);
-    console.log("[QmSyncServerAuthAdapter] Tokens saved from external source");
+    console.log("[QmServerAuthAdapter] Tokens saved from external source");
   }
 }

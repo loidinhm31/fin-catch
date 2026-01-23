@@ -1,12 +1,12 @@
-import { createContext, useContext, type ReactNode } from "react";
+import { createContext, type ReactNode, useContext } from "react";
 import type {
-  IPortfolioService,
-  IPortfolioEntryService,
+  IAuthService,
   ICouponPaymentService,
   IDataService,
-  IAuthService,
+  IPortfolioEntryService,
+  IPortfolioService,
   ISyncService,
-} from "@fin-catch/shared/services";
+} from "@repo/shared/services";
 
 /**
  * Platform services interface for dependency injection

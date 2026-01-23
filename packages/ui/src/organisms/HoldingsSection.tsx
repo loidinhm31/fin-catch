@@ -1,7 +1,11 @@
 import React, { useState } from "react";
 import { Plus, Wallet } from "lucide-react";
-import { CurrencyCode, PortfolioEntry, PortfolioPerformance } from "../types";
-import { HoldingCard } from "../molecules";
+import {
+  CurrencyCode,
+  PortfolioEntry,
+  PortfolioPerformance,
+} from "@repo/shared";
+import { HoldingCard } from "@repo/ui/molecules";
 
 export interface HoldingsSectionProps {
   performance: PortfolioPerformance | null;

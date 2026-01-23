@@ -5,12 +5,12 @@
  * Combines QmSyncClient and IndexedDBSyncStorage to provide full sync functionality.
  */
 
-import type { ISyncService } from "@fin-catch/shared/services";
-import type { SyncResult, SyncStatus } from "@fin-catch/shared/types";
+import type { ISyncService } from "@repo/shared/services";
+import type { SyncResult, SyncStatus } from "@repo/shared/types";
 import {
-  QmSyncClient,
   createSyncClientConfig,
   type HttpClientFn,
+  QmSyncClient,
 } from "./QmSyncClient";
 import { IndexedDBSyncStorage } from "./IndexedDBSyncStorage";
 import { getCurrentTimestamp } from "../adapters/indexeddb/database";

@@ -1,6 +1,10 @@
 import { invoke } from "@tauri-apps/api/core";
-import type { IAuthService } from "../interfaces";
-import type { AuthResponse, AuthStatus, SyncConfig } from "../../types";
+import type {
+  AuthResponse,
+  AuthStatus,
+  IAuthService,
+  SyncConfig,
+} from "@repo/shared";
 
 /**
  * Tauri adapter for authentication operations

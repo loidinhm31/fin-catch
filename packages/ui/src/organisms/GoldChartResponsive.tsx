@@ -10,15 +10,14 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import { GoldPricePoint } from "../types";
-import { formatTimestampForChart } from "@fin-catch/shared";
+import { formatTimestampForChart, GoldPricePoint } from "@repo/shared";
 import {
+  calculateXAxisInterval,
   formatCurrencyCompact,
   formatCurrencyValue,
-} from "../utils/chartFormatters";
-import { calculateXAxisInterval } from "../utils/chartUtils";
-import { useResponsiveChart } from "../hooks/useResponsiveChart";
-import { ResponsiveChartContainer } from "../molecules";
+} from "@repo/ui/utils";
+import { useResponsiveChart } from "@repo/ui/hooks";
+import { ResponsiveChartContainer } from "@repo/ui/molecules";
 
 export interface GoldChartResponsiveProps {
   data: GoldPricePoint[];

@@ -1,5 +1,5 @@
 import React from "react";
-import { CURRENCY_SYMBOLS, CurrencyCode } from "../types";
+import { CURRENCY_SYMBOLS, CurrencyCode } from "@repo/shared";
 
 export interface CurrencySelectorSectionProps {
   selectedCurrency: CurrencyCode;

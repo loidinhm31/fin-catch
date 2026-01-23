@@ -2,24 +2,22 @@ import React, { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { TrendingUp } from "lucide-react";
 import {
-  SimpleAlertDialog as AlertDialog,
   Input,
+  SimpleAlertDialog as AlertDialog,
   SimpleSelect as Select,
-} from "../atoms";
-import { DateRangePicker, FormField } from "../molecules";
+} from "@repo/ui/atoms";
+import { DateRangePicker, FormField } from "@repo/ui/molecules";
 import {
+  dateToUnixTimestamp,
+  getDefaultDateRange,
+  isValidDateRange,
   Resolution,
   RESOLUTION_LABELS,
   STOCK_SOURCE_LABELS,
   StockFormData,
   StockHistoryRequest,
   StockSource,
-} from "../types";
-import {
-  dateToUnixTimestamp,
-  getDefaultDateRange,
-  isValidDateRange,
-} from "@fin-catch/shared";
+} from "@repo/shared";
 
 export interface StockQueryFormProps {
   onSubmit: (request: StockHistoryRequest) => void;

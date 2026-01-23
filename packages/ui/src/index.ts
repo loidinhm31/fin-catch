@@ -9,7 +9,6 @@ export * from "./pages";
 export * from "./hooks";
 export * from "./services";
 export * from "./utils";
-export * from "./types";
 export * from "./adapters";
 
 // Platform injection

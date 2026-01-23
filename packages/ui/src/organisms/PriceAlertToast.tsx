@@ -1,6 +1,6 @@
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { X } from "lucide-react";
-import { PriceAlertEvent } from "../types";
+import { PriceAlertEvent } from "@repo/shared";
 
 interface ToastItem {
   id: string;

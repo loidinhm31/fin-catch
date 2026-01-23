@@ -1,13 +1,5 @@
 import { invoke } from "@tauri-apps/api/core";
-import { isTauri } from "../utils/platform";
-import {
-  getPortfolioService,
-  getPortfolioEntryService,
-  getCouponPaymentService,
-  getDataService,
-  getAuthService,
-  getSyncService,
-} from "../adapters";
+
 import {
   AuthResponse,
   AuthStatus,
@@ -25,7 +17,16 @@ import {
   SyncConfig,
   SyncResult,
   SyncStatus,
-} from "../types";
+} from "@repo/shared";
+import {
+  getAuthService,
+  getCouponPaymentService,
+  getDataService,
+  getPortfolioEntryService,
+  getPortfolioService,
+  getSyncService,
+} from "@repo/ui/adapters";
+import { isTauri } from "@repo/ui/utils";
 
 class FinCatchAPI {
   /**
@@ -258,7 +259,7 @@ class FinCatchAPI {
    * Authentication operations
    * Uses platform-appropriate auth adapter:
    * - Tauri: TauriAuthAdapter (secure encrypted storage)
-   * - Web: QmSyncServerAuthAdapter (localStorage-based, calls qm-sync-server)
+   * - Web: QmServerAuthAdapter (localStorage-based, calls qm-center-server)
    */
   async authConfigureSync(config: SyncConfig): Promise<void> {
     try {
@@ -331,7 +332,7 @@ class FinCatchAPI {
    * Sync operations
    * Uses platform-specific adapters:
    * - Tauri: TauriSyncAdapter (uses Tauri invoke)
-   * - Web: QmSyncServerSyncAdapter (calls qm-sync-server directly)
+   * - Web: QmServerSyncAdapter (calls qm-center-server directly)
    */
   async syncNow(): Promise<SyncResult> {
     try {

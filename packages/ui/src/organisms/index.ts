@@ -19,3 +19,4 @@ export * from "./ServerDisconnectedOverlay";
 export * from "./StockChartResponsive";
 export * from "./StockQueryForm";
 export * from "./SyncSettings";
+export * from "./Sidebar";

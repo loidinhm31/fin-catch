@@ -1,6 +1,6 @@
 import * as React from "react";
 import { cva, type VariantProps } from "class-variance-authority";
-import { cn } from "@fin-catch/shared";
+import { cn } from "@repo/shared";
 import { Loader2 } from "lucide-react";
 
 const buttonVariants = cva(

@@ -5,11 +5,11 @@ import type {
   GoldPremiumResponse,
   GoldPriceRequest,
   GoldPriceResponse,
+  IDataService,
   StockHistoryRequest,
   StockHistoryResponse,
-} from "../../types";
-import type { IDataService } from "../interfaces";
-import { WEB_SERVER_PORT, getSessionToken } from "../../utils/platform";
+} from "@repo/shared";
+import { getSessionToken, WEB_SERVER_PORT } from "@repo/ui/utils";
 
 /**
  * API response wrapper from embedded server

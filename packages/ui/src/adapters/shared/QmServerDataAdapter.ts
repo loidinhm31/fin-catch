@@ -5,20 +5,20 @@ import type {
   GoldPremiumResponse,
   GoldPriceRequest,
   GoldPriceResponse,
+  IDataService,
   StockHistoryRequest,
   StockHistoryResponse,
-} from "../../types";
-import type { IDataService } from "../interfaces";
+} from "@repo/shared";
 
 /**
- * Configuration for QmSyncServerDataAdapter
+ * Configuration for QmServerDataAdapter
  */
-export interface QmSyncServerConfig {
+export interface QmServerConfig {
   baseUrl?: string;
 }
 
 /**
- * API response wrapper from qm-sync-server
+ * API response wrapper from qm-center-server
  */
 interface ApiResponse<T> {
   success: boolean;
@@ -45,15 +45,15 @@ function getDefaultBaseUrl(): string {
 
 /**
  * Shared adapter for financial data APIs
- * Calls qm-sync-server directly - works in both Tauri webview and browser
+ * Calls qm-center-server directly - works in both Tauri webview and browser
  */
-export class QmSyncServerDataAdapter implements IDataService {
+export class QmServerDataAdapter implements IDataService {
   private readonly baseUrl: string;
 
-  constructor(config?: QmSyncServerConfig) {
+  constructor(config?: QmServerConfig) {
     this.baseUrl = config?.baseUrl || getDefaultBaseUrl();
     console.log(
-      `[QmSyncServerDataAdapter] Initialized with baseUrl: ${this.baseUrl}`,
+      `[QmServerDataAdapter] Initialized with baseUrl: ${this.baseUrl}`,
     );
   }
 
@@ -62,7 +62,7 @@ export class QmSyncServerDataAdapter implements IDataService {
     request: TReq,
   ): Promise<TRes> {
     const url = `${this.baseUrl}${endpoint}`;
-    console.log(`[QmSyncServerDataAdapter] POST ${endpoint}`, request);
+    console.log(`[QmServerDataAdapter] POST ${endpoint}`, request);
 
     const response = await fetch(url, {
       method: "POST",
@@ -79,7 +79,7 @@ export class QmSyncServerDataAdapter implements IDataService {
     }
 
     const result: ApiResponse<TRes> = await response.json();
-    console.log(`[QmSyncServerDataAdapter] Response`, result);
+    console.log(`[QmServerDataAdapter] Response`, result);
 
     if (!result.success) {
       throw new Error(result.error || "Unknown API error");
@@ -90,7 +90,7 @@ export class QmSyncServerDataAdapter implements IDataService {
 
   private async get<TRes>(endpoint: string): Promise<TRes> {
     const url = `${this.baseUrl}${endpoint}`;
-    console.log(`[QmSyncServerDataAdapter] GET ${endpoint}`);
+    console.log(`[QmServerDataAdapter] GET ${endpoint}`);
 
     const response = await fetch(url, {
       method: "GET",
@@ -105,7 +105,7 @@ export class QmSyncServerDataAdapter implements IDataService {
     }
 
     const result: ApiResponse<TRes> = await response.json();
-    console.log(`[QmSyncServerDataAdapter] Response`, result);
+    console.log(`[QmServerDataAdapter] Response`, result);
 
     if (!result.success) {
       throw new Error(result.error || "Unknown API error");
@@ -123,7 +123,7 @@ export class QmSyncServerDataAdapter implements IDataService {
         request,
       );
     } catch (error) {
-      console.error("[QmSyncServerDataAdapter] Stock history error:", error);
+      console.error("[QmServerDataAdapter] Stock history error:", error);
       return {
         symbol: request.symbol,
         resolution: request.resolution,
@@ -141,7 +141,7 @@ export class QmSyncServerDataAdapter implements IDataService {
         request,
       );
     } catch (error) {
-      console.error("[QmSyncServerDataAdapter] Gold price error:", error);
+      console.error("[QmServerDataAdapter] Gold price error:", error);
       return {
         gold_price_id: request.gold_price_id,
         source: request.source || "sjc",
@@ -160,7 +160,7 @@ export class QmSyncServerDataAdapter implements IDataService {
         request,
       );
     } catch (error) {
-      console.error("[QmSyncServerDataAdapter] Exchange rate error:", error);
+      console.error("[QmServerDataAdapter] Exchange rate error:", error);
       return {
         currency_code: request.currency_code,
         source: request.source || "vietcombank",
@@ -179,7 +179,7 @@ export class QmSyncServerDataAdapter implements IDataService {
         request,
       );
     } catch (error) {
-      console.error("[QmSyncServerDataAdapter] Gold premium error:", error);
+      console.error("[QmServerDataAdapter] Gold premium error:", error);
       return {
         status: "error",
         error: error instanceof Error ? error.message : String(error),
@@ -193,7 +193,7 @@ export class QmSyncServerDataAdapter implements IDataService {
         "/api/v1/fin-catch/sources",
       );
     } catch (error) {
-      console.error("[QmSyncServerDataAdapter] Get sources error:", error);
+      console.error("[QmServerDataAdapter] Get sources error:", error);
       return {};
     }
   }
@@ -204,7 +204,7 @@ export class QmSyncServerDataAdapter implements IDataService {
         "/api/v1/fin-catch/health",
       );
     } catch (error) {
-      console.error("[QmSyncServerDataAdapter] Health check error:", error);
+      console.error("[QmServerDataAdapter] Health check error:", error);
       return {};
     }
   }

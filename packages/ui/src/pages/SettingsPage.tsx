@@ -1,6 +1,5 @@
 import React from "react";
-import { SyncSettings } from "../organisms/SyncSettings";
-import { BrowserSync } from "../organisms/BrowserSync";
+import { BrowserSync, SyncSettings } from "@repo/ui/organisms";
 
 interface SettingsPageProps {
   onLogout?: () => void;

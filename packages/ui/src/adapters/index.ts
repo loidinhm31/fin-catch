@@ -10,12 +10,12 @@ export type {
 
 // Re-export shared adapters (used by both Tauri and Web for APIs)
 export {
-  QmSyncServerDataAdapter,
-  type QmSyncServerConfig,
-  QmSyncServerAuthAdapter,
-  type QmSyncServerAuthConfig,
-  QmSyncServerSyncAdapter,
-  type QmSyncServerSyncConfig,
+  QmServerDataAdapter,
+  type QmServerConfig,
+  QmServerAuthAdapter,
+  type QmServerAuthConfig,
+  QmServerSyncAdapter,
+  type QmServerSyncConfig,
 } from "./shared";
 
 // Re-export factory functions

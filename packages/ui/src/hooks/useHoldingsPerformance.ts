@@ -3,7 +3,7 @@ import {
   CurrencyCode,
   PortfolioEntry,
   PortfolioHoldingsPerformance,
-} from "../types";
+} from "@repo/shared";
 import { calculateAllHoldingsPerformance } from "../utils/holdings";
 
 export const useHoldingsPerformance = (

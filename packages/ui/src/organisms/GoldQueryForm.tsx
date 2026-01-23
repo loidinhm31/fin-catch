@@ -5,19 +5,17 @@ import {
   SimpleAlertDialog as AlertDialog,
   SimpleSelect as Select,
 } from "../atoms";
-import { DateRangePicker, FormField } from "../molecules";
+import { DateRangePicker, FormField } from "@repo/ui/molecules";
 import {
+  dateToUnixTimestamp,
+  getDefaultDateRange,
   GOLD_SOURCE_LABELS,
   GoldFormData,
   GoldPriceRequest,
   GoldSource,
-  SJC_GOLD_PRICE_IDS,
-} from "../types";
-import {
-  dateToUnixTimestamp,
-  getDefaultDateRange,
   isValidDateRange,
-} from "@fin-catch/shared";
+  SJC_GOLD_PRICE_IDS,
+} from "@repo/shared";
 
 export interface GoldQueryFormProps {
   onSubmit: (request: GoldPriceRequest) => void;

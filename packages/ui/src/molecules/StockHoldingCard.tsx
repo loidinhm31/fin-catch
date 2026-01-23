@@ -1,13 +1,13 @@
 import React from "react";
 import {
+  Bell,
+  BellOff,
   ChevronDown,
   ChevronUp,
   Edit,
   Trash2,
-  Bell,
-  BellOff,
 } from "lucide-react";
-import { CurrencyCode, EntryPerformance, PortfolioEntry } from "../types";
+import { CurrencyCode, EntryPerformance, PortfolioEntry } from "@repo/shared";
 
 export interface StockHoldingCardProps {
   entryPerf: EntryPerformance;

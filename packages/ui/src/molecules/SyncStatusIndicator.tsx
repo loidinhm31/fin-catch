@@ -1,14 +1,14 @@
 import React, { useEffect, useState } from "react";
 import {
+  AlertCircle,
+  AlertTriangle,
+  CheckCircle2,
   Cloud,
   CloudOff,
   RefreshCw,
-  CheckCircle2,
-  AlertCircle,
-  AlertTriangle,
 } from "lucide-react";
-import { finCatchAPI } from "../services/api";
-import { SyncStatus, AuthStatus } from "../types";
+import { finCatchAPI } from "@repo/ui/services";
+import { AuthStatus, SyncStatus } from "@repo/shared";
 
 interface SyncStatusIndicatorProps {
   onTap?: () => void;

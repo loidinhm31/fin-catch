@@ -1,6 +1,6 @@
 import React, { useState } from "react";
-import { Plus, Edit, Trash2 } from "lucide-react";
-import { BondCouponPayment, CurrencyCode } from "../types";
+import { Edit, Plus, Trash2 } from "lucide-react";
+import { BondCouponPayment, CurrencyCode } from "@repo/shared";
 import { useCouponPayments } from "../hooks/useCouponPayments";
 import { AddEditCouponModal } from "../organisms/AddEditCouponModal";
 import { convertCurrency } from "../utils/currency";

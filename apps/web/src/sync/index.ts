@@ -1,7 +1,7 @@
 /**
  * Sync Module for Web Application
  *
- * Provides IndexedDB-based sync with qm-sync-server.
+ * Provides IndexedDB-based sync with qm-center-server.
  */
 
 // Client

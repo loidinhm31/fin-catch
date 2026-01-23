@@ -1,17 +1,17 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import {
+  Check,
+  Copy,
+  ExternalLink,
   Globe,
+  Monitor,
   Power,
   PowerOff,
-  Copy,
-  Check,
-  ExternalLink,
-  Monitor,
 } from "lucide-react";
 import { invoke } from "@tauri-apps/api/core";
 import { openUrl } from "@tauri-apps/plugin-opener";
-import { Button } from "../atoms/Button";
-import { isTauri } from "../utils/platform";
+import { Button } from "@repo/ui/atoms";
+import { isTauri } from "@repo/ui/utils";
 
 /**
  * Browser Sync component for starting/stopping the embedded web server

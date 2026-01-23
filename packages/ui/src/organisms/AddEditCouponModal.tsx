@@ -1,6 +1,9 @@
 import React, { useEffect, useState } from "react";
-import { BondCouponPayment, CurrencyCode } from "../types";
-import { dateToUnixTimestamp } from "@fin-catch/shared";
+import {
+  BondCouponPayment,
+  CurrencyCode,
+  dateToUnixTimestamp,
+} from "@repo/shared";
 import {
   Button,
   CurrencySelect,

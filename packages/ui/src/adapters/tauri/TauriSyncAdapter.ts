@@ -1,6 +1,6 @@
 import { invoke } from "@tauri-apps/api/core";
 import type { ISyncService } from "../interfaces";
-import type { SyncResult, SyncStatus } from "../../types";
+import type { SyncResult, SyncStatus } from "@repo/shared";
 
 /**
  * Tauri adapter for sync operations

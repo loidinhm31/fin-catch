@@ -7,3 +7,4 @@ export * from "./usePortfolioPerformance";
 export * from "./usePortfolios";
 export * from "./useResponsiveChart";
 export * from "./useServerConnection";
+export * from "./useSyncStatus";

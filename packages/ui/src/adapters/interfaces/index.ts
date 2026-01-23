@@ -1,5 +1,5 @@
 /**
- * Service interfaces re-exported from @fin-catch/shared
+ * Service interfaces re-exported from @repo/shared
  *
  * This file provides backward compatibility for existing imports.
  * All service interfaces are now defined in the shared package.
@@ -11,4 +11,4 @@ export type {
   IDataService,
   IAuthService,
   ISyncService,
-} from "@fin-catch/shared";
+} from "@repo/shared";

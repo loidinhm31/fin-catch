@@ -1,9 +1,9 @@
 import React, { useState } from "react";
 import { Wallet } from "lucide-react";
-import { CurrencyCode, PortfolioEntry } from "../types";
+import { CurrencyCode, PortfolioEntry } from "@repo/shared";
 import { formatCurrency as formatCurrencyUtil } from "../utils/currency";
-import { getPreference, setPreference } from "../utils/preferences";
-import { ConfirmDialog, CubeShape } from "../atoms";
+import { getPreference, setPreference } from "@repo/ui/utils";
+import { ConfirmDialog, CubeShape } from "@repo/ui/atoms";
 import {
   AddEditEntryModal,
   CreatePortfolioModal,
@@ -12,11 +12,13 @@ import {
   HoldingsSection,
   PerformanceSummaryCard,
   PortfolioSelector,
-} from "../organisms";
-import { usePortfolios } from "../hooks/usePortfolios";
-import { usePortfolioEntries } from "../hooks/usePortfolioEntries";
-import { usePortfolioPerformance } from "../hooks/usePortfolioPerformance";
-import { useHoldingsPerformance } from "../hooks/useHoldingsPerformance";
+} from "@repo/ui/organisms";
+import {
+  useHoldingsPerformance,
+  usePortfolioEntries,
+  usePortfolioPerformance,
+  usePortfolios,
+} from "@repo/ui/hooks";
 
 export const PortfolioPage: React.FC = () => {
   // Hooks for data management
