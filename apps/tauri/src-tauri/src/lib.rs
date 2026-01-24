@@ -334,7 +334,7 @@ async fn sync_get_status(
 }
 
 //=============================================================================
-// Browser Sync Commands (On-demand web server)
+// Browser Sync Commands (On-demand http server)
 //=============================================================================
 
 /// Start the browser sync server and return the URL with session token
@@ -351,7 +351,7 @@ fn start_browser_sync(
         return Err("Browser sync server is already running".to_string());
     }
 
-    // Clone what we need for the web server
+    // Clone what we need for the http server
     let gateway_clone = state.gateway.clone();
     let db_clone = state.db.clone();
     let sync_service_clone = state.sync.clone();
@@ -360,7 +360,7 @@ fn start_browser_sync(
     let sync_status_clone = (*sync_status_holder).clone();
     let app_handle_clone = app_handle.clone();
 
-    // Start the web server (price alerts now come from qm-sync server, not local)
+    // Start the http server (price alerts now come from qm-sync server, not local)
     let token = web_server::start_web_server(
         gateway_clone,
         db_clone,
@@ -372,7 +372,7 @@ fn start_browser_sync(
     );
 
     // In dev mode, open browser to Vite dev server for HMR support
-    // In production, open to the embedded web server
+    // In production, open to the embedded http server
     let is_dev_mode = std::env::var("TAURI_DEV_HOST").is_ok()
         || std::env::var("CARGO_MANIFEST_DIR").is_ok();
 

@@ -18,7 +18,8 @@
     "./services": "./src/services/index.ts",
     "./utils": "./src/utils/index.ts",
     "./assets/*": "./src/assets/*",
-    "./types": "./src/types/index.ts"
+    "./types": "./src/types/index.ts",
+    "./embed": "./src/embed/index.ts"
   },
   "scripts": {
     "build": "tsc",
@@ -26,6 +27,7 @@
   },
   "dependencies": {
     "@repo/shared": "workspace:*",
+    "dexie": "^4.0.11",
     "@radix-ui/react-accordion": "^1.2.12",
     "@radix-ui/react-alert-dialog": "^1.1.15",
     "@radix-ui/react-dialog": "^1.1.15",
@@ -49,7 +51,9 @@
     "axios": "^1.13.2",
     "react-hook-form": "^7.66.0",
     "react-router-dom": "^7.9.6",
-    "tailwindcss": "^4.1.17"
+    "tailwindcss": "^4.1.17",
+    "@fontsource/dm-sans": "^5.1.0",
+    "@fontsource/space-grotesk": "^5.1.0"
   },
   "devDependencies": {
     "@types/react": "^19.1.8",

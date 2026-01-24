@@ -196,7 +196,7 @@ export class HttpDataAdapter implements IDataService {
   }
 
   async healthCheckSource(_sourceName: string): Promise<boolean> {
-    // Health check for individual sources not implemented in web API
+    // Health check for individual sources not implemented in http API
     const results = await this.healthCheckAll();
     return results[_sourceName] ?? false;
   }

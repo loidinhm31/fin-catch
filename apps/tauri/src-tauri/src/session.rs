@@ -1,7 +1,7 @@
 //! Session token management for secure browser sync.
 //!
 //! This module provides cryptographically secure session tokens
-//! for authenticating browser requests to the embedded web server.
+//! for authenticating browser requests to the embedded http server.
 
 use rand::{thread_rng, RngCore};
 use std::sync::{Arc, Mutex};

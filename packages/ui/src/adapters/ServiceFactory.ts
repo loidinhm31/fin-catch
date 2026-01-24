@@ -24,7 +24,7 @@ import {
   HttpCouponPaymentAdapter,
   HttpPortfolioAdapter,
   HttpPortfolioEntryAdapter,
-} from "./web";
+} from "./http";
 
 // Shared adapters (calls qm-center-server directly)
 import {
@@ -160,7 +160,7 @@ export const resetServices = (): void => {
 };
 
 /**
- * Set custom Portfolio Service (e.g. for web adapter injection)
+ * Set custom Portfolio Service (e.g. for http adapter injection)
  */
 export const setPortfolioService = (service: IPortfolioService): void => {
   portfolioService = service;

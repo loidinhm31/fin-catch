@@ -4,6 +4,7 @@ import type {
   IAuthService,
   SyncConfig,
 } from "@repo/shared";
+import { AUTH_STORAGE_KEYS } from "@repo/shared/constants";
 
 /**
  * Configuration for QmServerAuthAdapter
@@ -24,18 +25,9 @@ interface ApiResponse<T> {
 }
 
 /**
- * Token storage keys
+ * Token storage keys - use centralized keys for SSO across qm-center ecosystem
  */
-const STORAGE_KEYS = {
-  ACCESS_TOKEN: "fin-catch-access-token",
-  REFRESH_TOKEN: "fin-catch-refresh-token",
-  USER_ID: "fin-catch-user-id",
-  APPS: "fin-catch-apps",
-  IS_ADMIN: "fin-catch-is-admin",
-  SERVER_URL: "fin-catch-server-url",
-  APP_ID: "fin-catch-app-id",
-  API_KEY: "fin-catch-api-key",
-} as const;
+const STORAGE_KEYS = AUTH_STORAGE_KEYS;
 
 /**
  * Get the base URL from Vite env or default
@@ -85,7 +77,7 @@ function getDefaultApiKey(): string {
 /**
  * Shared adapter for auth APIs
  * Calls qm-center-server directly - works in both Tauri webview and browser
- * Stores tokens in localStorage (for web) - note: less secure than Tauri's encrypted storage
+ * Stores tokens in localStorage (for http) - note: less secure than Tauri's encrypted storage
  */
 export class QmServerAuthAdapter implements IAuthService {
   private baseUrl: string;

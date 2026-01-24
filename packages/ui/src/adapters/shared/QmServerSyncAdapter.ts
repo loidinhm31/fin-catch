@@ -46,8 +46,8 @@ const STORAGE_KEYS = {
 } as const;
 
 /**
- * Shared sync adapter for web app
- * Calls qm-center-server directly - works in standalone web app
+ * Shared sync adapter for http app
+ * Calls qm-center-server directly - works in standalone http app
  */
 export class QmServerSyncAdapter implements ISyncService {
   private readonly baseUrl: string;
@@ -75,13 +75,13 @@ export class QmServerSyncAdapter implements ISyncService {
 
   async syncNow(): Promise<SyncResult> {
     try {
-      // The web adapter cannot do a full delta sync as it doesn't have local changes
-      // In web mode, sync is effectively a "pull" operation to get remote data
-      // For now, return a result indicating web sync is not fully supported
+      // The http adapter cannot do a full delta sync as it doesn't have local changes
+      // In http mode, sync is effectively a "pull" operation to get remote data
+      // For now, return a result indicating http sync is not fully supported
       // The server-side sync requires local changes which we don't have in IndexedDB yet
 
       console.log(
-        "[QmServerSyncAdapter] syncNow - web sync not fully implemented",
+        "[QmServerSyncAdapter] syncNow - http sync not fully implemented",
       );
 
       // Try to call the sync status endpoint to verify connectivity
@@ -116,7 +116,7 @@ export class QmServerSyncAdapter implements ISyncService {
       const token = await this.getAccessToken();
       const isAuthenticated = !!token;
 
-      // In web mode, we don't track pending changes locally (yet)
+      // In http mode, we don't track pending changes locally (yet)
       // Return a basic status based on authentication
       return {
         configured: true,

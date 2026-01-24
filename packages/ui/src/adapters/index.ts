@@ -18,6 +18,26 @@ export {
   type QmServerSyncConfig,
 } from "./shared";
 
+// Re-export IndexedDB adapters (for http/browser applications)
+export {
+  IndexedDBPortfolioAdapter,
+  IndexedDBPortfolioEntryAdapter,
+  IndexedDBCouponPaymentAdapter,
+  IndexedDBSyncAdapter,
+  IndexedDBSyncStorage,
+  createIndexedDBSyncAdapter,
+  db,
+  generateId,
+  getCurrentTimestamp,
+  FinCatchDatabase,
+  SYNC_META_KEYS,
+  type SyncMeta,
+  type PendingChange,
+  type IndexedDBSyncAdapterConfig,
+  type TokenProvider,
+  type TokenSaver,
+} from "./web";
+
 // Re-export factory functions
 export {
   getPortfolioService,

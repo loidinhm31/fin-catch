@@ -29,7 +29,7 @@ rusqlite = { version = "0.32", features = ["bundled"] }
 tokio = { version = "1", features = ["sync"] }
 
 # Sync client library (uses reqwest internally)
-qm-sync-client = { path = "../../../../qm-sync/qm-sync-client", features = ["reqwest-client"] }
+qm-sync-client = { path = "../../../../qm-sync/qm-core-engine/qm-sync-client", features = ["reqwest-client"] }
 
 # Required by qm-sync-client
 thiserror = "1"
@@ -59,13 +59,7 @@ hex = "0.4"
 # JWT token validation
 jsonwebtoken = "9"
 
-# Financial data aggregation library (moved to qm-sync, kept for dev mode Axum server)
-fin-catch-data = { path = "../../../../qm-sync/fin-catch-data" }
-
-# Once cell for global singleton (price monitor)
-once_cell = "1"
-
-# Embedded web server for browser mode
+# Embedded http server for browser mode
 axum = { version = "0.7", features = ["macros"] }
 tower-http = { version = "0.5", features = ["cors", "fs"] }
 rust-embed = "8"

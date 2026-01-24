@@ -4,7 +4,7 @@ import type { SyncResult, SyncStatus } from "@repo/shared/types";
  * Sync service interface for data synchronization
  * Implemented by platform-specific adapters:
  * - TauriSyncAdapter: Uses Tauri invoke for desktop
- * - QmServerSyncAdapter: Calls qm-center-server directly for web
+ * - QmServerSyncAdapter: Calls qm-center-server directly for http
  */
 export interface ISyncService {
   /**

@@ -76,7 +76,6 @@ const calculateBondPresentValue = (
       faceValue / (1 + periodicYTM * getTargetDateProgressRatio(maturityDate));
   }
 
-  console.log("sss", pvCoupons, pvFaceValue, periodicYTM, ytm);
   // Total present value
   return pvCoupons + pvFaceValue;
 };
@@ -170,7 +169,6 @@ export const calculatePortfolioPerformance = async (
             entry.maturity_date,
             entry.coupon_frequency,
           );
-          console.log("curre", currentPrice);
         } else if (
           entry.current_market_price !== undefined &&
           entry.current_market_price > 0

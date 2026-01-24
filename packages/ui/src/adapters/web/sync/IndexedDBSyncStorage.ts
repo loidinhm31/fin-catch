@@ -6,7 +6,7 @@
  * and managing sync checkpoints.
  */
 
-import { db, getCurrentTimestamp, SYNC_META_KEYS } from "@repo/ui/adapters";
+import { db, getCurrentTimestamp, SYNC_META_KEYS } from "../database";
 import type { Checkpoint, PullRecord, SyncRecord } from "@repo/shared";
 
 /**

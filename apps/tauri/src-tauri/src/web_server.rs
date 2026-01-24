@@ -1,14 +1,14 @@
-//! Embedded web server for browser mode (DEVELOPMENT ONLY)
+//! Embedded http server for browser mode (DEVELOPMENT ONLY)
 //!
 //! This server provides API endpoints on port 25092 that mirror the Tauri invoke commands,
 //! allowing the same React app to work in browser mode for easier debugging during development.
 //!
-//! NOTE: In the new monorepo architecture, the pure web app (apps/web) should use:
+//! NOTE: In the new monorepo architecture, the pure http app (apps/http) should use:
 //! - IndexedDB for local data storage
 //! - qm-center-server APIs for financial data (stock/gold/exchange rates)
 //!
 //! This embedded server is kept for development convenience when testing the Tauri app
-//! in browser mode. In production, the pure web experience should use apps/web instead.
+//! in browser mode. In production, the pure http experience should use apps/http instead.
 //!
 //! The server is started on-demand when user clicks "Open in Browser" and can be
 //! stopped gracefully, notifying connected browsers via SSE.
@@ -41,7 +41,7 @@ use crate::shared_auth::SharedAuthStatusHolder;
 use crate::shared_sync::SharedSyncStatusHolder;
 use crate::sync::SyncService;
 
-/// Port for the embedded web server
+/// Port for the embedded http server
 pub const WEB_SERVER_PORT: u16 = 25092;
 
 /// Embed the dist folder at compile time (only in release mode)
@@ -64,7 +64,7 @@ impl Asset {
 }
 
 
-/// Shared state for the web server
+/// Shared state for the http server
 #[derive(Clone)]
 pub struct WebServerState {
     pub gateway: Arc<DataSourceGateway>,
@@ -76,7 +76,7 @@ pub struct WebServerState {
     pub app_handle: tauri::AppHandle,
     /// Broadcast channel for SSE shutdown notifications
     pub shutdown_broadcast: broadcast::Sender<String>,
-    // Note: price alerts now handled by qm-sync server, not local web server
+    // Note: price alerts now handled by qm-sync server, not local http server
 }
 
 /// Handle for graceful shutdown
@@ -117,7 +117,7 @@ struct TokenQuery {
     token: Option<String>,
 }
 
-/// Start the embedded web server in a background thread.
+/// Start the embedded http server in a background thread.
 /// Returns the session token for the browser URL.
 /// Note: Price alerts are now handled by qm-sync server, not this local server.
 pub fn start_web_server(
@@ -212,7 +212,7 @@ pub fn start_web_server(
 
             let listener = tokio::net::TcpListener::bind(&addr)
                 .await
-                .expect("Failed to bind web server");
+                .expect("Failed to bind http server");
 
             println!("[WebServer] Ready at http://localhost:{}", WEB_SERVER_PORT);
 
@@ -239,7 +239,7 @@ pub fn start_web_server(
     token
 }
 
-/// Stop the web server gracefully
+/// Stop the http server gracefully
 pub fn stop_web_server() {
     let handle = SERVER_HANDLE.lock().unwrap().take();
     if let Some(h) = handle {
@@ -247,7 +247,7 @@ pub fn stop_web_server() {
     }
 }
 
-/// Check if the web server is currently running
+/// Check if the http server is currently running
 pub fn is_server_running() -> bool {
     SERVER_HANDLE.lock().unwrap().is_some()
 }

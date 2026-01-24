@@ -1,7 +1,7 @@
-//! Shared authentication status for web server access
+//! Shared authentication status for http server access
 //!
 //! This module provides a thread-safe way to share auth status between
-//! the Tauri commands and the embedded web server.
+//! the Tauri commands and the embedded http server.
 
 use serde::{Deserialize, Serialize};
 use std::sync::{Arc, RwLock};

@@ -14,7 +14,7 @@ import { Button } from "@repo/ui/atoms";
 import { isTauri } from "@repo/ui/utils";
 
 /**
- * Browser Sync component for starting/stopping the embedded web server
+ * Browser Sync component for starting/stopping the embedded http server
  * and opening the app in a browser.
  */
 export const BrowserSync: React.FC = () => {

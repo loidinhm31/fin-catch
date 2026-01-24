@@ -61,7 +61,7 @@ export interface IAuthService {
 
   /**
    * Save tokens from external source (e.g., when sync service refreshes tokens)
-   * Optional - only needed for web adapter where sync may refresh tokens
+   * Optional - only needed for http adapter where sync may refresh tokens
    */
   saveTokensExternal?(
     accessToken: string,

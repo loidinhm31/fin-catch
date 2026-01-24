@@ -1,6 +1,6 @@
 /**
  * Platform detection utilities for fin-catch app
- * Enables the same React bundle to run in both Tauri and web browser
+ * Enables the same React bundle to run in both Tauri and http browser
  */
 
 /**
@@ -12,17 +12,17 @@ export const isTauri = (): boolean => {
 };
 
 /**
- * Check if running in a regular web browser
+ * Check if running in a regular http browser
  */
 export const isWeb = (): boolean => !isTauri();
 
 /**
- * Port for the embedded web server (must match Rust web_server.rs)
+ * Port for the embedded http server (must match Rust web_server.rs)
  */
 export const WEB_SERVER_PORT = 25092;
 
 /**
- * Get the URL for the embedded web server
+ * Get the URL for the embedded http server
  */
 export const getWebServerUrl = (): string =>
   `http://localhost:${WEB_SERVER_PORT}`;
@@ -62,8 +62,8 @@ export const isDesktop = (): boolean => {
 /**
  * Get platform name for logging/display
  */
-export const getPlatformName = (): "tauri" | "web" => {
-  return isTauri() ? "tauri" : "web";
+export const getPlatformName = (): "tauri" | "http" => {
+  return isTauri() ? "tauri" : "http";
 };
 
 /**

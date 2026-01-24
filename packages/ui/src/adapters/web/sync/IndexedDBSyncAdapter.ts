@@ -13,7 +13,7 @@ import {
   QmSyncClient,
 } from "@repo/shared";
 import { IndexedDBSyncStorage } from "./IndexedDBSyncStorage";
-import { getCurrentTimestamp } from "@repo/ui/adapters";
+import { getCurrentTimestamp } from "../database";
 
 /**
  * Token provider function type.

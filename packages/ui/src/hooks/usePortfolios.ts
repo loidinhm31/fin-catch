@@ -12,6 +12,7 @@ export const usePortfolios = () => {
 
   const loadPortfolios = useCallback(async () => {
     setIsLoading(true);
+    console.log("LOADING");
     try {
       const portfolioList = await finCatchAPI.listPortfolios();
       setPortfolios(portfolioList);
