@@ -1,19 +1,26 @@
 import { useState, useEffect } from "react";
 import {
+  Routes,
+  Route,
+  Navigate,
+  useLocation,
+  useNavigate,
+} from "react-router-dom";
+import {
   FinancialDataPage,
   PortfolioPage,
   LoginPage,
   SettingsPage,
-} from "@repo/ui/pages";
-import { LoadingSpinner } from "@repo/ui/atoms";
-import { SyncStatusIndicator, BottomNav } from "@repo/ui/molecules";
+} from "@fin-catch/ui/pages";
+import { LoadingSpinner } from "@fin-catch/ui/atoms";
+import { SyncStatusIndicator, BottomNav } from "@fin-catch/ui/molecules";
 import {
   BrowserSyncInitializer,
   PriceAlertToast,
   Sidebar,
-} from "@repo/ui/organisms";
-import "../styles/global.css";
-import { useAuth } from "@repo/ui/hooks";
+} from "@fin-catch/ui/organisms";
+import "@fin-catch/ui/styles/global.css";
+import { useAuth } from "@fin-catch/ui/hooks";
 
 type Page = "financial-data" | "portfolio" | "settings";
 
@@ -42,7 +49,10 @@ export function AppShell({
   embedded = false,
   onLogoutRequest,
 }: AppShellProps = {}) {
-  const [currentPage, setCurrentPage] = useState<Page>("portfolio");
+  // Navigation hooks
+  const location = useLocation();
+  const navigate = useNavigate();
+
   const [localSkipAuth, setLocalSkipAuth] = useState(false);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const {
@@ -50,6 +60,33 @@ export function AppShell({
     isLoading: isAuthLoading,
     checkAuthStatus,
   } = useAuth();
+
+  // Derive current page from path
+  const getCurrentPage = (): Page => {
+    // Check path suffix to support root-level and embedded routing
+    const path = location.pathname;
+    if (path.endsWith("/market") || path === "/market") return "financial-data";
+    if (path.endsWith("/settings") || path === "/settings") return "settings";
+    return "portfolio"; // default
+  };
+
+  const currentPage = getCurrentPage();
+
+  const handleNavigate = (page: Page) => {
+    // Use relative paths for navigation to support optional embedding
+    switch (page) {
+      case "financial-data":
+        navigate("market");
+        break;
+      case "settings":
+        navigate("settings");
+        break;
+      case "portfolio":
+      default:
+        navigate("portfolio");
+        break;
+    }
+  };
 
   // Use either the prop or local state for skip auth
   const skipAuth = skipAuthProp || localSkipAuth;
@@ -115,8 +152,8 @@ export function AppShell({
         {showNavigation && (isAuthenticated || skipAuth) && (
           <Sidebar
             currentPage={currentPage}
-            onNavigate={setCurrentPage}
-            onSyncTap={() => setCurrentPage("settings")}
+            onNavigate={handleNavigate}
+            onSyncTap={() => handleNavigate("settings")}
             isCollapsed={isSidebarCollapsed}
             onToggleCollapse={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
           />
@@ -134,32 +171,33 @@ export function AppShell({
               boxShadow: "0 4px 20px rgba(0, 0, 0, 0.4)",
             }}
           >
-            <SyncStatusIndicator onTap={() => setCurrentPage("settings")} />
+            <SyncStatusIndicator onTap={() => handleNavigate("settings")} />
           </div>
         )}
 
         {/* Page Content - Adjust margins for sidebar on desktop (no margins in embedded mode) */}
         <div
-          className={`transition-all duration-300 ${
-            embedded
-              ? "pt-4 pb-4"
-              : `pt-[60px] md:pt-6 pb-24 md:pb-6 ${
-                  isSidebarCollapsed ? "md:ml-16" : "md:ml-64"
-                }`
-          }`}
+          className={`transition-all duration-300 ${embedded
+            ? "pt-4 pb-4"
+            : `pt-[60px] md:pt-6 pb-24 md:pb-6 ${isSidebarCollapsed ? "md:ml-16" : "md:ml-64"
+            }`
+            }`}
         >
-          {currentPage === "financial-data" ? (
-            <FinancialDataPage />
-          ) : currentPage === "portfolio" ? (
-            <PortfolioPage />
-          ) : (
-            <SettingsPage onLogout={handleLogout} />
-          )}
+          <Routes>
+            <Route path="market" element={<FinancialDataPage />} />
+            <Route path="portfolio" element={<PortfolioPage />} />
+            <Route
+              path="settings"
+              element={<SettingsPage onLogout={handleLogout} />}
+            />
+            <Route path="/" element={<Navigate to="portfolio" replace />} />
+            <Route path="*" element={<Navigate to="portfolio" replace />} />
+          </Routes>
         </div>
 
         {/* Mobile Bottom Navigation - Hidden on desktop and in embedded mode */}
         {showNavigation && (isAuthenticated || skipAuth) && (
-          <BottomNav currentPage={currentPage} onNavigate={setCurrentPage} />
+          <BottomNav currentPage={currentPage} onNavigate={handleNavigate} />
         )}
 
         {/* Price Alert Toast Notifications */}
