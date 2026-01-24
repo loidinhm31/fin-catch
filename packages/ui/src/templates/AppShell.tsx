@@ -198,7 +198,7 @@ export function AppShell({
           className={`transition-all duration-300 ${
             embedded
               ? "pt-4 pb-4"
-              : `pt-[60px] md:pt-6 pb-24 md:pb-6 ${
+              : `pt-15 md:pt-6 pb-24 md:pb-6 ${
                   isSidebarCollapsed ? "md:ml-16" : "md:ml-64"
                 }`
           }`}
@@ -209,9 +209,12 @@ export function AppShell({
             {/* More specific route must come before less specific */}
             <Route
               path="trading/operations"
-              element={<TradingOperationsPage />}
+              element={<TradingOperationsPage basePath={basePath} />}
             />
-            <Route path="trading" element={<TradingPage />} />
+            <Route
+              path="trading"
+              element={<TradingPage basePath={basePath} />}
+            />
             <Route
               path="settings"
               element={<SettingsPage onLogout={handleLogout} />}

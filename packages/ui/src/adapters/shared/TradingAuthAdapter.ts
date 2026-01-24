@@ -6,6 +6,11 @@ import type {
   TradingAccountInfo,
   TradingSubAccount,
   TradingAccountBalance,
+  LoanPackage,
+  PPSE,
+  Order,
+  PlaceOrderRequest,
+  Deal,
 } from "@fin-catch/shared";
 import { AUTH_STORAGE_KEYS } from "@fin-catch/shared/constants";
 
@@ -208,15 +213,16 @@ export class TradingAuthAdapter implements ITradingAuthService {
   async verifyOtp(
     platform: TradingPlatformId,
     otp: string,
+    otpType: "email" | "smart" = "email",
   ): Promise<TradingSession> {
     const token = this.getAccessToken();
     if (!token) {
       throw new Error("Not authenticated. Please login to qm-center first.");
     }
 
-    return this.post<{ otp: string }, TradingSession>(
+    return this.post<{ otp: string; otp_type: string }, TradingSession>(
       `/api/v1/trading/${platform}/verify-otp`,
-      { otp },
+      { otp, otp_type: otpType },
     );
   }
 
@@ -323,5 +329,177 @@ export class TradingAuthAdapter implements ITradingAuthService {
     return this.get<TradingAccountBalance>(
       `/api/v1/trading/${platform}/accounts/${accountId}/balance`,
     );
+  }
+
+  // =========================================================================
+  // Trading Operations (sections 4.1-4.6)
+  // =========================================================================
+
+  /**
+   * Get loan packages for an account (4.1)
+   *
+   * @param platform - Platform identifier
+   * @param accountNo - Account number
+   * @returns List of available loan packages
+   */
+  async getLoanPackages(
+    platform: TradingPlatformId,
+    accountNo: string,
+  ): Promise<LoanPackage[]> {
+    const token = this.getAccessToken();
+    if (!token) {
+      throw new Error("Not authenticated. Please login to qm-center first.");
+    }
+
+    const response = await this.get<{ loanPackages: LoanPackage[] }>(
+      `/api/v1/trading/${platform}/accounts/${accountNo}/loan-packages`,
+    );
+    return response.loanPackages;
+  }
+
+  /**
+   * Get buying/selling power (4.2)
+   *
+   * @param platform - Platform identifier
+   * @param accountNo - Account number
+   * @param symbol - Stock symbol
+   * @param price - Price for calculation
+   * @param loanPackageId - Loan package ID
+   * @returns PPSE (purchasing/selling power estimate)
+   */
+  async getPPSE(
+    platform: TradingPlatformId,
+    accountNo: string,
+    symbol: string,
+    price: number,
+    loanPackageId: number,
+  ): Promise<PPSE> {
+    const token = this.getAccessToken();
+    if (!token) {
+      throw new Error("Not authenticated. Please login to qm-center first.");
+    }
+
+    const params = new URLSearchParams({
+      symbol,
+      price: String(price),
+      loanPackageId: String(loanPackageId),
+    });
+
+    return this.get<PPSE>(
+      `/api/v1/trading/${platform}/accounts/${accountNo}/ppse?${params}`,
+    );
+  }
+
+  /**
+   * Place an order (4.3)
+   *
+   * @param platform - Platform identifier
+   * @param order - Order request details
+   * @returns Created order
+   */
+  async placeOrder(
+    platform: TradingPlatformId,
+    order: PlaceOrderRequest,
+  ): Promise<Order> {
+    const token = this.getAccessToken();
+    if (!token) {
+      throw new Error("Not authenticated. Please login to qm-center first.");
+    }
+
+    return this.post<PlaceOrderRequest, Order>(
+      `/api/v1/trading/${platform}/accounts/${order.accountNo}/orders`,
+      order,
+    );
+  }
+
+  /**
+   * Get list of orders (4.4)
+   *
+   * @param platform - Platform identifier
+   * @param accountNo - Account number
+   * @returns List of today's orders
+   */
+  async getOrders(
+    platform: TradingPlatformId,
+    accountNo: string,
+  ): Promise<Order[]> {
+    const token = this.getAccessToken();
+    if (!token) {
+      throw new Error("Not authenticated. Please login to qm-center first.");
+    }
+
+    const response = await this.get<{ orders: Order[] }>(
+      `/api/v1/trading/${platform}/accounts/${accountNo}/orders`,
+    );
+    return response.orders;
+  }
+
+  /**
+   * Cancel an order (4.5)
+   *
+   * @param platform - Platform identifier
+   * @param accountNo - Account number
+   * @param orderId - Order ID to cancel
+   * @returns Cancelled order
+   */
+  async cancelOrder(
+    platform: TradingPlatformId,
+    accountNo: string,
+    orderId: number,
+  ): Promise<Order> {
+    const token = this.getAccessToken();
+    if (!token) {
+      throw new Error("Not authenticated. Please login to qm-center first.");
+    }
+
+    return this.delete<Order>(
+      `/api/v1/trading/${platform}/accounts/${accountNo}/orders/${orderId}`,
+    );
+  }
+
+  /**
+   * Get deals/holdings (4.6)
+   *
+   * @param platform - Platform identifier
+   * @param accountNo - Account number
+   * @returns List of current positions
+   */
+  async getDeals(
+    platform: TradingPlatformId,
+    accountNo: string,
+  ): Promise<Deal[]> {
+    const token = this.getAccessToken();
+    if (!token) {
+      throw new Error("Not authenticated. Please login to qm-center first.");
+    }
+
+    const response = await this.get<{ deals: Deal[] }>(
+      `/api/v1/trading/${platform}/accounts/${accountNo}/deals`,
+    );
+    return response.deals;
+  }
+
+  /**
+   * DELETE request helper
+   */
+  private async delete<TRes>(endpoint: string): Promise<TRes> {
+    const url = `${this.baseUrl}${endpoint}`;
+    console.log(`[TradingAuthAdapter] DELETE ${endpoint}`);
+
+    const response = await fetch(url, {
+      method: "DELETE",
+      headers: this.getAuthHeaders(),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      const errorMessage = errorData.error || `API error: ${response.status}`;
+      console.error(`[TradingAuthAdapter] Error:`, errorMessage);
+      throw new Error(errorMessage);
+    }
+
+    const result = await response.json();
+    console.log(`[TradingAuthAdapter] Response`, result);
+    return result as TRes;
   }
 }

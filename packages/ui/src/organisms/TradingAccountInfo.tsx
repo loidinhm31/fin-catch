@@ -1,6 +1,8 @@
 import React, { useEffect, useState, useCallback } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   AlertCircle,
+  ArrowRightLeft,
   Banknote,
   ChevronDown,
   Loader2,
@@ -28,6 +30,8 @@ interface TradingAccountInfoProps {
   tradingService: ITradingAuthService;
   /** Platform to show account info for */
   platform: TradingPlatformId;
+  /** Base path for navigation (e.g. /fin-catch) */
+  basePath?: string;
 }
 
 /**
@@ -52,7 +56,10 @@ const formatCurrency = (value: number): string => {
 export const TradingAccountInfo: React.FC<TradingAccountInfoProps> = ({
   tradingService,
   platform,
+  basePath,
 }) => {
+  const navigate = useNavigate();
+
   // Account info state
   const [accountInfo, setAccountInfo] = useState<TradingAccountInfoType | null>(
     null,
@@ -648,6 +655,31 @@ export const TradingAccountInfo: React.FC<TradingAccountInfoProps> = ({
               Unable to load balance
             </div>
           )}
+        </div>
+      )}
+
+      {/* Start Trading Button */}
+      {selectedAccount && (
+        <div className="pt-4">
+          <Button
+            variant="primary"
+            onClick={() => {
+              const path = basePath
+                ? `${basePath}/trading/operations`
+                : "/trading/operations";
+              navigate(
+                `${path}?platform=${platform}&account=${selectedAccount.id}`,
+              );
+            }}
+            className="w-full"
+            style={{
+              background:
+                "linear-gradient(135deg, #00d4ff 0%, #7b61ff 50%, #00ff88 100%)",
+            }}
+          >
+            <ArrowRightLeft className="w-4 h-4 mr-2" />
+            Start Trading
+          </Button>
         </div>
       )}
     </div>

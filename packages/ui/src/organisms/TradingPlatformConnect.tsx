@@ -19,7 +19,17 @@ import type {
   TradingSession,
   TradingStatus,
 } from "@fin-catch/shared";
-import { Button, Input, Label } from "@fin-catch/ui/atoms";
+import { AUTH_STORAGE_KEYS } from "@fin-catch/shared/constants";
+import {
+  Button,
+  Input,
+  Label,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@fin-catch/ui/atoms";
 import { TradingAccountInfo } from "./TradingAccountInfo";
 
 /**
@@ -29,7 +39,10 @@ interface TradingPlatformConnectProps {
   /** Trading auth service instance */
   tradingService: ITradingAuthService;
   /** Callback when connection status changes */
+  /** Callback when connection status changes */
   onStatusChange?: (platform: TradingPlatformId, status: TradingStatus) => void;
+  /** Base path for navigation */
+  basePath?: string;
 }
 
 /**
@@ -49,6 +62,7 @@ type ConnectionStep = "select" | "login" | "otp" | "connected";
 export const TradingPlatformConnect: React.FC<TradingPlatformConnectProps> = ({
   tradingService,
   onStatusChange,
+  basePath,
 }) => {
   // Platform selection state
   const [platforms, setPlatforms] = useState<TradingPlatform[]>([]);
@@ -63,12 +77,29 @@ export const TradingPlatformConnect: React.FC<TradingPlatformConnectProps> = ({
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [otp, setOtp] = useState("");
+  const [otpType, setOtpType] = useState<"email" | "smart">("email");
 
   // UI state
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [otpSent, setOtpSent] = useState(false);
+  const [_otpSent, setOtpSent] = useState(false);
   const [otpCountdown, setOtpCountdown] = useState(0);
+
+  // Initialize OTP type from storage
+  useEffect(() => {
+    const storedType = localStorage.getItem(AUTH_STORAGE_KEYS.OTP_TYPE) as
+      | "email"
+      | "smart"
+      | null;
+    if (storedType) {
+      setOtpType(storedType);
+    }
+  }, []);
+
+  const handleOtpTypeChange = (type: "email" | "smart") => {
+    setOtpType(type);
+    localStorage.setItem(AUTH_STORAGE_KEYS.OTP_TYPE, type);
+  };
 
   // Load platforms on mount
   useEffect(() => {
@@ -165,11 +196,25 @@ export const TradingPlatformConnect: React.FC<TradingPlatformConnectProps> = ({
       setSession(result);
       onStatusChange?.(selectedPlatform.id, result.status);
 
-      // If platform requires OTP, request it and go to OTP step
+      // If platform requires OTP, check preference
       if (selectedPlatform.requires_otp) {
-        await tradingService.requestOtp(selectedPlatform.id);
-        setOtpSent(true);
-        setOtpCountdown(120); // 2 minute countdown
+        // Read preference directly to ensure we have latest value
+        const otpType =
+          localStorage.getItem(AUTH_STORAGE_KEYS.OTP_TYPE) || "email";
+        console.log(
+          "[TradingPlatformConnect] Login success. OTP Type preference:",
+          otpType,
+        );
+
+        if (otpType === "email") {
+          await tradingService.requestOtp(selectedPlatform.id);
+          setOtpSent(true);
+          setOtpCountdown(120); // 2 minute countdown
+        } else {
+          // Smart OTP: Don't request from server, just show input
+          setOtpSent(false); // No countdown needed for Smart OTP usually, or maybe let user handle it
+          setOtpCountdown(0);
+        }
         setStep("otp");
       } else {
         // No OTP required, we're connected
@@ -207,7 +252,17 @@ export const TradingPlatformConnect: React.FC<TradingPlatformConnectProps> = ({
     setIsLoading(true);
 
     try {
-      const result = await tradingService.verifyOtp(selectedPlatform.id, otp);
+      // Get preferred OTP type from storage (default to email)
+      const otpType =
+        (localStorage.getItem(AUTH_STORAGE_KEYS.OTP_TYPE) as
+          | "email"
+          | "smart") || "email";
+
+      const result = await tradingService.verifyOtp(
+        selectedPlatform.id,
+        otp,
+        otpType,
+      );
       setSession(result);
       onStatusChange?.(selectedPlatform.id, result.status);
       setStep("connected");
@@ -467,6 +522,35 @@ export const TradingPlatformConnect: React.FC<TradingPlatformConnectProps> = ({
             />
           </div>
 
+          <div>
+            <Label
+              htmlFor="otp-type-select"
+              style={{
+                color: "var(--color-text-primary)",
+                marginBottom: "8px",
+              }}
+            >
+              <div className="flex items-center gap-2">
+                <KeyRound className="w-4 h-4" style={{ color: "#00d4ff" }} />
+                OTP Preference
+              </div>
+            </Label>
+            <Select
+              value={otpType}
+              onValueChange={(value) =>
+                handleOtpTypeChange(value as "email" | "smart")
+              }
+            >
+              <SelectTrigger id="otp-type-select">
+                <SelectValue placeholder="Select OTP Type" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="email">Email OTP</SelectItem>
+                <SelectItem value="smart">Smart OTP</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
           <div className="flex gap-3 pt-2">
             <Button
               type="button"
@@ -496,22 +580,46 @@ export const TradingPlatformConnect: React.FC<TradingPlatformConnectProps> = ({
             className="text-center mb-4 p-4 rounded-lg"
             style={{ background: "rgba(0, 212, 255, 0.1)" }}
           >
-            <Mail
-              className="w-8 h-8 mx-auto mb-2"
-              style={{ color: "#00d4ff" }}
-            />
-            <div
-              className="font-semibold"
-              style={{ color: "var(--color-text-primary)" }}
-            >
-              Check your email
-            </div>
-            <div
-              className="text-sm"
-              style={{ color: "var(--color-text-secondary)" }}
-            >
-              We sent an OTP to your registered email
-            </div>
+            {/* Show different icon/text based on OTP type */}
+            {localStorage.getItem(AUTH_STORAGE_KEYS.OTP_TYPE) === "smart" ? (
+              <>
+                <KeyRound
+                  className="w-8 h-8 mx-auto mb-2"
+                  style={{ color: "#00d4ff" }}
+                />
+                <div
+                  className="font-semibold"
+                  style={{ color: "var(--color-text-primary)" }}
+                >
+                  Enter Smart OTP
+                </div>
+                <div
+                  className="text-sm"
+                  style={{ color: "var(--color-text-secondary)" }}
+                >
+                  Please enter the code from your Entrade X app
+                </div>
+              </>
+            ) : (
+              <>
+                <Mail
+                  className="w-8 h-8 mx-auto mb-2"
+                  style={{ color: "#00d4ff" }}
+                />
+                <div
+                  className="font-semibold"
+                  style={{ color: "var(--color-text-primary)" }}
+                >
+                  Check your email
+                </div>
+                <div
+                  className="text-sm"
+                  style={{ color: "var(--color-text-secondary)" }}
+                >
+                  We sent an OTP to your registered email
+                </div>
+              </>
+            )}
           </div>
 
           <div>
@@ -542,23 +650,26 @@ export const TradingPlatformConnect: React.FC<TradingPlatformConnectProps> = ({
           </div>
 
           <div className="flex items-center justify-center gap-2">
-            <button
-              type="button"
-              onClick={handleResendOtp}
-              disabled={isLoading || otpCountdown > 0}
-              className="text-sm font-medium flex items-center gap-1 transition-colors"
-              style={{
-                color:
-                  otpCountdown > 0
-                    ? "var(--color-text-muted)"
-                    : "var(--color-accent)",
-              }}
-            >
-              <RefreshCw
-                className={`w-4 h-4 ${isLoading ? "animate-spin" : ""}`}
-              />
-              {otpCountdown > 0 ? `Resend in ${otpCountdown}s` : "Resend OTP"}
-            </button>
+            {/* Resend button only for email OTP */}
+            {localStorage.getItem(AUTH_STORAGE_KEYS.OTP_TYPE) !== "smart" && (
+              <button
+                type="button"
+                onClick={handleResendOtp}
+                disabled={isLoading || otpCountdown > 0}
+                className="text-sm font-medium flex items-center gap-1 transition-colors"
+                style={{
+                  color:
+                    otpCountdown > 0
+                      ? "var(--color-text-muted)"
+                      : "var(--color-accent)",
+                }}
+              >
+                <RefreshCw
+                  className={`w-4 h-4 ${isLoading ? "animate-spin" : ""}`}
+                />
+                {otpCountdown > 0 ? `Resend in ${otpCountdown}s` : "Resend OTP"}
+              </button>
+            )}
           </div>
 
           <div className="flex gap-3 pt-2">
@@ -643,6 +754,7 @@ export const TradingPlatformConnect: React.FC<TradingPlatformConnectProps> = ({
             <TradingAccountInfo
               tradingService={tradingService}
               platform={selectedPlatform.id}
+              basePath={basePath}
             />
           )}
 

@@ -5,6 +5,11 @@ import {
   TradingAccountInfo,
   TradingSubAccount,
   TradingAccountBalance,
+  LoanPackage,
+  PPSE,
+  Order,
+  PlaceOrderRequest,
+  Deal,
 } from "@fin-catch/shared/types";
 
 /**
@@ -56,9 +61,14 @@ export interface ITradingAuthService {
    *
    * @param platform - Platform identifier
    * @param otp - OTP code from email
+   * @param otpType - OTP type (email or smart), defaults to email
    * @returns Session with status "connected"
    */
-  verifyOtp(platform: TradingPlatformId, otp: string): Promise<TradingSession>;
+  verifyOtp(
+    platform: TradingPlatformId,
+    otp: string,
+    otpType?: "email" | "smart",
+  ): Promise<TradingSession>;
 
   /**
    * Get current session status for a platform
@@ -102,4 +112,82 @@ export interface ITradingAuthService {
     platform: TradingPlatformId,
     accountId: string,
   ): Promise<TradingAccountBalance>;
+
+  // =========================================================================
+  // Trading Operations (sections 4.1-4.6)
+  // =========================================================================
+
+  /**
+   * Get loan packages for an account (4.1)
+   *
+   * @param platform - Platform identifier
+   * @param accountNo - Account number
+   * @returns List of available loan packages
+   */
+  getLoanPackages(
+    platform: TradingPlatformId,
+    accountNo: string,
+  ): Promise<LoanPackage[]>;
+
+  /**
+   * Get buying/selling power (4.2)
+   *
+   * @param platform - Platform identifier
+   * @param accountNo - Account number
+   * @param symbol - Stock symbol
+   * @param price - Price for calculation
+   * @param loanPackageId - Loan package ID
+   * @returns PPSE (purchasing/selling power estimate)
+   */
+  getPPSE(
+    platform: TradingPlatformId,
+    accountNo: string,
+    symbol: string,
+    price: number,
+    loanPackageId: number,
+  ): Promise<PPSE>;
+
+  /**
+   * Place an order (4.3)
+   *
+   * @param platform - Platform identifier
+   * @param order - Order request details
+   * @returns Created order
+   */
+  placeOrder(
+    platform: TradingPlatformId,
+    order: PlaceOrderRequest,
+  ): Promise<Order>;
+
+  /**
+   * Get list of orders (4.4)
+   *
+   * @param platform - Platform identifier
+   * @param accountNo - Account number
+   * @returns List of today's orders
+   */
+  getOrders(platform: TradingPlatformId, accountNo: string): Promise<Order[]>;
+
+  /**
+   * Cancel an order (4.5)
+   *
+   * @param platform - Platform identifier
+   * @param accountNo - Account number
+   * @param orderId - Order ID to cancel
+   * @returns Cancelled order
+   */
+  cancelOrder(
+    platform: TradingPlatformId,
+    accountNo: string,
+    orderId: number,
+  ): Promise<Order>;
+
+  /**
+   * Get deals/holdings (4.6)
+   *
+   * @param platform - Platform identifier
+   * @param accountNo - Account number
+   * @returns List of current positions
+   */
+  getDeals(platform: TradingPlatformId, accountNo: string): Promise<Deal[]>;
 }

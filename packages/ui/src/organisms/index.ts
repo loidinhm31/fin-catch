@@ -22,3 +22,6 @@ export * from "./SyncSettings";
 export * from "./Sidebar";
 export * from "./TradingAccountInfo";
 export * from "./TradingPlatformConnect";
+export * from "./OrderForm";
+export * from "./OrderBook";
+export * from "./Holdings";
