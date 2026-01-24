@@ -1,5 +1,5 @@
-import type { IPortfolioService, Portfolio } from "@repo/shared";
-import { getSessionToken, WEB_SERVER_PORT } from "@repo/ui/utils";
+import type { IPortfolioService, Portfolio } from "@fin-catch/shared";
+import { getSessionToken, WEB_SERVER_PORT } from "@fin-catch/ui/utils";
 
 /**
  * API response wrapper from embedded server

@@ -14,9 +14,9 @@ import {
   Server,
   User,
 } from "lucide-react";
-import { Button, Input, Label } from "@repo/ui/atoms";
-import { finCatchAPI } from "@repo/ui/services";
-import { AuthStatus, SyncResult, SyncStatus } from "@repo/shared";
+import { Button, Input, Label } from "@fin-catch/ui/atoms";
+import { finCatchAPI } from "@fin-catch/ui/services";
+import { AuthStatus, SyncResult, SyncStatus } from "@fin-catch/shared";
 
 interface SyncSettingsProps {
   onLogout?: () => void;

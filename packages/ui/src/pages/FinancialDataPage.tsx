@@ -15,9 +15,9 @@ import {
   GoldPriceResponse,
   StockHistoryRequest,
   StockHistoryResponse,
-} from "@repo/shared";
-import { finCatchAPI } from "@repo/ui/services";
-import { DateRangePicker } from "@repo/ui/molecules";
+} from "@fin-catch/shared";
+import { finCatchAPI } from "@fin-catch/ui/services";
+import { DateRangePicker } from "@fin-catch/ui/molecules";
 
 type ActiveTab = "stock" | "gold";
 

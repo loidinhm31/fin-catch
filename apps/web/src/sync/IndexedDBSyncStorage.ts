@@ -6,8 +6,8 @@
  * and managing sync checkpoints.
  */
 
-import { db, getCurrentTimestamp, SYNC_META_KEYS } from "@repo/ui/adapters";
-import type { Checkpoint, PullRecord, SyncRecord } from "@repo/shared";
+import { db, getCurrentTimestamp, SYNC_META_KEYS } from "@fin-catch/ui/adapters";
+import type { Checkpoint, PullRecord, SyncRecord } from "@fin-catch/shared";
 
 /**
  * IndexedDB implementation of sync storage.

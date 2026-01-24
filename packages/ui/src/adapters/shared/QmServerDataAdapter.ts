@@ -8,7 +8,7 @@ import type {
   IDataService,
   StockHistoryRequest,
   StockHistoryResponse,
-} from "@repo/shared";
+} from "@fin-catch/shared";
 
 /**
  * Configuration for QmServerDataAdapter

@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
-import { AuthStatus } from "@repo/shared";
-import { finCatchAPI } from "@repo/ui/services";
+import { AuthStatus } from "@fin-catch/shared";
+import { finCatchAPI } from "@fin-catch/ui/services";
 
 export const useAuth = () => {
   const [authStatus, setAuthStatus] = useState<AuthStatus | null>(null);

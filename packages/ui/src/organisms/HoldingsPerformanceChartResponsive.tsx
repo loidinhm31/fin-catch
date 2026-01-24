@@ -13,10 +13,10 @@ import {
 import {
   formatTimestampForChart,
   PortfolioHoldingsPerformance,
-} from "@repo/shared";
-import { calculateXAxisInterval } from "@repo/ui/utils";
-import { useResponsiveChart } from "@repo/ui/hooks";
-import { ResponsiveChartContainer } from "@repo/ui/molecules";
+} from "@fin-catch/shared";
+import { calculateXAxisInterval } from "@fin-catch/ui/utils";
+import { useResponsiveChart } from "@fin-catch/ui/hooks";
+import { ResponsiveChartContainer } from "@fin-catch/ui/molecules";
 
 export interface HoldingsPerformanceChartResponsiveProps {
   data: PortfolioHoldingsPerformance;

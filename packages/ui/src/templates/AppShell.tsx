@@ -19,7 +19,7 @@ import {
   PriceAlertToast,
   Sidebar,
 } from "@fin-catch/ui/organisms";
-import "@fin-catch/ui/styles/global.css";
+import "@fin-catch/ui/styles";
 import { useAuth } from "@fin-catch/ui/hooks";
 
 type Page = "financial-data" | "portfolio" | "settings";

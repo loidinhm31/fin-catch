@@ -6,7 +6,7 @@ import {
   EntryPerformance,
   getUnitLabel,
   PortfolioEntry,
-} from "@repo/shared";
+} from "@fin-catch/shared";
 
 export interface GoldHoldingCardProps {
   entryPerf: EntryPerformance;

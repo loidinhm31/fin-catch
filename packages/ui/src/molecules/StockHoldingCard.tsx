@@ -7,7 +7,7 @@ import {
   Edit,
   Trash2,
 } from "lucide-react";
-import { CurrencyCode, EntryPerformance, PortfolioEntry } from "@repo/shared";
+import { CurrencyCode, EntryPerformance, PortfolioEntry } from "@fin-catch/shared";
 
 export interface StockHoldingCardProps {
   entryPerf: EntryPerformance;

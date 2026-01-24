@@ -3,8 +3,8 @@ import type {
   AuthStatus,
   IAuthService,
   SyncConfig,
-} from "@repo/shared";
-import { AUTH_STORAGE_KEYS } from "@repo/shared/constants";
+} from "@fin-catch/shared";
+import { AUTH_STORAGE_KEYS } from "@fin-catch/shared/constants";
 
 /**
  * Configuration for QmServerAuthAdapter

@@ -10,7 +10,7 @@ export {
   createSyncClientConfig,
   fetchHttpClient,
   type HttpClientFn,
-} from "@repo/shared";
+} from "@fin-catch/shared";
 
 // Storage
 export { IndexedDBSyncStorage } from "./IndexedDBSyncStorage";

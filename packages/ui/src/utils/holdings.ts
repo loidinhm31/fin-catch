@@ -1,10 +1,10 @@
-import { finCatchAPI } from "@repo/ui/services";
+import { finCatchAPI } from "@fin-catch/ui/services";
 import {
   CurrencyCode,
   HoldingPerformance,
   PortfolioEntry,
   PortfolioHoldingsPerformance,
-} from "@repo/shared";
+} from "@fin-catch/shared";
 import { convertCurrency } from "./currency";
 
 // Chart colors for holdings

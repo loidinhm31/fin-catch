@@ -1,5 +1,5 @@
 {
-  "name": "@repo/tauri",
+  "name": "@fin-catch/tauri",
   "private": true,
   "version": "0.1.0",
   "type": "module",
@@ -14,8 +14,8 @@
     "version": "node scripts/bump-version.js"
   },
   "dependencies": {
-    "@repo/shared": "workspace:*",
-    "@repo/ui": "workspace:*",
+    "@fin-catch/shared": "workspace:*",
+    "@fin-catch/ui": "workspace:*",
     "@radix-ui/react-accordion": "^1.2.12",
     "@radix-ui/react-alert-dialog": "^1.1.15",
     "@radix-ui/react-dialog": "^1.1.15",

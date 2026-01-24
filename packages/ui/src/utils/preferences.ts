@@ -1,4 +1,4 @@
-import { CurrencyCode } from "@repo/shared";
+import { CurrencyCode } from "@fin-catch/shared";
 
 /**
  * User preferences stored in localStorage

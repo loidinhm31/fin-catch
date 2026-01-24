@@ -1,4 +1,4 @@
-import { isTauri } from "@repo/ui/utils";
+import { isTauri } from "@fin-catch/ui/utils";
 
 // Interfaces
 import type {

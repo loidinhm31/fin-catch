@@ -1,6 +1,6 @@
 import * as React from "react";
 import { AlertCircle } from "lucide-react";
-import { cn } from "@repo/shared";
+import { cn } from "@fin-catch/shared";
 import {
   AlertDialog,
   AlertDialogAction,

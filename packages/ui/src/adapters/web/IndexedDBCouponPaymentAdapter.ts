@@ -1,5 +1,5 @@
-import type { ICouponPaymentService } from "@repo/shared/services";
-import type { BondCouponPayment } from "@repo/shared/types";
+import type { ICouponPaymentService } from "@fin-catch/shared/services";
+import type { BondCouponPayment } from "@fin-catch/shared/types";
 import { db, generateId, getCurrentTimestamp } from "./database";
 
 /**

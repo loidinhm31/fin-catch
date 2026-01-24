@@ -11,14 +11,14 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import { formatTimestampForChart, StockCandle } from "@repo/shared";
+import { formatTimestampForChart, StockCandle } from "@fin-catch/shared";
 import {
   calculateXAxisInterval,
   formatCurrencyCompact,
   formatVolume,
-} from "@repo/ui/utils";
-import { useResponsiveChart } from "@repo/ui/hooks";
-import { ResponsiveChartContainer } from "@repo/ui/molecules";
+} from "@fin-catch/ui/utils";
+import { useResponsiveChart } from "@fin-catch/ui/hooks";
+import { ResponsiveChartContainer } from "@fin-catch/ui/molecules";
 
 export interface StockChartResponsiveProps {
   data: StockCandle[];

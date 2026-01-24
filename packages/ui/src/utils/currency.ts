@@ -1,10 +1,10 @@
-import { finCatchAPI } from "@repo/ui/services";
+import { finCatchAPI } from "@fin-catch/ui/services";
 import type {
   CURRENCY_SYMBOLS,
   CurrencyCode,
   ExchangeRateRequest,
   ExchangeRateResponse,
-} from "@repo/shared";
+} from "@fin-catch/shared";
 
 /**
  * Cache for exchange rates to avoid repeated API calls

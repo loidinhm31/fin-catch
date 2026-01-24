@@ -7,8 +7,8 @@
  */
 
 import React from "react";
-import { isOpenedFromDesktop } from "@repo/ui/utils";
-import { useServerConnection } from "@repo/ui/hooks";
+import { isOpenedFromDesktop } from "@fin-catch/ui/utils";
+import { useServerConnection } from "@fin-catch/ui/hooks";
 import { ServerDisconnectedOverlay } from "./ServerDisconnectedOverlay";
 
 interface BrowserSyncInitializerProps {

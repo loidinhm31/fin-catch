@@ -1,4 +1,4 @@
-import type { SyncResult, SyncStatus } from "@repo/shared/types";
+import type { SyncResult, SyncStatus } from "@fin-catch/shared/types";
 
 /**
  * Sync service interface for data synchronization

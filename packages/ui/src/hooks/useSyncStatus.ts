@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
-import { SyncStatus, AuthStatus } from "@repo/shared";
-import { finCatchAPI } from "@repo/ui/services";
+import { SyncStatus, AuthStatus } from "@fin-catch/shared";
+import { finCatchAPI } from "@fin-catch/ui/services";
 
 interface UseSyncStatusOptions {
   autoRefreshInterval?: number;

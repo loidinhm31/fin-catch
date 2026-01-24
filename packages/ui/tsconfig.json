@@ -15,7 +15,7 @@
     "outDir": "./dist",
     "baseUrl": ".",
     "paths": {
-      "@repo/ui/*": ["./src/*"]
+      "@fin-catch/ui/*": ["./src/*"]
     }
   },
   "include": ["src"],

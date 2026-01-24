@@ -37,4 +37,10 @@ export interface FinCatchEmbedProps {
    * Optional class name for the root container
    */
   className?: string;
+
+  /**
+   * Whether to wrap the app in a Router.
+   * Default: true. Set to false if embedding in an app that already has a Router.
+   */
+  useRouter?: boolean;
 }

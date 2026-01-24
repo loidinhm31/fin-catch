@@ -7,7 +7,7 @@
  */
 
 import { db, getCurrentTimestamp, SYNC_META_KEYS } from "../database";
-import type { Checkpoint, PullRecord, SyncRecord } from "@repo/shared";
+import type { Checkpoint, PullRecord, SyncRecord } from "@fin-catch/shared";
 
 /**
  * IndexedDB implementation of sync storage.

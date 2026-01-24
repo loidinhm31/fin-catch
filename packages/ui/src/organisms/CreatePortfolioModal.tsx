@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Wallet } from "lucide-react";
-import { finCatchAPI } from "@repo/ui/services";
-import { Portfolio } from "@repo/shared";
+import { finCatchAPI } from "@fin-catch/ui/services";
+import { Portfolio } from "@fin-catch/shared";
 import { Button, ErrorAlert, Input, Label, Modal, Textarea } from "../atoms";
 
 export interface CreatePortfolioModalProps {

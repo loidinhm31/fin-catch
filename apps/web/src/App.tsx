@@ -1,11 +1,11 @@
 /**
  * Web Application Entry Point
  *
- * Uses the FinCatchApp component from @repo/ui/embed for consistency.
+ * Uses the FinCatchApp component from @fin-catch/ui/embed for consistency.
  * This allows fin-catch to run standalone or be embedded in other apps.
  */
-import { FinCatchApp } from "@repo/ui/embed";
-import "@repo/ui/styles";
+import { FinCatchApp } from "@fin-catch/ui/embed";
+import "@fin-catch/ui/styles";
 
 function App() {
   return <FinCatchApp />;

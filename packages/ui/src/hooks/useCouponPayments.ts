@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
-import { BondCouponPayment } from "@repo/shared";
-import { finCatchAPI } from "@repo/ui/services";
+import { BondCouponPayment } from "@fin-catch/shared";
+import { finCatchAPI } from "@fin-catch/ui/services";
 
 export const useCouponPayments = (entryId: string | null) => {
   const [payments, setPayments] = useState<BondCouponPayment[]>([]);

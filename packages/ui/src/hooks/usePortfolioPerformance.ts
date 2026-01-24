@@ -3,7 +3,7 @@ import {
   CurrencyCode,
   PortfolioEntry,
   PortfolioPerformance,
-} from "@repo/shared";
+} from "@fin-catch/shared";
 import { calculatePortfolioPerformance } from "../utils/performanceCalculations";
 
 export const usePortfolioPerformance = (

@@ -1,6 +1,6 @@
-import { AppShell } from "@repo/ui/templates";
-import "@repo/ui/styles";
+import { FinCatchApp } from "@fin-catch/ui/embed";
+import "@fin-catch/ui/styles";
 
 export default function App() {
-  return <AppShell />;
+  return <FinCatchApp />;
 }

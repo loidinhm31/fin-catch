@@ -3,7 +3,7 @@ import {
   BondCouponPayment,
   CurrencyCode,
   dateToUnixTimestamp,
-} from "@repo/shared";
+} from "@fin-catch/shared";
 import {
   Button,
   CurrencySelect,

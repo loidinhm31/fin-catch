@@ -5,8 +5,8 @@ import {
   Input,
   SimpleAlertDialog as AlertDialog,
   SimpleSelect as Select,
-} from "@repo/ui/atoms";
-import { DateRangePicker, FormField } from "@repo/ui/molecules";
+} from "@fin-catch/ui/atoms";
+import { DateRangePicker, FormField } from "@fin-catch/ui/molecules";
 import {
   dateToUnixTimestamp,
   getDefaultDateRange,
@@ -17,7 +17,7 @@ import {
   StockFormData,
   StockHistoryRequest,
   StockSource,
-} from "@repo/shared";
+} from "@fin-catch/shared";
 
 export interface StockQueryFormProps {
   onSubmit: (request: StockHistoryRequest) => void;

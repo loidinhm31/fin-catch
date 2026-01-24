@@ -1,4 +1,4 @@
-import { AuthResponse, AuthStatus, SyncConfig } from "@repo/shared";
+import { AuthResponse, AuthStatus, SyncConfig } from "@fin-catch/shared";
 
 /**
  * Auth service interface for user authentication

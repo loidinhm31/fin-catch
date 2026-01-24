@@ -8,7 +8,7 @@ import type {
   GoldPriceResponse,
   StockHistoryRequest,
   StockHistoryResponse,
-} from "@repo/shared";
+} from "@fin-catch/shared";
 import type { IDataService } from "../interfaces";
 
 /**

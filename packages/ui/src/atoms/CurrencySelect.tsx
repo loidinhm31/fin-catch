@@ -1,6 +1,6 @@
 import * as React from "react";
-import type { CurrencyCode } from "@repo/shared";
-import { CURRENCY_LABELS, CURRENCY_SYMBOLS } from "@repo/shared";
+import type { CurrencyCode } from "@fin-catch/shared";
+import { CURRENCY_LABELS, CURRENCY_SYMBOLS } from "@fin-catch/shared";
 import {
   Select,
   SelectContent,

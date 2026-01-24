@@ -17,7 +17,7 @@ import {
   SyncConfig,
   SyncResult,
   SyncStatus,
-} from "@repo/shared";
+} from "@fin-catch/shared";
 import {
   getAuthService,
   getCouponPaymentService,
@@ -25,8 +25,8 @@ import {
   getPortfolioEntryService,
   getPortfolioService,
   getSyncService,
-} from "@repo/ui/adapters";
-import { isTauri } from "@repo/ui/utils";
+} from "@fin-catch/ui/adapters";
+import { isTauri } from "@fin-catch/ui/utils";
 
 class FinCatchAPI {
   /**

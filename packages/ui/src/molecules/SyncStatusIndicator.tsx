@@ -7,8 +7,8 @@ import {
   CloudOff,
   RefreshCw,
 } from "lucide-react";
-import { finCatchAPI } from "@repo/ui/services";
-import { AuthStatus, SyncStatus } from "@repo/shared";
+import { finCatchAPI } from "@fin-catch/ui/services";
+import { AuthStatus, SyncStatus } from "@fin-catch/shared";
 
 interface SyncStatusIndicatorProps {
   onTap?: () => void;

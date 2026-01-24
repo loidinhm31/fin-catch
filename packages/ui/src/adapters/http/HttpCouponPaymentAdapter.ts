@@ -1,5 +1,5 @@
-import type { BondCouponPayment, ICouponPaymentService } from "@repo/shared";
-import { getSessionToken, WEB_SERVER_PORT } from "@repo/ui/utils";
+import type { BondCouponPayment, ICouponPaymentService } from "@fin-catch/shared";
+import { getSessionToken, WEB_SERVER_PORT } from "@fin-catch/ui/utils";
 
 /**
  * API response wrapper from embedded server

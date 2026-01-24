@@ -1,6 +1,6 @@
 import React from "react";
 import { ChevronDown, ChevronUp, Edit, Trash2 } from "lucide-react";
-import { CurrencyCode, EntryPerformance, PortfolioEntry } from "@repo/shared";
+import { CurrencyCode, EntryPerformance, PortfolioEntry } from "@fin-catch/shared";
 import { CouponPaymentsSection } from "./CouponPaymentsSection";
 
 export interface BondHoldingCardProps {

@@ -9,7 +9,7 @@ import { useEffect, useMemo } from "react";
 import { HashRouter } from "react-router-dom";
 import type { IPlatformServices } from "../platform";
 import { PlatformProvider } from "../platform";
-import { AppShell } from "@repo/ui/templates";
+import { AppShell } from "../templates";
 import {
   QmServerAuthAdapter,
   QmServerDataAdapter,
@@ -85,6 +85,7 @@ function getApiKey(): string {
 export function FinCatchApp({
   authTokens,
   embedded = false,
+  useRouter = true,
   onLogoutRequest,
   className,
 }: FinCatchEmbedProps) {
@@ -139,16 +140,18 @@ export function FinCatchApp({
   // Determine if we should skip auth (tokens provided externally)
   const skipAuth = !!(authTokens?.accessToken && authTokens?.refreshToken);
 
+  const content = (
+    <AppShell
+      skipAuth={skipAuth}
+      embedded={embedded}
+      onLogoutRequest={onLogoutRequest}
+    />
+  );
+
   return (
     <div className={className}>
       <PlatformProvider services={services}>
-        <HashRouter>
-          <AppShell
-            skipAuth={skipAuth}
-            embedded={embedded}
-            onLogoutRequest={onLogoutRequest}
-          />
-        </HashRouter>
+        {useRouter ? <HashRouter>{content}</HashRouter> : content}
       </PlatformProvider>
     </div>
   );

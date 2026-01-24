@@ -14,7 +14,7 @@ import {
   getSessionToken,
   isOpenedFromDesktop,
   WEB_SERVER_PORT,
-} from "@repo/ui/utils";
+} from "@fin-catch/ui/utils";
 
 export interface ServerConnectionState {
   isConnected: boolean;

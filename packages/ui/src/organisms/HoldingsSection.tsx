@@ -4,8 +4,8 @@ import {
   CurrencyCode,
   PortfolioEntry,
   PortfolioPerformance,
-} from "@repo/shared";
-import { HoldingCard } from "@repo/ui/molecules";
+} from "@fin-catch/shared";
+import { HoldingCard } from "@fin-catch/ui/molecules";
 
 export interface HoldingsSectionProps {
   performance: PortfolioPerformance | null;

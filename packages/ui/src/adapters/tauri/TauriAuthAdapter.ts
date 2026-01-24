@@ -4,7 +4,7 @@ import type {
   AuthStatus,
   IAuthService,
   SyncConfig,
-} from "@repo/shared";
+} from "@fin-catch/shared";
 
 /**
  * Tauri adapter for authentication operations

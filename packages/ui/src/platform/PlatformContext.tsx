@@ -6,7 +6,7 @@ import type {
   IPortfolioEntryService,
   IPortfolioService,
   ISyncService,
-} from "@repo/shared/services";
+} from "@fin-catch/shared/services";
 
 /**
  * Platform services interface for dependency injection

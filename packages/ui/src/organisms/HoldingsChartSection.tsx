@@ -1,6 +1,6 @@
 import React from "react";
 import { BarChart3 } from "lucide-react";
-import { PortfolioHoldingsPerformance } from "@repo/shared";
+import { PortfolioHoldingsPerformance } from "@fin-catch/shared";
 import { HoldingsPerformanceChartResponsive } from "./HoldingsPerformanceChartResponsive";
 
 export interface HoldingsChartSectionProps {

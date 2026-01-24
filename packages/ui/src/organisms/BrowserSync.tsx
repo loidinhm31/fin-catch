@@ -10,8 +10,8 @@ import {
 } from "lucide-react";
 import { invoke } from "@tauri-apps/api/core";
 import { openUrl } from "@tauri-apps/plugin-opener";
-import { Button } from "@repo/ui/atoms";
-import { isTauri } from "@repo/ui/utils";
+import { Button } from "@fin-catch/ui/atoms";
+import { isTauri } from "@fin-catch/ui/utils";
 
 /**
  * Browser Sync component for starting/stopping the embedded http server

@@ -10,7 +10,7 @@ import type {
   BondCouponPayment,
   Portfolio,
   PortfolioEntry,
-} from "@repo/shared/types";
+} from "@fin-catch/shared/types";
 
 // =============================================================================
 // Sync Metadata Types

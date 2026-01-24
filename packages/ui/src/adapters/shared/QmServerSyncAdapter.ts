@@ -1,4 +1,4 @@
-import type { ISyncService, SyncResult, SyncStatus } from "@repo/shared";
+import type { ISyncService, SyncResult, SyncStatus } from "@fin-catch/shared";
 
 /**
  * Configuration for QmServerSyncAdapter

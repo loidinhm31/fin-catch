@@ -11,15 +11,15 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import { formatTimestampForChart, GoldPremiumPoint } from "@repo/shared";
+import { formatTimestampForChart, GoldPremiumPoint } from "@fin-catch/shared";
 import {
   calculateXAxisInterval,
   formatCurrencyCompact,
   formatCurrencyValue,
   formatPercent,
-} from "@repo/ui/utils";
-import { useResponsiveChart } from "@repo/ui/hooks";
-import { ResponsiveChartContainer } from "@repo/ui/molecules";
+} from "@fin-catch/ui/utils";
+import { useResponsiveChart } from "@fin-catch/ui/hooks";
+import { ResponsiveChartContainer } from "@fin-catch/ui/molecules";
 
 export interface GoldPremiumChartResponsiveProps {
   data: GoldPremiumPoint[];

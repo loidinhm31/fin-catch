@@ -8,8 +8,8 @@ import type {
   IDataService,
   StockHistoryRequest,
   StockHistoryResponse,
-} from "@repo/shared";
-import { getSessionToken, WEB_SERVER_PORT } from "@repo/ui/utils";
+} from "@fin-catch/shared";
+import { getSessionToken, WEB_SERVER_PORT } from "@fin-catch/ui/utils";
 
 /**
  * API response wrapper from embedded server

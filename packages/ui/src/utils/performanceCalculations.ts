@@ -3,8 +3,8 @@ import {
   EntryPerformance,
   PortfolioEntry,
   PortfolioPerformance,
-} from "@repo/shared";
-import { finCatchAPI } from "@repo/ui/services";
+} from "@fin-catch/shared";
+import { finCatchAPI } from "@fin-catch/ui/services";
 import { convertCurrency } from "./currency";
 
 /**

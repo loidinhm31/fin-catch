@@ -1,4 +1,4 @@
-import { Portfolio } from "@repo/shared/types";
+import { Portfolio } from "@fin-catch/shared/types";
 
 /**
  * Portfolio service interface

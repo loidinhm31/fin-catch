@@ -8,4 +8,4 @@ interface ImportMeta {
   readonly env: ImportMetaEnv;
 }
 
-declare module "@repo/ui/styles";
+declare module "@fin-catch/ui/styles";

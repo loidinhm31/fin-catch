@@ -1,5 +1,5 @@
 import React from "react";
-import { CurrencyCode, getUnitLabel } from "@repo/shared";
+import { CurrencyCode, getUnitLabel } from "@fin-catch/shared";
 import { formatCurrency } from "../utils/currency";
 import { Input, Label, SimpleSelect as Select } from "../atoms";
 

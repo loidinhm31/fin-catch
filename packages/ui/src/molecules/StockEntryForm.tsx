@@ -7,7 +7,7 @@ import {
   AccordionTrigger,
   Input,
   Label,
-} from "@repo/ui/atoms";
+} from "@fin-catch/ui/atoms";
 
 export interface StockEntryFormProps {
   symbol: string;
