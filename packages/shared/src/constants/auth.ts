@@ -13,6 +13,7 @@ export const AUTH_STORAGE_KEYS = {
   SERVER_URL: "qm-center-server-url",
   APP_ID: "qm-center-app-id",
   API_KEY: "qm-center-api-key",
+  OTP_TYPE: "qm-center-otp-type",
 } as const;
 
 export type AuthStorageKey =

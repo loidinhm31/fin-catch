@@ -49,4 +49,10 @@ export interface FinCatchEmbedProps {
    * Required when useRouter is false to enable absolute navigation paths.
    */
   basePath?: string;
+
+  /**
+   * Preferred OTP type for trading verification.
+   * Default: "email"
+   */
+  otpType?: "email" | "smart";
 }

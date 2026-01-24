@@ -12,6 +12,7 @@ import {
   LoginPage,
   SettingsPage,
   TradingPage,
+  TradingOperationsPage,
 } from "@fin-catch/ui/pages";
 import { LoadingSpinner } from "@fin-catch/ui/atoms";
 import { SyncStatusIndicator, BottomNav } from "@fin-catch/ui/molecules";
@@ -71,10 +72,11 @@ export function AppShell({
 
   // Derive current page from path
   const getCurrentPage = (): Page => {
-    // Check path suffix to support root-level and embedded routing
+    // Check path to support root-level and embedded routing
     const path = location.pathname;
     if (path.endsWith("/market") || path === "/market") return "financial-data";
-    if (path.endsWith("/trading") || path === "/trading") return "trading";
+    // Match both /trading and /trading/operations
+    if (path.includes("/trading") || path === "/trading") return "trading";
     if (path.endsWith("/settings") || path === "/settings") return "settings";
     return "portfolio"; // default
   };
@@ -204,6 +206,11 @@ export function AppShell({
           <Routes>
             <Route path="market" element={<FinancialDataPage />} />
             <Route path="portfolio" element={<PortfolioPage />} />
+            {/* More specific route must come before less specific */}
+            <Route
+              path="trading/operations"
+              element={<TradingOperationsPage />}
+            />
             <Route path="trading" element={<TradingPage />} />
             <Route
               path="settings"
