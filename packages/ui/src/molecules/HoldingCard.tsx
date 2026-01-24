@@ -1,5 +1,9 @@
 import React from "react";
-import { CurrencyCode, EntryPerformance, PortfolioEntry } from "@fin-catch/shared";
+import {
+  CurrencyCode,
+  EntryPerformance,
+  PortfolioEntry,
+} from "@fin-catch/shared";
 import { StockHoldingCard } from "./StockHoldingCard";
 import { GoldHoldingCard } from "./GoldHoldingCard";
 import { BondHoldingCard } from "./BondHoldingCard";

@@ -1,4 +1,7 @@
-import type { BondCouponPayment, ICouponPaymentService } from "@fin-catch/shared";
+import type {
+  BondCouponPayment,
+  ICouponPaymentService,
+} from "@fin-catch/shared";
 import { getSessionToken, WEB_SERVER_PORT } from "@fin-catch/ui/utils";
 
 /**

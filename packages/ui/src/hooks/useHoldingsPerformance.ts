@@ -4,7 +4,7 @@ import {
   PortfolioEntry,
   PortfolioHoldingsPerformance,
 } from "@fin-catch/shared";
-import { calculateAllHoldingsPerformance } from "../utils/holdings";
+import { calculateAllHoldingsPerformance } from "@fin-catch/ui/utils";
 
 export const useHoldingsPerformance = (
   entries: PortfolioEntry[],

@@ -1,6 +1,6 @@
-import { LineChart, Wallet, Settings } from "lucide-react";
+import { LineChart, Wallet, Settings, ArrowLeftRight } from "lucide-react";
 
-type Page = "financial-data" | "portfolio" | "settings";
+type Page = "financial-data" | "portfolio" | "trading" | "settings";
 
 interface BottomNavProps {
   currentPage: Page;
@@ -25,6 +25,12 @@ export function BottomNav({ currentPage, onNavigate }: BottomNavProps) {
       label: "Portfolio",
       icon: Wallet,
       activeColor: "#8B5CF6",
+    },
+    {
+      id: "trading",
+      label: "Trading",
+      icon: ArrowLeftRight,
+      activeColor: "#00FF88",
     },
     {
       id: "settings",

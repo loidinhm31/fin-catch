@@ -43,4 +43,10 @@ export interface FinCatchEmbedProps {
    * Default: true. Set to false if embedding in an app that already has a Router.
    */
   useRouter?: boolean;
+
+  /**
+   * Base path for navigation when embedded (e.g., "/fin-catch").
+   * Required when useRouter is false to enable absolute navigation paths.
+   */
+  basePath?: string;
 }

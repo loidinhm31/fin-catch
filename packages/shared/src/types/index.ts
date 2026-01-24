@@ -5,3 +5,4 @@ export * from "./benchmark";
 export * from "./holdings";
 export * from "./auth";
 export * from "./sync";
+export * from "./trading";

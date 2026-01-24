@@ -6,10 +6,10 @@ import type {
   GoldPremiumResponse,
   GoldPriceRequest,
   GoldPriceResponse,
+  IDataService,
   StockHistoryRequest,
   StockHistoryResponse,
 } from "@fin-catch/shared";
-import type { IDataService } from "../interfaces";
 
 /**
  * Tauri adapter for external market data operations

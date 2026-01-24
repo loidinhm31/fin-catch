@@ -6,6 +6,7 @@ import type {
   IPortfolioEntryService,
   IPortfolioService,
   ISyncService,
+  ITradingAuthService,
 } from "@fin-catch/shared/services";
 
 /**
@@ -19,6 +20,8 @@ export interface IPlatformServices {
   data: IDataService;
   auth: IAuthService;
   sync: ISyncService;
+  /** Trading platform auth service (optional - requires qm-center auth) */
+  trading?: ITradingAuthService;
 }
 
 /**

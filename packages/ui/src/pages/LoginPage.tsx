@@ -1,9 +1,7 @@
 import React, { useState } from "react";
 import { KeyRound, Lock, Mail, ShieldCheck, User } from "lucide-react";
-import { Button } from "../atoms/Button";
-import { Input } from "../atoms/Input";
-import { Label } from "../atoms/Label";
 import { finCatchAPI } from "@fin-catch/ui/services";
+import { Button, Input, Label } from "@fin-catch/ui/atoms";
 
 interface LoginPageProps {
   onLoginSuccess: () => void;

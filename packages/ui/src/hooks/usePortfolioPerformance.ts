@@ -4,7 +4,7 @@ import {
   PortfolioEntry,
   PortfolioPerformance,
 } from "@fin-catch/shared";
-import { calculatePortfolioPerformance } from "../utils/performanceCalculations";
+import { calculatePortfolioPerformance } from "@fin-catch/ui/utils";
 
 export const usePortfolioPerformance = (
   entries: PortfolioEntry[],

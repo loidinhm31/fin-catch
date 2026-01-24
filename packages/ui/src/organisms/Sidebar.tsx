@@ -11,10 +11,11 @@ import {
   CheckCircle2,
   AlertCircle,
   AlertTriangle,
+  ArrowLeftRight,
 } from "lucide-react";
 import { useSyncStatus } from "@fin-catch/ui/hooks";
 
-type Page = "financial-data" | "portfolio" | "settings";
+type Page = "financial-data" | "portfolio" | "trading" | "settings";
 
 interface SidebarProps {
   currentPage: Page;
@@ -41,28 +42,35 @@ export function Sidebar({
     activeColor: string;
     activeBg: string;
   }[] = [
-      {
-        id: "financial-data",
-        label: "Market",
-        icon: LineChart,
-        activeColor: "#22D3EE",
-        activeBg: "rgba(34, 211, 238, 0.15)",
-      },
-      {
-        id: "portfolio",
-        label: "Portfolio",
-        icon: Wallet,
-        activeColor: "#8B5CF6",
-        activeBg: "rgba(139, 92, 246, 0.15)",
-      },
-      {
-        id: "settings",
-        label: "Settings",
-        icon: Settings,
-        activeColor: "#00D4FF",
-        activeBg: "rgba(0, 212, 255, 0.15)",
-      },
-    ];
+    {
+      id: "financial-data",
+      label: "Market",
+      icon: LineChart,
+      activeColor: "#22D3EE",
+      activeBg: "rgba(34, 211, 238, 0.15)",
+    },
+    {
+      id: "portfolio",
+      label: "Portfolio",
+      icon: Wallet,
+      activeColor: "#8B5CF6",
+      activeBg: "rgba(139, 92, 246, 0.15)",
+    },
+    {
+      id: "trading",
+      label: "Trading",
+      icon: ArrowLeftRight,
+      activeColor: "#00FF88",
+      activeBg: "rgba(0, 255, 136, 0.15)",
+    },
+    {
+      id: "settings",
+      label: "Settings",
+      icon: Settings,
+      activeColor: "#00D4FF",
+      activeBg: "rgba(0, 212, 255, 0.15)",
+    },
+  ];
 
   // Sync status helpers
   const getSyncIcon = () => {
@@ -90,8 +98,9 @@ export function Sidebar({
 
   return (
     <aside
-      className={`fixed left-0 top-0 bottom-0 z-40 hidden md:flex flex-col border-r transition-all duration-300 ${isCollapsed ? "w-16" : "w-64"
-        }`}
+      className={`fixed left-0 top-0 bottom-0 z-40 hidden md:flex flex-col border-r transition-all duration-300 ${
+        isCollapsed ? "w-16" : "w-64"
+      }`}
       style={{
         background: "rgba(15, 23, 42, 0.85)",
         backdropFilter: "blur(16px)",
@@ -102,8 +111,9 @@ export function Sidebar({
     >
       {/* Logo / Brand */}
       <div
-        className={`flex items-center gap-3 py-5 border-b transition-all duration-300 ${isCollapsed ? "px-3 justify-center" : "px-6"
-          }`}
+        className={`flex items-center gap-3 py-5 border-b transition-all duration-300 ${
+          isCollapsed ? "px-3 justify-center" : "px-6"
+        }`}
         style={{ borderBottomColor: "rgba(255, 255, 255, 0.1)" }}
       >
         <div
@@ -140,8 +150,9 @@ export function Sidebar({
                 <button
                   onClick={() => onNavigate(id)}
                   title={isCollapsed ? label : undefined}
-                  className={`w-full flex items-center gap-3 py-3 rounded-xl transition-all duration-200 group ${isCollapsed ? "px-0 justify-center" : "px-4"
-                    }`}
+                  className={`w-full flex items-center gap-3 py-3 rounded-xl transition-all duration-200 group ${
+                    isCollapsed ? "px-0 justify-center" : "px-4"
+                  }`}
                   style={{
                     color: isActive ? activeColor : "#94A3B8",
                     background: isActive ? activeBg : "transparent",
@@ -149,16 +160,18 @@ export function Sidebar({
                   }}
                 >
                   <Icon
-                    className={`w-5 h-5 flex-shrink-0 transition-all ${isActive
+                    className={`w-5 h-5 flex-shrink-0 transition-all ${
+                      isActive
                         ? "stroke-[2.5]"
                         : "stroke-2 group-hover:stroke-[2.5]"
-                      }`}
+                    }`}
                   />
                   {!isCollapsed && (
                     <>
                       <span
-                        className={`text-sm whitespace-nowrap ${isActive ? "font-semibold" : "font-medium"
-                          }`}
+                        className={`text-sm whitespace-nowrap ${
+                          isActive ? "font-semibold" : "font-medium"
+                        }`}
                       >
                         {label}
                       </span>
@@ -205,8 +218,9 @@ export function Sidebar({
                 ? `${pendingCount} pending`
                 : "Sync status"
           }
-          className={`w-full flex items-center gap-2 p-2 rounded-lg transition-all hover:bg-white/5 ${isCollapsed ? "justify-center" : ""
-            }`}
+          className={`w-full flex items-center gap-2 p-2 rounded-lg transition-all hover:bg-white/5 ${
+            isCollapsed ? "justify-center" : ""
+          }`}
           style={{ color: getSyncColor() }}
         >
           <SyncIcon

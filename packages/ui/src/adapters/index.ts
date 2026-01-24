@@ -6,6 +6,7 @@ export type {
   IDataService,
   IAuthService,
   ISyncService,
+  ITradingAuthService,
 } from "./interfaces";
 
 // Re-export shared adapters (used by both Tauri and Web for APIs)
@@ -16,6 +17,8 @@ export {
   type QmServerAuthConfig,
   QmServerSyncAdapter,
   type QmServerSyncConfig,
+  TradingAuthAdapter,
+  type TradingAuthConfig,
 } from "./shared";
 
 // Re-export IndexedDB adapters (for http/browser applications)
@@ -46,6 +49,7 @@ export {
   getDataService,
   getAuthService,
   getSyncService,
+  getTradingAuthService,
   getAllServices,
   resetServices,
   setPortfolioService,
@@ -54,4 +58,5 @@ export {
   setDataService,
   setAuthService,
   setSyncService,
+  setTradingAuthService,
 } from "./ServiceFactory";

@@ -1,6 +1,5 @@
 import { invoke } from "@tauri-apps/api/core";
-import type { PortfolioEntry } from "@fin-catch/shared";
-import type { IPortfolioEntryService } from "../interfaces";
+import type { IPortfolioEntryService, PortfolioEntry } from "@fin-catch/shared";
 
 /**
  * Tauri adapter for portfolio entry operations

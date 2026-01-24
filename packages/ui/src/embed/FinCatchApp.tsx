@@ -17,12 +17,14 @@ import {
   IndexedDBPortfolioEntryAdapter,
   IndexedDBCouponPaymentAdapter,
   IndexedDBSyncAdapter,
+  TradingAuthAdapter,
   setAuthService,
   setCouponPaymentService,
   setDataService,
   setPortfolioEntryService,
   setPortfolioService,
   setSyncService,
+  setTradingAuthService,
 } from "../adapters";
 import type { FinCatchEmbedProps } from "./types";
 
@@ -88,6 +90,7 @@ export function FinCatchApp({
   useRouter = true,
   onLogoutRequest,
   className,
+  basePath,
 }: FinCatchEmbedProps) {
   // Create services - memoized to prevent recreation on every render
   const services = useMemo<IPlatformServices>(() => {
@@ -111,6 +114,7 @@ export function FinCatchApp({
       data: new QmServerDataAdapter(),
       auth: authAdapter,
       sync: syncAdapter,
+      trading: new TradingAuthAdapter(),
     };
   }, []);
 
@@ -122,6 +126,9 @@ export function FinCatchApp({
     setDataService(services.data);
     setAuthService(services.auth);
     setSyncService(services.sync);
+    if (services.trading) {
+      setTradingAuthService(services.trading);
+    }
   }, [services]);
 
   // If external auth tokens are provided, save them to the auth service
@@ -145,6 +152,7 @@ export function FinCatchApp({
       skipAuth={skipAuth}
       embedded={embedded}
       onLogoutRequest={onLogoutRequest}
+      basePath={basePath}
     />
   );
 

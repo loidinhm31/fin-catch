@@ -6,7 +6,11 @@
  * and managing sync checkpoints.
  */
 
-import { db, getCurrentTimestamp, SYNC_META_KEYS } from "@fin-catch/ui/adapters";
+import {
+  db,
+  getCurrentTimestamp,
+  SYNC_META_KEYS,
+} from "@fin-catch/ui/adapters";
 import type { Checkpoint, PullRecord, SyncRecord } from "@fin-catch/shared";
 
 /**

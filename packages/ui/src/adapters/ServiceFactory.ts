@@ -8,6 +8,7 @@ import type {
   IPortfolioEntryService,
   IPortfolioService,
   ISyncService,
+  ITradingAuthService,
 } from "./interfaces";
 
 // Tauri Adapters (for storage via Tauri invoke)
@@ -40,6 +41,7 @@ let couponPaymentService: ICouponPaymentService | null = null;
 let dataService: IDataService | null = null;
 let authService: IAuthService | null = null;
 let syncService: ISyncService | null = null;
+let tradingAuthService: ITradingAuthService | null = null;
 
 /**
  * Get the Portfolio Service for the current platform
@@ -209,4 +211,20 @@ export const setAuthService = (service: IAuthService): void => {
 export const setSyncService = (service: ISyncService): void => {
   syncService = service;
   console.log("[ServiceFactory] Set custom SyncService");
+};
+
+/**
+ * Get the Trading Auth Service
+ * Returns null if not initialized (trading is optional)
+ */
+export const getTradingAuthService = (): ITradingAuthService | null => {
+  return tradingAuthService;
+};
+
+/**
+ * Set custom Trading Auth Service
+ */
+export const setTradingAuthService = (service: ITradingAuthService): void => {
+  tradingAuthService = service;
+  console.log("[ServiceFactory] Set custom TradingAuthService");
 };

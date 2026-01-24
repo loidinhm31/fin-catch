@@ -11,4 +11,5 @@ export type {
   IDataService,
   IAuthService,
   ISyncService,
+  ITradingAuthService,
 } from "@fin-catch/shared";

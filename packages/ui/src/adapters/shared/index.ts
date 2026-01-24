@@ -10,3 +10,7 @@ export {
   QmServerSyncAdapter,
   type QmServerSyncConfig,
 } from "./QmServerSyncAdapter";
+export {
+  TradingAuthAdapter,
+  type TradingAuthConfig,
+} from "./TradingAuthAdapter";

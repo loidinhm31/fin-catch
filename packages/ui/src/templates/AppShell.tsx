@@ -11,6 +11,7 @@ import {
   PortfolioPage,
   LoginPage,
   SettingsPage,
+  TradingPage,
 } from "@fin-catch/ui/pages";
 import { LoadingSpinner } from "@fin-catch/ui/atoms";
 import { SyncStatusIndicator, BottomNav } from "@fin-catch/ui/molecules";
@@ -22,7 +23,7 @@ import {
 import "@fin-catch/ui/styles";
 import { useAuth } from "@fin-catch/ui/hooks";
 
-type Page = "financial-data" | "portfolio" | "settings";
+type Page = "financial-data" | "portfolio" | "trading" | "settings";
 
 /**
  * Props for AppShell component
@@ -42,12 +43,19 @@ export interface AppShellProps {
    * Callback when user requests logout - allows parent app to handle logout
    */
   onLogoutRequest?: () => void;
+
+  /**
+   * Base path for navigation when embedded (e.g., "/fin-catch")
+   * If not provided, navigation uses relative paths (for standalone mode with HashRouter)
+   */
+  basePath?: string;
 }
 
 export function AppShell({
   skipAuth: skipAuthProp = false,
   embedded = false,
   onLogoutRequest,
+  basePath,
 }: AppShellProps = {}) {
   // Navigation hooks
   const location = useLocation();
@@ -66,6 +74,7 @@ export function AppShell({
     // Check path suffix to support root-level and embedded routing
     const path = location.pathname;
     if (path.endsWith("/market") || path === "/market") return "financial-data";
+    if (path.endsWith("/trading") || path === "/trading") return "trading";
     if (path.endsWith("/settings") || path === "/settings") return "settings";
     return "portfolio"; // default
   };
@@ -73,19 +82,26 @@ export function AppShell({
   const currentPage = getCurrentPage();
 
   const handleNavigate = (page: Page) => {
-    // Use relative paths for navigation to support optional embedding
+    // Build the target path
+    let pagePath;
     switch (page) {
       case "financial-data":
-        navigate("market");
+        pagePath = "market";
+        break;
+      case "trading":
+        pagePath = "trading";
         break;
       case "settings":
-        navigate("settings");
+        pagePath = "settings";
         break;
       case "portfolio":
       default:
-        navigate("portfolio");
+        pagePath = "portfolio";
         break;
     }
+    // Use absolute paths when basePath is provided (embedded mode), otherwise relative (standalone)
+    const targetPath = basePath ? `${basePath}/${pagePath}` : pagePath;
+    navigate(targetPath);
   };
 
   // Use either the prop or local state for skip auth
@@ -177,15 +193,18 @@ export function AppShell({
 
         {/* Page Content - Adjust margins for sidebar on desktop (no margins in embedded mode) */}
         <div
-          className={`transition-all duration-300 ${embedded
-            ? "pt-4 pb-4"
-            : `pt-[60px] md:pt-6 pb-24 md:pb-6 ${isSidebarCollapsed ? "md:ml-16" : "md:ml-64"
-            }`
-            }`}
+          className={`transition-all duration-300 ${
+            embedded
+              ? "pt-4 pb-4"
+              : `pt-[60px] md:pt-6 pb-24 md:pb-6 ${
+                  isSidebarCollapsed ? "md:ml-16" : "md:ml-64"
+                }`
+          }`}
         >
           <Routes>
             <Route path="market" element={<FinancialDataPage />} />
             <Route path="portfolio" element={<PortfolioPage />} />
+            <Route path="trading" element={<TradingPage />} />
             <Route
               path="settings"
               element={<SettingsPage onLogout={handleLogout} />}
