@@ -14,3 +14,4 @@ export {
   TradingAuthAdapter,
   type TradingAuthConfig,
 } from "./TradingAuthAdapter";
+export { MarketDataAdapter, type MarketDataConfig } from "./MarketDataAdapter";

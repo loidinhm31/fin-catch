@@ -3,6 +3,7 @@ import type {
   IAuthService,
   ICouponPaymentService,
   IDataService,
+  IMarketDataService,
   IPortfolioEntryService,
   IPortfolioService,
   ISyncService,
@@ -22,6 +23,8 @@ export interface IPlatformServices {
   sync: ISyncService;
   /** Trading platform auth service (optional - requires qm-center auth) */
   trading?: ITradingAuthService;
+  /** Market data streaming service (optional - requires trading session) */
+  marketData?: IMarketDataService;
 }
 
 /**

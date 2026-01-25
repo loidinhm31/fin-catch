@@ -6,3 +6,4 @@ export type { IDataService } from "./IDataService";
 export type { IAuthService } from "./IAuthService";
 export type { ISyncService } from "./ISyncService";
 export type { ITradingAuthService } from "./ITradingAuthService";
+export type { IMarketDataService } from "./IMarketDataService";

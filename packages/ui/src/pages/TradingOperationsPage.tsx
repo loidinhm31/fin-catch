@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useCallback } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, Loader2, RefreshCw, Wallet } from "lucide-react";
+import { ArrowLeft, Loader2, RefreshCw, Wallet, Activity } from "lucide-react";
 import type {
   TradingPlatformId,
   LoanPackage,
@@ -8,7 +8,14 @@ import type {
   Deal,
 } from "@fin-catch/shared";
 import { Button } from "@fin-catch/ui/atoms";
-import { OrderForm, OrderBook, Holdings } from "@fin-catch/ui/organisms";
+import { SymbolSearch } from "@fin-catch/ui/molecules";
+import {
+  OrderForm,
+  OrderBook,
+  Holdings,
+  MarketDataTicker,
+  MarketDepth,
+} from "@fin-catch/ui/organisms";
 import { usePlatformServices } from "@fin-catch/ui/platform";
 
 /**
@@ -45,6 +52,10 @@ export const TradingOperationsPage: React.FC<TradingOperationsPageProps> = ({
   const [loanPackages, setLoanPackages] = useState<LoanPackage[]>([]);
   const [orders, setOrders] = useState<Order[]>([]);
   const [deals, setDeals] = useState<Deal[]>([]);
+
+  // Market data state
+  const [selectedSymbol, setSelectedSymbol] = useState<string>("");
+  const [currentPrice, setCurrentPrice] = useState<number | undefined>();
 
   // Loading state
   const [isLoadingPackages, setIsLoadingPackages] = useState(true);
@@ -140,9 +151,30 @@ export const TradingOperationsPage: React.FC<TradingOperationsPageProps> = ({
 
   // Handle deal click (for selling)
   const handleDealClick = useCallback((deal: Deal) => {
-    // Could pre-populate sell form or show modal
+    // Pre-populate sell by selecting the symbol
+    setSelectedSymbol(deal.symbol);
     console.log("Deal clicked:", deal);
   }, []);
+
+  // Handle symbol selection from market data
+  const handleSymbolSelect = useCallback((symbol: string) => {
+    setSelectedSymbol(symbol);
+    setCurrentPrice(undefined); // Reset price until we get new data
+  }, []);
+
+  // Handle price update from market data ticker
+  const handlePriceUpdate = useCallback((price: number | undefined) => {
+    setCurrentPrice(price);
+  }, []);
+
+  // Handle price click from order book depth
+  const handlePriceClick = useCallback(
+    (price: number, _side: "bid" | "ask") => {
+      // Could use this to pre-fill order form price
+      console.log("Price clicked:", price);
+    },
+    [],
+  );
 
   // Handle back navigation
   const handleBack = () => {
@@ -255,9 +287,68 @@ export const TradingOperationsPage: React.FC<TradingOperationsPageProps> = ({
           </div>
         </div>
 
-        {/* Main Content Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Left Column: Order Form */}
+        {/* Main Content Grid - 4 Column Layout */}
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+          {/* Column 1: Market Data */}
+          <div className="lg:col-span-1 space-y-4">
+            {/* Section Header */}
+            <div className="flex items-center gap-2">
+              <Activity className="w-4 h-4" style={{ color: "#00d4ff" }} />
+              <h2
+                className="text-lg font-semibold"
+                style={{ color: "#00d4ff" }}
+              >
+                Market Data
+              </h2>
+            </div>
+
+            {/* Symbol Search */}
+            <SymbolSearch
+              onSelect={handleSymbolSelect}
+              initialValue={selectedSymbol}
+            />
+
+            {/* Market Data Ticker */}
+            {selectedSymbol && (
+              <>
+                <MarketDataTicker
+                  symbol={selectedSymbol}
+                  platform={platform}
+                  showDetails={true}
+                  onPriceUpdate={handlePriceUpdate}
+                />
+
+                {/* Market Depth (Order Book L2) */}
+                <MarketDepth
+                  symbol={selectedSymbol}
+                  platform={platform}
+                  maxLevels={10}
+                  onPriceClick={handlePriceClick}
+                />
+              </>
+            )}
+
+            {/* Placeholder when no symbol selected */}
+            {!selectedSymbol && (
+              <div
+                className="rounded-2xl p-6 border text-center"
+                style={{
+                  background: "rgba(26, 31, 58, 0.6)",
+                  backdropFilter: "blur(16px)",
+                  borderColor: "rgba(0, 212, 255, 0.2)",
+                }}
+              >
+                <p
+                  className="text-sm"
+                  style={{ color: "var(--color-text-secondary)" }}
+                >
+                  Select a symbol to view real-time market data
+                </p>
+              </div>
+            )}
+          </div>
+
+          {/* Column 2: Order Form */}
           <div className="lg:col-span-1">
             {isLoadingPackages ? (
               <div
@@ -286,11 +377,13 @@ export const TradingOperationsPage: React.FC<TradingOperationsPageProps> = ({
                 accountNo={accountNo}
                 loanPackages={loanPackages}
                 onOrderPlaced={handleOrderPlaced}
+                initialSymbol={selectedSymbol}
+                initialPrice={currentPrice}
               />
             )}
           </div>
 
-          {/* Right Column: Orders and Holdings */}
+          {/* Columns 3-4: Orders and Holdings */}
           <div className="lg:col-span-2 space-y-6">
             {/* Order Book */}
             <OrderBook

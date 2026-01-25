@@ -6,3 +6,4 @@ export * from "./HoldingCard";
 export * from "./TabNavigator";
 export * from "./SyncStatusIndicator";
 export * from "./BottomNav";
+export * from "./SymbolSearch";

@@ -25,3 +25,5 @@ export * from "./TradingPlatformConnect";
 export * from "./OrderForm";
 export * from "./OrderBook";
 export * from "./Holdings";
+export * from "./MarketDataTicker";
+export * from "./MarketDepth";

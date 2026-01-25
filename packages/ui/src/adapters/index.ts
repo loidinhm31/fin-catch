@@ -19,6 +19,8 @@ export {
   type QmServerSyncConfig,
   TradingAuthAdapter,
   type TradingAuthConfig,
+  MarketDataAdapter,
+  type MarketDataConfig,
 } from "./shared";
 
 // Re-export IndexedDB adapters (for http/browser applications)

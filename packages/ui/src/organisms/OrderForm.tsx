@@ -38,6 +38,10 @@ interface OrderFormProps {
   loanPackages: LoanPackage[];
   /** Callback when order is placed */
   onOrderPlaced?: () => void;
+  /** Initial symbol from market data selection */
+  initialSymbol?: string;
+  /** Initial price from market data (in VND, not thousands) */
+  initialPrice?: number;
 }
 
 const ORDER_TYPES: { value: OrderType; label: string; description: string }[] =
@@ -79,16 +83,35 @@ export const OrderForm: React.FC<OrderFormProps> = ({
   accountNo,
   loanPackages,
   onOrderPlaced,
+  initialSymbol,
+  initialPrice,
 }) => {
   // Form state
-  const [symbol, setSymbol] = useState("");
+  const [symbol, setSymbol] = useState(initialSymbol || "");
   const [side, setSide] = useState<OrderSide>("NB");
   const [orderType, setOrderType] = useState<OrderType>("LO");
-  const [price, setPrice] = useState<string>("");
+  const [price, setPrice] = useState<string>(
+    initialPrice ? (initialPrice / 1000).toString() : "",
+  );
   const [quantity, setQuantity] = useState<string>("");
   const [selectedLoanPackageId, setSelectedLoanPackageId] = useState<number>(
     loanPackages[0]?.id || 0,
   );
+
+  // Update symbol when initialSymbol changes from market data
+  useEffect(() => {
+    if (initialSymbol) {
+      setSymbol(initialSymbol);
+    }
+  }, [initialSymbol]);
+
+  // Update price when initialPrice changes from market data
+  useEffect(() => {
+    if (initialPrice !== undefined && orderType === "LO") {
+      // Convert from VND to thousands for display
+      setPrice((initialPrice / 1000).toFixed(1));
+    }
+  }, [initialPrice, orderType]);
 
   // UI state
   const [ppse, setPpse] = useState<PPSE | null>(null);

@@ -18,6 +18,7 @@ import {
   IndexedDBCouponPaymentAdapter,
   IndexedDBSyncAdapter,
   TradingAuthAdapter,
+  MarketDataAdapter,
   setAuthService,
   setCouponPaymentService,
   setDataService,
@@ -115,6 +116,7 @@ export function FinCatchApp({
       auth: authAdapter,
       sync: syncAdapter,
       trading: new TradingAuthAdapter(),
+      marketData: new MarketDataAdapter(),
     };
   }, []);
 
