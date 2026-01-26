@@ -95,7 +95,7 @@ export const OrderForm: React.FC<OrderFormProps> = ({
   );
   const [quantity, setQuantity] = useState<string>("");
   const [selectedLoanPackageId, setSelectedLoanPackageId] = useState<number>(
-    loanPackages[0]?.id || 0,
+    loanPackages.find((p) => p.type === "N")?.id || loanPackages[0]?.id || 0,
   );
 
   // Track if user has manually edited the price (to stop auto-sync from market data)
