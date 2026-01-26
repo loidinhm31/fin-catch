@@ -60,14 +60,28 @@ export const MarketDepth: React.FC<MarketDepthProps> = ({
     setLoading(false);
   }, []);
 
+  // Use refs to store latest callbacks without triggering effect re-runs
+  const handleMessageRef = React.useRef(handleMessage);
+  const handleErrorRef = React.useRef(handleError);
+
+  // Keep refs updated
+  React.useEffect(() => {
+    handleMessageRef.current = handleMessage;
+    handleErrorRef.current = handleError;
+  });
+
   useEffect(() => {
     if (!marketData || !symbol) return;
 
     setLoading(true);
     setError(null);
 
-    // Connect to market data stream
-    const disconnect = marketData.connect(platform, handleMessage, handleError);
+    // Connect to market data stream using refs to avoid re-connection on callback changes
+    const disconnect = marketData.connect(
+      platform,
+      (msg) => handleMessageRef.current(msg),
+      (err) => handleErrorRef.current(err),
+    );
 
     // Subscribe to symbol
     const subscribeTimeout = setTimeout(() => {
@@ -83,7 +97,9 @@ export const MarketDepth: React.FC<MarketDepthProps> = ({
       marketData.unsubscribe(platform, symbol).catch(console.error);
       disconnect();
     };
-  }, [symbol, platform, marketData, handleMessage, handleError]);
+    // Only re-connect when symbol, platform, or marketData changes
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [symbol, platform, marketData]);
 
   // Calculate max volume for bar width scaling
   const maxVolume = useMemo(() => {

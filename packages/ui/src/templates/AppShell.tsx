@@ -64,11 +64,14 @@ export function AppShell({
 
   const [localSkipAuth, setLocalSkipAuth] = useState(false);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+
+  // Skip initial auth check if tokens are provided externally (embedded mode)
+  // This prevents unnecessary /api/v1/auth/me calls when already authenticated
   const {
     isAuthenticated,
     isLoading: isAuthLoading,
     checkAuthStatus,
-  } = useAuth();
+  } = useAuth({ skipInitialCheck: skipAuthProp });
 
   // Derive current page from path
   const getCurrentPage = (): Page => {
@@ -108,14 +111,6 @@ export function AppShell({
 
   // Use either the prop or local state for skip auth
   const skipAuth = skipAuthProp || localSkipAuth;
-
-  // Re-check auth status when skipAuthProp changes (for embedded mode with external tokens)
-  // But only if not already skipping auth
-  useEffect(() => {
-    if (skipAuthProp && !isAuthLoading) {
-      checkAuthStatus();
-    }
-  }, [skipAuthProp]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Show loading spinner while checking auth status
   // But skip loading state if we're in skipAuth mode (embedded with external tokens)

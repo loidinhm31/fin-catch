@@ -98,20 +98,30 @@ export const OrderForm: React.FC<OrderFormProps> = ({
     loanPackages[0]?.id || 0,
   );
 
+  // Track if user has manually edited the price (to stop auto-sync from market data)
+  const [priceManuallyEdited, setPriceManuallyEdited] = useState(false);
+
   // Update symbol when initialSymbol changes from market data
+  // Also reset the manual edit flag so the new symbol's price can be synced
   useEffect(() => {
     if (initialSymbol) {
       setSymbol(initialSymbol);
+      setPriceManuallyEdited(false); // Reset on symbol change to allow price sync
     }
   }, [initialSymbol]);
 
   // Update price when initialPrice changes from market data
+  // Only sync if user hasn't manually edited the price
   useEffect(() => {
-    if (initialPrice !== undefined && orderType === "LO") {
+    if (
+      initialPrice !== undefined &&
+      orderType === "LO" &&
+      !priceManuallyEdited
+    ) {
       // Convert from VND to thousands for display
       setPrice((initialPrice / 1000).toFixed(1));
     }
-  }, [initialPrice, orderType]);
+  }, [initialPrice, orderType, priceManuallyEdited]);
 
   // UI state
   const [ppse, setPpse] = useState<PPSE | null>(null);
@@ -217,6 +227,7 @@ export const OrderForm: React.FC<OrderFormProps> = ({
       setQuantity("");
       setShowConfirm(false);
       setPpse(null);
+      setPriceManuallyEdited(false); // Allow price sync for next order
       onOrderPlaced?.();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to place order");
@@ -370,7 +381,10 @@ export const OrderForm: React.FC<OrderFormProps> = ({
           <input
             type="number"
             value={price}
-            onChange={(e) => setPrice(e.target.value)}
+            onChange={(e) => {
+              setPrice(e.target.value);
+              setPriceManuallyEdited(true); // Stop auto-sync from market data
+            }}
             placeholder={isMarketOrder ? "Market price" : "Enter price"}
             className="w-full p-3 rounded-xl border text-sm outline-none transition-colors"
             style={{

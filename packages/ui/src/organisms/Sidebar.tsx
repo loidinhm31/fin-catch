@@ -32,7 +32,7 @@ export function Sidebar({
   isCollapsed,
   onToggleCollapse,
 }: SidebarProps) {
-  const { authStatus, syncStatus, isSyncing, lastSyncSuccess, error } =
+  const { isAuthenticated, syncStatus, isSyncing, lastSyncSuccess, error } =
     useSyncStatus();
 
   const navItems: {
@@ -75,7 +75,7 @@ export function Sidebar({
   // Sync status helpers
   const getSyncIcon = () => {
     if (isSyncing) return RefreshCw;
-    if (!authStatus?.isAuthenticated) return CloudOff;
+    if (!isAuthenticated) return CloudOff;
     if (error) return AlertCircle;
     if (lastSyncSuccess === false) return AlertTriangle;
     if (lastSyncSuccess === true) return CheckCircle2;
@@ -84,7 +84,7 @@ export function Sidebar({
 
   const getSyncColor = () => {
     if (isSyncing) return "#00d4ff";
-    if (!authStatus?.isAuthenticated) return "#718096";
+    if (!isAuthenticated) return "#718096";
     if (error) return "#ff3366";
     if (lastSyncSuccess === false) return "#ffaa00";
     if (syncStatus?.pendingChanges && syncStatus.pendingChanges > 0)

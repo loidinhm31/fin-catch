@@ -1,13 +1,22 @@
 import { useEffect, useState } from "react";
-import { SyncStatus, AuthStatus } from "@fin-catch/shared";
+import { SyncStatus, AUTH_STORAGE_KEYS } from "@fin-catch/shared";
 import { finCatchAPI } from "@fin-catch/ui/services";
+
+/**
+ * Check auth status from localStorage without calling the server.
+ * This is used for periodic status checks to avoid unnecessary API calls.
+ */
+function getLocalAuthStatus(): { isAuthenticated: boolean } {
+  const accessToken = localStorage.getItem(AUTH_STORAGE_KEYS.ACCESS_TOKEN);
+  return { isAuthenticated: !!accessToken };
+}
 
 interface UseSyncStatusOptions {
   autoRefreshInterval?: number;
 }
 
 interface UseSyncStatusResult {
-  authStatus: AuthStatus | null;
+  isAuthenticated: boolean;
   syncStatus: SyncStatus | null;
   isSyncing: boolean;
   lastSyncSuccess: boolean | null;
@@ -21,7 +30,7 @@ export function useSyncStatus(
 ): UseSyncStatusResult {
   const { autoRefreshInterval = 30000 } = options;
 
-  const [authStatus, setAuthStatus] = useState<AuthStatus | null>(null);
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
   const [syncStatus, setSyncStatus] = useState<SyncStatus | null>(null);
   const [isSyncing, setIsSyncing] = useState(false);
   const [lastSyncSuccess, setLastSyncSuccess] = useState<boolean | null>(null);
@@ -29,11 +38,12 @@ export function useSyncStatus(
 
   const loadStatus = async () => {
     try {
-      const [auth, sync] = await Promise.all([
-        finCatchAPI.authGetStatus(),
-        finCatchAPI.syncGetStatus(),
-      ]);
-      setAuthStatus(auth);
+      // Get auth status from localStorage (no server call)
+      const auth = getLocalAuthStatus();
+      setIsAuthenticated(auth.isAuthenticated);
+
+      // Only get sync status from server
+      const sync = await finCatchAPI.syncGetStatus();
       setSyncStatus(sync);
       setError(null);
     } catch (err) {
@@ -42,7 +52,7 @@ export function useSyncStatus(
   };
 
   const triggerSync = async () => {
-    if (!authStatus?.isAuthenticated) {
+    if (!isAuthenticated) {
       setError("Not logged in");
       return;
     }
@@ -71,7 +81,7 @@ export function useSyncStatus(
   }, [autoRefreshInterval]);
 
   return {
-    authStatus,
+    isAuthenticated,
     syncStatus,
     isSyncing,
     lastSyncSuccess,

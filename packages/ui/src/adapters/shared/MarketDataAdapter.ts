@@ -3,6 +3,12 @@
  *
  * HTTP/SSE adapter for real-time market data streaming.
  * Uses Server-Sent Events for streaming and REST for subscription management.
+ *
+ * Supports two API versions:
+ * - v1 (legacy): Per-user MQTT connections
+ * - v2 (recommended): Shared MQTT pool with reference counting
+ *
+ * The v2 API provides better resource utilization and supports batch subscriptions.
  */
 
 import type {
@@ -20,6 +26,37 @@ import { AUTH_STORAGE_KEYS } from "@fin-catch/shared/constants";
  */
 export interface MarketDataConfig {
   baseUrl?: string;
+  /**
+   * API version to use: 'v1' (legacy per-user) or 'v2' (shared pool)
+   * Default: 'v2'
+   */
+  apiVersion?: "v1" | "v2";
+}
+
+/**
+ * Batch subscribe response from v2 API
+ */
+export interface BatchSubscribeResponse {
+  subscribed: number;
+  symbols: string[];
+  cachedItems: number;
+  newMqttSubscriptions: number;
+}
+
+/**
+ * Pool statistics from v2 API
+ */
+export interface PoolStats {
+  status: string;
+  totalSymbols: number;
+  totalConsumers: number;
+  activeMqttSubscriptions: number;
+  subscriptions: Array<{
+    symbol: string;
+    refCount: number;
+    mqttSubscribed: boolean;
+    hasCachedData: boolean;
+  }>;
 }
 
 /**
@@ -43,23 +80,33 @@ function getDefaultBaseUrl(): string {
  *
  * Implements IMarketDataService using SSE for streaming and REST for subscriptions.
  * Uses fetch with ReadableStream to support Authorization header (EventSource doesn't support headers).
+ *
+ * Supports v1 (legacy) and v2 (shared pool) APIs.
  */
 export class MarketDataAdapter implements IMarketDataService {
   private baseUrl: string;
+  private apiVersion: "v1" | "v2";
   private abortController: AbortController | null = null;
   private connectionStatus: MarketDataConnectionStatus = "disconnected";
   private snapshots: Map<string, StockInfo> = new Map();
   private orderBooks: Map<string, TopPrice> = new Map();
   private currentPlatform: TradingPlatformId | null = null;
 
+  // Client-side subscription tracking with reference counting
+  // Key: "platform:symbol", Value: reference count
+  private activeSubscriptions: Map<string, number> = new Map();
+  // Track pending subscribe calls to avoid duplicate in-flight requests
+  private pendingSubscribes: Map<string, Promise<void>> = new Map();
+
   constructor(config?: MarketDataConfig) {
     this.baseUrl =
       config?.baseUrl ||
       this.getStoredValue(AUTH_STORAGE_KEYS.SERVER_URL) ||
       getDefaultBaseUrl();
+    this.apiVersion = config?.apiVersion || "v2";
 
     console.log(
-      `[MarketDataAdapter] Initialized with baseUrl: ${this.baseUrl}`,
+      `[MarketDataAdapter] Initialized with baseUrl: ${this.baseUrl}, apiVersion: ${this.apiVersion}`,
     );
   }
 
@@ -145,9 +192,16 @@ export class MarketDataAdapter implements IMarketDataService {
     this.currentPlatform = platform;
     this.notifyStatusChange("connecting");
 
-    const url = `${this.baseUrl}/api/v1/trading/${platform}/market-data/stream`;
+    // Use v1 or v2 endpoint based on configuration
+    const streamPath =
+      this.apiVersion === "v2"
+        ? `/api/v1/trading/${platform}/market-data/v2/stream`
+        : `/api/v1/trading/${platform}/market-data/stream`;
+    const url = `${this.baseUrl}${streamPath}`;
 
-    console.log(`[MarketDataAdapter] Connecting to SSE: ${url}`);
+    console.log(
+      `[MarketDataAdapter] Connecting to SSE (${this.apiVersion}): ${url}`,
+    );
 
     // Create abort controller for cancellation
     this.abortController = new AbortController();
@@ -284,6 +338,7 @@ export class MarketDataAdapter implements IMarketDataService {
 
   /**
    * Subscribe to a symbol's market data
+   * Uses client-side reference counting to avoid duplicate API calls
    */
   async subscribe(platform: TradingPlatformId, symbol: string): Promise<void> {
     const token = this.getAccessToken();
@@ -291,31 +346,150 @@ export class MarketDataAdapter implements IMarketDataService {
       throw new Error("Not authenticated. Please login first.");
     }
 
-    const url = `${this.baseUrl}/api/v1/trading/${platform}/market-data/subscribe`;
+    const upperSymbol = symbol.toUpperCase();
+    const subscriptionKey = `${platform}:${upperSymbol}`;
 
-    console.log(`[MarketDataAdapter] Subscribing to ${symbol}`);
-
-    const response = await fetch(url, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify({ symbol: symbol.toUpperCase() }),
-    });
-
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      const errorMessage = errorData.error || `API error: ${response.status}`;
-      throw new Error(errorMessage);
+    // Check if already subscribed - just increment ref count
+    const currentRefCount = this.activeSubscriptions.get(subscriptionKey) || 0;
+    if (currentRefCount > 0) {
+      this.activeSubscriptions.set(subscriptionKey, currentRefCount + 1);
+      console.log(
+        `[MarketDataAdapter] Already subscribed to ${upperSymbol}, ref count: ${currentRefCount + 1}`,
+      );
+      return;
     }
 
-    const result = await response.json();
-    console.log(`[MarketDataAdapter] Subscribed to ${symbol}:`, result);
+    // Check if there's a pending subscribe call for this symbol
+    const pendingSubscribe = this.pendingSubscribes.get(subscriptionKey);
+    if (pendingSubscribe) {
+      console.log(
+        `[MarketDataAdapter] Subscribe to ${upperSymbol} already in progress, waiting...`,
+      );
+      // Wait for the pending request, then increment ref count if successful
+      await pendingSubscribe;
+      // After pending completes, increment ref count (it was set to 1 by first caller)
+      const newRefCount = this.activeSubscriptions.get(subscriptionKey) || 0;
+      this.activeSubscriptions.set(subscriptionKey, newRefCount + 1);
+      console.log(
+        `[MarketDataAdapter] Pending subscribe completed for ${upperSymbol}, ref count: ${newRefCount + 1}`,
+      );
+      return;
+    }
+
+    const subscribePath =
+      this.apiVersion === "v2"
+        ? `/api/v1/trading/${platform}/market-data/v2/subscribe`
+        : `/api/v1/trading/${platform}/market-data/subscribe`;
+    const url = `${this.baseUrl}${subscribePath}`;
+
+    console.log(
+      `[MarketDataAdapter] Subscribing to ${upperSymbol} (${this.apiVersion})`,
+    );
+
+    // Create the subscribe promise and track it
+    const subscribePromise = (async () => {
+      const response = await fetch(url, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ symbol: upperSymbol }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        const errorMessage = errorData.error || `API error: ${response.status}`;
+        throw new Error(errorMessage);
+      }
+
+      const result = await response.json();
+      console.log(`[MarketDataAdapter] Subscribed to ${upperSymbol}:`, result);
+
+      // Mark as subscribed with ref count 1
+      this.activeSubscriptions.set(subscriptionKey, 1);
+    })();
+
+    this.pendingSubscribes.set(subscriptionKey, subscribePromise);
+
+    try {
+      await subscribePromise;
+    } finally {
+      // Clean up pending promise
+      this.pendingSubscribes.delete(subscriptionKey);
+    }
+  }
+
+  /**
+   * Subscribe to multiple symbols at once (v2 only, falls back to sequential for v1)
+   * More efficient than individual subscribes for portfolios
+   */
+  async subscribeBatch(
+    platform: TradingPlatformId,
+    symbols: string[],
+  ): Promise<BatchSubscribeResponse> {
+    const token = this.getAccessToken();
+    if (!token) {
+      throw new Error("Not authenticated. Please login first.");
+    }
+
+    if (symbols.length === 0) {
+      return {
+        subscribed: 0,
+        symbols: [],
+        cachedItems: 0,
+        newMqttSubscriptions: 0,
+      };
+    }
+
+    // For v2, use batch endpoint
+    if (this.apiVersion === "v2") {
+      const url = `${this.baseUrl}/api/v1/trading/${platform}/market-data/v2/subscribe-batch`;
+
+      console.log(
+        `[MarketDataAdapter] Batch subscribing to ${symbols.length} symbols`,
+      );
+
+      const response = await fetch(url, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          symbols: symbols.map((s) => s.toUpperCase()),
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        const errorMessage = errorData.error || `API error: ${response.status}`;
+        throw new Error(errorMessage);
+      }
+
+      const result = await response.json();
+      console.log(`[MarketDataAdapter] Batch subscribed:`, result);
+      return result;
+    }
+
+    // For v1, fall back to sequential subscribes
+    console.log(
+      `[MarketDataAdapter] Batch subscribe (v1 fallback): subscribing to ${symbols.length} symbols sequentially`,
+    );
+    for (const symbol of symbols) {
+      await this.subscribe(platform, symbol);
+    }
+    return {
+      subscribed: symbols.length,
+      symbols: symbols.map((s) => s.toUpperCase()),
+      cachedItems: 0,
+      newMqttSubscriptions: symbols.length,
+    };
   }
 
   /**
    * Unsubscribe from a symbol's market data
+   * Uses client-side reference counting - only calls API when ref count reaches 0
    */
   async unsubscribe(
     platform: TradingPlatformId,
@@ -326,9 +500,32 @@ export class MarketDataAdapter implements IMarketDataService {
       throw new Error("Not authenticated. Please login first.");
     }
 
-    const url = `${this.baseUrl}/api/v1/trading/${platform}/market-data/unsubscribe`;
+    const upperSymbol = symbol.toUpperCase();
+    const subscriptionKey = `${platform}:${upperSymbol}`;
 
-    console.log(`[MarketDataAdapter] Unsubscribing from ${symbol}`);
+    // Check reference count
+    const currentRefCount = this.activeSubscriptions.get(subscriptionKey) || 0;
+    if (currentRefCount > 1) {
+      // Still other subscribers, just decrement
+      this.activeSubscriptions.set(subscriptionKey, currentRefCount - 1);
+      console.log(
+        `[MarketDataAdapter] Decremented ref count for ${upperSymbol}, remaining: ${currentRefCount - 1}`,
+      );
+      return;
+    }
+
+    // Last subscriber, actually unsubscribe
+    this.activeSubscriptions.delete(subscriptionKey);
+
+    const unsubscribePath =
+      this.apiVersion === "v2"
+        ? `/api/v1/trading/${platform}/market-data/v2/unsubscribe`
+        : `/api/v1/trading/${platform}/market-data/unsubscribe`;
+    const url = `${this.baseUrl}${unsubscribePath}`;
+
+    console.log(
+      `[MarketDataAdapter] Unsubscribing from ${upperSymbol} (${this.apiVersion})`,
+    );
 
     const response = await fetch(url, {
       method: "POST",
@@ -336,7 +533,7 @@ export class MarketDataAdapter implements IMarketDataService {
         "Content-Type": "application/json",
         Authorization: `Bearer ${token}`,
       },
-      body: JSON.stringify({ symbol: symbol.toUpperCase() }),
+      body: JSON.stringify({ symbol: upperSymbol }),
     });
 
     if (!response.ok) {
@@ -346,12 +543,110 @@ export class MarketDataAdapter implements IMarketDataService {
     }
 
     // Remove from cache
-    const upperSymbol = symbol.toUpperCase();
     this.snapshots.delete(upperSymbol);
     this.orderBooks.delete(upperSymbol);
 
     const result = await response.json();
-    console.log(`[MarketDataAdapter] Unsubscribed from ${symbol}:`, result);
+    console.log(
+      `[MarketDataAdapter] Unsubscribed from ${upperSymbol}:`,
+      result,
+    );
+  }
+
+  /**
+   * Unsubscribe from multiple symbols at once (v2 only, falls back to sequential for v1)
+   */
+  async unsubscribeBatch(
+    platform: TradingPlatformId,
+    symbols: string[],
+  ): Promise<void> {
+    const token = this.getAccessToken();
+    if (!token) {
+      throw new Error("Not authenticated. Please login first.");
+    }
+
+    if (symbols.length === 0) {
+      return;
+    }
+
+    // For v2, use batch endpoint
+    if (this.apiVersion === "v2") {
+      const url = `${this.baseUrl}/api/v1/trading/${platform}/market-data/v2/unsubscribe-batch`;
+
+      console.log(
+        `[MarketDataAdapter] Batch unsubscribing from ${symbols.length} symbols`,
+      );
+
+      const response = await fetch(url, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          symbols: symbols.map((s) => s.toUpperCase()),
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        const errorMessage = errorData.error || `API error: ${response.status}`;
+        throw new Error(errorMessage);
+      }
+
+      // Remove from cache
+      for (const symbol of symbols) {
+        const upperSymbol = symbol.toUpperCase();
+        this.snapshots.delete(upperSymbol);
+        this.orderBooks.delete(upperSymbol);
+      }
+
+      console.log(
+        `[MarketDataAdapter] Batch unsubscribed from ${symbols.length} symbols`,
+      );
+      return;
+    }
+
+    // For v1, fall back to sequential unsubscribes
+    console.log(
+      `[MarketDataAdapter] Batch unsubscribe (v1 fallback): unsubscribing from ${symbols.length} symbols sequentially`,
+    );
+    for (const symbol of symbols) {
+      await this.unsubscribe(platform, symbol);
+    }
+  }
+
+  /**
+   * Get pool statistics (v2 only)
+   * Returns null for v1 API
+   */
+  async getPoolStats(platform: TradingPlatformId): Promise<PoolStats | null> {
+    if (this.apiVersion !== "v2") {
+      console.log("[MarketDataAdapter] Pool stats only available for v2 API");
+      return null;
+    }
+
+    const token = this.getAccessToken();
+    if (!token) {
+      throw new Error("Not authenticated. Please login first.");
+    }
+
+    const url = `${this.baseUrl}/api/v1/trading/${platform}/market-data/v2/stats`;
+
+    const response = await fetch(url, {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      const errorMessage = errorData.error || `API error: ${response.status}`;
+      throw new Error(errorMessage);
+    }
+
+    return response.json();
   }
 
   /**
@@ -397,6 +692,9 @@ export class MarketDataAdapter implements IMarketDataService {
     this.messageHandlers.clear();
     this.errorHandlers.clear();
     this.statusHandlers.clear();
+    // Clear subscription tracking
+    this.activeSubscriptions.clear();
+    this.pendingSubscribes.clear();
     // Keep cache for potential reconnection
   }
 

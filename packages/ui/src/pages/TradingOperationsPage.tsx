@@ -63,12 +63,12 @@ export const TradingOperationsPage: React.FC<TradingOperationsPageProps> = ({
   const [isLoadingDeals, setIsLoadingDeals] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Auto-refresh interval (5 seconds)
-  const REFRESH_INTERVAL = 5000;
-
   // Load loan packages
   const loadLoanPackages = useCallback(async () => {
-    if (!tradingService || !accountNo) return;
+    if (!tradingService || !accountNo) {
+      setIsLoadingPackages(false);
+      return;
+    }
 
     setIsLoadingPackages(true);
     try {
@@ -87,7 +87,10 @@ export const TradingOperationsPage: React.FC<TradingOperationsPageProps> = ({
 
   // Load orders
   const loadOrders = useCallback(async () => {
-    if (!tradingService || !accountNo) return;
+    if (!tradingService || !accountNo) {
+      setIsLoadingOrders(false);
+      return;
+    }
 
     setIsLoadingOrders(true);
     try {
@@ -102,7 +105,10 @@ export const TradingOperationsPage: React.FC<TradingOperationsPageProps> = ({
 
   // Load deals
   const loadDeals = useCallback(async () => {
-    if (!tradingService || !accountNo) return;
+    if (!tradingService || !accountNo) {
+      setIsLoadingDeals(false);
+      return;
+    }
 
     setIsLoadingDeals(true);
     try {
@@ -115,7 +121,7 @@ export const TradingOperationsPage: React.FC<TradingOperationsPageProps> = ({
     }
   }, [tradingService, platform, accountNo]);
 
-  // Initial load
+  // Initial load - only run when accountNo changes, not when callbacks change
   useEffect(() => {
     if (!accountNo) {
       setError("Account number is required");
@@ -125,18 +131,11 @@ export const TradingOperationsPage: React.FC<TradingOperationsPageProps> = ({
     loadLoanPackages();
     loadOrders();
     loadDeals();
-  }, [accountNo, loadLoanPackages, loadOrders, loadDeals]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [accountNo]);
 
-  // Auto-refresh orders
-  useEffect(() => {
-    if (!accountNo) return;
-
-    const interval = setInterval(() => {
-      loadOrders();
-    }, REFRESH_INTERVAL);
-
-    return () => clearInterval(interval);
-  }, [accountNo, loadOrders]);
+  // Auto-refresh disabled - users can manually refresh using the refresh button
+  // This reduces API overhead and prevents interference with user input
 
   // Handle order placed
   const handleOrderPlaced = useCallback(() => {
@@ -352,11 +351,12 @@ export const TradingOperationsPage: React.FC<TradingOperationsPageProps> = ({
           <div className="lg:col-span-1">
             {isLoadingPackages ? (
               <div
-                className="rounded-2xl p-6 border flex items-center justify-center"
+                className="rounded-2xl p-6 border flex flex-col items-center justify-center"
                 style={{
                   background: "rgba(26, 31, 58, 0.6)",
                   backdropFilter: "blur(16px)",
                   borderColor: "rgba(123, 97, 255, 0.2)",
+                  minHeight: "300px",
                 }}
               >
                 <Loader2
@@ -364,11 +364,23 @@ export const TradingOperationsPage: React.FC<TradingOperationsPageProps> = ({
                   style={{ color: "#00d4ff" }}
                 />
                 <span
-                  className="ml-2"
+                  className="mt-2 text-sm"
                   style={{ color: "var(--color-text-secondary)" }}
                 >
-                  Loading...
+                  Loading order form...
                 </span>
+                <button
+                  onClick={loadLoanPackages}
+                  className="mt-4 px-4 py-2 rounded-lg flex items-center gap-2 transition-colors hover:bg-white/10"
+                  style={{
+                    background: "rgba(0, 212, 255, 0.1)",
+                    border: "1px solid rgba(0, 212, 255, 0.3)",
+                    color: "#00d4ff",
+                  }}
+                >
+                  <RefreshCw className="w-4 h-4" />
+                  Reload
+                </button>
               </div>
             ) : (
               <OrderForm

@@ -74,18 +74,30 @@ export const MarketDataTicker: React.FC<MarketDataTickerProps> = ({
     [],
   );
 
+  // Use refs to store latest callbacks without triggering effect re-runs
+  const handleMessageRef = React.useRef(handleMessage);
+  const handleErrorRef = React.useRef(handleError);
+  const handleStatusChangeRef = React.useRef(handleStatusChange);
+
+  // Keep refs updated
+  React.useEffect(() => {
+    handleMessageRef.current = handleMessage;
+    handleErrorRef.current = handleError;
+    handleStatusChangeRef.current = handleStatusChange;
+  });
+
   useEffect(() => {
     if (!marketData || !symbol) return;
 
     setLoading(true);
     setError(null);
 
-    // Connect to market data stream
+    // Connect to market data stream using refs to avoid re-connection on callback changes
     const disconnect = marketData.connect(
       platform,
-      handleMessage,
-      handleError,
-      handleStatusChange,
+      (msg) => handleMessageRef.current(msg),
+      (err) => handleErrorRef.current(err),
+      (status) => handleStatusChangeRef.current(status),
     );
 
     // Subscribe to symbol after a short delay to ensure connection
@@ -102,14 +114,9 @@ export const MarketDataTicker: React.FC<MarketDataTickerProps> = ({
       marketData.unsubscribe(platform, symbol).catch(console.error);
       disconnect();
     };
-  }, [
-    symbol,
-    platform,
-    marketData,
-    handleMessage,
-    handleError,
-    handleStatusChange,
-  ]);
+    // Only re-connect when symbol, platform, or marketData changes
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [symbol, platform, marketData]);
 
   // Loading state
   if (loading) {

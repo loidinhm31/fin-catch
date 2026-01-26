@@ -84,6 +84,11 @@ export class QmServerAuthAdapter implements IAuthService {
   private appId: string;
   private apiKey: string;
 
+  // Cache for getStatus() to prevent multiple server calls
+  private statusCache: AuthStatus | null = null;
+  private statusCacheTimestamp: number = 0;
+  private static STATUS_CACHE_TTL = 10000; // 10 seconds cache
+
   constructor(config?: QmServerAuthConfig) {
     // Try to load from storage first, then use config, then defaults
     this.baseUrl =
@@ -263,6 +268,9 @@ export class QmServerAuthAdapter implements IAuthService {
       // Store auth data
       this.storeAuthData(response);
 
+      // Invalidate cache so next getStatus() fetches fresh data
+      this.invalidateStatusCache();
+
       return response;
     } catch (error) {
       console.error("[QmServerAuthAdapter] Login error:", error);
@@ -277,6 +285,10 @@ export class QmServerAuthAdapter implements IAuthService {
     this.removeStoredValue(STORAGE_KEYS.USER_ID);
     this.removeStoredValue(STORAGE_KEYS.APPS);
     this.removeStoredValue(STORAGE_KEYS.IS_ADMIN);
+
+    // Invalidate cache
+    this.invalidateStatusCache();
+
     console.log("[QmServerAuthAdapter] Logged out");
   }
 
@@ -304,13 +316,41 @@ export class QmServerAuthAdapter implements IAuthService {
     }
   }
 
+  /**
+   * Invalidate the status cache (call after login/logout)
+   */
+  private invalidateStatusCache(): void {
+    this.statusCache = null;
+    this.statusCacheTimestamp = 0;
+  }
+
+  /**
+   * Check if the status cache is still valid
+   */
+  private isStatusCacheValid(): boolean {
+    return (
+      this.statusCache !== null &&
+      Date.now() - this.statusCacheTimestamp <
+        QmServerAuthAdapter.STATUS_CACHE_TTL
+    );
+  }
+
   async getStatus(): Promise<AuthStatus> {
+    // Return cached status if still valid
+    if (this.isStatusCacheValid()) {
+      console.log("[QmServerAuthAdapter] Returning cached status");
+      return this.statusCache!;
+    }
+
     const accessToken = this.getStoredValue(STORAGE_KEYS.ACCESS_TOKEN);
     if (!accessToken) {
-      return {
+      const status: AuthStatus = {
         isAuthenticated: false,
         serverUrl: this.baseUrl,
       };
+      this.statusCache = status;
+      this.statusCacheTimestamp = Date.now();
+      return status;
     }
 
     // Check if token is expired
@@ -318,10 +358,13 @@ export class QmServerAuthAdapter implements IAuthService {
       try {
         await this.refreshToken();
       } catch {
-        return {
+        const status: AuthStatus = {
           isAuthenticated: false,
           serverUrl: this.baseUrl,
         };
+        this.statusCache = status;
+        this.statusCacheTimestamp = Date.now();
+        return status;
       }
     }
 
@@ -335,7 +378,7 @@ export class QmServerAuthAdapter implements IAuthService {
         isAdmin: boolean;
       }>("/api/v1/auth/me", true);
 
-      return {
+      const status: AuthStatus = {
         isAuthenticated: true,
         userId: userInfo.userId,
         username: userInfo.username,
@@ -344,19 +387,25 @@ export class QmServerAuthAdapter implements IAuthService {
         isAdmin: userInfo.isAdmin,
         serverUrl: this.baseUrl,
       };
+      this.statusCache = status;
+      this.statusCacheTimestamp = Date.now();
+      return status;
     } catch {
-      // If server request fails, return cached data
+      // If server request fails, return cached data from localStorage
       const userId = this.getStoredValue(STORAGE_KEYS.USER_ID);
       const appsStr = this.getStoredValue(STORAGE_KEYS.APPS);
       const isAdminStr = this.getStoredValue(STORAGE_KEYS.IS_ADMIN);
 
-      return {
+      const status: AuthStatus = {
         isAuthenticated: !!userId,
         userId: userId || undefined,
         apps: appsStr ? JSON.parse(appsStr) : undefined,
         isAdmin: isAdminStr ? JSON.parse(isAdminStr) : undefined,
         serverUrl: this.baseUrl,
       };
+      this.statusCache = status;
+      this.statusCacheTimestamp = Date.now();
+      return status;
     }
   }
 

@@ -129,7 +129,8 @@ export const TradingPlatformConnect: React.FC<TradingPlatformConnectProps> = ({
       }
     };
     checkAllStatuses();
-  }, [platforms, tradingService]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [platforms]);
 
   // OTP countdown timer
   useEffect(() => {

@@ -8,7 +8,16 @@ import {
   RefreshCw,
 } from "lucide-react";
 import { finCatchAPI } from "@fin-catch/ui/services";
-import { AuthStatus, SyncStatus } from "@fin-catch/shared";
+import { AUTH_STORAGE_KEYS, SyncStatus } from "@fin-catch/shared";
+
+/**
+ * Check auth status from localStorage without calling the server.
+ * This is used for periodic status checks to avoid unnecessary API calls.
+ */
+function getLocalAuthStatus(): { isAuthenticated: boolean } {
+  const accessToken = localStorage.getItem(AUTH_STORAGE_KEYS.ACCESS_TOKEN);
+  return { isAuthenticated: !!accessToken };
+}
 
 interface SyncStatusIndicatorProps {
   onTap?: () => void;
@@ -19,20 +28,21 @@ export const SyncStatusIndicator: React.FC<SyncStatusIndicatorProps> = ({
   onTap,
   autoRefreshInterval = 30000,
 }) => {
-  const [authStatus, setAuthStatus] = useState<AuthStatus | null>(null);
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
   const [syncStatus, setSyncStatus] = useState<SyncStatus | null>(null);
   const [isSyncing, setIsSyncing] = useState(false);
   const [lastSyncSuccess, setLastSyncSuccess] = useState<boolean | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  // Load status
+  // Load status - uses localStorage for auth to avoid server calls
   const loadStatus = async () => {
     try {
-      const [auth, sync] = await Promise.all([
-        finCatchAPI.authGetStatus(),
-        finCatchAPI.syncGetStatus(),
-      ]);
-      setAuthStatus(auth);
+      // Get auth status from localStorage (no server call)
+      const auth = getLocalAuthStatus();
+      setIsAuthenticated(auth.isAuthenticated);
+
+      // Only get sync status from server
+      const sync = await finCatchAPI.syncGetStatus();
       setSyncStatus(sync);
       setError(null);
     } catch (err) {
@@ -49,7 +59,7 @@ export const SyncStatusIndicator: React.FC<SyncStatusIndicatorProps> = ({
 
   // Handle sync trigger
   const handleSync = async () => {
-    if (!authStatus?.isAuthenticated) {
+    if (!isAuthenticated) {
       setError("Not logged in");
       return;
     }
@@ -86,7 +96,7 @@ export const SyncStatusIndicator: React.FC<SyncStatusIndicatorProps> = ({
       return <RefreshCw className="w-5 h-5 animate-spin" />;
     }
 
-    if (!authStatus?.isAuthenticated) {
+    if (!isAuthenticated) {
       return <CloudOff className="w-5 h-5" />;
     }
 
@@ -111,7 +121,7 @@ export const SyncStatusIndicator: React.FC<SyncStatusIndicatorProps> = ({
 
   const getColor = () => {
     if (isSyncing) return "#00d4ff"; // Electric blue
-    if (!authStatus?.isAuthenticated) return "#718096"; // Muted
+    if (!isAuthenticated) return "#718096"; // Muted
     if (error) return "#ff3366"; // Bright red
     if (lastSyncSuccess === false) return "#ffaa00"; // Warning
     if (syncStatus?.pendingChanges && syncStatus.pendingChanges > 0)
@@ -121,13 +131,13 @@ export const SyncStatusIndicator: React.FC<SyncStatusIndicatorProps> = ({
   };
 
   const showBadge =
-    authStatus?.isAuthenticated &&
+    isAuthenticated &&
     syncStatus?.pendingChanges &&
     syncStatus.pendingChanges > 0;
 
   const getTooltip = () => {
     if (isSyncing) return "Syncing...";
-    if (!authStatus?.isAuthenticated) return "Not logged in";
+    if (!isAuthenticated) return "Not logged in";
     if (error) return `Error: ${error}`;
     if (lastSyncSuccess === false) return "Sync failed";
     if (syncStatus?.pendingChanges && syncStatus.pendingChanges > 0)
