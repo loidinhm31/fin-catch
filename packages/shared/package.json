@@ -14,6 +14,8 @@
   },
   "scripts": {
     "build": "tsc",
+    "lint": "eslint .",
+    "type-check": "tsc --noEmit",
     "clean": "rimraf dist .turbo"
   },
   "dependencies": {
@@ -23,6 +25,8 @@
     "tailwind-merge": "^3.4.0"
   },
   "devDependencies": {
-    "typescript": "~5.8.3"
+    "typescript": "~5.8.3",
+    "@fin-catch/tsconfig": "workspace:*",
+    "@fin-catch/eslint-config": "workspace:*"
   }
 }
