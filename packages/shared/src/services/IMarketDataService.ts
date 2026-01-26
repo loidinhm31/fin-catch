@@ -7,6 +7,8 @@
 import type {
   StockInfo,
   TopPrice,
+  Tick,
+  MarketIndex,
   MarketDataMessage,
   TradingPlatformId,
   MarketDataConnectionStatus,
@@ -65,6 +67,53 @@ export interface IMarketDataService {
    * @returns Cached order book or null if not available
    */
   getOrderBook(symbol: string): TopPrice | null;
+
+  /**
+   * Subscribe to a market index
+   *
+   * @param platform - Trading platform ID
+   * @param indexCode - Index code (e.g., VN30, VNINDEX)
+   */
+  subscribeIndex(platform: TradingPlatformId, indexCode: string): Promise<void>;
+
+  /**
+   * Subscribe to multiple market indexes
+   *
+   * @param platform - Trading platform ID
+   * @param indexes - Array of index codes
+   */
+  subscribeIndexes(
+    platform: TradingPlatformId,
+    indexes: string[],
+  ): Promise<{ subscribed: number; indexes: string[] }>;
+
+  /**
+   * Unsubscribe from a market index
+   *
+   * @param platform - Trading platform ID
+   * @param indexCode - Index code
+   */
+  unsubscribeIndex(
+    platform: TradingPlatformId,
+    indexCode: string,
+  ): Promise<void>;
+
+  /**
+   * Get cached tick history for a symbol
+   *
+   * @param symbol - Stock symbol
+   * @param limit - Maximum number of ticks to return
+   * @returns Array of ticks (newest first)
+   */
+  getTickHistory(symbol: string, limit?: number): Tick[];
+
+  /**
+   * Get cached market index data
+   *
+   * @param indexCode - Index code
+   * @returns Cached market index or null if not available
+   */
+  getMarketIndex(indexCode: string): MarketIndex | null;
 
   /**
    * Check if connected to market data stream

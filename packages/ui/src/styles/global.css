@@ -1,15 +1,10 @@
 @import "tailwindcss";
 
-/* Space Grotesk - Heading font */
+/* Space Grotesk - All App font */
 @import "@fontsource/space-grotesk/400.css";
 @import "@fontsource/space-grotesk/500.css";
 @import "@fontsource/space-grotesk/600.css";
 @import "@fontsource/space-grotesk/700.css";
-
-/* DM Sans - Body font */
-@import "@fontsource/dm-sans/400.css";
-@import "@fontsource/dm-sans/500.css";
-@import "@fontsource/dm-sans/700.css";
 
 @source "../**/*.{ts,tsx}";
 
@@ -95,7 +90,9 @@
   /* ===== TYPOGRAPHY - Tech Startup ===== */
   /* Font Families */
   --font-heading: "Space Grotesk", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-  --font-body: "DM Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-base: "Space Grotesk", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  /* Alias for backward compatibility (will be mangled by regex in embed, but works in base app) */
+  --font-body: var(--font-base);
 
   /* Font Sizes */
   --text-xs: 0.75rem;
@@ -185,14 +182,17 @@ html {
   scroll-behavior: smooth;
 }
 
-body {
+body,
+:host {
   margin: 0;
   padding: 0;
-  font-family: var(--font-body);
+  font-family: var(--font-base), serif;
   color: var(--color-text-primary);
   background: var(--color-bg-primary);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  width: 100%;
+  min-height: 100%;
 }
 
 /* All headings use Space Grotesk */

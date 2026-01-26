@@ -15,6 +15,8 @@ import {
   Holdings,
   MarketDataTicker,
   MarketDepth,
+  MarketIndexBar,
+  TickTape,
 } from "@fin-catch/ui/organisms";
 import { usePlatformServices } from "@fin-catch/ui/platform";
 
@@ -286,6 +288,9 @@ export const TradingOperationsPage: React.FC<TradingOperationsPageProps> = ({
           </div>
         </div>
 
+        {/* Market Index Bar */}
+        <MarketIndexBar platform={platform} />
+
         {/* Main Content Grid - 4 Column Layout */}
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
           {/* Column 1: Market Data */}
@@ -323,6 +328,13 @@ export const TradingOperationsPage: React.FC<TradingOperationsPageProps> = ({
                   platform={platform}
                   maxLevels={10}
                   onPriceClick={handlePriceClick}
+                />
+
+                {/* Tick Tape (Trade History) */}
+                <TickTape
+                  symbol={selectedSymbol}
+                  platform={platform}
+                  maxTicks={30}
                 />
               </>
             )}

@@ -15,6 +15,8 @@ import type {
   IMarketDataService,
   StockInfo,
   TopPrice,
+  Tick,
+  MarketIndex,
   MarketDataMessage,
   TradingPlatformId,
   MarketDataConnectionStatus,
@@ -44,11 +46,22 @@ export interface BatchSubscribeResponse {
 }
 
 /**
+ * Batch index subscribe response from v2 API
+ */
+export interface BatchIndexSubscribeResponse {
+  subscribed: number;
+  indexes: string[];
+  cachedItems: number;
+  newMqttSubscriptions: number;
+}
+
+/**
  * Pool statistics from v2 API
  */
 export interface PoolStats {
   status: string;
   totalSymbols: number;
+  totalIndexes: number;
   totalConsumers: number;
   activeMqttSubscriptions: number;
   subscriptions: Array<{
@@ -56,8 +69,20 @@ export interface PoolStats {
     refCount: number;
     mqttSubscribed: boolean;
     hasCachedData: boolean;
+    tickCount: number;
+  }>;
+  indexSubscriptions: Array<{
+    indexCode: string;
+    refCount: number;
+    mqttSubscribed: boolean;
+    hasCachedData: boolean;
   }>;
 }
+
+/**
+ * Maximum number of ticks to store per symbol
+ */
+const MAX_TICK_HISTORY = 50;
 
 /**
  * Get the base URL from Vite env or default
@@ -90,13 +115,18 @@ export class MarketDataAdapter implements IMarketDataService {
   private connectionStatus: MarketDataConnectionStatus = "disconnected";
   private snapshots: Map<string, StockInfo> = new Map();
   private orderBooks: Map<string, TopPrice> = new Map();
+  private tickHistory: Map<string, Tick[]> = new Map();
+  private marketIndexes: Map<string, MarketIndex> = new Map();
   private currentPlatform: TradingPlatformId | null = null;
 
   // Client-side subscription tracking with reference counting
   // Key: "platform:symbol", Value: reference count
   private activeSubscriptions: Map<string, number> = new Map();
+  // Key: "platform:indexCode", Value: reference count
+  private activeIndexSubscriptions: Map<string, number> = new Map();
   // Track pending subscribe calls to avoid duplicate in-flight requests
   private pendingSubscribes: Map<string, Promise<void>> = new Map();
+  private pendingIndexSubscribes: Map<string, Promise<void>> = new Map();
 
   constructor(config?: MarketDataConfig) {
     this.baseUrl =
@@ -332,7 +362,26 @@ export class MarketDataAdapter implements IMarketDataService {
         this.orderBooks.set(topPrice.symbol.toUpperCase(), topPrice);
         break;
       }
-      // Other message types don't need caching for now
+      case "TICK": {
+        const tick = msg.data as Tick;
+        const symbol = tick.symbol.toUpperCase();
+        const ticks = this.tickHistory.get(symbol) || [];
+        ticks.unshift(tick); // Add to front (newest first)
+        if (ticks.length > MAX_TICK_HISTORY) {
+          ticks.pop(); // Remove oldest
+        }
+        this.tickHistory.set(symbol, ticks);
+        break;
+      }
+      case "MARKET_INDEX": {
+        const marketIndex = msg.data as MarketIndex;
+        this.marketIndexes.set(
+          marketIndex.indexCode.toUpperCase(),
+          marketIndex,
+        );
+        break;
+      }
+      // OHLC and BOARD_EVENT don't need caching for now
     }
   }
 
@@ -617,6 +666,219 @@ export class MarketDataAdapter implements IMarketDataService {
   }
 
   /**
+   * Subscribe to a market index
+   * Uses client-side reference counting to avoid duplicate API calls
+   */
+  async subscribeIndex(
+    platform: TradingPlatformId,
+    indexCode: string,
+  ): Promise<void> {
+    const token = this.getAccessToken();
+    if (!token) {
+      throw new Error("Not authenticated. Please login first.");
+    }
+
+    const upperIndex = indexCode.toUpperCase();
+    const subscriptionKey = `${platform}:${upperIndex}`;
+
+    // Check if already subscribed - just increment ref count
+    const currentRefCount =
+      this.activeIndexSubscriptions.get(subscriptionKey) || 0;
+    if (currentRefCount > 0) {
+      this.activeIndexSubscriptions.set(subscriptionKey, currentRefCount + 1);
+      console.log(
+        `[MarketDataAdapter] Already subscribed to index ${upperIndex}, ref count: ${currentRefCount + 1}`,
+      );
+      return;
+    }
+
+    // Check if there's a pending subscribe call for this index
+    const pendingSubscribe = this.pendingIndexSubscribes.get(subscriptionKey);
+    if (pendingSubscribe) {
+      console.log(
+        `[MarketDataAdapter] Subscribe to index ${upperIndex} already in progress, waiting...`,
+      );
+      await pendingSubscribe;
+      const newRefCount =
+        this.activeIndexSubscriptions.get(subscriptionKey) || 0;
+      this.activeIndexSubscriptions.set(subscriptionKey, newRefCount + 1);
+      return;
+    }
+
+    const url = `${this.baseUrl}/api/v1/trading/${platform}/market-data/v2/subscribe-index`;
+
+    console.log(`[MarketDataAdapter] Subscribing to index ${upperIndex}`);
+
+    const subscribePromise = (async () => {
+      const response = await fetch(url, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ index: upperIndex }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        const errorMessage = errorData.error || `API error: ${response.status}`;
+        throw new Error(errorMessage);
+      }
+
+      const result = await response.json();
+      console.log(
+        `[MarketDataAdapter] Subscribed to index ${upperIndex}:`,
+        result,
+      );
+
+      this.activeIndexSubscriptions.set(subscriptionKey, 1);
+    })();
+
+    this.pendingIndexSubscribes.set(subscriptionKey, subscribePromise);
+
+    try {
+      await subscribePromise;
+    } finally {
+      this.pendingIndexSubscribes.delete(subscriptionKey);
+    }
+  }
+
+  /**
+   * Subscribe to multiple indexes at once
+   */
+  async subscribeIndexes(
+    platform: TradingPlatformId,
+    indexes: string[],
+  ): Promise<BatchIndexSubscribeResponse> {
+    const token = this.getAccessToken();
+    if (!token) {
+      throw new Error("Not authenticated. Please login first.");
+    }
+
+    if (indexes.length === 0) {
+      return {
+        subscribed: 0,
+        indexes: [],
+        cachedItems: 0,
+        newMqttSubscriptions: 0,
+      };
+    }
+
+    const url = `${this.baseUrl}/api/v1/trading/${platform}/market-data/v2/subscribe-indexes`;
+
+    console.log(
+      `[MarketDataAdapter] Batch subscribing to ${indexes.length} indexes`,
+    );
+
+    const response = await fetch(url, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        indexes: indexes.map((i) => i.toUpperCase()),
+      }),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      const errorMessage = errorData.error || `API error: ${response.status}`;
+      throw new Error(errorMessage);
+    }
+
+    const result = await response.json();
+    console.log(`[MarketDataAdapter] Batch index subscribed:`, result);
+
+    // Update local tracking
+    for (const idx of indexes) {
+      const subscriptionKey = `${platform}:${idx.toUpperCase()}`;
+      const currentRefCount =
+        this.activeIndexSubscriptions.get(subscriptionKey) || 0;
+      this.activeIndexSubscriptions.set(subscriptionKey, currentRefCount + 1);
+    }
+
+    return result;
+  }
+
+  /**
+   * Unsubscribe from a market index
+   */
+  async unsubscribeIndex(
+    platform: TradingPlatformId,
+    indexCode: string,
+  ): Promise<void> {
+    const token = this.getAccessToken();
+    if (!token) {
+      throw new Error("Not authenticated. Please login first.");
+    }
+
+    const upperIndex = indexCode.toUpperCase();
+    const subscriptionKey = `${platform}:${upperIndex}`;
+
+    // Check reference count
+    const currentRefCount =
+      this.activeIndexSubscriptions.get(subscriptionKey) || 0;
+    if (currentRefCount > 1) {
+      this.activeIndexSubscriptions.set(subscriptionKey, currentRefCount - 1);
+      console.log(
+        `[MarketDataAdapter] Decremented ref count for index ${upperIndex}, remaining: ${currentRefCount - 1}`,
+      );
+      return;
+    }
+
+    // Last subscriber, actually unsubscribe
+    this.activeIndexSubscriptions.delete(subscriptionKey);
+
+    const url = `${this.baseUrl}/api/v1/trading/${platform}/market-data/v2/unsubscribe-index`;
+
+    console.log(`[MarketDataAdapter] Unsubscribing from index ${upperIndex}`);
+
+    const response = await fetch(url, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ index: upperIndex }),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      const errorMessage = errorData.error || `API error: ${response.status}`;
+      throw new Error(errorMessage);
+    }
+
+    // Remove from cache
+    this.marketIndexes.delete(upperIndex);
+
+    const result = await response.json();
+    console.log(
+      `[MarketDataAdapter] Unsubscribed from index ${upperIndex}:`,
+      result,
+    );
+  }
+
+  /**
+   * Get cached tick history for a symbol
+   * Returns ticks newest first
+   */
+  getTickHistory(symbol: string, limit?: number): Tick[] {
+    const ticks = this.tickHistory.get(symbol.toUpperCase()) || [];
+    if (limit && limit > 0) {
+      return ticks.slice(0, limit);
+    }
+    return ticks;
+  }
+
+  /**
+   * Get cached market index data
+   */
+  getMarketIndex(indexCode: string): MarketIndex | null {
+    return this.marketIndexes.get(indexCode.toUpperCase()) || null;
+  }
+
+  /**
    * Get pool statistics (v2 only)
    * Returns null for v1 API
    */
@@ -695,6 +957,8 @@ export class MarketDataAdapter implements IMarketDataService {
     // Clear subscription tracking
     this.activeSubscriptions.clear();
     this.pendingSubscribes.clear();
+    this.activeIndexSubscriptions.clear();
+    this.pendingIndexSubscribes.clear();
     // Keep cache for potential reconnection
   }
 
@@ -704,5 +968,7 @@ export class MarketDataAdapter implements IMarketDataService {
   clearCache(): void {
     this.snapshots.clear();
     this.orderBooks.clear();
+    this.tickHistory.clear();
+    this.marketIndexes.clear();
   }
 }

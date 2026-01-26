@@ -79,12 +79,30 @@ export interface MarketIndex {
   change?: number;
   /** Change percentage */
   changePercent?: number;
-  /** Total trading volume */
-  totalVolume?: number;
+  /** Total trading volume (as string from DNSE) */
+  totalVolume?: string;
   /** Total trading value */
   totalValue?: number;
-  /** Timestamp (milliseconds since epoch) */
-  timestamp?: number;
+  /** Prior/reference index value */
+  priorValue?: number;
+  /** Highest index value of the day */
+  highestValue?: number;
+  /** Lowest index value of the day */
+  lowestValue?: number;
+  /** Timestamp (ISO string) */
+  timestamp?: string;
+  /** Market ID */
+  marketId?: string;
+  /** Up issue count */
+  upCount?: number;
+  /** Down issue count */
+  downCount?: number;
+  /** No change issue count */
+  unchangedCount?: number;
+  /** Ceiling issue count */
+  ceilingCount?: number;
+  /** Floor issue count */
+  floorCount?: number;
 }
 
 /**

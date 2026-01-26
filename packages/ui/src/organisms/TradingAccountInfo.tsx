@@ -672,10 +672,6 @@ export const TradingAccountInfo: React.FC<TradingAccountInfoProps> = ({
               );
             }}
             className="w-full"
-            style={{
-              background:
-                "linear-gradient(135deg, #00d4ff 0%, #7b61ff 50%, #00ff88 100%)",
-            }}
           >
             <ArrowRightLeft className="w-4 h-4 mr-2" />
             Start Trading
