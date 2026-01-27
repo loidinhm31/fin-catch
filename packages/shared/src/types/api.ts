@@ -2,7 +2,7 @@
 export type Resolution = "1" | "5" | "15" | "30" | "60" | "1D" | "1W" | "1M";
 
 // Stock data sources
-export type StockSource = "vndirect" | "ssi" | "yahoo_finance";
+export type StockSource = "vndirect" | "ssi" | "yahoo_finance" | "dnse";
 
 // Gold data sources
 export type GoldSource = "sjc";
@@ -113,6 +113,7 @@ export const STOCK_SOURCE_LABELS: Record<StockSource, string> = {
   vndirect: "VNDIRECT",
   ssi: "SSI",
   yahoo_finance: "Yahoo Finance",
+  dnse: "DNSE",
 };
 
 // Gold source labels
