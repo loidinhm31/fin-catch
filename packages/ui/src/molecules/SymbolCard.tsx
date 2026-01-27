@@ -79,15 +79,18 @@ export const SymbolCard: React.FC<SymbolCardProps> = ({
         hover:scale-[1.02] active:scale-[0.98]
         ${isSelected ? "ring-2" : ""}
       `}
-      style={{
-        background: isSelected
-          ? "rgba(0, 212, 255, 0.1)"
-          : "rgba(15, 23, 42, 0.6)",
-        border: isSelected
-          ? "1px solid rgba(0, 212, 255, 0.5)"
-          : "1px solid rgba(100, 116, 139, 0.2)",
-        ringColor: "#00d4ff",
-      }}
+      style={
+        {
+          background: isSelected
+            ? "rgba(0, 212, 255, 0.1)"
+            : "rgba(15, 23, 42, 0.6)",
+          border: isSelected
+            ? "1px solid rgba(0, 212, 255, 0.5)"
+            : "1px solid rgba(100, 116, 139, 0.2)",
+          // Ring color is handled via Tailwind's ring-cyan-400 class
+          "--tw-ring-color": "#00d4ff",
+        } as React.CSSProperties
+      }
       onClick={onClick}
     >
       {/* Header: Symbol & Trend Icon */}

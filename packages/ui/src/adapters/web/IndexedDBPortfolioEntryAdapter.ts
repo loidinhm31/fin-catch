@@ -4,6 +4,11 @@ import { db, generateId, getCurrentTimestamp } from "./database";
 
 /**
  * IndexedDB implementation of Portfolio Entry Service using Dexie
+ *
+ * Sync tracking:
+ * - Creates/updates: synced_at is cleared (undefined) and sync_version incremented
+ * - Deletes: Tracked in _pendingChanges before hard delete
+ * - The sync adapter queries records where synced_at is undefined
  */
 export class IndexedDBPortfolioEntryAdapter implements IPortfolioEntryService {
   async createEntry(entry: PortfolioEntry): Promise<string> {
@@ -14,7 +19,8 @@ export class IndexedDBPortfolioEntryAdapter implements IPortfolioEntryService {
       ...entry,
       id,
       created_at: entry.created_at || now,
-      sync_version: entry.sync_version || 0,
+      sync_version: 1,
+      synced_at: undefined, // Mark as pending sync
     };
 
     await db.portfolioEntries.add(newEntry);
@@ -44,17 +50,54 @@ export class IndexedDBPortfolioEntryAdapter implements IPortfolioEntryService {
       throw new Error(`Entry not found: ${entry.id}`);
     }
 
-    await db.portfolioEntries.put(entry);
+    // Mark as pending sync by clearing synced_at and incrementing version
+    const updatedEntry: PortfolioEntry = {
+      ...entry,
+      sync_version: (existing.sync_version || 0) + 1,
+      synced_at: undefined, // Mark as pending sync
+    };
+
+    await db.portfolioEntries.put(updatedEntry);
   }
 
   async deleteEntry(id: string): Promise<void> {
-    // Use transaction for cascading delete
+    // Use transaction for cascading delete and sync tracking
     await db.transaction(
       "rw",
-      [db.portfolioEntries, db.couponPayments],
+      [db.portfolioEntries, db.couponPayments, db._pendingChanges],
       async () => {
+        // Get the entry before deleting (for sync version)
+        const entry = await db.portfolioEntries.get(id);
+
         // Delete all coupon payments for this entry
+        // Track each payment deletion for sync
+        const payments = await db.couponPayments
+          .where("entry_id")
+          .equals(id)
+          .toArray();
+        for (const payment of payments) {
+          await db._pendingChanges.add({
+            tableName: "couponPayments",
+            rowId: payment.id,
+            operation: "delete",
+            data: {},
+            version: (payment.sync_version || 0) + 1,
+            createdAt: getCurrentTimestamp(),
+          });
+        }
         await db.couponPayments.where("entry_id").equals(id).delete();
+
+        // Track entry deletion for sync
+        if (entry) {
+          await db._pendingChanges.add({
+            tableName: "portfolioEntries",
+            rowId: id,
+            operation: "delete",
+            data: {},
+            version: (entry.sync_version || 0) + 1,
+            createdAt: getCurrentTimestamp(),
+          });
+        }
 
         // Delete the entry
         await db.portfolioEntries.delete(id);

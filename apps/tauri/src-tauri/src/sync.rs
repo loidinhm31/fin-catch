@@ -289,10 +289,14 @@ impl SyncService {
             "currentMarketPrice": entry.current_market_price,
             "lastPriceUpdate": entry.last_price_update,
             "ytm": entry.ytm,
-            // Alert fields (synced, but not last_alert_at and alert_triggered which are local-only)
+            // Alert fields (synced to server for qm-sync monitoring)
             "targetPrice": entry.target_price,
             "stopLoss": entry.stop_loss,
             "alertEnabled": entry.alert_enabled,
+            // Alert tracking fields (server-updated, included to preserve values)
+            "lastAlertAt": entry.last_alert_at,
+            "alertCount": entry.alert_count,
+            "lastAlertType": entry.last_alert_type,
         });
 
         // Remove null fields
@@ -469,6 +473,10 @@ impl SyncService {
             target_price: data["targetPrice"].as_f64(),
             stop_loss: data["stopLoss"].as_f64(),
             alert_enabled: data["alertEnabled"].as_bool(),
+            // Alert tracking fields (updated by server when alerts trigger)
+            last_alert_at: data["lastAlertAt"].as_i64(),
+            alert_count: data["alertCount"].as_i64().map(|v| v as i32),
+            last_alert_type: data["lastAlertType"].as_str().map(|s| s.to_string()),
             sync_version: record.version,
             synced_at: Some(chrono::Utc::now().timestamp()),
         };

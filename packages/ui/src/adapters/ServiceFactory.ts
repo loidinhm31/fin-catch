@@ -15,6 +15,7 @@ import type {
 import {
   TauriAuthAdapter,
   TauriCouponPaymentAdapter,
+  TauriDataAdapter,
   TauriPortfolioAdapter,
   TauriPortfolioEntryAdapter,
   TauriSyncAdapter,
@@ -28,11 +29,58 @@ import {
 } from "./http";
 
 // Shared adapters (calls qm-center-server directly)
-import {
-  QmServerAuthAdapter,
-  QmServerDataAdapter,
-  QmServerSyncAdapter,
-} from "./shared";
+import { QmServerAuthAdapter, QmServerDataAdapter } from "./shared";
+
+// IndexedDB adapters (for web/browser sync with local storage)
+import { IndexedDBSyncAdapter } from "./web";
+
+/**
+ * Get server URL from environment or default
+ */
+function getServerUrl(): string {
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const env = (import.meta as any).env;
+    if (env?.VITE_QM_SYNC_SERVER_URL) {
+      return env.VITE_QM_SYNC_SERVER_URL;
+    }
+  } catch {
+    // Not in a Vite environment
+  }
+  return "http://localhost:3000";
+}
+
+/**
+ * Get app ID from environment or default
+ */
+function getAppId(): string {
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const env = (import.meta as any).env;
+    if (env?.VITE_APP_ID) {
+      return env.VITE_APP_ID;
+    }
+  } catch {
+    // Not in a Vite environment
+  }
+  return "fin-catch";
+}
+
+/**
+ * Get API key from environment or default
+ */
+function getApiKey(): string {
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const env = (import.meta as any).env;
+    if (env?.VITE_API_KEY) {
+      return env.VITE_API_KEY;
+    }
+  } catch {
+    // Not in a Vite environment
+  }
+  return "";
+}
 
 // Singleton instances (lazy initialized)
 let portfolioService: IPortfolioService | null = null;
@@ -90,13 +138,16 @@ export const getCouponPaymentService = (): ICouponPaymentService => {
 
 /**
  * Get the Data Service for the current platform
- * All platforms use QmServerDataAdapter to call qm-center-server directly
+ * Tauri: TauriDataAdapter (IPC to Rust backend)
+ * Web/HTTP: QmServerDataAdapter (calls qm-center-server directly)
  */
 export const getDataService = (): IDataService => {
   if (!dataService) {
-    dataService = new QmServerDataAdapter();
+    dataService = isTauri()
+      ? new TauriDataAdapter()
+      : new QmServerDataAdapter();
     console.log(
-      "[ServiceFactory] Created DataService using QmServerDataAdapter",
+      `[ServiceFactory] Created DataService using ${isTauri() ? "TauriDataAdapter" : "QmServerDataAdapter"}`,
     );
   }
   return dataService;
@@ -122,16 +173,26 @@ export const getAuthService = (): IAuthService => {
 /**
  * Get the Sync Service for the current platform
  * Tauri: TauriSyncAdapter (uses Tauri invoke)
- * Web: QmServerSyncAdapter (calls qm-center-server directly)
+ * Web: IndexedDBSyncAdapter (uses IndexedDB for local storage + QmSyncClient for server)
  */
 export const getSyncService = (): ISyncService => {
   if (!syncService) {
-    syncService = isTauri()
-      ? new TauriSyncAdapter()
-      : new QmServerSyncAdapter();
-    console.log(
-      `[ServiceFactory] Created SyncService for ${isTauri() ? "Tauri" : "QmSyncServer"}`,
-    );
+    if (isTauri()) {
+      syncService = new TauriSyncAdapter();
+      console.log("[ServiceFactory] Created SyncService for Tauri");
+    } else {
+      // Get or create auth service for token management
+      const auth = getAuthService() as QmServerAuthAdapter;
+      syncService = new IndexedDBSyncAdapter({
+        serverUrl: getServerUrl(),
+        appId: getAppId(),
+        apiKey: getApiKey(),
+        getTokens: () => auth.getTokens(),
+        saveTokens: (accessToken, refreshToken, userId) =>
+          auth.saveTokensExternal(accessToken, refreshToken, userId),
+      });
+      console.log("[ServiceFactory] Created SyncService for IndexedDB");
+    }
   }
   return syncService;
 };

@@ -4,9 +4,18 @@
  * Implements the LocalStorage pattern from qm-sync-client for IndexedDB/Dexie.
  * Provides methods for tracking pending changes, applying remote changes,
  * and managing sync checkpoints.
+ *
+ * Sync tracking approach (matches Rust/SQLite implementation):
+ * - Creates/updates: Records have synced_at = undefined (pending)
+ * - Deletes: Tracked in _pendingChanges table before hard delete
+ * - After successful sync: synced_at is set, _pendingChanges entries removed
  */
 
-import { db, getCurrentTimestamp, SYNC_META_KEYS } from "../database";
+import {
+  db,
+  getCurrentTimestamp,
+  SYNC_META_KEYS,
+} from "@fin-catch/ui/adapters";
 import type { Checkpoint, PullRecord, SyncRecord } from "@fin-catch/shared";
 
 /**
@@ -19,23 +28,148 @@ export class IndexedDBSyncStorage {
 
   /**
    * Get all records that have pending changes (not yet synced).
+   *
+   * This combines two sources:
+   * 1. Records where synced_at is undefined (creates/updates) - like Rust implementation
+   * 2. Records in _pendingChanges table with operation="delete" (deletes)
    */
   async getPendingChanges(): Promise<SyncRecord[]> {
-    const pending = await db._pendingChanges.toArray();
-    return pending.map((change) => ({
-      tableName: change.tableName,
-      rowId: change.rowId,
-      data: change.data,
-      version: change.version,
-      deleted: change.operation === "delete",
-    }));
+    const records: SyncRecord[] = [];
+
+    // 1. Get unsynced portfolios (synced_at is undefined)
+    const portfolios = await db.portfolios.toArray();
+    for (const portfolio of portfolios) {
+      if (portfolio.synced_at === undefined || portfolio.synced_at === null) {
+        records.push({
+          tableName: "portfolios",
+          rowId: portfolio.id,
+          data: {
+            name: portfolio.name,
+            description: portfolio.description,
+            baseCurrency: portfolio.base_currency,
+            createdAt: portfolio.created_at,
+          },
+          version: portfolio.sync_version || 1,
+          deleted: false,
+        });
+      }
+    }
+
+    // 2. Get unsynced portfolio entries (synced_at is undefined)
+    const entries = await db.portfolioEntries.toArray();
+    for (const entry of entries) {
+      if (entry.synced_at === undefined || entry.synced_at === null) {
+        records.push({
+          tableName: "portfolio_entries",
+          rowId: entry.id,
+          data: {
+            portfolioSyncUuid: entry.portfolio_id,
+            assetType: entry.asset_type,
+            symbol: entry.symbol,
+            quantity: entry.quantity,
+            purchasePrice: entry.purchase_price,
+            currency: entry.currency,
+            purchaseDate: entry.purchase_date,
+            notes: entry.notes,
+            tags: entry.tags,
+            transactionFees: entry.transaction_fees,
+            source: entry.source,
+            createdAt: entry.created_at,
+            unit: entry.unit,
+            goldType: entry.gold_type,
+            faceValue: entry.face_value,
+            couponRate: entry.coupon_rate,
+            maturityDate: entry.maturity_date,
+            couponFrequency: entry.coupon_frequency,
+            currentMarketPrice: entry.current_market_price,
+            lastPriceUpdate: entry.last_price_update,
+            ytm: entry.ytm,
+            targetPrice: entry.target_price,
+            stopLoss: entry.stop_loss,
+            alertEnabled: entry.alert_enabled,
+            lastAlertAt: entry.last_alert_at,
+            alertCount: entry.alert_count,
+            lastAlertType: entry.last_alert_type,
+          },
+          version: entry.sync_version || 1,
+          deleted: false,
+        });
+      }
+    }
+
+    // 3. Get unsynced coupon payments (synced_at is undefined)
+    const payments = await db.couponPayments.toArray();
+    for (const payment of payments) {
+      if (payment.synced_at === undefined || payment.synced_at === null) {
+        records.push({
+          tableName: "bond_coupon_payments",
+          rowId: payment.id,
+          data: {
+            entrySyncUuid: payment.entry_id,
+            paymentDate: payment.payment_date,
+            amount: payment.amount,
+            currency: payment.currency,
+            notes: payment.notes,
+            createdAt: payment.created_at,
+          },
+          version: payment.sync_version || 1,
+          deleted: false,
+        });
+      }
+    }
+
+    // 4. Get pending deletes from _pendingChanges table
+    const pendingDeletes = await db._pendingChanges
+      .filter((change) => change.operation === "delete")
+      .toArray();
+    for (const change of pendingDeletes) {
+      // Map local table names to server table names
+      let tableName = change.tableName;
+      if (tableName === "portfolioEntries") tableName = "portfolio_entries";
+      if (tableName === "couponPayments") tableName = "bond_coupon_payments";
+
+      records.push({
+        tableName,
+        rowId: change.rowId,
+        data: {},
+        version: change.version,
+        deleted: true,
+      });
+    }
+
+    return records;
   }
 
   /**
    * Get the count of pending changes.
    */
   async getPendingChangesCount(): Promise<number> {
-    return db._pendingChanges.count();
+    let count = 0;
+
+    // Count unsynced portfolios
+    const portfolios = await db.portfolios.toArray();
+    count += portfolios.filter(
+      (p) => p.synced_at === undefined || p.synced_at === null,
+    ).length;
+
+    // Count unsynced entries
+    const entries = await db.portfolioEntries.toArray();
+    count += entries.filter(
+      (e) => e.synced_at === undefined || e.synced_at === null,
+    ).length;
+
+    // Count unsynced payments
+    const payments = await db.couponPayments.toArray();
+    count += payments.filter(
+      (p) => p.synced_at === undefined || p.synced_at === null,
+    ).length;
+
+    // Count pending deletes
+    count += await db._pendingChanges
+      .filter((change) => change.operation === "delete")
+      .count();
+
+    return count;
   }
 
   /**
@@ -93,17 +227,41 @@ export class IndexedDBSyncStorage {
       ],
       async () => {
         for (const { tableName, rowId } of recordIds) {
-          // Remove from pending changes
-          await db._pendingChanges.where({ tableName, rowId }).delete();
+          // Convert server table names to local names for _pendingChanges lookup
+          const localTableName = this.serverToLocalTableName(tableName);
 
-          // Update synced_at on the actual record
+          // Remove from pending changes (deletes are tracked here)
+          await db._pendingChanges
+            .where({ tableName: localTableName, rowId })
+            .delete();
+
+          // Update synced_at on the actual record (if it still exists - not for deletes)
           const table = this.getTable(tableName);
           if (table) {
-            await table.update(rowId, { synced_at: now });
+            // Only update if record exists (won't exist for deletes)
+            const exists = await table.get(rowId);
+            if (exists) {
+              await table.update(rowId, { synced_at: now });
+            }
           }
         }
       },
     );
+  }
+
+  /**
+   * Convert server table name to local table name for _pendingChanges.
+   */
+  private serverToLocalTableName(tableName: string): string {
+    switch (tableName) {
+      case "portfolio_entries":
+        return "portfolioEntries";
+      case "bond_coupon_payments":
+      case "coupon_payments":
+        return "couponPayments";
+      default:
+        return tableName;
+    }
   }
 
   // =========================================================================
@@ -199,6 +357,10 @@ export class IndexedDBSyncStorage {
     this.convertCamelToSnake(data, "targetPrice", "target_price");
     this.convertCamelToSnake(data, "stopLoss", "stop_loss");
     this.convertCamelToSnake(data, "alertEnabled", "alert_enabled");
+    // Alert tracking fields (server-updated)
+    this.convertCamelToSnake(data, "lastAlertAt", "last_alert_at");
+    this.convertCamelToSnake(data, "alertCount", "alert_count");
+    this.convertCamelToSnake(data, "lastAlertType", "last_alert_type");
 
     // Coupon payment fields
     this.convertCamelToSnake(data, "entryId", "entry_id");

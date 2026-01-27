@@ -5,11 +5,7 @@
  * like qm-center-app. It sets up all necessary services and providers.
  */
 
-import { useEffect, useMemo } from "react";
-import { HashRouter } from "react-router-dom";
-import type { IPlatformServices } from "../platform";
-import { PlatformProvider } from "../platform";
-import { AppShell } from "../templates";
+import { isTauri } from "@fin-catch/ui/utils";
 import {
   QmServerAuthAdapter,
   QmServerDataAdapter,
@@ -19,6 +15,12 @@ import {
   IndexedDBSyncAdapter,
   TradingAuthAdapter,
   MarketDataAdapter,
+  TauriAuthAdapter,
+  TauriCouponPaymentAdapter,
+  TauriDataAdapter,
+  TauriPortfolioAdapter,
+  TauriPortfolioEntryAdapter,
+  TauriSyncAdapter,
   setAuthService,
   setCouponPaymentService,
   setDataService,
@@ -26,8 +28,12 @@ import {
   setPortfolioService,
   setSyncService,
   setTradingAuthService,
-} from "../adapters";
+} from "@fin-catch/ui/adapters";
 import type { FinCatchEmbedProps } from "./types";
+import { useEffect, useMemo } from "react";
+import { IPlatformServices, PlatformProvider } from "@fin-catch/ui/platform";
+import { AppShell } from "@fin-catch/ui/templates";
+import { HashRouter } from "react-router-dom";
 
 /**
  * Get server URL from environment or default
@@ -95,6 +101,20 @@ export function FinCatchApp({
 }: FinCatchEmbedProps) {
   // Create services - memoized to prevent recreation on every render
   const services = useMemo<IPlatformServices>(() => {
+    // If running in Tauri, use Tauri adapters
+    if (isTauri()) {
+      return {
+        portfolio: new TauriPortfolioAdapter(),
+        portfolioEntry: new TauriPortfolioEntryAdapter(),
+        couponPayment: new TauriCouponPaymentAdapter(),
+        data: new TauriDataAdapter(),
+        auth: new TauriAuthAdapter(),
+        sync: new TauriSyncAdapter(),
+        trading: new TradingAuthAdapter(),
+        marketData: new MarketDataAdapter(),
+      };
+    }
+
     // Create auth adapter first (single source of truth for tokens)
     const authAdapter = new QmServerAuthAdapter();
 

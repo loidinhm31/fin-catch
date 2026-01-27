@@ -23,11 +23,8 @@ use axum::{
     routing::{get, post, put},
     Router,
 };
-use fin_catch_data::{
-    DataSourceGateway, GoldPremiumRequest,
-    GoldPriceRequest, StockHistoryRequest,
-};
 use futures::stream::Stream;
+use qm_fin_catch_data::{DataSourceGateway, ExchangeRateRequest, GoldPremiumRequest, GoldPriceRequest, StockHistoryRequest};
 use serde::{Deserialize, Serialize};
 use std::convert::Infallible;
 use std::sync::{Arc, Mutex};
@@ -427,7 +424,7 @@ async fn api_gold_price(
 /// Exchange rate API
 async fn api_exchange_rate(
     State(state): State<WebServerState>,
-    Json(request): Json<fin_catch_data::ExchangeRateRequest>,
+    Json(request): Json<ExchangeRateRequest>,
 ) -> impl IntoResponse {
     match state.gateway.fetch_exchange_rate_history(request).await {
         Ok(response) => Json(ApiResponse::success(response)).into_response(),
@@ -444,7 +441,7 @@ async fn api_gold_premium(
     State(state): State<WebServerState>,
     Json(request): Json<GoldPremiumRequest>,
 ) -> impl IntoResponse {
-    use fin_catch_data::models::gold_premium::GoldPremiumCalculator;
+    use qm_fin_catch_data::models::gold_premium::GoldPremiumCalculator;
 
     if let Err(e) = request.validate() {
         return (

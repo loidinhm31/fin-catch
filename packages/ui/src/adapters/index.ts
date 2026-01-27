@@ -15,8 +15,6 @@ export {
   type QmServerConfig,
   QmServerAuthAdapter,
   type QmServerAuthConfig,
-  QmServerSyncAdapter,
-  type QmServerSyncConfig,
   TradingAuthAdapter,
   type TradingAuthConfig,
   MarketDataAdapter,
@@ -42,6 +40,16 @@ export {
   type TokenProvider,
   type TokenSaver,
 } from "./web";
+
+// Re-export Tauri adapters (for desktop/Tauri applications)
+export {
+  TauriPortfolioAdapter,
+  TauriPortfolioEntryAdapter,
+  TauriCouponPaymentAdapter,
+  TauriDataAdapter,
+  TauriAuthAdapter,
+  TauriSyncAdapter,
+} from "./tauri";
 
 // Re-export factory functions
 export {
