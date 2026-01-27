@@ -4,11 +4,7 @@
  * HTTP/SSE adapter for real-time market data streaming.
  * Uses Server-Sent Events for streaming and REST for subscription management.
  *
- * Supports two API versions:
- * - v1 (legacy): Per-user MQTT connections
- * - v2 (recommended): Shared MQTT pool with reference counting
- *
- * The v2 API provides better resource utilization and supports batch subscriptions.
+ * Uses a shared MQTT pool with reference counting for efficient resource utilization.
  */
 
 import type {
@@ -33,15 +29,10 @@ import { AUTH_STORAGE_KEYS } from "@fin-catch/shared/constants";
  */
 export interface MarketDataConfig {
   baseUrl?: string;
-  /**
-   * API version to use: 'v1' (legacy per-user) or 'v2' (shared pool)
-   * Default: 'v2'
-   */
-  apiVersion?: "v1" | "v2";
 }
 
 /**
- * Batch subscribe response from v2 API
+ * Batch subscribe response
  */
 export interface BatchSubscribeResponse {
   subscribed: number;
@@ -51,7 +42,7 @@ export interface BatchSubscribeResponse {
 }
 
 /**
- * Batch index subscribe response from v2 API
+ * Batch index subscribe response
  */
 export interface BatchIndexSubscribeResponse {
   subscribed: number;
@@ -61,7 +52,7 @@ export interface BatchIndexSubscribeResponse {
 }
 
 /**
- * Pool statistics from v2 API
+ * Pool statistics
  */
 export interface PoolStats {
   status: string;
@@ -110,12 +101,9 @@ function getDefaultBaseUrl(): string {
  *
  * Implements IMarketDataService using SSE for streaming and REST for subscriptions.
  * Uses fetch with ReadableStream to support Authorization header (EventSource doesn't support headers).
- *
- * Supports v1 (legacy) and v2 (shared pool) APIs.
  */
 export class MarketDataAdapter implements IMarketDataService {
   private baseUrl: string;
-  private apiVersion: "v1" | "v2";
   private abortController: AbortController | null = null;
   private connectionStatus: MarketDataConnectionStatus = "disconnected";
   private snapshots: Map<string, StockInfo> = new Map();
@@ -145,10 +133,9 @@ export class MarketDataAdapter implements IMarketDataService {
       config?.baseUrl ||
       this.getStoredValue(AUTH_STORAGE_KEYS.SERVER_URL) ||
       getDefaultBaseUrl();
-    this.apiVersion = config?.apiVersion || "v2";
 
     console.log(
-      `[MarketDataAdapter] Initialized with baseUrl: ${this.baseUrl}, apiVersion: ${this.apiVersion}`,
+      `[MarketDataAdapter] Initialized with baseUrl: ${this.baseUrl}`,
     );
   }
 
@@ -234,16 +221,10 @@ export class MarketDataAdapter implements IMarketDataService {
     this.currentPlatform = platform;
     this.notifyStatusChange("connecting");
 
-    // Use v1 or v2 endpoint based on configuration
-    const streamPath =
-      this.apiVersion === "v2"
-        ? `/api/v1/trading/${platform}/market-data/v2/stream`
-        : `/api/v1/trading/${platform}/market-data/stream`;
+    const streamPath = `/api/v1/trading/${platform}/market-data/stream`;
     const url = `${this.baseUrl}${streamPath}`;
 
-    console.log(
-      `[MarketDataAdapter] Connecting to SSE (${this.apiVersion}): ${url}`,
-    );
+    console.log(`[MarketDataAdapter] Connecting to SSE: ${url}`);
 
     // Create abort controller for cancellation
     this.abortController = new AbortController();
@@ -518,15 +499,9 @@ export class MarketDataAdapter implements IMarketDataService {
       return;
     }
 
-    const subscribePath =
-      this.apiVersion === "v2"
-        ? `/api/v1/trading/${platform}/market-data/v2/subscribe`
-        : `/api/v1/trading/${platform}/market-data/subscribe`;
-    const url = `${this.baseUrl}${subscribePath}`;
+    const url = `${this.baseUrl}/api/v1/trading/${platform}/market-data/subscribe`;
 
-    console.log(
-      `[MarketDataAdapter] Subscribing to ${upperSymbol} (${this.apiVersion})`,
-    );
+    console.log(`[MarketDataAdapter] Subscribing to ${upperSymbol}`);
 
     // Create the subscribe promise and track it
     const subscribePromise = (async () => {
@@ -563,7 +538,7 @@ export class MarketDataAdapter implements IMarketDataService {
   }
 
   /**
-   * Subscribe to multiple symbols at once (v2 only, falls back to sequential for v1)
+   * Subscribe to multiple symbols at once
    * More efficient than individual subscribes for portfolios
    */
   async subscribeBatch(
@@ -584,49 +559,32 @@ export class MarketDataAdapter implements IMarketDataService {
       };
     }
 
-    // For v2, use batch endpoint
-    if (this.apiVersion === "v2") {
-      const url = `${this.baseUrl}/api/v1/trading/${platform}/market-data/v2/subscribe-batch`;
+    const url = `${this.baseUrl}/api/v1/trading/${platform}/market-data/subscribe-batch`;
 
-      console.log(
-        `[MarketDataAdapter] Batch subscribing to ${symbols.length} symbols`,
-      );
-
-      const response = await fetch(url, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          symbols: symbols.map((s) => s.toUpperCase()),
-        }),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        const errorMessage = errorData.error || `API error: ${response.status}`;
-        throw new Error(errorMessage);
-      }
-
-      const result = await response.json();
-      console.log(`[MarketDataAdapter] Batch subscribed:`, result);
-      return result;
-    }
-
-    // For v1, fall back to sequential subscribes
     console.log(
-      `[MarketDataAdapter] Batch subscribe (v1 fallback): subscribing to ${symbols.length} symbols sequentially`,
+      `[MarketDataAdapter] Batch subscribing to ${symbols.length} symbols`,
     );
-    for (const symbol of symbols) {
-      await this.subscribe(platform, symbol);
+
+    const response = await fetch(url, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        symbols: symbols.map((s) => s.toUpperCase()),
+      }),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      const errorMessage = errorData.error || `API error: ${response.status}`;
+      throw new Error(errorMessage);
     }
-    return {
-      subscribed: symbols.length,
-      symbols: symbols.map((s) => s.toUpperCase()),
-      cachedItems: 0,
-      newMqttSubscriptions: symbols.length,
-    };
+
+    const result = await response.json();
+    console.log(`[MarketDataAdapter] Batch subscribed:`, result);
+    return result;
   }
 
   /**
@@ -659,15 +617,9 @@ export class MarketDataAdapter implements IMarketDataService {
     // Last subscriber, actually unsubscribe
     this.activeSubscriptions.delete(subscriptionKey);
 
-    const unsubscribePath =
-      this.apiVersion === "v2"
-        ? `/api/v1/trading/${platform}/market-data/v2/unsubscribe`
-        : `/api/v1/trading/${platform}/market-data/unsubscribe`;
-    const url = `${this.baseUrl}${unsubscribePath}`;
+    const url = `${this.baseUrl}/api/v1/trading/${platform}/market-data/unsubscribe`;
 
-    console.log(
-      `[MarketDataAdapter] Unsubscribing from ${upperSymbol} (${this.apiVersion})`,
-    );
+    console.log(`[MarketDataAdapter] Unsubscribing from ${upperSymbol}`);
 
     const response = await fetch(url, {
       method: "POST",
@@ -696,7 +648,7 @@ export class MarketDataAdapter implements IMarketDataService {
   }
 
   /**
-   * Unsubscribe from multiple symbols at once (v2 only, falls back to sequential for v1)
+   * Unsubscribe from multiple symbols at once
    */
   async unsubscribeBatch(
     platform: TradingPlatformId,
@@ -711,51 +663,39 @@ export class MarketDataAdapter implements IMarketDataService {
       return;
     }
 
-    // For v2, use batch endpoint
-    if (this.apiVersion === "v2") {
-      const url = `${this.baseUrl}/api/v1/trading/${platform}/market-data/v2/unsubscribe-batch`;
+    const url = `${this.baseUrl}/api/v1/trading/${platform}/market-data/unsubscribe-batch`;
 
-      console.log(
-        `[MarketDataAdapter] Batch unsubscribing from ${symbols.length} symbols`,
-      );
-
-      const response = await fetch(url, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          symbols: symbols.map((s) => s.toUpperCase()),
-        }),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        const errorMessage = errorData.error || `API error: ${response.status}`;
-        throw new Error(errorMessage);
-      }
-
-      // Remove from cache
-      for (const symbol of symbols) {
-        const upperSymbol = symbol.toUpperCase();
-        this.snapshots.delete(upperSymbol);
-        this.orderBooks.delete(upperSymbol);
-      }
-
-      console.log(
-        `[MarketDataAdapter] Batch unsubscribed from ${symbols.length} symbols`,
-      );
-      return;
-    }
-
-    // For v1, fall back to sequential unsubscribes
     console.log(
-      `[MarketDataAdapter] Batch unsubscribe (v1 fallback): unsubscribing from ${symbols.length} symbols sequentially`,
+      `[MarketDataAdapter] Batch unsubscribing from ${symbols.length} symbols`,
     );
-    for (const symbol of symbols) {
-      await this.unsubscribe(platform, symbol);
+
+    const response = await fetch(url, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        symbols: symbols.map((s) => s.toUpperCase()),
+      }),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      const errorMessage = errorData.error || `API error: ${response.status}`;
+      throw new Error(errorMessage);
     }
+
+    // Remove from cache
+    for (const symbol of symbols) {
+      const upperSymbol = symbol.toUpperCase();
+      this.snapshots.delete(upperSymbol);
+      this.orderBooks.delete(upperSymbol);
+    }
+
+    console.log(
+      `[MarketDataAdapter] Batch unsubscribed from ${symbols.length} symbols`,
+    );
   }
 
   /**
@@ -798,7 +738,7 @@ export class MarketDataAdapter implements IMarketDataService {
       return;
     }
 
-    const url = `${this.baseUrl}/api/v1/trading/${platform}/market-data/v2/subscribe-index`;
+    const url = `${this.baseUrl}/api/v1/trading/${platform}/market-data/subscribe-index`;
 
     console.log(`[MarketDataAdapter] Subscribing to index ${upperIndex}`);
 
@@ -857,7 +797,7 @@ export class MarketDataAdapter implements IMarketDataService {
       };
     }
 
-    const url = `${this.baseUrl}/api/v1/trading/${platform}/market-data/v2/subscribe-indexes`;
+    const url = `${this.baseUrl}/api/v1/trading/${platform}/market-data/subscribe-indexes`;
 
     console.log(
       `[MarketDataAdapter] Batch subscribing to ${indexes.length} indexes`,
@@ -923,7 +863,7 @@ export class MarketDataAdapter implements IMarketDataService {
     // Last subscriber, actually unsubscribe
     this.activeIndexSubscriptions.delete(subscriptionKey);
 
-    const url = `${this.baseUrl}/api/v1/trading/${platform}/market-data/v2/unsubscribe-index`;
+    const url = `${this.baseUrl}/api/v1/trading/${platform}/market-data/unsubscribe-index`;
 
     console.log(`[MarketDataAdapter] Unsubscribing from index ${upperIndex}`);
 
@@ -972,21 +912,15 @@ export class MarketDataAdapter implements IMarketDataService {
   }
 
   /**
-   * Get pool statistics (v2 only)
-   * Returns null for v1 API
+   * Get pool statistics
    */
   async getPoolStats(platform: TradingPlatformId): Promise<PoolStats | null> {
-    if (this.apiVersion !== "v2") {
-      console.log("[MarketDataAdapter] Pool stats only available for v2 API");
-      return null;
-    }
-
     const token = this.getAccessToken();
     if (!token) {
       throw new Error("Not authenticated. Please login first.");
     }
 
-    const url = `${this.baseUrl}/api/v1/trading/${platform}/market-data/v2/stats`;
+    const url = `${this.baseUrl}/api/v1/trading/${platform}/market-data/stats`;
 
     const response = await fetch(url, {
       method: "GET",
@@ -1112,7 +1046,7 @@ export class MarketDataAdapter implements IMarketDataService {
       return;
     }
 
-    const url = `${this.baseUrl}/api/v1/trading/${platform}/market-data/v2/subscribe-ohlc`;
+    const url = `${this.baseUrl}/api/v1/trading/${platform}/market-data/subscribe-ohlc`;
 
     console.log(
       `[MarketDataAdapter] Subscribing to OHLC ${upperSymbol}:${resolution}`,
@@ -1182,7 +1116,7 @@ export class MarketDataAdapter implements IMarketDataService {
     // Last subscriber, actually unsubscribe
     this.activeOhlcSubscriptions.delete(subscriptionKey);
 
-    const url = `${this.baseUrl}/api/v1/trading/${platform}/market-data/v2/unsubscribe-ohlc`;
+    const url = `${this.baseUrl}/api/v1/trading/${platform}/market-data/unsubscribe-ohlc`;
 
     console.log(
       `[MarketDataAdapter] Unsubscribing from OHLC ${upperSymbol}:${resolution}`,
@@ -1248,7 +1182,7 @@ export class MarketDataAdapter implements IMarketDataService {
       return;
     }
 
-    const url = `${this.baseUrl}/api/v1/trading/${platform}/market-data/v2/subscribe-index-ohlc`;
+    const url = `${this.baseUrl}/api/v1/trading/${platform}/market-data/subscribe-index-ohlc`;
 
     console.log(
       `[MarketDataAdapter] Subscribing to index OHLC ${upperIndex}:${resolution}`,
@@ -1316,7 +1250,7 @@ export class MarketDataAdapter implements IMarketDataService {
 
     this.activeOhlcSubscriptions.delete(subscriptionKey);
 
-    const url = `${this.baseUrl}/api/v1/trading/${platform}/market-data/v2/unsubscribe-index-ohlc`;
+    const url = `${this.baseUrl}/api/v1/trading/${platform}/market-data/unsubscribe-index-ohlc`;
 
     console.log(
       `[MarketDataAdapter] Unsubscribing from index OHLC ${upperIndex}:${resolution}`,
@@ -1368,7 +1302,7 @@ export class MarketDataAdapter implements IMarketDataService {
       };
     }
 
-    const url = `${this.baseUrl}/api/v1/trading/${platform}/market-data/v2/subscribe-batch-with-ohlc`;
+    const url = `${this.baseUrl}/api/v1/trading/${platform}/market-data/subscribe-batch-with-ohlc`;
 
     console.log(
       `[MarketDataAdapter] Batch subscribing to ${options.symbols.length} symbols with OHLC: ${options.includeOhlc || false}`,
@@ -1436,7 +1370,7 @@ export class MarketDataAdapter implements IMarketDataService {
       };
     }
 
-    const url = `${this.baseUrl}/api/v1/trading/${platform}/market-data/v2/subscribe-indexes-with-ohlc`;
+    const url = `${this.baseUrl}/api/v1/trading/${platform}/market-data/subscribe-indexes-with-ohlc`;
 
     console.log(
       `[MarketDataAdapter] Batch subscribing to ${options.indexes.length} indexes with OHLC: ${options.includeOhlc || false}`,
