@@ -40,6 +40,10 @@ export interface PortfolioEntry {
   target_price?: number; // Take-profit price
   stop_loss?: number; // Stop-loss price
   alert_enabled?: boolean; // Alerts active (default true when prices set)
+  // Alert tracking fields (updated by server when alerts trigger)
+  last_alert_at?: number; // Unix timestamp of last triggered alert
+  alert_count?: number; // Number of times alert has been triggered (max 3, then auto-disable)
+  last_alert_type?: "target" | "stop_loss"; // Type of last triggered alert
   sync_version: number;
   synced_at?: number;
 }

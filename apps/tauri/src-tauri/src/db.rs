@@ -45,6 +45,10 @@ pub struct PortfolioEntry {
     pub target_price: Option<f64>,      // Take-profit price
     pub stop_loss: Option<f64>,         // Stop-loss price
     pub alert_enabled: Option<bool>,    // Alerts active (default true when prices set)
+    // Alert tracking fields (updated by server when alerts trigger)
+    pub last_alert_at: Option<i64>,     // Unix timestamp of last triggered alert
+    pub alert_count: Option<i32>,       // Number of times alert has been triggered (max 3)
+    pub last_alert_type: Option<String>, // Type of last triggered alert ("target" or "stop_loss")
     // Sync fields
     pub sync_version: i64,
     pub synced_at: Option<i64>,
@@ -117,7 +121,8 @@ impl Database {
                 stop_loss REAL,
                 alert_enabled INTEGER DEFAULT 1,
                 last_alert_at INTEGER,
-                alert_triggered TEXT,
+                alert_count INTEGER,
+                last_alert_type TEXT,
                 sync_version INTEGER DEFAULT 1,
                 synced_at INTEGER,
                 deleted INTEGER DEFAULT 0,
@@ -202,6 +207,15 @@ impl Database {
         if !columns.contains(&"alert_enabled".to_string()) {
             conn.execute("ALTER TABLE portfolio_entries ADD COLUMN alert_enabled INTEGER DEFAULT 1", [])?;
         }
+        if !columns.contains(&"last_alert_at".to_string()) {
+            conn.execute("ALTER TABLE portfolio_entries ADD COLUMN last_alert_at INTEGER", [])?;
+        }
+        if !columns.contains(&"alert_count".to_string()) {
+            conn.execute("ALTER TABLE portfolio_entries ADD COLUMN alert_count INTEGER", [])?;
+        }
+        if !columns.contains(&"last_alert_type".to_string()) {
+            conn.execute("ALTER TABLE portfolio_entries ADD COLUMN last_alert_type TEXT", [])?;
+        }
 
         Ok(())
     }
@@ -269,8 +283,9 @@ impl Database {
 
     pub fn update_portfolio(&self, portfolio: &Portfolio) -> Result<()> {
         let conn = self.conn.lock().unwrap();
+        // Clear synced_at and increment sync_version to mark as pending sync
         conn.execute(
-            "UPDATE portfolios SET name = ?1, description = ?2, base_currency = ?3 WHERE id = ?4",
+            "UPDATE portfolios SET name = ?1, description = ?2, base_currency = ?3, synced_at = NULL, sync_version = sync_version + 1 WHERE id = ?4",
             params![portfolio.name, portfolio.description, portfolio.base_currency, portfolio.id],
         )?;
         Ok(())
@@ -313,9 +328,9 @@ impl Database {
                 id, portfolio_id, asset_type, symbol, quantity, purchase_price, currency,
                 purchase_date, notes, tags, transaction_fees, source, created_at, unit, gold_type,
                 face_value, coupon_rate, maturity_date, coupon_frequency, current_market_price, last_price_update, ytm,
-                target_price, stop_loss, alert_enabled,
+                target_price, stop_loss, alert_enabled, last_alert_at, alert_count, last_alert_type,
                 sync_version, synced_at
-            ) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14, ?15, ?16, ?17, ?18, ?19, ?20, ?21, ?22, ?23, ?24, ?25, ?26, ?27)",
+            ) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14, ?15, ?16, ?17, ?18, ?19, ?20, ?21, ?22, ?23, ?24, ?25, ?26, ?27, ?28, ?29, ?30)",
             params![
                 id,
                 entry.portfolio_id,
@@ -342,6 +357,9 @@ impl Database {
                 entry.target_price,
                 entry.stop_loss,
                 entry.alert_enabled,
+                entry.last_alert_at,
+                entry.alert_count,
+                entry.last_alert_type,
                 entry.sync_version,
                 entry.synced_at
             ],
@@ -355,7 +373,7 @@ impl Database {
             "SELECT id, portfolio_id, asset_type, symbol, quantity, purchase_price, currency,
                     purchase_date, notes, tags, transaction_fees, source, created_at, unit, gold_type,
                     face_value, coupon_rate, maturity_date, coupon_frequency, current_market_price, last_price_update, ytm,
-                    target_price, stop_loss, alert_enabled,
+                    target_price, stop_loss, alert_enabled, last_alert_at, alert_count, last_alert_type,
                     sync_version, synced_at
              FROM portfolio_entries WHERE id = ?1",
             params![id],
@@ -386,8 +404,11 @@ impl Database {
                     target_price: row.get(22)?,
                     stop_loss: row.get(23)?,
                     alert_enabled: row.get(24)?,
-                    sync_version: row.get(25)?,
-                    synced_at: row.get(26)?,
+                    last_alert_at: row.get(25)?,
+                    alert_count: row.get(26)?,
+                    last_alert_type: row.get(27)?,
+                    sync_version: row.get(28)?,
+                    synced_at: row.get(29)?,
                 })
             },
         )
@@ -399,7 +420,7 @@ impl Database {
             "SELECT id, portfolio_id, asset_type, symbol, quantity, purchase_price, currency,
                     purchase_date, notes, tags, transaction_fees, source, created_at, unit, gold_type,
                     face_value, coupon_rate, maturity_date, coupon_frequency, current_market_price, last_price_update, ytm,
-                    target_price, stop_loss, alert_enabled,
+                    target_price, stop_loss, alert_enabled, last_alert_at, alert_count, last_alert_type,
                     sync_version, synced_at
              FROM portfolio_entries WHERE portfolio_id = ?1 AND deleted = 0 ORDER BY created_at DESC"
         )?;
@@ -430,8 +451,11 @@ impl Database {
                 target_price: row.get(22)?,
                 stop_loss: row.get(23)?,
                 alert_enabled: row.get(24)?,
-                sync_version: row.get(25)?,
-                synced_at: row.get(26)?,
+                last_alert_at: row.get(25)?,
+                alert_count: row.get(26)?,
+                last_alert_type: row.get(27)?,
+                sync_version: row.get(28)?,
+                synced_at: row.get(29)?,
             })
         })?;
 
@@ -440,14 +464,17 @@ impl Database {
 
     pub fn update_entry(&self, entry: &PortfolioEntry) -> Result<()> {
         let conn = self.conn.lock().unwrap();
+        // Clear synced_at and increment sync_version to mark as pending sync
         conn.execute(
             "UPDATE portfolio_entries SET
                 asset_type = ?1, symbol = ?2, quantity = ?3, purchase_price = ?4, currency = ?5,
                 purchase_date = ?6, notes = ?7, tags = ?8, transaction_fees = ?9, source = ?10,
                 unit = ?11, gold_type = ?12, face_value = ?13, coupon_rate = ?14, maturity_date = ?15,
                 coupon_frequency = ?16, current_market_price = ?17, last_price_update = ?18, ytm = ?19,
-                target_price = ?20, stop_loss = ?21, alert_enabled = ?22
-             WHERE id = ?23",
+                target_price = ?20, stop_loss = ?21, alert_enabled = ?22,
+                last_alert_at = ?23, alert_count = ?24, last_alert_type = ?25,
+                synced_at = NULL, sync_version = sync_version + 1
+             WHERE id = ?26",
             params![
                 entry.asset_type,
                 entry.symbol,
@@ -471,6 +498,9 @@ impl Database {
                 entry.target_price,
                 entry.stop_loss,
                 entry.alert_enabled,
+                entry.last_alert_at,
+                entry.alert_count,
+                entry.last_alert_type,
                 entry.id,
             ],
         )?;
@@ -547,9 +577,11 @@ impl Database {
 
     pub fn update_coupon_payment(&self, payment: &BondCouponPayment) -> Result<()> {
         let conn = self.conn.lock().unwrap();
+        // Clear synced_at and increment sync_version to mark as pending sync
         conn.execute(
             "UPDATE bond_coupon_payments SET
-                payment_date = ?1, amount = ?2, currency = ?3, notes = ?4
+                payment_date = ?1, amount = ?2, currency = ?3, notes = ?4,
+                synced_at = NULL, sync_version = sync_version + 1
              WHERE id = ?5",
             params![
                 payment.payment_date,
@@ -641,7 +673,7 @@ impl Database {
             "SELECT id, portfolio_id, asset_type, symbol, quantity, purchase_price, currency,
                     purchase_date, notes, tags, transaction_fees, source, created_at, unit, gold_type,
                     face_value, coupon_rate, maturity_date, coupon_frequency, current_market_price, last_price_update, ytm,
-                    target_price, stop_loss, alert_enabled,
+                    target_price, stop_loss, alert_enabled, last_alert_at, alert_count, last_alert_type,
                     sync_version, synced_at
              FROM portfolio_entries WHERE deleted = 1 AND synced_at IS NULL"
         )?;
@@ -672,8 +704,11 @@ impl Database {
                 target_price: row.get(22)?,
                 stop_loss: row.get(23)?,
                 alert_enabled: row.get(24)?,
-                sync_version: row.get(25)?,
-                synced_at: row.get(26)?,
+                last_alert_at: row.get(25)?,
+                alert_count: row.get(26)?,
+                last_alert_type: row.get(27)?,
+                sync_version: row.get(28)?,
+                synced_at: row.get(29)?,
             })
         })?;
         entries.collect()
@@ -773,8 +808,9 @@ impl Database {
         alert_enabled: Option<bool>,
     ) -> Result<()> {
         let conn = self.conn.lock().unwrap();
+        // Clear synced_at and increment sync_version to mark as pending sync
         conn.execute(
-            "UPDATE portfolio_entries SET target_price = ?1, stop_loss = ?2, alert_enabled = ?3 WHERE id = ?4",
+            "UPDATE portfolio_entries SET target_price = ?1, stop_loss = ?2, alert_enabled = ?3, synced_at = NULL, sync_version = sync_version + 1 WHERE id = ?4",
             params![target_price, stop_loss, alert_enabled, entry_id],
         )?;
         Ok(())

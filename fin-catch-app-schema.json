@@ -132,6 +132,36 @@
           "name": "ytm",
           "type": "number",
           "nullable": true
+        },
+        {
+          "name": "targetPrice",
+          "type": "number",
+          "nullable": true
+        },
+        {
+          "name": "stopLoss",
+          "type": "number",
+          "nullable": true
+        },
+        {
+          "name": "alertEnabled",
+          "type": "boolean",
+          "nullable": true
+        },
+        {
+          "name": "lastAlertAt",
+          "type": "integer",
+          "nullable": true
+        },
+        {
+          "name": "alertCount",
+          "type": "integer",
+          "nullable": true
+        },
+        {
+          "name": "lastAlertType",
+          "type": "string",
+          "nullable": true
         }
       ],
       "primaryKey": "rowId"
