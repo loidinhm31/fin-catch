@@ -20,6 +20,11 @@ import type {
   MarketDataMessage,
   TradingPlatformId,
   MarketDataConnectionStatus,
+  OHLC,
+  OhlcResolution,
+  BatchSubscribeOptions,
+  IndexSubscribeOptions,
+  BatchSubscribeWithOhlcResponse,
 } from "@fin-catch/shared";
 import { AUTH_STORAGE_KEYS } from "@fin-catch/shared/constants";
 
@@ -127,6 +132,13 @@ export class MarketDataAdapter implements IMarketDataService {
   // Track pending subscribe calls to avoid duplicate in-flight requests
   private pendingSubscribes: Map<string, Promise<void>> = new Map();
   private pendingIndexSubscribes: Map<string, Promise<void>> = new Map();
+
+  // OHLC data cache: key is "symbol:resolution"
+  private ohlcCache: Map<string, OHLC> = new Map();
+  // Key: "platform:symbol:resolution", Value: reference count
+  private activeOhlcSubscriptions: Map<string, number> = new Map();
+  // Track pending OHLC subscribe calls
+  private pendingOhlcSubscribes: Map<string, Promise<void>> = new Map();
 
   constructor(config?: MarketDataConfig) {
     this.baseUrl =
@@ -349,17 +361,55 @@ export class MarketDataAdapter implements IMarketDataService {
 
   /**
    * Update local cache with incoming message
+   *
+   * Note: DNSE sends data via separate MQTT topics:
+   * - stockinfo: reference/ceiling/floor prices (STOCK_INFO)
+   * - tick: real-time trades (TICK) - merged into snapshot for lastPrice
+   * - topprice: order book bids/asks (TOP_PRICE)
    */
   private updateCache(msg: MarketDataMessage): void {
     switch (msg.type) {
       case "STOCK_INFO": {
         const stockInfo = msg.data as StockInfo;
-        this.snapshots.set(stockInfo.symbol.toUpperCase(), stockInfo);
+        const symbol = stockInfo.symbol.toUpperCase();
+        // Merge with existing snapshot to preserve tick-derived data
+        const existing = this.snapshots.get(symbol);
+        if (existing) {
+          // Keep lastPrice, change, changePercent, volume from ticks if stockInfo doesn't have them
+          this.snapshots.set(symbol, {
+            ...existing,
+            ...stockInfo,
+            // Preserve tick-derived fields if stockInfo has nulls
+            lastPrice: stockInfo.lastPrice ?? existing.lastPrice,
+            change: stockInfo.change ?? existing.change,
+            changePercent: stockInfo.changePercent ?? existing.changePercent,
+            volume: stockInfo.volume ?? existing.volume,
+          });
+        } else {
+          this.snapshots.set(symbol, stockInfo);
+        }
         break;
       }
       case "TOP_PRICE": {
         const topPrice = msg.data as TopPrice;
-        this.orderBooks.set(topPrice.symbol.toUpperCase(), topPrice);
+        const symbol = topPrice.symbol.toUpperCase();
+        this.orderBooks.set(symbol, topPrice);
+
+        // Update snapshot with best bid/ask from order book
+        const existing = this.snapshots.get(symbol);
+        if (existing && topPrice.bids && topPrice.asks) {
+          const bestBid = topPrice.bids[0];
+          const bestAsk = topPrice.asks[0];
+          if (bestBid || bestAsk) {
+            this.snapshots.set(symbol, {
+              ...existing,
+              bidPrice: bestBid?.price ?? existing.bidPrice,
+              bidVolume: bestBid?.volume ?? existing.bidVolume,
+              askPrice: bestAsk?.price ?? existing.askPrice,
+              askVolume: bestAsk?.volume ?? existing.askVolume,
+            });
+          }
+        }
         break;
       }
       case "TICK": {
@@ -371,6 +421,43 @@ export class MarketDataAdapter implements IMarketDataService {
           ticks.pop(); // Remove oldest
         }
         this.tickHistory.set(symbol, ticks);
+
+        // Update snapshot with tick data - this is the real-time price!
+        const existing = this.snapshots.get(symbol);
+        const refPrice = existing?.refPrice;
+        const lastPrice = tick.price;
+        // Calculate change from reference price if available
+        const change =
+          lastPrice !== undefined && refPrice !== undefined
+            ? lastPrice - refPrice
+            : undefined;
+        const changePercent =
+          change !== undefined && refPrice !== undefined && refPrice !== 0
+            ? (change / refPrice) * 100
+            : undefined;
+        // Parse volume from totalVolumeTraded string
+        const volume = tick.totalVolumeTraded
+          ? parseInt(tick.totalVolumeTraded, 10)
+          : existing?.volume;
+
+        if (existing) {
+          this.snapshots.set(symbol, {
+            ...existing,
+            lastPrice: lastPrice ?? existing.lastPrice,
+            change: change ?? existing.change,
+            changePercent: changePercent ?? existing.changePercent,
+            volume: volume ?? existing.volume,
+          });
+        } else {
+          // Create a new snapshot from tick if we don't have stockinfo yet
+          this.snapshots.set(symbol, {
+            symbol,
+            lastPrice,
+            change,
+            changePercent,
+            volume,
+          } as StockInfo);
+        }
         break;
       }
       case "MARKET_INDEX": {
@@ -381,7 +468,13 @@ export class MarketDataAdapter implements IMarketDataService {
         );
         break;
       }
-      // OHLC and BOARD_EVENT don't need caching for now
+      case "OHLC": {
+        const ohlc = msg.data as OHLC;
+        const key = `${ohlc.symbol.toUpperCase()}:${ohlc.interval}`;
+        this.ohlcCache.set(key, ohlc);
+        break;
+      }
+      // BOARD_EVENT don't need caching for now
     }
   }
 
@@ -959,6 +1052,8 @@ export class MarketDataAdapter implements IMarketDataService {
     this.pendingSubscribes.clear();
     this.activeIndexSubscriptions.clear();
     this.pendingIndexSubscribes.clear();
+    this.activeOhlcSubscriptions.clear();
+    this.pendingOhlcSubscribes.clear();
     // Keep cache for potential reconnection
   }
 
@@ -970,5 +1065,431 @@ export class MarketDataAdapter implements IMarketDataService {
     this.orderBooks.clear();
     this.tickHistory.clear();
     this.marketIndexes.clear();
+    this.ohlcCache.clear();
+  }
+
+  // ============================================================================
+  // OHLC Subscription Methods
+  // ============================================================================
+
+  /**
+   * Subscribe to stock OHLC data
+   */
+  async subscribeOhlc(
+    platform: TradingPlatformId,
+    symbol: string,
+    resolution: OhlcResolution,
+  ): Promise<void> {
+    const token = this.getAccessToken();
+    if (!token) {
+      throw new Error("Not authenticated. Please login first.");
+    }
+
+    const upperSymbol = symbol.toUpperCase();
+    const subscriptionKey = `${platform}:${upperSymbol}:${resolution}`;
+
+    // Check if already subscribed - just increment ref count
+    const currentRefCount =
+      this.activeOhlcSubscriptions.get(subscriptionKey) || 0;
+    if (currentRefCount > 0) {
+      this.activeOhlcSubscriptions.set(subscriptionKey, currentRefCount + 1);
+      console.log(
+        `[MarketDataAdapter] Already subscribed to OHLC ${upperSymbol}:${resolution}, ref count: ${currentRefCount + 1}`,
+      );
+      return;
+    }
+
+    // Check if there's a pending subscribe call
+    const pendingSubscribe = this.pendingOhlcSubscribes.get(subscriptionKey);
+    if (pendingSubscribe) {
+      console.log(
+        `[MarketDataAdapter] Subscribe to OHLC ${upperSymbol}:${resolution} already in progress, waiting...`,
+      );
+      await pendingSubscribe;
+      const newRefCount =
+        this.activeOhlcSubscriptions.get(subscriptionKey) || 0;
+      this.activeOhlcSubscriptions.set(subscriptionKey, newRefCount + 1);
+      return;
+    }
+
+    const url = `${this.baseUrl}/api/v1/trading/${platform}/market-data/v2/subscribe-ohlc`;
+
+    console.log(
+      `[MarketDataAdapter] Subscribing to OHLC ${upperSymbol}:${resolution}`,
+    );
+
+    const subscribePromise = (async () => {
+      const response = await fetch(url, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ symbol: upperSymbol, resolution }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        const errorMessage = errorData.error || `API error: ${response.status}`;
+        throw new Error(errorMessage);
+      }
+
+      const result = await response.json();
+      console.log(
+        `[MarketDataAdapter] Subscribed to OHLC ${upperSymbol}:${resolution}:`,
+        result,
+      );
+
+      this.activeOhlcSubscriptions.set(subscriptionKey, 1);
+    })();
+
+    this.pendingOhlcSubscribes.set(subscriptionKey, subscribePromise);
+
+    try {
+      await subscribePromise;
+    } finally {
+      this.pendingOhlcSubscribes.delete(subscriptionKey);
+    }
+  }
+
+  /**
+   * Unsubscribe from stock OHLC data
+   */
+  async unsubscribeOhlc(
+    platform: TradingPlatformId,
+    symbol: string,
+    resolution: OhlcResolution,
+  ): Promise<void> {
+    const token = this.getAccessToken();
+    if (!token) {
+      throw new Error("Not authenticated. Please login first.");
+    }
+
+    const upperSymbol = symbol.toUpperCase();
+    const subscriptionKey = `${platform}:${upperSymbol}:${resolution}`;
+
+    // Check reference count
+    const currentRefCount =
+      this.activeOhlcSubscriptions.get(subscriptionKey) || 0;
+    if (currentRefCount > 1) {
+      this.activeOhlcSubscriptions.set(subscriptionKey, currentRefCount - 1);
+      console.log(
+        `[MarketDataAdapter] Decremented ref count for OHLC ${upperSymbol}:${resolution}, remaining: ${currentRefCount - 1}`,
+      );
+      return;
+    }
+
+    // Last subscriber, actually unsubscribe
+    this.activeOhlcSubscriptions.delete(subscriptionKey);
+
+    const url = `${this.baseUrl}/api/v1/trading/${platform}/market-data/v2/unsubscribe-ohlc`;
+
+    console.log(
+      `[MarketDataAdapter] Unsubscribing from OHLC ${upperSymbol}:${resolution}`,
+    );
+
+    const response = await fetch(url, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ symbol: upperSymbol, resolution }),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      const errorMessage = errorData.error || `API error: ${response.status}`;
+      throw new Error(errorMessage);
+    }
+
+    // Remove from cache
+    this.ohlcCache.delete(`${upperSymbol}:${resolution}`);
+
+    const result = await response.json();
+    console.log(
+      `[MarketDataAdapter] Unsubscribed from OHLC ${upperSymbol}:${resolution}:`,
+      result,
+    );
+  }
+
+  /**
+   * Subscribe to index OHLC data
+   */
+  async subscribeIndexOhlc(
+    platform: TradingPlatformId,
+    indexCode: string,
+    resolution: OhlcResolution,
+  ): Promise<void> {
+    const token = this.getAccessToken();
+    if (!token) {
+      throw new Error("Not authenticated. Please login first.");
+    }
+
+    const upperIndex = indexCode.toUpperCase();
+    const subscriptionKey = `${platform}:${upperIndex}:${resolution}`;
+
+    const currentRefCount =
+      this.activeOhlcSubscriptions.get(subscriptionKey) || 0;
+    if (currentRefCount > 0) {
+      this.activeOhlcSubscriptions.set(subscriptionKey, currentRefCount + 1);
+      console.log(
+        `[MarketDataAdapter] Already subscribed to index OHLC ${upperIndex}:${resolution}, ref count: ${currentRefCount + 1}`,
+      );
+      return;
+    }
+
+    const pendingSubscribe = this.pendingOhlcSubscribes.get(subscriptionKey);
+    if (pendingSubscribe) {
+      await pendingSubscribe;
+      const newRefCount =
+        this.activeOhlcSubscriptions.get(subscriptionKey) || 0;
+      this.activeOhlcSubscriptions.set(subscriptionKey, newRefCount + 1);
+      return;
+    }
+
+    const url = `${this.baseUrl}/api/v1/trading/${platform}/market-data/v2/subscribe-index-ohlc`;
+
+    console.log(
+      `[MarketDataAdapter] Subscribing to index OHLC ${upperIndex}:${resolution}`,
+    );
+
+    const subscribePromise = (async () => {
+      const response = await fetch(url, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ index: upperIndex, resolution }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        const errorMessage = errorData.error || `API error: ${response.status}`;
+        throw new Error(errorMessage);
+      }
+
+      const result = await response.json();
+      console.log(
+        `[MarketDataAdapter] Subscribed to index OHLC ${upperIndex}:${resolution}:`,
+        result,
+      );
+
+      this.activeOhlcSubscriptions.set(subscriptionKey, 1);
+    })();
+
+    this.pendingOhlcSubscribes.set(subscriptionKey, subscribePromise);
+
+    try {
+      await subscribePromise;
+    } finally {
+      this.pendingOhlcSubscribes.delete(subscriptionKey);
+    }
+  }
+
+  /**
+   * Unsubscribe from index OHLC data
+   */
+  async unsubscribeIndexOhlc(
+    platform: TradingPlatformId,
+    indexCode: string,
+    resolution: OhlcResolution,
+  ): Promise<void> {
+    const token = this.getAccessToken();
+    if (!token) {
+      throw new Error("Not authenticated. Please login first.");
+    }
+
+    const upperIndex = indexCode.toUpperCase();
+    const subscriptionKey = `${platform}:${upperIndex}:${resolution}`;
+
+    const currentRefCount =
+      this.activeOhlcSubscriptions.get(subscriptionKey) || 0;
+    if (currentRefCount > 1) {
+      this.activeOhlcSubscriptions.set(subscriptionKey, currentRefCount - 1);
+      console.log(
+        `[MarketDataAdapter] Decremented ref count for index OHLC ${upperIndex}:${resolution}, remaining: ${currentRefCount - 1}`,
+      );
+      return;
+    }
+
+    this.activeOhlcSubscriptions.delete(subscriptionKey);
+
+    const url = `${this.baseUrl}/api/v1/trading/${platform}/market-data/v2/unsubscribe-index-ohlc`;
+
+    console.log(
+      `[MarketDataAdapter] Unsubscribing from index OHLC ${upperIndex}:${resolution}`,
+    );
+
+    const response = await fetch(url, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ index: upperIndex, resolution }),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      const errorMessage = errorData.error || `API error: ${response.status}`;
+      throw new Error(errorMessage);
+    }
+
+    this.ohlcCache.delete(`${upperIndex}:${resolution}`);
+
+    const result = await response.json();
+    console.log(
+      `[MarketDataAdapter] Unsubscribed from index OHLC ${upperIndex}:${resolution}:`,
+      result,
+    );
+  }
+
+  /**
+   * Subscribe to multiple symbols with optional OHLC
+   */
+  async subscribeBatchWithOhlc(
+    platform: TradingPlatformId,
+    options: BatchSubscribeOptions,
+  ): Promise<BatchSubscribeWithOhlcResponse> {
+    const token = this.getAccessToken();
+    if (!token) {
+      throw new Error("Not authenticated. Please login first.");
+    }
+
+    if (options.symbols.length === 0) {
+      return {
+        subscribed: 0,
+        symbols: [],
+        cachedItems: 0,
+        newMqttSubscriptions: 0,
+        ohlcSubscriptions: 0,
+      };
+    }
+
+    const url = `${this.baseUrl}/api/v1/trading/${platform}/market-data/v2/subscribe-batch-with-ohlc`;
+
+    console.log(
+      `[MarketDataAdapter] Batch subscribing to ${options.symbols.length} symbols with OHLC: ${options.includeOhlc || false}`,
+    );
+
+    const response = await fetch(url, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        symbols: options.symbols.map((s) => s.toUpperCase()),
+        includeOhlc: options.includeOhlc || false,
+        ohlcResolution: options.ohlcResolution || "1",
+      }),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      const errorMessage = errorData.error || `API error: ${response.status}`;
+      throw new Error(errorMessage);
+    }
+
+    const result = await response.json();
+    console.log(`[MarketDataAdapter] Batch subscribed with OHLC:`, result);
+
+    // Update local tracking
+    for (const symbol of options.symbols) {
+      const subscriptionKey = `${platform}:${symbol.toUpperCase()}`;
+      const currentRefCount =
+        this.activeSubscriptions.get(subscriptionKey) || 0;
+      this.activeSubscriptions.set(subscriptionKey, currentRefCount + 1);
+
+      // Track OHLC subscriptions if enabled
+      if (options.includeOhlc) {
+        const ohlcKey = `${platform}:${symbol.toUpperCase()}:${options.ohlcResolution || "1"}`;
+        const ohlcRefCount = this.activeOhlcSubscriptions.get(ohlcKey) || 0;
+        this.activeOhlcSubscriptions.set(ohlcKey, ohlcRefCount + 1);
+      }
+    }
+
+    return result;
+  }
+
+  /**
+   * Subscribe to multiple indexes with optional OHLC
+   */
+  async subscribeIndexesWithOhlc(
+    platform: TradingPlatformId,
+    options: IndexSubscribeOptions,
+  ): Promise<BatchSubscribeWithOhlcResponse> {
+    const token = this.getAccessToken();
+    if (!token) {
+      throw new Error("Not authenticated. Please login first.");
+    }
+
+    if (options.indexes.length === 0) {
+      return {
+        subscribed: 0,
+        symbols: [],
+        cachedItems: 0,
+        newMqttSubscriptions: 0,
+        ohlcSubscriptions: 0,
+      };
+    }
+
+    const url = `${this.baseUrl}/api/v1/trading/${platform}/market-data/v2/subscribe-indexes-with-ohlc`;
+
+    console.log(
+      `[MarketDataAdapter] Batch subscribing to ${options.indexes.length} indexes with OHLC: ${options.includeOhlc || false}`,
+    );
+
+    const response = await fetch(url, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        indexes: options.indexes.map((i) => i.toUpperCase()),
+        includeOhlc: options.includeOhlc || false,
+        ohlcResolution: options.ohlcResolution || "1",
+      }),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      const errorMessage = errorData.error || `API error: ${response.status}`;
+      throw new Error(errorMessage);
+    }
+
+    const result = await response.json();
+    console.log(
+      `[MarketDataAdapter] Batch index subscribed with OHLC:`,
+      result,
+    );
+
+    // Update local tracking
+    for (const idx of options.indexes) {
+      const subscriptionKey = `${platform}:${idx.toUpperCase()}`;
+      const currentRefCount =
+        this.activeIndexSubscriptions.get(subscriptionKey) || 0;
+      this.activeIndexSubscriptions.set(subscriptionKey, currentRefCount + 1);
+
+      // Track OHLC subscriptions if enabled
+      if (options.includeOhlc) {
+        const ohlcKey = `${platform}:${idx.toUpperCase()}:${options.ohlcResolution || "1"}`;
+        const ohlcRefCount = this.activeOhlcSubscriptions.get(ohlcKey) || 0;
+        this.activeOhlcSubscriptions.set(ohlcKey, ohlcRefCount + 1);
+      }
+    }
+
+    return result;
+  }
+
+  /**
+   * Get cached OHLC data for a symbol
+   */
+  getOhlc(symbol: string, resolution: OhlcResolution): OHLC | null {
+    const key = `${symbol.toUpperCase()}:${resolution}`;
+    return this.ohlcCache.get(key) || null;
   }
 }

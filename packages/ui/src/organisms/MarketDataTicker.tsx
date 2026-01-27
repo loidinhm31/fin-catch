@@ -1,12 +1,12 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { TrendingUp, TrendingDown, Activity, Loader2 } from "lucide-react";
-import { usePlatformServices } from "../platform/PlatformContext";
 import type {
   StockInfo,
   MarketDataMessage,
   TradingPlatformId,
   MarketDataConnectionStatus,
 } from "@fin-catch/shared";
+import { usePlatformServices } from "@fin-catch/ui/platform";
 
 /**
  * Props for MarketDataTicker component
@@ -44,16 +44,23 @@ export const MarketDataTicker: React.FC<MarketDataTickerProps> = ({
   // Handle incoming market data messages
   const handleMessage = useCallback(
     (msg: MarketDataMessage) => {
-      if (msg.type === "STOCK_INFO") {
-        const info = msg.data as StockInfo;
-        if (info.symbol.toUpperCase() === symbol.toUpperCase()) {
-          setStockInfo(info);
+      // Skip market index messages
+      if (msg.type === "MARKET_INDEX") return;
+
+      const data = msg.data as any;
+      if (data.symbol?.toUpperCase() === symbol.toUpperCase()) {
+        // Get the latest merged snapshot from the adapter's cache
+        const snapshot = marketData?.getSnapshot(symbol);
+        if (snapshot) {
+          setStockInfo(snapshot);
           setLoading(false);
-          onPriceUpdate?.(info.lastPrice);
+          if (snapshot.lastPrice !== undefined) {
+            onPriceUpdate?.(snapshot.lastPrice);
+          }
         }
       }
     },
-    [symbol, onPriceUpdate],
+    [symbol, marketData, onPriceUpdate],
   );
 
   // Handle connection errors
@@ -179,8 +186,23 @@ export const MarketDataTicker: React.FC<MarketDataTickerProps> = ({
     );
   }
 
-  const change = stockInfo.change || 0;
-  const changePercent = stockInfo.changePercent || 0;
+  let change = stockInfo.change;
+  let changePercent = stockInfo.changePercent;
+
+  // Calculate change from refPrice if missing but prices are available
+  if (
+    (change === null || change === undefined) &&
+    stockInfo.lastPrice !== undefined &&
+    stockInfo.refPrice !== undefined
+  ) {
+    change = stockInfo.lastPrice - stockInfo.refPrice;
+    if (stockInfo.refPrice !== 0) {
+      changePercent = (change / stockInfo.refPrice) * 100;
+    }
+  }
+
+  change = change || 0;
+  changePercent = changePercent || 0;
   const isUp = change >= 0;
   const priceColor = isUp ? "#00ff88" : "#ff3366";
   const TrendIcon = isUp ? TrendingUp : TrendingDown;

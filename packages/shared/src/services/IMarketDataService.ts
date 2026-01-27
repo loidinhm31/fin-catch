@@ -12,6 +12,11 @@ import type {
   MarketDataMessage,
   TradingPlatformId,
   MarketDataConnectionStatus,
+  OHLC,
+  OhlcResolution,
+  BatchSubscribeOptions,
+  IndexSubscribeOptions,
+  BatchSubscribeWithOhlcResponse,
 } from "@fin-catch/shared/types";
 
 /**
@@ -129,4 +134,91 @@ export interface IMarketDataService {
    * Disconnect from market data stream
    */
   disconnect(): void;
+
+  // ============================================================================
+  // OHLC Subscription Methods
+  // ============================================================================
+
+  /**
+   * Subscribe to stock OHLC data
+   *
+   * @param platform - Trading platform ID
+   * @param symbol - Stock symbol
+   * @param resolution - OHLC resolution (1, 1H, 1D, W)
+   */
+  subscribeOhlc(
+    platform: TradingPlatformId,
+    symbol: string,
+    resolution: OhlcResolution,
+  ): Promise<void>;
+
+  /**
+   * Unsubscribe from stock OHLC data
+   *
+   * @param platform - Trading platform ID
+   * @param symbol - Stock symbol
+   * @param resolution - OHLC resolution
+   */
+  unsubscribeOhlc(
+    platform: TradingPlatformId,
+    symbol: string,
+    resolution: OhlcResolution,
+  ): Promise<void>;
+
+  /**
+   * Subscribe to index OHLC data
+   *
+   * @param platform - Trading platform ID
+   * @param indexCode - Index code
+   * @param resolution - OHLC resolution
+   */
+  subscribeIndexOhlc(
+    platform: TradingPlatformId,
+    indexCode: string,
+    resolution: OhlcResolution,
+  ): Promise<void>;
+
+  /**
+   * Unsubscribe from index OHLC data
+   *
+   * @param platform - Trading platform ID
+   * @param indexCode - Index code
+   * @param resolution - OHLC resolution
+   */
+  unsubscribeIndexOhlc(
+    platform: TradingPlatformId,
+    indexCode: string,
+    resolution: OhlcResolution,
+  ): Promise<void>;
+
+  /**
+   * Subscribe to multiple symbols with optional OHLC
+   *
+   * @param platform - Trading platform ID
+   * @param options - Batch subscribe options
+   */
+  subscribeBatchWithOhlc(
+    platform: TradingPlatformId,
+    options: BatchSubscribeOptions,
+  ): Promise<BatchSubscribeWithOhlcResponse>;
+
+  /**
+   * Subscribe to multiple indexes with optional OHLC
+   *
+   * @param platform - Trading platform ID
+   * @param options - Index subscribe options
+   */
+  subscribeIndexesWithOhlc(
+    platform: TradingPlatformId,
+    options: IndexSubscribeOptions,
+  ): Promise<BatchSubscribeWithOhlcResponse>;
+
+  /**
+   * Get cached OHLC data for a symbol
+   *
+   * @param symbol - Stock symbol
+   * @param resolution - OHLC resolution
+   * @returns Cached OHLC data or null
+   */
+  getOhlc(symbol: string, resolution: OhlcResolution): OHLC | null;
 }

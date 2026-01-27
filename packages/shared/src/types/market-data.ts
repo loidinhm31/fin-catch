@@ -147,12 +147,14 @@ export interface Tick {
   symbol: string;
   /** Trade price */
   price: number;
-  /** Trade volume */
+  /** Trade volume (for this tick) */
   volume: number;
   /** Trade side (BUY, SELL, NEUTRAL) */
   side: string;
-  /** Timestamp (milliseconds since epoch) */
-  timestamp?: number;
+  /** Timestamp (milliseconds since epoch or ISO string) */
+  timestamp?: number | string;
+  /** Total volume traded for the day (cumulative) */
+  totalVolumeTraded?: string;
 }
 
 /**
@@ -241,3 +243,84 @@ export type MarketDataConnectionStatus =
   | "connecting"
   | "connected"
   | "error";
+
+// ============================================================================
+// OHLC Subscription Types
+// ============================================================================
+
+/**
+ * OHLC resolution for candlestick data
+ */
+export type OhlcResolution = "1" | "1H" | "1D" | "W";
+
+/**
+ * OHLC subscription request
+ */
+export interface OhlcSubscribeRequest {
+  /** Stock symbol to subscribe */
+  symbol: string;
+  /** Resolution (1, 1H, 1D, W) */
+  resolution: OhlcResolution;
+}
+
+/**
+ * Index OHLC subscription request
+ */
+export interface IndexOhlcSubscribeRequest {
+  /** Index code to subscribe */
+  index: string;
+  /** Resolution (1, 1H, 1D, W) */
+  resolution: OhlcResolution;
+}
+
+/**
+ * Batch subscribe options with OHLC
+ */
+export interface BatchSubscribeOptions {
+  /** Stock symbols to subscribe */
+  symbols: string[];
+  /** Include OHLC candlestick data */
+  includeOhlc?: boolean;
+  /** OHLC resolution (default: "1") */
+  ohlcResolution?: OhlcResolution;
+}
+
+/**
+ * Index subscribe options with OHLC
+ */
+export interface IndexSubscribeOptions {
+  /** Index codes to subscribe */
+  indexes: string[];
+  /** Include OHLC candlestick data */
+  includeOhlc?: boolean;
+  /** OHLC resolution (default: "1") */
+  ohlcResolution?: OhlcResolution;
+}
+
+/**
+ * OHLC subscribe response
+ */
+export interface OhlcSubscribeResponse {
+  /** Key (symbol:resolution) */
+  key: string;
+  /** Resolution */
+  resolution: string;
+  /** Whether cached data is available */
+  hasCachedData: boolean;
+}
+
+/**
+ * Batch subscribe response with OHLC info
+ */
+export interface BatchSubscribeWithOhlcResponse {
+  /** Number of symbols subscribed */
+  subscribed: number;
+  /** Symbols that were subscribed */
+  symbols: string[];
+  /** Number of cached items returned */
+  cachedItems: number;
+  /** Number of new MQTT subscriptions */
+  newMqttSubscriptions: number;
+  /** Number of OHLC subscriptions */
+  ohlcSubscriptions: number;
+}

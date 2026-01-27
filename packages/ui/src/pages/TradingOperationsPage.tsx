@@ -1,14 +1,26 @@
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState, useCallback, useMemo } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, Loader2, RefreshCw, Wallet, Activity } from "lucide-react";
+import {
+  ArrowLeft,
+  Loader2,
+  RefreshCw,
+  Wallet,
+  Activity,
+  ChevronDown,
+  ChevronUp,
+  LayoutGrid,
+} from "lucide-react";
 import type {
   TradingPlatformId,
   LoanPackage,
   Order,
   Deal,
+  StockInfo,
+  OHLC,
+  OhlcResolution,
 } from "@fin-catch/shared";
 import { Button } from "@fin-catch/ui/atoms";
-import { SymbolSearch } from "@fin-catch/ui/molecules";
+import { MultiSymbolSubscription, SymbolCard } from "@fin-catch/ui/molecules";
 import {
   OrderForm,
   OrderBook,
@@ -27,6 +39,8 @@ import { usePlatformServices } from "@fin-catch/ui/platform";
  * URL params: ?platform=dnse&account=123
  *
  * Features:
+ * - Multi-symbol subscription with OHLC support
+ * - Responsive symbol card grid (1-4 columns)
  * - Order placement form
  * - Order book (today's orders)
  * - Holdings (current positions)
@@ -47,17 +61,29 @@ export const TradingOperationsPage: React.FC<TradingOperationsPageProps> = ({
     (searchParams.get("platform") as TradingPlatformId) || "dnse";
   const accountNo = searchParams.get("account") || "";
 
-  // Get trading service from platform context
-  const { trading: tradingService } = usePlatformServices();
+  // Get services from platform context
+  const { trading: tradingService, marketData: marketDataService } =
+    usePlatformServices();
 
   // Data state
   const [loanPackages, setLoanPackages] = useState<LoanPackage[]>([]);
   const [orders, setOrders] = useState<Order[]>([]);
   const [deals, setDeals] = useState<Deal[]>([]);
 
-  // Market data state
+  // Multi-symbol subscription state
+  const [subscribedSymbols, setSubscribedSymbols] = useState<string[]>([]);
+  const [symbolData, setSymbolData] = useState<Map<string, StockInfo>>(
+    new Map(),
+  );
+  const [ohlcData, setOhlcData] = useState<Map<string, OHLC>>(new Map());
+  const [includeOhlc, setIncludeOhlc] = useState(false);
+  const [ohlcResolution, setOhlcResolution] = useState<OhlcResolution>("1");
+  const [isSubscribing, setIsSubscribing] = useState(false);
+
+  // Selected symbol state (for detail panel)
   const [selectedSymbol, setSelectedSymbol] = useState<string>("");
   const [currentPrice, setCurrentPrice] = useState<number | undefined>();
+  const [showDetailPanel, setShowDetailPanel] = useState(true);
 
   // Loading state
   const [isLoadingPackages, setIsLoadingPackages] = useState(true);
@@ -81,7 +107,6 @@ export const TradingOperationsPage: React.FC<TradingOperationsPageProps> = ({
       setLoanPackages(packages);
     } catch (err) {
       console.error("Failed to load loan packages:", err);
-      // Don't set error - packages are optional
     } finally {
       setIsLoadingPackages(false);
     }
@@ -123,7 +148,7 @@ export const TradingOperationsPage: React.FC<TradingOperationsPageProps> = ({
     }
   }, [tradingService, platform, accountNo]);
 
-  // Initial load - only run when accountNo changes, not when callbacks change
+  // Initial load
   useEffect(() => {
     if (!accountNo) {
       setError("Account number is required");
@@ -136,8 +161,141 @@ export const TradingOperationsPage: React.FC<TradingOperationsPageProps> = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [accountNo]);
 
-  // Auto-refresh disabled - users can manually refresh using the refresh button
-  // This reduces API overhead and prevents interference with user input
+  // Handle multi-symbol subscription
+  const handleSubscribe = useCallback(
+    async (
+      symbols: string[],
+      withOhlc: boolean,
+      resolution: OhlcResolution,
+    ) => {
+      if (!marketDataService) return;
+
+      setIsSubscribing(true);
+      setIncludeOhlc(withOhlc);
+      setOhlcResolution(resolution);
+
+      try {
+        // Use batch subscribe with OHLC option
+        await marketDataService.subscribeBatchWithOhlc(platform, {
+          symbols,
+          includeOhlc: withOhlc,
+          ohlcResolution: resolution,
+        });
+
+        // Update subscribed symbols list
+        setSubscribedSymbols((prev) => [
+          ...prev,
+          ...symbols.filter((s) => !prev.includes(s)),
+        ]);
+
+        // Select first symbol if none selected
+        if (!selectedSymbol && symbols.length > 0) {
+          setSelectedSymbol(symbols[0]);
+        }
+      } catch (err) {
+        console.error("Failed to subscribe to symbols:", err);
+      } finally {
+        setIsSubscribing(false);
+      }
+    },
+    [marketDataService, platform, selectedSymbol],
+  );
+
+  // Handle symbol unsubscription
+  const handleUnsubscribe = useCallback(
+    async (symbol: string) => {
+      if (!marketDataService) return;
+
+      try {
+        await marketDataService.unsubscribe(platform, symbol);
+        if (includeOhlc) {
+          await marketDataService.unsubscribeOhlc(
+            platform,
+            symbol,
+            ohlcResolution,
+          );
+        }
+
+        setSubscribedSymbols((prev) => prev.filter((s) => s !== symbol));
+        setSymbolData((prev) => {
+          const next = new Map(prev);
+          next.delete(symbol);
+          return next;
+        });
+        setOhlcData((prev) => {
+          const next = new Map(prev);
+          next.delete(`${symbol}:${ohlcResolution}`);
+          return next;
+        });
+
+        // Clear selection if this was the selected symbol
+        if (selectedSymbol === symbol) {
+          const remaining = subscribedSymbols.filter((s) => s !== symbol);
+          setSelectedSymbol(remaining.length > 0 ? remaining[0] : "");
+        }
+      } catch (err) {
+        console.error("Failed to unsubscribe from symbol:", err);
+      }
+    },
+    [
+      marketDataService,
+      platform,
+      selectedSymbol,
+      subscribedSymbols,
+      includeOhlc,
+      ohlcResolution,
+    ],
+  );
+
+  // Update symbol data from market data service cache
+  useEffect(() => {
+    if (!marketDataService || subscribedSymbols.length === 0) return;
+
+    const updateData = () => {
+      const newSymbolData = new Map<string, StockInfo>();
+      const newOhlcData = new Map<string, OHLC>();
+
+      for (const symbol of subscribedSymbols) {
+        const snapshot = marketDataService.getSnapshot(symbol);
+        if (snapshot) {
+          newSymbolData.set(symbol, snapshot);
+        }
+
+        if (includeOhlc) {
+          const ohlc = marketDataService.getOhlc(symbol, ohlcResolution);
+          if (ohlc) {
+            newOhlcData.set(`${symbol}:${ohlcResolution}`, ohlc);
+          }
+        }
+      }
+
+      setSymbolData(newSymbolData);
+      setOhlcData(newOhlcData);
+    };
+
+    // Initial update
+    updateData();
+
+    // Poll for updates (market data is pushed via SSE, but we need to read from cache)
+    const interval = setInterval(updateData, 1000);
+
+    return () => clearInterval(interval);
+  }, [marketDataService, subscribedSymbols, includeOhlc, ohlcResolution]);
+
+  // Get OHLC for a symbol
+  const getOhlcForSymbol = useCallback(
+    (symbol: string): OHLC | null => {
+      return ohlcData.get(`${symbol}:${ohlcResolution}`) || null;
+    },
+    [ohlcData, ohlcResolution],
+  );
+
+  // Handle symbol card click
+  const handleSymbolClick = useCallback((symbol: string) => {
+    setSelectedSymbol(symbol);
+    setCurrentPrice(undefined);
+    setShowDetailPanel(true);
+  }, []);
 
   // Handle order placed
   const handleOrderPlaced = useCallback(() => {
@@ -152,15 +310,8 @@ export const TradingOperationsPage: React.FC<TradingOperationsPageProps> = ({
 
   // Handle deal click (for selling)
   const handleDealClick = useCallback((deal: Deal) => {
-    // Pre-populate sell by selecting the symbol
     setSelectedSymbol(deal.symbol);
-    console.log("Deal clicked:", deal);
-  }, []);
-
-  // Handle symbol selection from market data
-  const handleSymbolSelect = useCallback((symbol: string) => {
-    setSelectedSymbol(symbol);
-    setCurrentPrice(undefined); // Reset price until we get new data
+    setShowDetailPanel(true);
   }, []);
 
   // Handle price update from market data ticker
@@ -171,7 +322,6 @@ export const TradingOperationsPage: React.FC<TradingOperationsPageProps> = ({
   // Handle price click from order book depth
   const handlePriceClick = useCallback(
     (price: number, _side: "bid" | "ask") => {
-      // Could use this to pre-fill order form price
       console.log("Price clicked:", price);
     },
     [],
@@ -187,6 +337,18 @@ export const TradingOperationsPage: React.FC<TradingOperationsPageProps> = ({
     loadOrders();
     loadDeals();
   };
+
+  // Sorted symbols for grid display
+  const sortedSymbols = useMemo(() => {
+    return [...subscribedSymbols].sort((a, b) => {
+      const dataA = symbolData.get(a);
+      const dataB = symbolData.get(b);
+      // Sort by change percent descending (best performers first)
+      const changeA = dataA?.changePercent ?? 0;
+      const changeB = dataB?.changePercent ?? 0;
+      return changeB - changeA;
+    });
+  }, [subscribedSymbols, symbolData]);
 
   if (!tradingService) {
     return (
@@ -230,10 +392,10 @@ export const TradingOperationsPage: React.FC<TradingOperationsPageProps> = ({
 
   return (
     <div className="p-4 md:p-6">
-      <div className="max-w-6xl mx-auto space-y-6">
+      <div className="max-w-7xl mx-auto space-y-4">
         {/* Header */}
         <div
-          className="rounded-2xl p-6 border"
+          className="rounded-2xl p-4 md:p-6 border"
           style={{
             background: "rgba(26, 31, 58, 0.6)",
             backdropFilter: "blur(16px)",
@@ -261,13 +423,13 @@ export const TradingOperationsPage: React.FC<TradingOperationsPageProps> = ({
                 </div>
                 <div>
                   <h1
-                    className="text-xl font-bold"
+                    className="text-lg md:text-xl font-bold"
                     style={{ color: "var(--color-text-primary)" }}
                   >
                     Trading Operations
                   </h1>
                   <p
-                    className="text-sm"
+                    className="text-xs md:text-sm"
                     style={{ color: "var(--color-text-secondary)" }}
                   >
                     {platform.toUpperCase()} - Account: {accountNo}
@@ -291,143 +453,162 @@ export const TradingOperationsPage: React.FC<TradingOperationsPageProps> = ({
         {/* Market Index Bar */}
         <MarketIndexBar platform={platform} />
 
-        {/* Main Content Grid - 4 Column Layout */}
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-          {/* Column 1: Market Data */}
-          <div className="lg:col-span-1 space-y-4">
-            {/* Section Header */}
-            <div className="flex items-center gap-2">
-              <Activity className="w-4 h-4" style={{ color: "#00d4ff" }} />
-              <h2
-                className="text-lg font-semibold"
-                style={{ color: "#00d4ff" }}
-              >
-                Market Data
-              </h2>
-            </div>
-
-            {/* Symbol Search */}
-            <SymbolSearch
-              onSelect={handleSymbolSelect}
-              initialValue={selectedSymbol}
-            />
-
-            {/* Market Data Ticker */}
-            {selectedSymbol && (
-              <>
-                <MarketDataTicker
-                  symbol={selectedSymbol}
-                  platform={platform}
-                  showDetails={true}
-                  onPriceUpdate={handlePriceUpdate}
-                />
-
-                {/* Market Depth (Order Book L2) */}
-                <MarketDepth
-                  symbol={selectedSymbol}
-                  platform={platform}
-                  maxLevels={10}
-                  onPriceClick={handlePriceClick}
-                />
-
-                {/* Tick Tape (Trade History) */}
-                <TickTape
-                  symbol={selectedSymbol}
-                  platform={platform}
-                  maxTicks={30}
-                />
-              </>
-            )}
-
-            {/* Placeholder when no symbol selected */}
-            {!selectedSymbol && (
-              <div
-                className="rounded-2xl p-6 border text-center"
-                style={{
-                  background: "rgba(26, 31, 58, 0.6)",
-                  backdropFilter: "blur(16px)",
-                  borderColor: "rgba(0, 212, 255, 0.2)",
-                }}
-              >
-                <p
-                  className="text-sm"
-                  style={{ color: "var(--color-text-secondary)" }}
-                >
-                  Select a symbol to view real-time market data
-                </p>
-              </div>
-            )}
+        {/* Multi-Symbol Subscription */}
+        <div
+          className="rounded-2xl p-4 border"
+          style={{
+            background: "rgba(26, 31, 58, 0.6)",
+            backdropFilter: "blur(16px)",
+            borderColor: "rgba(0, 212, 255, 0.2)",
+          }}
+        >
+          <div className="flex items-center gap-2 mb-3">
+            <LayoutGrid className="w-4 h-4" style={{ color: "#00d4ff" }} />
+            <h2 className="text-sm font-semibold" style={{ color: "#00d4ff" }}>
+              Market Watch
+            </h2>
           </div>
+          <MultiSymbolSubscription
+            onSubscribe={handleSubscribe}
+            onUnsubscribe={handleUnsubscribe}
+            subscribedSymbols={subscribedSymbols}
+            loading={isSubscribing}
+          />
+        </div>
 
-          {/* Column 2: Order Form */}
-          <div className="lg:col-span-1">
-            {isLoadingPackages ? (
-              <div
-                className="rounded-2xl p-6 border flex flex-col items-center justify-center"
-                style={{
-                  background: "rgba(26, 31, 58, 0.6)",
-                  backdropFilter: "blur(16px)",
-                  borderColor: "rgba(123, 97, 255, 0.2)",
-                  minHeight: "300px",
-                }}
-              >
-                <Loader2
-                  className="w-5 h-5 animate-spin"
-                  style={{ color: "#00d4ff" }}
-                />
-                <span
-                  className="mt-2 text-sm"
-                  style={{ color: "var(--color-text-secondary)" }}
-                >
-                  Loading order form...
-                </span>
-                <button
-                  onClick={loadLoanPackages}
-                  className="mt-4 px-4 py-2 rounded-lg flex items-center gap-2 transition-colors hover:bg-white/10"
-                  style={{
-                    background: "rgba(0, 212, 255, 0.1)",
-                    border: "1px solid rgba(0, 212, 255, 0.3)",
-                    color: "#00d4ff",
-                  }}
-                >
-                  <RefreshCw className="w-4 h-4" />
-                  Reload
-                </button>
-              </div>
-            ) : (
-              <OrderForm
-                tradingService={tradingService}
-                platform={platform}
-                accountNo={accountNo}
-                loanPackages={loanPackages}
-                onOrderPlaced={handleOrderPlaced}
-                initialSymbol={selectedSymbol}
-                initialPrice={currentPrice}
+        {/* Subscribed Symbols Grid - Responsive 1-4 columns */}
+        {subscribedSymbols.length > 0 && (
+          <div
+            className="grid gap-3"
+            style={{
+              gridTemplateColumns: "repeat(auto-fill, minmax(140px, 1fr))",
+            }}
+          >
+            {sortedSymbols.map((symbol) => (
+              <SymbolCard
+                key={symbol}
+                symbol={symbol}
+                stockInfo={symbolData.get(symbol) || null}
+                ohlc={getOhlcForSymbol(symbol)}
+                isSelected={selectedSymbol === symbol}
+                onClick={() => handleSymbolClick(symbol)}
+                showOhlc={includeOhlc}
               />
+            ))}
+          </div>
+        )}
+
+        {/* Selected Symbol Detail Panel */}
+        {selectedSymbol && (
+          <div
+            className="rounded-2xl border overflow-hidden"
+            style={{
+              background: "rgba(26, 31, 58, 0.6)",
+              backdropFilter: "blur(16px)",
+              borderColor: "rgba(0, 212, 255, 0.3)",
+            }}
+          >
+            {/* Panel Header - Collapsible */}
+            <button
+              className="w-full p-4 flex items-center justify-between hover:bg-white/5 transition-colors"
+              onClick={() => setShowDetailPanel(!showDetailPanel)}
+            >
+              <div className="flex items-center gap-2">
+                <Activity className="w-4 h-4" style={{ color: "#00d4ff" }} />
+                <span className="font-semibold" style={{ color: "#00d4ff" }}>
+                  {selectedSymbol} Detail
+                </span>
+              </div>
+              {showDetailPanel ? (
+                <ChevronUp className="w-4 h-4 text-gray-400" />
+              ) : (
+                <ChevronDown className="w-4 h-4 text-gray-400" />
+              )}
+            </button>
+
+            {/* Panel Content */}
+            {showDetailPanel && (
+              <div className="p-4 pt-0 grid grid-cols-1 lg:grid-cols-3 gap-4">
+                {/* Market Data Column */}
+                <div className="space-y-4">
+                  <MarketDataTicker
+                    symbol={selectedSymbol}
+                    platform={platform}
+                    showDetails={true}
+                    onPriceUpdate={handlePriceUpdate}
+                  />
+                  <MarketDepth
+                    symbol={selectedSymbol}
+                    platform={platform}
+                    maxLevels={10}
+                    onPriceClick={handlePriceClick}
+                  />
+                </div>
+
+                {/* Tick Tape Column */}
+                <div>
+                  <TickTape
+                    symbol={selectedSymbol}
+                    platform={platform}
+                    maxTicks={20}
+                  />
+                </div>
+
+                {/* Order Form Column */}
+                <div>
+                  {isLoadingPackages ? (
+                    <div
+                      className="rounded-lg p-6 flex flex-col items-center justify-center"
+                      style={{
+                        background: "rgba(15, 23, 42, 0.5)",
+                        minHeight: "200px",
+                      }}
+                    >
+                      <Loader2
+                        className="w-5 h-5 animate-spin"
+                        style={{ color: "#00d4ff" }}
+                      />
+                      <span className="mt-2 text-sm text-gray-400">
+                        Loading...
+                      </span>
+                    </div>
+                  ) : (
+                    <OrderForm
+                      tradingService={tradingService}
+                      platform={platform}
+                      accountNo={accountNo}
+                      loanPackages={loanPackages}
+                      onOrderPlaced={handleOrderPlaced}
+                      initialSymbol={selectedSymbol}
+                      initialPrice={currentPrice}
+                    />
+                  )}
+                </div>
+              </div>
             )}
           </div>
+        )}
 
-          {/* Columns 3-4: Orders and Holdings */}
-          <div className="lg:col-span-2 space-y-6">
-            {/* Order Book */}
-            <OrderBook
-              tradingService={tradingService}
-              platform={platform}
-              accountNo={accountNo}
-              orders={orders}
-              isLoading={isLoadingOrders}
-              onCancelOrder={handleOrderCancelled}
-              onRefresh={loadOrders}
-            />
+        {/* Orders and Holdings Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          {/* Order Book */}
+          <OrderBook
+            tradingService={tradingService}
+            platform={platform}
+            accountNo={accountNo}
+            orders={orders}
+            isLoading={isLoadingOrders}
+            onCancelOrder={handleOrderCancelled}
+            onRefresh={loadOrders}
+          />
 
-            {/* Holdings */}
-            <Holdings
-              deals={deals}
-              isLoading={isLoadingDeals}
-              onRefresh={loadDeals}
-              onDealClick={handleDealClick}
-            />
-          </div>
+          {/* Holdings */}
+          <Holdings
+            deals={deals}
+            isLoading={isLoadingDeals}
+            onRefresh={loadDeals}
+            onDealClick={handleDealClick}
+          />
         </div>
       </div>
     </div>

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { Loader2 } from "lucide-react";
-import { usePlatformServices } from "../platform/PlatformContext";
+import { usePlatformServices } from "@fin-catch/ui/platform";
 import type {
   TopPrice,
   OrderBookLevel,
@@ -115,6 +115,23 @@ export const MarketDepth: React.FC<MarketDepthProps> = ({
     return orderBook.asks[0].price - orderBook.bids[0].price;
   }, [orderBook]);
 
+  // Format timestamp
+  const formatTime = (timestamp?: number | string): string => {
+    if (!timestamp) return "";
+    let date: Date;
+    if (typeof timestamp === "number") {
+      const ms = timestamp < 10000000000 ? timestamp * 1000 : timestamp;
+      date = new Date(ms);
+    } else {
+      date = new Date(timestamp);
+    }
+    return date.toLocaleTimeString("vi-VN", {
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+    });
+  };
+
   // Loading state
   if (loading) {
     return (
@@ -189,9 +206,16 @@ export const MarketDepth: React.FC<MarketDepthProps> = ({
     >
       {/* Header */}
       <div className="flex items-center justify-between mb-3">
-        <h3 className="text-sm font-semibold" style={{ color: "#9ca3af" }}>
-          Order Book
-        </h3>
+        <div className="flex flex-col">
+          <h3 className="text-sm font-semibold" style={{ color: "#9ca3af" }}>
+            Order Book
+          </h3>
+          {orderBook?.timestamp && (
+            <span className="text-[10px]" style={{ color: "#6b7280" }}>
+              Last update: {formatTime(orderBook.timestamp)}
+            </span>
+          )}
+        </div>
         <span className="text-xs" style={{ color: "#6b7280" }}>
           {symbol}
         </span>
