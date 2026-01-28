@@ -14,7 +14,7 @@ import {
   GoldPriceRequest,
   GoldSource,
   isValidDateRange,
-  SJC_GOLD_PRICE_IDS,
+  SJC_GOLD_TYPE_CATEGORIES,
 } from "@fin-catch/shared";
 
 export interface GoldQueryFormProps {
@@ -52,22 +52,46 @@ export const GoldQueryForm: React.FC<GoldQueryFormProps> = ({
   });
 
   const selectedSource = watch("source");
+  const [selectedCategoryIndex, setSelectedCategoryIndex] = useState("0");
 
-  // Dynamically generate gold price ID options based on selected source
-  const goldPriceIdOptions = useMemo(() => {
-    const sourceMap = selectedSource === "sjc" ? SJC_GOLD_PRICE_IDS : {};
-    return Object.entries(sourceMap).map(([value, label]) => ({
-      value,
-      label,
+  // Generate category options: "category_name (category_name_en)"
+  const categoryOptions = useMemo(() => {
+    if (selectedSource !== "sjc") {
+      return [];
+    }
+    return SJC_GOLD_TYPE_CATEGORIES.map((category, index) => ({
+      value: String(index),
+      label: `${category.category_name} (${category.category_name_en})`,
     }));
   }, [selectedSource]);
 
-  // Reset goldPriceId to first available option when source changes
-  useEffect(() => {
-    if (goldPriceIdOptions.length > 0) {
-      setValue("goldPriceId", goldPriceIdOptions[0].value);
+  // Generate location options based on selected category
+  const locationOptions = useMemo(() => {
+    if (selectedSource !== "sjc") {
+      return [];
     }
-  }, [selectedSource, goldPriceIdOptions, setValue]);
+    const categoryIndex = parseInt(selectedCategoryIndex, 10);
+    const category = SJC_GOLD_TYPE_CATEGORIES[categoryIndex];
+    if (!category) {
+      return [];
+    }
+    return category.items.map((item) => ({
+      value: item.id,
+      label: `${item.location} (${item.location_en})`,
+    }));
+  }, [selectedSource, selectedCategoryIndex]);
+
+  // Reset goldPriceId to first item when category changes
+  useEffect(() => {
+    if (locationOptions.length > 0) {
+      setValue("goldPriceId", locationOptions[0].value);
+    }
+  }, [selectedCategoryIndex, locationOptions, setValue]);
+
+  // Reset category and goldPriceId when source changes
+  useEffect(() => {
+    setSelectedCategoryIndex("0");
+  }, [selectedSource]);
 
   const handleFormSubmit = (data: GoldFormData) => {
     // Validate date range
@@ -125,9 +149,20 @@ export const GoldQueryForm: React.FC<GoldQueryFormProps> = ({
         />
       </FormField>
 
-      {/* Gold Price ID Select */}
+      {/* Gold Category Select */}
+      <FormField label="Gold Category" required htmlFor="gold-category">
+        <Select
+          id="gold-category"
+          value={selectedCategoryIndex}
+          onChange={setSelectedCategoryIndex}
+          options={categoryOptions}
+          fullWidth
+        />
+      </FormField>
+
+      {/* Gold Location Select */}
       <FormField
-        label="Gold Type"
+        label="Location"
         error={errors.goldPriceId?.message}
         required
         htmlFor="gold-price-id"
@@ -135,12 +170,12 @@ export const GoldQueryForm: React.FC<GoldQueryFormProps> = ({
         <Controller
           name="goldPriceId"
           control={control}
-          rules={{ required: "Gold type is required" }}
+          rules={{ required: "Location is required" }}
           render={({ field }) => (
             <Select
               {...field}
               id="gold-price-id"
-              options={goldPriceIdOptions}
+              options={locationOptions}
               error={!!errors.goldPriceId}
               fullWidth
             />

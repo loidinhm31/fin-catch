@@ -121,11 +121,97 @@ export const GOLD_SOURCE_LABELS: Record<GoldSource, string> = {
   sjc: "SJC Gold",
 };
 
-// Gold price IDs for SJC source
-export const SJC_GOLD_PRICE_IDS: Record<string, string> = {
-  "1": "Ho Chi Minh Center",
-  "2": "Ha Noi Center",
-};
+// Gold type item within a category
+export interface GoldTypeItem {
+  id: string;
+  location: string;
+  location_en: string;
+}
+
+// Gold type category with metadata
+export interface GoldTypeCategory {
+  category_name: string;
+  category_name_en: string;
+  items: GoldTypeItem[];
+}
+
+// Complete gold type categories for SJC source
+export const SJC_GOLD_TYPE_CATEGORIES: GoldTypeCategory[] = [
+  {
+    category_name: "Vàng miếng SJC (1L, 10L, 1KG)",
+    category_name_en: "Gold Bars (1L, 10L, 1KG)",
+    items: [
+      { id: "1", location: "Hồ Chí Minh", location_en: "Ho Chi Minh City" },
+      { id: "2", location: "Miền Bắc", location_en: "Northern Region" },
+      { id: "4", location: "Nha Trang", location_en: "Nha Trang" },
+      { id: "5", location: "Đà Nẵng", location_en: "Da Nang" },
+      { id: "7", location: "Cần Thơ", location_en: "Can Tho" },
+      { id: "8", location: "Nghệ An", location_en: "Nghe An" },
+      { id: "9", location: "Huế", location_en: "Hue" },
+      { id: "10", location: "Bình Dương", location_en: "Binh Duong" },
+      { id: "13", location: "Đắk Lắk", location_en: "Dak Lak" },
+      { id: "16", location: "Phú Yên", location_en: "Phu Yen" },
+    ],
+  },
+  {
+    category_name: "Vàng nhẫn SJC 99,99 5 chỉ",
+    category_name_en: "5 Chi Gold",
+    items: [
+      { id: "17", location: "Hồ Chí Minh", location_en: "Ho Chi Minh City" },
+      { id: "18", location: "Miền Bắc", location_en: "Northern Region" },
+      { id: "20", location: "Nha Trang", location_en: "Nha Trang" },
+      { id: "21", location: "Đà Nẵng", location_en: "Da Nang" },
+      { id: "23", location: "Cần Thơ", location_en: "Can Tho" },
+      { id: "24", location: "Nghệ An", location_en: "Nghe An" },
+      { id: "25", location: "Huế", location_en: "Hue" },
+      { id: "26", location: "Bình Dương", location_en: "Binh Duong" },
+      { id: "29", location: "Đắk Lắk", location_en: "Dak Lak" },
+      { id: "32", location: "Phú Yên", location_en: "Phu Yen" },
+    ],
+  },
+  {
+    category_name: "Vàng nhẫn SJC 99,99 (0.5, 1, 2 chỉ)",
+    category_name_en: "Small Gold (0.5-2 Chi)",
+    items: [
+      { id: "33", location: "Hồ Chí Minh", location_en: "Ho Chi Minh City" },
+      { id: "34", location: "Miền Bắc", location_en: "Northern Region" },
+      { id: "36", location: "Nha Trang", location_en: "Nha Trang" },
+      { id: "37", location: "Đà Nẵng", location_en: "Da Nang" },
+      { id: "39", location: "Cần Thơ", location_en: "Can Tho" },
+      { id: "40", location: "Nghệ An", location_en: "Nghe An" },
+      { id: "41", location: "Huế", location_en: "Hue" },
+      { id: "42", location: "Bình Dương", location_en: "Binh Duong" },
+      { id: "45", location: "Đắk Lắk", location_en: "Dak Lak" },
+      { id: "48", location: "Phú Yên", location_en: "Phu Yen" },
+    ],
+  },
+  {
+    category_name: "Nhẫn tròn trơn 99,99%",
+    category_name_en: "Gold Rings (99.99%)",
+    items: [
+      { id: "49", location: "Hồ Chí Minh", location_en: "Ho Chi Minh City" },
+      { id: "50", location: "Miền Bắc", location_en: "Northern Region" },
+      { id: "52", location: "Nha Trang", location_en: "Nha Trang" },
+      { id: "53", location: "Đà Nẵng", location_en: "Da Nang" },
+      { id: "55", location: "Cần Thơ", location_en: "Can Tho" },
+      { id: "56", location: "Nghệ An", location_en: "Nghe An" },
+      { id: "57", location: "Huế", location_en: "Hue" },
+      { id: "58", location: "Bình Dương", location_en: "Binh Duong" },
+    ],
+  },
+];
+
+// Gold price IDs for SJC source (derived from categories for backward compatibility)
+export const SJC_GOLD_PRICE_IDS: Record<string, string> =
+  SJC_GOLD_TYPE_CATEGORIES.reduce(
+    (acc, category) => {
+      category.items.forEach((item) => {
+        acc[item.id] = item.location_en;
+      });
+      return acc;
+    },
+    {} as Record<string, string>,
+  );
 
 // Gold Premium Request
 export interface GoldPremiumRequest {

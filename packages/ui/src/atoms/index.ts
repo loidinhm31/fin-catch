@@ -3,6 +3,7 @@ export * from "./Button";
 export * from "./Input";
 export * from "./Select";
 export * from "./SimpleSelect"; // Backward-compatible Select wrapper
+export * from "./GroupedSelect"; // Select with grouped options
 export * from "./Textarea";
 export * from "./Label";
 export * from "./DateInput";
