@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, lazy, Suspense } from "react";
 import {
   Routes,
   Route,
@@ -6,15 +6,30 @@ import {
   useLocation,
   useNavigate,
 } from "react-router-dom";
-import {
-  FinancialDataPage,
-  PortfolioPage,
-  LoginPage,
-  SettingsPage,
-  TradingPage,
-  TradingOperationsPage,
-} from "@fin-catch/ui/pages";
+import { LoginPage } from "@fin-catch/ui/pages";
 import { LoadingSpinner } from "@fin-catch/ui/atoms";
+
+// Lazy-loaded page components for code-splitting
+// Import directly from individual files for optimal chunk splitting
+const FinancialDataPage = lazy(() =>
+  import("@fin-catch/ui/pages").then((m) => ({
+    default: m.FinancialDataPage,
+  })),
+);
+const PortfolioPage = lazy(() =>
+  import("@fin-catch/ui/pages").then((m) => ({ default: m.PortfolioPage })),
+);
+const SettingsPage = lazy(() =>
+  import("@fin-catch/ui/pages").then((m) => ({ default: m.SettingsPage })),
+);
+const TradingPage = lazy(() =>
+  import("@fin-catch/ui/pages").then((m) => ({ default: m.TradingPage })),
+);
+const TradingOperationsPage = lazy(() =>
+  import("@fin-catch/ui/pages").then((m) => ({
+    default: m.TradingOperationsPage,
+  })),
+);
 import { SyncStatusIndicator, BottomNav } from "@fin-catch/ui/molecules";
 import {
   BrowserSyncInitializer,
@@ -198,25 +213,27 @@ export function AppShell({
                 }`
           }`}
         >
-          <Routes>
-            <Route path="market" element={<FinancialDataPage />} />
-            <Route path="portfolio" element={<PortfolioPage />} />
-            {/* More specific route must come before less specific */}
-            <Route
-              path="trading/operations"
-              element={<TradingOperationsPage basePath={basePath} />}
-            />
-            <Route
-              path="trading"
-              element={<TradingPage basePath={basePath} />}
-            />
-            <Route
-              path="settings"
-              element={<SettingsPage onLogout={handleLogout} />}
-            />
-            <Route path="/" element={<Navigate to="portfolio" replace />} />
-            <Route path="*" element={<Navigate to="portfolio" replace />} />
-          </Routes>
+          <Suspense fallback={<LoadingSpinner />}>
+            <Routes>
+              <Route path="market" element={<FinancialDataPage />} />
+              <Route path="portfolio" element={<PortfolioPage />} />
+              {/* More specific route must come before less specific */}
+              <Route
+                path="trading/operations"
+                element={<TradingOperationsPage basePath={basePath} />}
+              />
+              <Route
+                path="trading"
+                element={<TradingPage basePath={basePath} />}
+              />
+              <Route
+                path="settings"
+                element={<SettingsPage onLogout={handleLogout} />}
+              />
+              <Route path="/" element={<Navigate to="portfolio" replace />} />
+              <Route path="*" element={<Navigate to="portfolio" replace />} />
+            </Routes>
+          </Suspense>
         </div>
 
         {/* Mobile Bottom Navigation - Hidden on desktop and in embedded mode */}
