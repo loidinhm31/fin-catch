@@ -21,6 +21,7 @@ export * from "./Modal";
 
 // Feedback Components
 export * from "./ErrorAlert";
+export * from "./ErrorBoundary";
 export * from "./LoadingSpinner";
 export * from "./EmptyState";
 export * from "./AlertDialog";

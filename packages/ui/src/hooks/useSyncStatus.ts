@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { SyncStatus, AUTH_STORAGE_KEYS } from "@fin-catch/shared";
 import { finCatchAPI } from "@fin-catch/ui/services";
 
@@ -36,7 +36,7 @@ export function useSyncStatus(
   const [lastSyncSuccess, setLastSyncSuccess] = useState<boolean | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  const loadStatus = async () => {
+  const loadStatus = useCallback(async () => {
     try {
       // Get auth status from localStorage (no server call)
       const auth = getLocalAuthStatus();
@@ -49,7 +49,7 @@ export function useSyncStatus(
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to load status");
     }
-  };
+  }, []);
 
   const triggerSync = async () => {
     if (!isAuthenticated) {
@@ -78,7 +78,7 @@ export function useSyncStatus(
     loadStatus();
     const interval = setInterval(loadStatus, autoRefreshInterval);
     return () => clearInterval(interval);
-  }, [autoRefreshInterval]);
+  }, [autoRefreshInterval, loadStatus]);
 
   return {
     isAuthenticated,

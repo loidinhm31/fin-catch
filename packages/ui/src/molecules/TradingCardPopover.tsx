@@ -6,11 +6,7 @@ import type {
   TradingPlatformId,
   LoanPackage,
 } from "@fin-catch/shared";
-import {
-  Popover,
-  PopoverTrigger,
-  PopoverContent,
-} from "@fin-catch/ui/atoms";
+import { Popover, PopoverTrigger, PopoverContent } from "@fin-catch/ui/atoms";
 import { TradingCard } from "./TradingCard";
 import { CompactOrderForm } from "@fin-catch/ui/organisms";
 import { useFrozenPrice } from "@fin-catch/ui/hooks";
@@ -130,7 +126,14 @@ export const TradingCardPopover: React.FC<TradingCardPopoverProps> = ({
 
     capturePrice(currentPrice);
     setIsOpen(true);
-  }, [isDragging, stockInfo?.lastPrice, stockInfo?.bidPrice, stockInfo?.askPrice, topPrice, capturePrice]);
+  }, [
+    isDragging,
+    stockInfo?.lastPrice,
+    stockInfo?.bidPrice,
+    stockInfo?.askPrice,
+    topPrice,
+    capturePrice,
+  ]);
 
   // Handle popover close
   const handleClose = useCallback(() => {

@@ -187,7 +187,7 @@ export const BidAskSpread: React.FC<BidAskSpreadProps> = ({
           </span>
           <span style={{ color: "#00d4ff" }}>
             {formatPrice(askPrice - bidPrice)} (
-            {((askPrice - bidPrice) / bidPrice * 100).toFixed(2)}%)
+            {(((askPrice - bidPrice) / bidPrice) * 100).toFixed(2)}%)
           </span>
         </div>
       )}

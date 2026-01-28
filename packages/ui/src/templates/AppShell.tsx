@@ -7,7 +7,7 @@ import {
   useNavigate,
 } from "react-router-dom";
 import { LoginPage } from "@fin-catch/ui/pages";
-import { LoadingSpinner } from "@fin-catch/ui/atoms";
+import { ErrorBoundary, LoadingSpinner } from "@fin-catch/ui/atoms";
 
 // Lazy-loaded page components for code-splitting
 // Import directly from individual files for optimal chunk splitting
@@ -213,27 +213,29 @@ export function AppShell({
                 }`
           }`}
         >
-          <Suspense fallback={<LoadingSpinner />}>
-            <Routes>
-              <Route path="market" element={<FinancialDataPage />} />
-              <Route path="portfolio" element={<PortfolioPage />} />
-              {/* More specific route must come before less specific */}
-              <Route
-                path="trading/operations"
-                element={<TradingOperationsPage basePath={basePath} />}
-              />
-              <Route
-                path="trading"
-                element={<TradingPage basePath={basePath} />}
-              />
-              <Route
-                path="settings"
-                element={<SettingsPage onLogout={handleLogout} />}
-              />
-              <Route path="/" element={<Navigate to="portfolio" replace />} />
-              <Route path="*" element={<Navigate to="portfolio" replace />} />
-            </Routes>
-          </Suspense>
+          <ErrorBoundary>
+            <Suspense fallback={<LoadingSpinner />}>
+              <Routes>
+                <Route path="market" element={<FinancialDataPage />} />
+                <Route path="portfolio" element={<PortfolioPage />} />
+                {/* More specific route must come before less specific */}
+                <Route
+                  path="trading/operations"
+                  element={<TradingOperationsPage basePath={basePath} />}
+                />
+                <Route
+                  path="trading"
+                  element={<TradingPage basePath={basePath} />}
+                />
+                <Route
+                  path="settings"
+                  element={<SettingsPage onLogout={handleLogout} />}
+                />
+                <Route path="/" element={<Navigate to="portfolio" replace />} />
+                <Route path="*" element={<Navigate to="portfolio" replace />} />
+              </Routes>
+            </Suspense>
+          </ErrorBoundary>
         </div>
 
         {/* Mobile Bottom Navigation - Hidden on desktop and in embedded mode */}

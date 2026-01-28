@@ -7,11 +7,11 @@ interface EmptyStateProps {
   description: string;
 }
 
-export const EmptyState: React.FC<EmptyStateProps> = ({
+export const EmptyState = React.memo(function EmptyState({
   icon,
   title,
   description,
-}) => {
+}: EmptyStateProps) {
   return (
     <Card className="p-12 text-center">
       <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4 text-purple-600">
@@ -21,4 +21,6 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
       <p className="text-gray-500 text-sm">{description}</p>
     </Card>
   );
-};
+});
+
+EmptyState.displayName = "EmptyState";

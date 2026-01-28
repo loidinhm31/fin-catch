@@ -12,13 +12,16 @@ export const usePortfolios = () => {
 
   const loadPortfolios = useCallback(async () => {
     setIsLoading(true);
-    console.log("LOADING");
     try {
       const portfolioList = await finCatchAPI.listPortfolios();
       setPortfolios(portfolioList);
-      if (portfolioList.length > 0 && !selectedPortfolioId) {
-        setSelectedPortfolioId(portfolioList[0].id);
-      }
+      // Use functional update to avoid circular dependency on selectedPortfolioId
+      setSelectedPortfolioId((prev) => {
+        if (portfolioList.length > 0 && !prev) {
+          return portfolioList[0].id;
+        }
+        return prev;
+      });
       setError(null);
     } catch (err) {
       setError(
@@ -27,7 +30,7 @@ export const usePortfolios = () => {
     } finally {
       setIsLoading(false);
     }
-  }, [selectedPortfolioId]);
+  }, []);
 
   const createPortfolio = async (portfolio: Portfolio): Promise<string> => {
     const portfolioId = await finCatchAPI.createPortfolio(portfolio);
@@ -46,7 +49,7 @@ export const usePortfolios = () => {
 
   useEffect(() => {
     loadPortfolios();
-  }, []);
+  }, [loadPortfolios]);
 
   const selectedPortfolio = portfolios.find(
     (p) => p.id === selectedPortfolioId,

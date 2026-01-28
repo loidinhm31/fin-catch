@@ -17,6 +17,7 @@ import {
 import { calculateXAxisInterval } from "@fin-catch/ui/utils";
 import { useResponsiveChart } from "@fin-catch/ui/hooks";
 import { ResponsiveChartContainer } from "@fin-catch/ui/molecules";
+import type { BrushChangeEvent } from "@fin-catch/ui/types";
 
 export interface HoldingsPerformanceChartResponsiveProps {
   data: PortfolioHoldingsPerformance;
@@ -62,7 +63,7 @@ export const HoldingsPerformanceChartResponsive: React.FC<
     (a, b) => a.timestamp - b.timestamp,
   );
 
-  const handleBrushChange = (newIndex: any) => {
+  const handleBrushChange = (newIndex: BrushChangeEvent) => {
     setBrushIndex({
       startIndex: newIndex.startIndex,
       endIndex: newIndex.endIndex,

@@ -5,10 +5,10 @@ export interface ErrorTextProps {
   className?: string;
 }
 
-export const ErrorText: React.FC<ErrorTextProps> = ({
+export const ErrorText = React.memo(function ErrorText({
   children,
   className = "",
-}) => {
+}: ErrorTextProps) {
   if (!children) return null;
 
   return (
@@ -24,4 +24,6 @@ export const ErrorText: React.FC<ErrorTextProps> = ({
       {children}
     </p>
   );
-};
+});
+
+ErrorText.displayName = "ErrorText";

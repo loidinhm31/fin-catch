@@ -20,6 +20,7 @@ import {
 } from "@fin-catch/ui/utils";
 import { useResponsiveChart } from "@fin-catch/ui/hooks";
 import { ResponsiveChartContainer } from "@fin-catch/ui/molecules";
+import type { BrushChangeEvent } from "@fin-catch/ui/types";
 
 export interface GoldPremiumChartResponsiveProps {
   data: GoldPremiumPoint[];
@@ -63,7 +64,7 @@ export const GoldPremiumChartResponsive: React.FC<
     gold_type: point.gold_type,
   }));
 
-  const handleBrushChange = (newIndex: any) => {
+  const handleBrushChange = (newIndex: BrushChangeEvent) => {
     setBrushIndex({
       startIndex: newIndex.startIndex,
       endIndex: newIndex.endIndex,

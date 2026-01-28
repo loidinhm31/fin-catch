@@ -299,7 +299,10 @@ export const CompactOrderForm: React.FC<CompactOrderFormProps> = ({
         )}
       </div>
 
-      <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+      <form
+        onSubmit={handleSubmit}
+        style={{ display: "flex", flexDirection: "column", gap: "12px" }}
+      >
         {/* Side Toggle - Compact */}
         <div style={{ display: "flex", gap: "8px" }}>
           <button

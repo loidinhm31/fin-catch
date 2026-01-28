@@ -20,7 +20,10 @@ export interface MiniOhlcChartProps {
 /**
  * Get candle color based on open/close relationship
  */
-function getCandleColor(open: number, close: number): {
+function getCandleColor(
+  open: number,
+  close: number,
+): {
   fill: string;
   stroke: string;
 } {

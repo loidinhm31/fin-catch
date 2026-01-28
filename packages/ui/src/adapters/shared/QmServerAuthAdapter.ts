@@ -4,7 +4,8 @@ import type {
   IAuthService,
   SyncConfig,
 } from "@fin-catch/shared";
-import { AUTH_STORAGE_KEYS } from "@fin-catch/shared/constants";
+import { AUTH_STORAGE_KEYS, env } from "@fin-catch/shared";
+import { serviceLogger } from "@fin-catch/ui/utils";
 
 /**
  * Configuration for QmServerAuthAdapter
@@ -30,48 +31,21 @@ interface ApiResponse<T> {
 const STORAGE_KEYS = AUTH_STORAGE_KEYS;
 
 /**
- * Get the base URL from Vite env or default
+ * Get the base URL from env utility
  */
 function getDefaultBaseUrl(): string {
-  try {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const env = (import.meta as any).env;
-    if (env?.VITE_QM_SYNC_SERVER_URL) {
-      return env.VITE_QM_SYNC_SERVER_URL;
-    }
-  } catch {
-    // Not in a Vite environment
-  }
-  return "http://localhost:3000";
+  return env.serverUrl;
 }
 
 /**
- * Get app credentials from Vite env or default
+ * Get app credentials from env utility
  */
 function getDefaultAppId(): string {
-  try {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const env = (import.meta as any).env;
-    if (env?.VITE_APP_ID) {
-      return env.VITE_APP_ID;
-    }
-  } catch {
-    // Not in a Vite environment
-  }
-  return "";
+  return env.appId;
 }
 
 function getDefaultApiKey(): string {
-  try {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const env = (import.meta as any).env;
-    if (env?.VITE_API_KEY) {
-      return env.VITE_API_KEY;
-    }
-  } catch {
-    // Not in a Vite environment
-  }
-  return "";
+  return env.apiKey;
 }
 
 /**
@@ -104,9 +78,7 @@ export class QmServerAuthAdapter implements IAuthService {
       this.getStoredValue(STORAGE_KEYS.API_KEY) ||
       getDefaultApiKey();
 
-    console.log(
-      `[QmServerAuthAdapter] Initialized with baseUrl: ${this.baseUrl}`,
-    );
+    serviceLogger.qmServer(`Initialized with baseUrl: ${this.baseUrl}`);
   }
 
   private getStoredValue(key: string): string | null {
@@ -130,7 +102,7 @@ export class QmServerAuthAdapter implements IAuthService {
     includeAuth = false,
   ): Promise<TRes> {
     const url = `${this.baseUrl}${endpoint}`;
-    console.log(`[QmServerAuthAdapter] POST ${endpoint}`, request);
+    serviceLogger.qmServer(`POST ${endpoint}`);
 
     const headers: Record<string, string> = {
       "Content-Type": "application/json",
@@ -158,7 +130,7 @@ export class QmServerAuthAdapter implements IAuthService {
     }
 
     const result = await response.json();
-    console.log(`[QmServerAuthAdapter] Response`, result);
+    serviceLogger.qmServerDebug("Response received");
 
     // Check if response is wrapped in ApiResponse
     if ("success" in result) {
@@ -178,7 +150,7 @@ export class QmServerAuthAdapter implements IAuthService {
     includeAuth = false,
   ): Promise<TRes> {
     const url = `${this.baseUrl}${endpoint}`;
-    console.log(`[QmServerAuthAdapter] GET ${endpoint}`);
+    serviceLogger.qmServer(`GET ${endpoint}`);
 
     const headers: Record<string, string> = {
       Accept: "application/json",
@@ -204,7 +176,7 @@ export class QmServerAuthAdapter implements IAuthService {
     }
 
     const result = await response.json();
-    console.log(`[QmServerAuthAdapter] Response`, result);
+    serviceLogger.qmServerDebug("Response received");
 
     // Check if response is wrapped in ApiResponse
     if ("success" in result) {
@@ -231,10 +203,7 @@ export class QmServerAuthAdapter implements IAuthService {
       this.apiKey = config.apiKey;
       this.setStoredValue(STORAGE_KEYS.API_KEY, config.apiKey);
     }
-    console.log("[QmServerAuthAdapter] Sync configured", {
-      serverUrl: this.baseUrl,
-      appId: this.appId,
-    });
+    serviceLogger.qmServer(`Sync configured: ${this.baseUrl}`);
   }
 
   async register(
@@ -253,7 +222,7 @@ export class QmServerAuthAdapter implements IAuthService {
 
       return response;
     } catch (error) {
-      console.error("[QmServerAuthAdapter] Register error:", error);
+      serviceLogger.qmServerError("Register failed");
       throw error;
     }
   }
@@ -273,7 +242,7 @@ export class QmServerAuthAdapter implements IAuthService {
 
       return response;
     } catch (error) {
-      console.error("[QmServerAuthAdapter] Login error:", error);
+      serviceLogger.qmServerError("Login failed");
       throw error;
     }
   }
@@ -289,7 +258,7 @@ export class QmServerAuthAdapter implements IAuthService {
     // Invalidate cache
     this.invalidateStatusCache();
 
-    console.log("[QmServerAuthAdapter] Logged out");
+    serviceLogger.qmServer("Logged out");
   }
 
   async refreshToken(): Promise<void> {
@@ -307,9 +276,9 @@ export class QmServerAuthAdapter implements IAuthService {
       // Update stored tokens
       this.setStoredValue(STORAGE_KEYS.ACCESS_TOKEN, response.accessToken);
       this.setStoredValue(STORAGE_KEYS.REFRESH_TOKEN, response.refreshToken);
-      console.log("[QmServerAuthAdapter] Token refreshed");
+      serviceLogger.qmServerDebug("Token refreshed");
     } catch (error) {
-      console.error("[QmServerAuthAdapter] Token refresh error:", error);
+      serviceLogger.qmServerError("Token refresh failed");
       // Clear tokens on refresh failure
       await this.logout();
       throw error;
@@ -338,7 +307,7 @@ export class QmServerAuthAdapter implements IAuthService {
   async getStatus(): Promise<AuthStatus> {
     // Return cached status if still valid
     if (this.isStatusCacheValid()) {
-      console.log("[QmServerAuthAdapter] Returning cached status");
+      serviceLogger.qmServerDebug("Returning cached status");
       return this.statusCache!;
     }
 
@@ -495,6 +464,6 @@ export class QmServerAuthAdapter implements IAuthService {
     this.setStoredValue(STORAGE_KEYS.ACCESS_TOKEN, accessToken);
     this.setStoredValue(STORAGE_KEYS.REFRESH_TOKEN, refreshToken);
     this.setStoredValue(STORAGE_KEYS.USER_ID, userId);
-    console.log("[QmServerAuthAdapter] Tokens saved from external source");
+    serviceLogger.qmServerDebug("Tokens saved from external source");
   }
 }

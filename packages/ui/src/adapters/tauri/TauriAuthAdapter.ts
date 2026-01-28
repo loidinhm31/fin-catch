@@ -5,6 +5,7 @@ import type {
   IAuthService,
   SyncConfig,
 } from "@fin-catch/shared";
+import { serviceLogger } from "@fin-catch/ui/utils";
 
 /**
  * Tauri adapter for authentication operations
@@ -12,13 +13,13 @@ import type {
  */
 export class TauriAuthAdapter implements IAuthService {
   async configureSync(config: SyncConfig): Promise<void> {
-    console.log("[Tauri IPC] auth_configure_sync", config);
+    serviceLogger.tauri("auth_configure_sync");
     await invoke<void>("auth_configure_sync", {
       serverUrl: config.serverUrl ?? null,
       appId: config.appId ?? null,
       apiKey: config.apiKey ?? null,
     });
-    console.log("[Tauri IPC Response] Sync configured");
+    serviceLogger.tauriDebug("Sync configured");
   }
 
   async register(
@@ -26,7 +27,7 @@ export class TauriAuthAdapter implements IAuthService {
     email: string,
     password: string,
   ): Promise<AuthResponse> {
-    console.log("[Tauri IPC] auth_register", { username, email });
+    serviceLogger.tauri("auth_register");
     const response = await invoke<AuthResponse>("auth_register", {
       username,
       email,
@@ -34,51 +35,51 @@ export class TauriAuthAdapter implements IAuthService {
       appId: null,
       apiKey: null,
     });
-    console.log("[Tauri IPC Response]", response);
+    serviceLogger.tauriDebug("Response received");
     return response;
   }
 
   async login(email: string, password: string): Promise<AuthResponse> {
-    console.log("[Tauri IPC] auth_login", { email });
+    serviceLogger.tauri("auth_login");
     const response = await invoke<AuthResponse>("auth_login", {
       email,
       password,
     });
-    console.log("[Tauri IPC Response]", response);
+    serviceLogger.tauriDebug("Response received");
     return response;
   }
 
   async logout(): Promise<void> {
-    console.log("[Tauri IPC] auth_logout");
+    serviceLogger.tauri("auth_logout");
     await invoke<void>("auth_logout");
-    console.log("[Tauri IPC Response] Logged out");
+    serviceLogger.tauriDebug("Logged out");
   }
 
   async refreshToken(): Promise<void> {
-    console.log("[Tauri IPC] auth_refresh_token");
+    serviceLogger.tauri("auth_refresh_token");
     await invoke<void>("auth_refresh_token");
-    console.log("[Tauri IPC Response] Token refreshed");
+    serviceLogger.tauriDebug("Token refreshed");
   }
 
   async getStatus(): Promise<AuthStatus> {
-    console.log("[Tauri IPC] auth_get_status");
+    serviceLogger.tauri("auth_get_status");
     const status = await invoke<AuthStatus>("auth_get_status");
-    console.log("[Tauri IPC Response]", status);
+    serviceLogger.tauriDebug("Status received");
     return status;
   }
 
   async isAuthenticated(): Promise<boolean> {
-    console.log("[Tauri IPC] auth_is_authenticated");
+    serviceLogger.tauri("auth_is_authenticated");
     const isAuth = await invoke<boolean>("auth_is_authenticated");
-    console.log("[Tauri IPC Response]", isAuth);
+    serviceLogger.tauriDebug(`Authenticated: ${isAuth}`);
     return isAuth;
   }
 
   async getAccessToken(): Promise<string | null> {
     try {
-      console.log("[Tauri IPC] auth_get_access_token");
+      serviceLogger.tauri("auth_get_access_token");
       const token = await invoke<string>("auth_get_access_token");
-      console.log("[Tauri IPC Response] Token retrieved");
+      serviceLogger.tauriDebug("Token retrieved");
       return token;
     } catch {
       return null;

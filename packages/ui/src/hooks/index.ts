@@ -1,6 +1,7 @@
 export * from "./useAuth";
 export * from "./useCouponPayments";
 export * from "./useCurrencyPreference";
+export * from "./useErrorBoundary";
 export * from "./useFrozenPrice";
 export * from "./useHoldingsPerformance";
 export * from "./usePortfolioEntries";

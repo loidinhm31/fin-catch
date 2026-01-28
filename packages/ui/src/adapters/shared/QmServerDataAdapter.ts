@@ -9,6 +9,8 @@ import type {
   StockHistoryRequest,
   StockHistoryResponse,
 } from "@fin-catch/shared";
+import { env } from "@fin-catch/shared";
+import { serviceLogger } from "@fin-catch/ui/utils";
 
 /**
  * Configuration for QmServerDataAdapter
@@ -27,20 +29,10 @@ interface ApiResponse<T> {
 }
 
 /**
- * Get the base URL from Vite env or default
+ * Get the base URL from env utility
  */
 function getDefaultBaseUrl(): string {
-  try {
-    // Vite injects import.meta.env at build time
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const env = (import.meta as any).env;
-    if (env?.VITE_QM_SYNC_SERVER_URL) {
-      return env.VITE_QM_SYNC_SERVER_URL;
-    }
-  } catch {
-    // Not in a Vite environment
-  }
-  return "http://localhost:3000";
+  return env.serverUrl;
 }
 
 /**
@@ -52,9 +44,7 @@ export class QmServerDataAdapter implements IDataService {
 
   constructor(config?: QmServerConfig) {
     this.baseUrl = config?.baseUrl || getDefaultBaseUrl();
-    console.log(
-      `[QmServerDataAdapter] Initialized with baseUrl: ${this.baseUrl}`,
-    );
+    serviceLogger.market(`Initialized with baseUrl: ${this.baseUrl}`);
   }
 
   private async post<TReq, TRes>(
@@ -62,7 +52,7 @@ export class QmServerDataAdapter implements IDataService {
     request: TReq,
   ): Promise<TRes> {
     const url = `${this.baseUrl}${endpoint}`;
-    console.log(`[QmServerDataAdapter] POST ${endpoint}`, request);
+    serviceLogger.market(`POST ${endpoint}`);
 
     const response = await fetch(url, {
       method: "POST",
@@ -79,7 +69,7 @@ export class QmServerDataAdapter implements IDataService {
     }
 
     const result: ApiResponse<TRes> = await response.json();
-    console.log(`[QmServerDataAdapter] Response`, result);
+    serviceLogger.marketDebug("Response received");
 
     if (!result.success) {
       throw new Error(result.error || "Unknown API error");
@@ -90,7 +80,7 @@ export class QmServerDataAdapter implements IDataService {
 
   private async get<TRes>(endpoint: string): Promise<TRes> {
     const url = `${this.baseUrl}${endpoint}`;
-    console.log(`[QmServerDataAdapter] GET ${endpoint}`);
+    serviceLogger.market(`GET ${endpoint}`);
 
     const response = await fetch(url, {
       method: "GET",
@@ -105,7 +95,7 @@ export class QmServerDataAdapter implements IDataService {
     }
 
     const result: ApiResponse<TRes> = await response.json();
-    console.log(`[QmServerDataAdapter] Response`, result);
+    serviceLogger.marketDebug("Response received");
 
     if (!result.success) {
       throw new Error(result.error || "Unknown API error");
@@ -123,7 +113,7 @@ export class QmServerDataAdapter implements IDataService {
         request,
       );
     } catch (error) {
-      console.error("[QmServerDataAdapter] Stock history error:", error);
+      serviceLogger.marketError("Stock history fetch failed");
       return {
         symbol: request.symbol,
         resolution: request.resolution,
@@ -141,7 +131,7 @@ export class QmServerDataAdapter implements IDataService {
         request,
       );
     } catch (error) {
-      console.error("[QmServerDataAdapter] Gold price error:", error);
+      serviceLogger.marketError("Gold price fetch failed");
       return {
         gold_price_id: request.gold_price_id,
         source: request.source || "sjc",
@@ -160,7 +150,7 @@ export class QmServerDataAdapter implements IDataService {
         request,
       );
     } catch (error) {
-      console.error("[QmServerDataAdapter] Exchange rate error:", error);
+      serviceLogger.marketError("Exchange rate fetch failed");
       return {
         currency_code: request.currency_code,
         source: request.source || "vietcombank",
@@ -179,7 +169,7 @@ export class QmServerDataAdapter implements IDataService {
         request,
       );
     } catch (error) {
-      console.error("[QmServerDataAdapter] Gold premium error:", error);
+      serviceLogger.marketError("Gold premium fetch failed");
       return {
         status: "error",
         error: error instanceof Error ? error.message : String(error),
@@ -193,7 +183,7 @@ export class QmServerDataAdapter implements IDataService {
         "/api/v1/fin-catch/sources",
       );
     } catch (error) {
-      console.error("[QmServerDataAdapter] Get sources error:", error);
+      serviceLogger.marketError("Get sources failed");
       return {};
     }
   }
@@ -204,7 +194,7 @@ export class QmServerDataAdapter implements IDataService {
         "/api/v1/fin-catch/health",
       );
     } catch (error) {
-      console.error("[QmServerDataAdapter] Health check error:", error);
+      serviceLogger.marketError("Health check failed");
       return {};
     }
   }

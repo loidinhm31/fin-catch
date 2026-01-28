@@ -6,11 +6,11 @@ interface CardProps {
   onClick?: () => void;
 }
 
-export const Card: React.FC<CardProps> = ({
+export const Card = React.memo(function Card({
   children,
   className = "",
   onClick,
-}) => {
+}: CardProps) {
   return (
     <div
       className={`bg-white rounded-xl border border-gray-200 shadow-sm ${onClick ? "cursor-pointer" : ""} ${className}`}
@@ -19,4 +19,6 @@ export const Card: React.FC<CardProps> = ({
       {children}
     </div>
   );
-};
+});
+
+Card.displayName = "Card";

@@ -5,13 +5,13 @@ export interface LabelProps extends React.LabelHTMLAttributes<HTMLLabelElement> 
   error?: boolean;
 }
 
-export const Label: React.FC<LabelProps> = ({
+export const Label = React.memo(function Label({
   children,
   required = false,
   error = false,
   className = "",
   ...props
-}) => {
+}: LabelProps) {
   return (
     <label
       className={className}
@@ -32,4 +32,6 @@ export const Label: React.FC<LabelProps> = ({
       )}
     </label>
   );
-};
+});
+
+Label.displayName = "Label";

@@ -12,7 +12,8 @@ import type {
   PlaceOrderRequest,
   Deal,
 } from "@fin-catch/shared";
-import { AUTH_STORAGE_KEYS } from "@fin-catch/shared/constants";
+import { AUTH_STORAGE_KEYS, env } from "@fin-catch/shared";
+import { serviceLogger } from "@fin-catch/ui/utils";
 
 /**
  * Configuration for TradingAuthAdapter
@@ -25,16 +26,7 @@ export interface TradingAuthConfig {
  * Get the base URL from Vite env or default
  */
 function getDefaultBaseUrl(): string {
-  try {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const env = (import.meta as any).env;
-    if (env?.VITE_QM_SYNC_SERVER_URL) {
-      return env.VITE_QM_SYNC_SERVER_URL;
-    }
-  } catch {
-    // Not in a Vite environment
-  }
-  return "http://localhost:3000";
+  return env.serverUrl;
 }
 
 /**
@@ -52,9 +44,7 @@ export class TradingAuthAdapter implements ITradingAuthService {
       this.getStoredValue(AUTH_STORAGE_KEYS.SERVER_URL) ||
       getDefaultBaseUrl();
 
-    console.log(
-      `[TradingAuthAdapter] Initialized with baseUrl: ${this.baseUrl}`,
-    );
+    serviceLogger.trading(`Initialized with baseUrl: ${this.baseUrl}`);
   }
 
   private getStoredValue(key: string): string | null {
@@ -94,7 +84,7 @@ export class TradingAuthAdapter implements ITradingAuthService {
     request: TReq,
   ): Promise<TRes> {
     const url = `${this.baseUrl}${endpoint}`;
-    console.log(`[TradingAuthAdapter] POST ${endpoint}`, request);
+    serviceLogger.trading(`POST ${endpoint}`);
 
     const response = await fetch(url, {
       method: "POST",
@@ -105,12 +95,12 @@ export class TradingAuthAdapter implements ITradingAuthService {
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
       const errorMessage = errorData.error || `API error: ${response.status}`;
-      console.error(`[TradingAuthAdapter] Error:`, errorMessage);
+      serviceLogger.tradingError(errorMessage);
       throw new Error(errorMessage);
     }
 
     const result = await response.json();
-    console.log(`[TradingAuthAdapter] Response`, result);
+    serviceLogger.tradingDebug("Response received");
     return result as TRes;
   }
 
@@ -119,7 +109,7 @@ export class TradingAuthAdapter implements ITradingAuthService {
    */
   private async get<TRes>(endpoint: string, auth = true): Promise<TRes> {
     const url = `${this.baseUrl}${endpoint}`;
-    console.log(`[TradingAuthAdapter] GET ${endpoint}`);
+    serviceLogger.trading(`GET ${endpoint}`);
 
     const headers: Record<string, string> = {
       Accept: "application/json",
@@ -140,12 +130,12 @@ export class TradingAuthAdapter implements ITradingAuthService {
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
       const errorMessage = errorData.error || `API error: ${response.status}`;
-      console.error(`[TradingAuthAdapter] Error:`, errorMessage);
+      serviceLogger.tradingError(errorMessage);
       throw new Error(errorMessage);
     }
 
     const result = await response.json();
-    console.log(`[TradingAuthAdapter] Response`, result);
+    serviceLogger.tradingDebug("Response received");
     return result as TRes;
   }
 
@@ -250,10 +240,7 @@ export class TradingAuthAdapter implements ITradingAuthService {
 
       return session;
     } catch (error) {
-      console.error(
-        `[TradingAuthAdapter] Error getting status for ${platform}:`,
-        error,
-      );
+      serviceLogger.tradingError(`Error getting status for ${platform}`);
       return null;
     }
   }
@@ -484,7 +471,7 @@ export class TradingAuthAdapter implements ITradingAuthService {
    */
   private async delete<TRes>(endpoint: string): Promise<TRes> {
     const url = `${this.baseUrl}${endpoint}`;
-    console.log(`[TradingAuthAdapter] DELETE ${endpoint}`);
+    serviceLogger.trading(`DELETE ${endpoint}`);
 
     const response = await fetch(url, {
       method: "DELETE",
@@ -494,12 +481,12 @@ export class TradingAuthAdapter implements ITradingAuthService {
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
       const errorMessage = errorData.error || `API error: ${response.status}`;
-      console.error(`[TradingAuthAdapter] Error:`, errorMessage);
+      serviceLogger.tradingError(errorMessage);
       throw new Error(errorMessage);
     }
 
     const result = await response.json();
-    console.log(`[TradingAuthAdapter] Response`, result);
+    serviceLogger.tradingDebug("Response received");
     return result as TRes;
   }
 }

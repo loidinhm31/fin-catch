@@ -126,16 +126,13 @@ export const TradingOperationsPage: React.FC<TradingOperationsPageProps> = ({
   const [error, setError] = useState<string | null>(null);
 
   // Toggle section collapse
-  const toggleSection = useCallback(
-    (section: "orderBook" | "holdings") => {
-      setCollapsedSections((prev) => {
-        const newState = { ...prev, [section]: !prev[section] };
-        saveCollapsedSections(newState);
-        return newState;
-      });
-    },
-    [],
-  );
+  const toggleSection = useCallback((section: "orderBook" | "holdings") => {
+    setCollapsedSections((prev) => {
+      const newState = { ...prev, [section]: !prev[section] };
+      saveCollapsedSections(newState);
+      return newState;
+    });
+  }, []);
 
   // Load loan packages
   const loadLoanPackages = useCallback(async () => {
@@ -337,12 +334,15 @@ export const TradingOperationsPage: React.FC<TradingOperationsPageProps> = ({
   }, [loadOrders]);
 
   // Handle deal click (for selling from holdings)
-  const handleDealClick = useCallback((deal: Deal) => {
-    // Subscribe to the deal's symbol if not already subscribed
-    if (!subscribedSymbols.includes(deal.symbol)) {
-      handleSubscribe([deal.symbol], includeOhlc, ohlcResolution);
-    }
-  }, [subscribedSymbols, handleSubscribe, includeOhlc, ohlcResolution]);
+  const handleDealClick = useCallback(
+    (deal: Deal) => {
+      // Subscribe to the deal's symbol if not already subscribed
+      if (!subscribedSymbols.includes(deal.symbol)) {
+        handleSubscribe([deal.symbol], includeOhlc, ohlcResolution);
+      }
+    },
+    [subscribedSymbols, handleSubscribe, includeOhlc, ohlcResolution],
+  );
 
   // Handle card reorder
   const handleReorder = useCallback((newOrder: string[]) => {

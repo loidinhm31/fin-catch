@@ -22,7 +22,9 @@ export interface SimpleSelectProps {
   id?: string;
   name?: string;
   className?: string;
+  /** @deprecated Use composition pattern with Select components for error styling */
   error?: boolean;
+  /** @deprecated Select is now always full width by default */
   fullWidth?: boolean;
   onBlur?: () => void;
 }

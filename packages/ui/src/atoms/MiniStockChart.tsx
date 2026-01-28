@@ -173,16 +173,21 @@ export const MiniStockChart: React.FC<MiniStockChartProps> = ({
   });
 
   // Create path for line
-  const linePath = points.map((p, i) => (i === 0 ? `M ${p.x} ${p.y}` : `L ${p.x} ${p.y}`)).join(" ");
+  const linePath = points
+    .map((p, i) => (i === 0 ? `M ${p.x} ${p.y}` : `L ${p.x} ${p.y}`))
+    .join(" ");
 
   // Create path for filled area (line + bottom edge)
   const areaPath = `${linePath} L ${svgWidth} ${svgHeight} L 0 ${svgHeight} Z`;
 
   const color = isPositive ? "#00ff88" : "#ff3366";
-  const fillColor = isPositive ? "rgba(0, 255, 136, 0.2)" : "rgba(255, 51, 102, 0.2)";
+  const fillColor = isPositive
+    ? "rgba(0, 255, 136, 0.2)"
+    : "rgba(255, 51, 102, 0.2)";
 
   // Calculate change percentage
-  const changePercent = ((chartData.endPrice - chartData.startPrice) / chartData.startPrice) * 100;
+  const changePercent =
+    ((chartData.endPrice - chartData.startPrice) / chartData.startPrice) * 100;
 
   return (
     <div
@@ -214,7 +219,13 @@ export const MiniStockChart: React.FC<MiniStockChartProps> = ({
         <path d={areaPath} fill={`url(#gradient-${symbol})`} />
 
         {/* Line */}
-        <path d={linePath} fill="none" stroke={color} strokeWidth={1.5} strokeLinejoin="round" />
+        <path
+          d={linePath}
+          fill="none"
+          stroke={color}
+          strokeWidth={1.5}
+          strokeLinejoin="round"
+        />
 
         {/* End point dot */}
         <circle
@@ -235,7 +246,9 @@ export const MiniStockChart: React.FC<MiniStockChartProps> = ({
           fontWeight: 600,
           padding: "2px 4px",
           borderRadius: "3px",
-          background: isPositive ? "rgba(0, 255, 136, 0.2)" : "rgba(255, 51, 102, 0.2)",
+          background: isPositive
+            ? "rgba(0, 255, 136, 0.2)"
+            : "rgba(255, 51, 102, 0.2)",
           color,
         }}
       >

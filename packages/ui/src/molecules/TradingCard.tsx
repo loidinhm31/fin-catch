@@ -129,8 +129,7 @@ export const TradingCard: React.FC<TradingCardProps> = ({
   const volume = stockInfo?.volume;
   const color = getChangeColor(change);
 
-  const TrendIcon =
-    change > 0 ? TrendingUp : change < 0 ? TrendingDown : Minus;
+  const TrendIcon = change > 0 ? TrendingUp : change < 0 ? TrendingDown : Minus;
 
   // Get best bid/ask from stockInfo or topPrice
   const bidPrice = topPrice?.bids?.[0]?.price ?? stockInfo?.bidPrice;
@@ -341,4 +340,3 @@ export const TradingCard: React.FC<TradingCardProps> = ({
     </div>
   );
 };
-

@@ -1,4 +1,5 @@
-import { isTauri } from "@fin-catch/ui/utils";
+import { isTauri, serviceLogger } from "@fin-catch/ui/utils";
+import { env } from "@fin-catch/shared";
 
 // Interfaces
 import type {
@@ -38,48 +39,21 @@ import { IndexedDBSyncAdapter } from "./web";
  * Get server URL from environment or default
  */
 function getServerUrl(): string {
-  try {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const env = (import.meta as any).env;
-    if (env?.VITE_QM_SYNC_SERVER_URL) {
-      return env.VITE_QM_SYNC_SERVER_URL;
-    }
-  } catch {
-    // Not in a Vite environment
-  }
-  return "http://localhost:3000";
+  return env.serverUrl;
 }
 
 /**
  * Get app ID from environment or default
  */
 function getAppId(): string {
-  try {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const env = (import.meta as any).env;
-    if (env?.VITE_APP_ID) {
-      return env.VITE_APP_ID;
-    }
-  } catch {
-    // Not in a Vite environment
-  }
-  return "fin-catch";
+  return env.appId;
 }
 
 /**
  * Get API key from environment or default
  */
 function getApiKey(): string {
-  try {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const env = (import.meta as any).env;
-    if (env?.VITE_API_KEY) {
-      return env.VITE_API_KEY;
-    }
-  } catch {
-    // Not in a Vite environment
-  }
-  return "";
+  return env.apiKey;
 }
 
 // Singleton instances (lazy initialized)
@@ -99,8 +73,8 @@ export const getPortfolioService = (): IPortfolioService => {
     portfolioService = isTauri()
       ? new TauriPortfolioAdapter()
       : new HttpPortfolioAdapter();
-    console.log(
-      `[ServiceFactory] Created PortfolioService for ${isTauri() ? "Tauri" : "HTTP"}`,
+    serviceLogger.factory(
+      `Created PortfolioService for ${isTauri() ? "Tauri" : "HTTP"}`,
     );
   }
   return portfolioService;
@@ -114,8 +88,8 @@ export const getPortfolioEntryService = (): IPortfolioEntryService => {
     portfolioEntryService = isTauri()
       ? new TauriPortfolioEntryAdapter()
       : new HttpPortfolioEntryAdapter();
-    console.log(
-      `[ServiceFactory] Created PortfolioEntryService for ${isTauri() ? "Tauri" : "HTTP"}`,
+    serviceLogger.factory(
+      `Created PortfolioEntryService for ${isTauri() ? "Tauri" : "HTTP"}`,
     );
   }
   return portfolioEntryService;
@@ -129,8 +103,8 @@ export const getCouponPaymentService = (): ICouponPaymentService => {
     couponPaymentService = isTauri()
       ? new TauriCouponPaymentAdapter()
       : new HttpCouponPaymentAdapter();
-    console.log(
-      `[ServiceFactory] Created CouponPaymentService for ${isTauri() ? "Tauri" : "HTTP"}`,
+    serviceLogger.factory(
+      `Created CouponPaymentService for ${isTauri() ? "Tauri" : "HTTP"}`,
     );
   }
   return couponPaymentService;
@@ -146,8 +120,8 @@ export const getDataService = (): IDataService => {
     dataService = isTauri()
       ? new TauriDataAdapter()
       : new QmServerDataAdapter();
-    console.log(
-      `[ServiceFactory] Created DataService using ${isTauri() ? "TauriDataAdapter" : "QmServerDataAdapter"}`,
+    serviceLogger.factory(
+      `Created DataService using ${isTauri() ? "TauriDataAdapter" : "QmServerDataAdapter"}`,
     );
   }
   return dataService;
@@ -163,8 +137,8 @@ export const getAuthService = (): IAuthService => {
     authService = isTauri()
       ? new TauriAuthAdapter()
       : new QmServerAuthAdapter();
-    console.log(
-      `[ServiceFactory] Created AuthService for ${isTauri() ? "Tauri" : "QmSyncServer"}`,
+    serviceLogger.factory(
+      `Created AuthService for ${isTauri() ? "Tauri" : "QmSyncServer"}`,
     );
   }
   return authService;
@@ -179,7 +153,7 @@ export const getSyncService = (): ISyncService => {
   if (!syncService) {
     if (isTauri()) {
       syncService = new TauriSyncAdapter();
-      console.log("[ServiceFactory] Created SyncService for Tauri");
+      serviceLogger.factory("Created SyncService for Tauri");
     } else {
       // Get or create auth service for token management
       const auth = getAuthService() as QmServerAuthAdapter;
@@ -191,7 +165,7 @@ export const getSyncService = (): ISyncService => {
         saveTokens: (accessToken, refreshToken, userId) =>
           auth.saveTokensExternal(accessToken, refreshToken, userId),
       });
-      console.log("[ServiceFactory] Created SyncService for IndexedDB");
+      serviceLogger.factory("Created SyncService for IndexedDB");
     }
   }
   return syncService;
@@ -219,7 +193,7 @@ export const resetServices = (): void => {
   dataService = null;
   authService = null;
   syncService = null;
-  console.log("[ServiceFactory] Reset all services");
+  serviceLogger.factory("Reset all services");
 };
 
 /**
@@ -227,7 +201,7 @@ export const resetServices = (): void => {
  */
 export const setPortfolioService = (service: IPortfolioService): void => {
   portfolioService = service;
-  console.log("[ServiceFactory] Set custom PortfolioService");
+  serviceLogger.factory("Set custom PortfolioService");
 };
 
 /**
@@ -237,7 +211,7 @@ export const setPortfolioEntryService = (
   service: IPortfolioEntryService,
 ): void => {
   portfolioEntryService = service;
-  console.log("[ServiceFactory] Set custom PortfolioEntryService");
+  serviceLogger.factory("Set custom PortfolioEntryService");
 };
 
 /**
@@ -247,7 +221,7 @@ export const setCouponPaymentService = (
   service: ICouponPaymentService,
 ): void => {
   couponPaymentService = service;
-  console.log("[ServiceFactory] Set custom CouponPaymentService");
+  serviceLogger.factory("Set custom CouponPaymentService");
 };
 
 /**
@@ -255,7 +229,7 @@ export const setCouponPaymentService = (
  */
 export const setDataService = (service: IDataService): void => {
   dataService = service;
-  console.log("[ServiceFactory] Set custom DataService");
+  serviceLogger.factory("Set custom DataService");
 };
 
 /**
@@ -263,7 +237,7 @@ export const setDataService = (service: IDataService): void => {
  */
 export const setAuthService = (service: IAuthService): void => {
   authService = service;
-  console.log("[ServiceFactory] Set custom AuthService");
+  serviceLogger.factory("Set custom AuthService");
 };
 
 /**
@@ -271,7 +245,7 @@ export const setAuthService = (service: IAuthService): void => {
  */
 export const setSyncService = (service: ISyncService): void => {
   syncService = service;
-  console.log("[ServiceFactory] Set custom SyncService");
+  serviceLogger.factory("Set custom SyncService");
 };
 
 /**
@@ -287,5 +261,5 @@ export const getTradingAuthService = (): ITradingAuthService | null => {
  */
 export const setTradingAuthService = (service: ITradingAuthService): void => {
   tradingAuthService = service;
-  console.log("[ServiceFactory] Set custom TradingAuthService");
+  serviceLogger.factory("Set custom TradingAuthService");
 };

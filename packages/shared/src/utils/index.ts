@@ -1,6 +1,8 @@
 export * from "./dateUtils";
 export * from "./goldConversions";
 export * from "./cn";
+export * from "./logger";
+export * from "./env";
 
 // Note: currency.ts is not exported here as it depends on platform-specific API services.
 // Use the currency utilities from @fin-catch/shared/types instead for formatters,
