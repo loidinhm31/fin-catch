@@ -9,3 +9,5 @@ export * from "./BottomNav";
 export * from "./SymbolSearch";
 export * from "./MultiSymbolSubscription";
 export * from "./SymbolCard";
+export * from "./TradingCard";
+export * from "./TradingCardPopover";

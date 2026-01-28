@@ -451,7 +451,10 @@ export class MarketDataAdapter implements IMarketDataService {
       }
       case "OHLC": {
         const ohlc = msg.data as OHLC;
-        const key = `${ohlc.symbol.toUpperCase()}:${ohlc.interval}`;
+        const symbol = ohlc.symbol.toUpperCase();
+        // Normalize "STOCK" interval to "1" for consistency with UI resolution selector
+        const normalizedInterval = ohlc.interval === "STOCK" ? "1" : ohlc.interval;
+        const key = `${symbol}:${normalizedInterval}`;
         this.ohlcCache.set(key, ohlc);
         break;
       }

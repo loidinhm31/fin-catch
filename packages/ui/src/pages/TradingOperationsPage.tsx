@@ -1,14 +1,14 @@
-import React, { useEffect, useState, useCallback, useMemo } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import {
   ArrowLeft,
-  Loader2,
   RefreshCw,
   Wallet,
-  Activity,
+  LayoutGrid,
   ChevronDown,
   ChevronUp,
-  LayoutGrid,
+  BookOpen,
+  Briefcase,
 } from "lucide-react";
 import type {
   TradingPlatformId,
@@ -18,19 +18,51 @@ import type {
   StockInfo,
   OHLC,
   OhlcResolution,
+  TopPrice,
 } from "@fin-catch/shared";
 import { Button } from "@fin-catch/ui/atoms";
-import { MultiSymbolSubscription, SymbolCard } from "@fin-catch/ui/molecules";
+import { MultiSymbolSubscription } from "@fin-catch/ui/molecules";
 import {
-  OrderForm,
   OrderBook,
   Holdings,
-  MarketDataTicker,
-  MarketDepth,
   MarketIndexBar,
-  TickTape,
+  DraggableSymbolGrid,
 } from "@fin-catch/ui/organisms";
 import { usePlatformServices } from "@fin-catch/ui/platform";
+
+/**
+ * Storage key for collapsible section states
+ */
+const COLLAPSED_SECTIONS_KEY = "trading-collapsed-sections";
+
+/**
+ * Load collapsed section states from localStorage
+ */
+function loadCollapsedSections(): { orderBook: boolean; holdings: boolean } {
+  try {
+    const saved = localStorage.getItem(COLLAPSED_SECTIONS_KEY);
+    if (saved) {
+      return JSON.parse(saved);
+    }
+  } catch {
+    // Ignore errors
+  }
+  return { orderBook: false, holdings: false };
+}
+
+/**
+ * Save collapsed section states to localStorage
+ */
+function saveCollapsedSections(state: {
+  orderBook: boolean;
+  holdings: boolean;
+}): void {
+  try {
+    localStorage.setItem(COLLAPSED_SECTIONS_KEY, JSON.stringify(state));
+  } catch {
+    // Ignore errors
+  }
+}
 
 /**
  * TradingOperationsPage component
@@ -40,10 +72,9 @@ import { usePlatformServices } from "@fin-catch/ui/platform";
  *
  * Features:
  * - Multi-symbol subscription with OHLC support
- * - Responsive symbol card grid (1-4 columns)
- * - Order placement form
- * - Order book (today's orders)
- * - Holdings (current positions)
+ * - Draggable symbol card grid with click-to-order popover
+ * - Order book (today's orders) - collapsible
+ * - Holdings (current positions) - collapsible
  */
 export interface TradingOperationsPageProps {
   /** Base path for navigation */
@@ -76,20 +107,35 @@ export const TradingOperationsPage: React.FC<TradingOperationsPageProps> = ({
     new Map(),
   );
   const [ohlcData, setOhlcData] = useState<Map<string, OHLC>>(new Map());
+  const [topPriceData, setTopPriceData] = useState<Map<string, TopPrice>>(
+    new Map(),
+  );
   const [includeOhlc, setIncludeOhlc] = useState(false);
   const [ohlcResolution, setOhlcResolution] = useState<OhlcResolution>("1");
   const [isSubscribing, setIsSubscribing] = useState(false);
 
-  // Selected symbol state (for detail panel)
-  const [selectedSymbol, setSelectedSymbol] = useState<string>("");
-  const [currentPrice, setCurrentPrice] = useState<number | undefined>();
-  const [showDetailPanel, setShowDetailPanel] = useState(true);
+  // Collapsible section states
+  const [collapsedSections, setCollapsedSections] = useState(() =>
+    loadCollapsedSections(),
+  );
 
   // Loading state
   const [isLoadingPackages, setIsLoadingPackages] = useState(true);
   const [isLoadingOrders, setIsLoadingOrders] = useState(true);
   const [isLoadingDeals, setIsLoadingDeals] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  // Toggle section collapse
+  const toggleSection = useCallback(
+    (section: "orderBook" | "holdings") => {
+      setCollapsedSections((prev) => {
+        const newState = { ...prev, [section]: !prev[section] };
+        saveCollapsedSections(newState);
+        return newState;
+      });
+    },
+    [],
+  );
 
   // Load loan packages
   const loadLoanPackages = useCallback(async () => {
@@ -187,18 +233,13 @@ export const TradingOperationsPage: React.FC<TradingOperationsPageProps> = ({
           ...prev,
           ...symbols.filter((s) => !prev.includes(s)),
         ]);
-
-        // Select first symbol if none selected
-        if (!selectedSymbol && symbols.length > 0) {
-          setSelectedSymbol(symbols[0]);
-        }
       } catch (err) {
         console.error("Failed to subscribe to symbols:", err);
       } finally {
         setIsSubscribing(false);
       }
     },
-    [marketDataService, platform, selectedSymbol],
+    [marketDataService, platform],
   );
 
   // Handle symbol unsubscription
@@ -227,24 +268,16 @@ export const TradingOperationsPage: React.FC<TradingOperationsPageProps> = ({
           next.delete(`${symbol}:${ohlcResolution}`);
           return next;
         });
-
-        // Clear selection if this was the selected symbol
-        if (selectedSymbol === symbol) {
-          const remaining = subscribedSymbols.filter((s) => s !== symbol);
-          setSelectedSymbol(remaining.length > 0 ? remaining[0] : "");
-        }
+        setTopPriceData((prev) => {
+          const next = new Map(prev);
+          next.delete(symbol);
+          return next;
+        });
       } catch (err) {
         console.error("Failed to unsubscribe from symbol:", err);
       }
     },
-    [
-      marketDataService,
-      platform,
-      selectedSymbol,
-      subscribedSymbols,
-      includeOhlc,
-      ohlcResolution,
-    ],
+    [marketDataService, platform, includeOhlc, ohlcResolution],
   );
 
   // Update symbol data from market data service cache
@@ -254,23 +287,33 @@ export const TradingOperationsPage: React.FC<TradingOperationsPageProps> = ({
     const updateData = () => {
       const newSymbolData = new Map<string, StockInfo>();
       const newOhlcData = new Map<string, OHLC>();
+      const newTopPriceData = new Map<string, TopPrice>();
 
       for (const symbol of subscribedSymbols) {
+        // Get stock info snapshot
         const snapshot = marketDataService.getSnapshot(symbol);
         if (snapshot) {
           newSymbolData.set(symbol, snapshot);
         }
 
+        // Get OHLC data
         if (includeOhlc) {
           const ohlc = marketDataService.getOhlc(symbol, ohlcResolution);
           if (ohlc) {
             newOhlcData.set(`${symbol}:${ohlcResolution}`, ohlc);
           }
         }
+
+        // Get top price (bid/ask) data from order book
+        const topPrice = marketDataService.getOrderBook(symbol);
+        if (topPrice) {
+          newTopPriceData.set(symbol, topPrice);
+        }
       }
 
       setSymbolData(newSymbolData);
       setOhlcData(newOhlcData);
+      setTopPriceData(newTopPriceData);
     };
 
     // Initial update
@@ -282,22 +325,7 @@ export const TradingOperationsPage: React.FC<TradingOperationsPageProps> = ({
     return () => clearInterval(interval);
   }, [marketDataService, subscribedSymbols, includeOhlc, ohlcResolution]);
 
-  // Get OHLC for a symbol
-  const getOhlcForSymbol = useCallback(
-    (symbol: string): OHLC | null => {
-      return ohlcData.get(`${symbol}:${ohlcResolution}`) || null;
-    },
-    [ohlcData, ohlcResolution],
-  );
-
-  // Handle symbol card click
-  const handleSymbolClick = useCallback((symbol: string) => {
-    setSelectedSymbol(symbol);
-    setCurrentPrice(undefined);
-    setShowDetailPanel(true);
-  }, []);
-
-  // Handle order placed
+  // Handle order placed from card popover
   const handleOrderPlaced = useCallback(() => {
     loadOrders();
     loadDeals();
@@ -308,24 +336,18 @@ export const TradingOperationsPage: React.FC<TradingOperationsPageProps> = ({
     loadOrders();
   }, [loadOrders]);
 
-  // Handle deal click (for selling)
+  // Handle deal click (for selling from holdings)
   const handleDealClick = useCallback((deal: Deal) => {
-    setSelectedSymbol(deal.symbol);
-    setShowDetailPanel(true);
-  }, []);
+    // Subscribe to the deal's symbol if not already subscribed
+    if (!subscribedSymbols.includes(deal.symbol)) {
+      handleSubscribe([deal.symbol], includeOhlc, ohlcResolution);
+    }
+  }, [subscribedSymbols, handleSubscribe, includeOhlc, ohlcResolution]);
 
-  // Handle price update from market data ticker
-  const handlePriceUpdate = useCallback((price: number | undefined) => {
-    setCurrentPrice(price);
+  // Handle card reorder
+  const handleReorder = useCallback((newOrder: string[]) => {
+    setSubscribedSymbols(newOrder);
   }, []);
-
-  // Handle price click from order book depth
-  const handlePriceClick = useCallback(
-    (price: number, _side: "bid" | "ask") => {
-      console.log("Price clicked:", price);
-    },
-    [],
-  );
 
   // Handle back navigation
   const handleBack = () => {
@@ -337,18 +359,6 @@ export const TradingOperationsPage: React.FC<TradingOperationsPageProps> = ({
     loadOrders();
     loadDeals();
   };
-
-  // Sorted symbols for grid display
-  const sortedSymbols = useMemo(() => {
-    return [...subscribedSymbols].sort((a, b) => {
-      const dataA = symbolData.get(a);
-      const dataB = symbolData.get(b);
-      // Sort by change percent descending (best performers first)
-      const changeA = dataA?.changePercent ?? 0;
-      const changeB = dataB?.changePercent ?? 0;
-      return changeB - changeA;
-    });
-  }, [subscribedSymbols, symbolData]);
 
   if (!tradingService) {
     return (
@@ -467,6 +477,15 @@ export const TradingOperationsPage: React.FC<TradingOperationsPageProps> = ({
             <h2 className="text-sm font-semibold" style={{ color: "#00d4ff" }}>
               Market Watch
             </h2>
+            <span
+              className="text-xs px-2 py-0.5 rounded-full"
+              style={{
+                background: "rgba(0, 212, 255, 0.1)",
+                color: "#00d4ff",
+              }}
+            >
+              Click card to trade
+            </span>
           </div>
           <MultiSymbolSubscription
             onSubscribe={handleSubscribe}
@@ -476,139 +495,137 @@ export const TradingOperationsPage: React.FC<TradingOperationsPageProps> = ({
           />
         </div>
 
-        {/* Subscribed Symbols Grid - Responsive 1-4 columns */}
-        {subscribedSymbols.length > 0 && (
-          <div
-            className="grid gap-3"
-            style={{
-              gridTemplateColumns: "repeat(auto-fill, minmax(140px, 1fr))",
-            }}
-          >
-            {sortedSymbols.map((symbol) => (
-              <SymbolCard
-                key={symbol}
-                symbol={symbol}
-                stockInfo={symbolData.get(symbol) || null}
-                ohlc={getOhlcForSymbol(symbol)}
-                isSelected={selectedSymbol === symbol}
-                onClick={() => handleSymbolClick(symbol)}
-                showOhlc={includeOhlc}
-              />
-            ))}
-          </div>
+        {/* Draggable Symbol Grid */}
+        {!isLoadingPackages && tradingService && (
+          <DraggableSymbolGrid
+            symbols={subscribedSymbols}
+            symbolData={symbolData}
+            topPriceData={topPriceData}
+            onReorder={handleReorder}
+            tradingService={tradingService}
+            platform={platform}
+            accountNo={accountNo}
+            loanPackages={loanPackages}
+            onOrderPlaced={handleOrderPlaced}
+            showMarketDepth={true}
+            showTickTape={true}
+          />
         )}
 
-        {/* Selected Symbol Detail Panel */}
-        {selectedSymbol && (
+        {/* Collapsible Bottom Panels */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          {/* Order Book - Collapsible */}
           <div
             className="rounded-2xl border overflow-hidden"
             style={{
               background: "rgba(26, 31, 58, 0.6)",
               backdropFilter: "blur(16px)",
-              borderColor: "rgba(0, 212, 255, 0.3)",
+              borderColor: "rgba(123, 97, 255, 0.2)",
             }}
           >
-            {/* Panel Header - Collapsible */}
             <button
+              onClick={() => toggleSection("orderBook")}
               className="w-full p-4 flex items-center justify-between hover:bg-white/5 transition-colors"
-              onClick={() => setShowDetailPanel(!showDetailPanel)}
             >
               <div className="flex items-center gap-2">
-                <Activity className="w-4 h-4" style={{ color: "#00d4ff" }} />
-                <span className="font-semibold" style={{ color: "#00d4ff" }}>
-                  {selectedSymbol} Detail
+                <BookOpen className="w-4 h-4" style={{ color: "#00d4ff" }} />
+                <span
+                  className="font-semibold text-sm"
+                  style={{ color: "#00d4ff" }}
+                >
+                  Order Book
+                </span>
+                <span
+                  className="text-xs px-2 py-0.5 rounded-full"
+                  style={{
+                    background: "rgba(0, 212, 255, 0.1)",
+                    color: "var(--color-text-secondary)",
+                  }}
+                >
+                  {orders.length} orders
                 </span>
               </div>
-              {showDetailPanel ? (
-                <ChevronUp className="w-4 h-4 text-gray-400" />
-              ) : (
+              {collapsedSections.orderBook ? (
                 <ChevronDown className="w-4 h-4 text-gray-400" />
+              ) : (
+                <ChevronUp className="w-4 h-4 text-gray-400" />
               )}
             </button>
-
-            {/* Panel Content */}
-            {showDetailPanel && (
-              <div className="p-4 pt-0 grid grid-cols-1 lg:grid-cols-3 gap-4">
-                {/* Market Data Column */}
-                <div className="space-y-4">
-                  <MarketDataTicker
-                    symbol={selectedSymbol}
-                    platform={platform}
-                    showDetails={true}
-                    onPriceUpdate={handlePriceUpdate}
-                  />
-                  <MarketDepth
-                    symbol={selectedSymbol}
-                    platform={platform}
-                    maxLevels={10}
-                    onPriceClick={handlePriceClick}
-                  />
-                </div>
-
-                {/* Tick Tape Column */}
-                <div>
-                  <TickTape
-                    symbol={selectedSymbol}
-                    platform={platform}
-                    maxTicks={20}
-                  />
-                </div>
-
-                {/* Order Form Column */}
-                <div>
-                  {isLoadingPackages ? (
-                    <div
-                      className="rounded-lg p-6 flex flex-col items-center justify-center"
-                      style={{
-                        background: "rgba(15, 23, 42, 0.5)",
-                        minHeight: "200px",
-                      }}
-                    >
-                      <Loader2
-                        className="w-5 h-5 animate-spin"
-                        style={{ color: "#00d4ff" }}
-                      />
-                      <span className="mt-2 text-sm text-gray-400">
-                        Loading...
-                      </span>
-                    </div>
-                  ) : (
-                    <OrderForm
-                      tradingService={tradingService}
-                      platform={platform}
-                      accountNo={accountNo}
-                      loanPackages={loanPackages}
-                      onOrderPlaced={handleOrderPlaced}
-                      initialSymbol={selectedSymbol}
-                      initialPrice={currentPrice}
-                    />
-                  )}
-                </div>
+            <div
+              style={{
+                maxHeight: collapsedSections.orderBook ? "0px" : "400px",
+                overflow: "hidden",
+                transition: "max-height 0.3s ease-in-out",
+              }}
+            >
+              <div className="p-4 pt-0">
+                <OrderBook
+                  tradingService={tradingService}
+                  platform={platform}
+                  accountNo={accountNo}
+                  orders={orders}
+                  isLoading={isLoadingOrders}
+                  onCancelOrder={handleOrderCancelled}
+                  onRefresh={loadOrders}
+                />
               </div>
-            )}
+            </div>
           </div>
-        )}
 
-        {/* Orders and Holdings Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-          {/* Order Book */}
-          <OrderBook
-            tradingService={tradingService}
-            platform={platform}
-            accountNo={accountNo}
-            orders={orders}
-            isLoading={isLoadingOrders}
-            onCancelOrder={handleOrderCancelled}
-            onRefresh={loadOrders}
-          />
-
-          {/* Holdings */}
-          <Holdings
-            deals={deals}
-            isLoading={isLoadingDeals}
-            onRefresh={loadDeals}
-            onDealClick={handleDealClick}
-          />
+          {/* Holdings - Collapsible */}
+          <div
+            className="rounded-2xl border overflow-hidden"
+            style={{
+              background: "rgba(26, 31, 58, 0.6)",
+              backdropFilter: "blur(16px)",
+              borderColor: "rgba(123, 97, 255, 0.2)",
+            }}
+          >
+            <button
+              onClick={() => toggleSection("holdings")}
+              className="w-full p-4 flex items-center justify-between hover:bg-white/5 transition-colors"
+            >
+              <div className="flex items-center gap-2">
+                <Briefcase className="w-4 h-4" style={{ color: "#00ff88" }} />
+                <span
+                  className="font-semibold text-sm"
+                  style={{ color: "#00ff88" }}
+                >
+                  Holdings
+                </span>
+                <span
+                  className="text-xs px-2 py-0.5 rounded-full"
+                  style={{
+                    background: "rgba(0, 255, 136, 0.1)",
+                    color: "var(--color-text-secondary)",
+                  }}
+                >
+                  {deals.length} positions
+                </span>
+              </div>
+              {collapsedSections.holdings ? (
+                <ChevronDown className="w-4 h-4 text-gray-400" />
+              ) : (
+                <ChevronUp className="w-4 h-4 text-gray-400" />
+              )}
+            </button>
+            <div
+              style={{
+                maxHeight: collapsedSections.holdings ? "0px" : "400px",
+                overflow: "hidden",
+                transition: "max-height 0.3s ease-in-out",
+              }}
+            >
+              <div className="p-4 pt-0">
+                <Holdings
+                  deals={deals}
+                  isLoading={isLoadingDeals}
+                  onRefresh={loadDeals}
+                  onDealClick={handleDealClick}
+                />
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>

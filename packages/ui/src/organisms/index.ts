@@ -30,3 +30,5 @@ export * from "./MarketDepth";
 export * from "./MarketIndexBar";
 export * from "./TickTape";
 export * from "./OhlcDisplay";
+export * from "./CompactOrderForm";
+export * from "./DraggableSymbolGrid";
