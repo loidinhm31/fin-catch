@@ -33,7 +33,7 @@ import type { FinCatchEmbedProps } from "./types";
 import { useEffect, useMemo } from "react";
 import { IPlatformServices, PlatformProvider } from "@fin-catch/ui/platform";
 import { AppShell } from "@fin-catch/ui/templates";
-import { HashRouter } from "react-router-dom";
+import { BrowserRouter } from "react-router-dom";
 
 /**
  * Get server URL from environment or default
@@ -181,7 +181,7 @@ export function FinCatchApp({
   return (
     <div className={className}>
       <PlatformProvider services={services}>
-        {useRouter ? <HashRouter>{content}</HashRouter> : content}
+        {useRouter ? <BrowserRouter>{content}</BrowserRouter> : content}
       </PlatformProvider>
     </div>
   );

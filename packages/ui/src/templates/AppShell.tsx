@@ -62,7 +62,7 @@ export interface AppShellProps {
 
   /**
    * Base path for navigation when embedded (e.g., "/fin-catch")
-   * If not provided, navigation uses relative paths (for standalone mode with HashRouter)
+   * If not provided, navigation uses relative paths (for standalone mode with BrowserRouter)
    */
   basePath?: string;
 }
@@ -231,8 +231,24 @@ export function AppShell({
                   path="settings"
                   element={<SettingsPage onLogout={handleLogout} />}
                 />
-                <Route path="/" element={<Navigate to="portfolio" replace />} />
-                <Route path="*" element={<Navigate to="portfolio" replace />} />
+                <Route
+                  path="/"
+                  element={
+                    <Navigate
+                      to={basePath ? `${basePath}/portfolio` : "portfolio"}
+                      replace
+                    />
+                  }
+                />
+                <Route
+                  path="*"
+                  element={
+                    <Navigate
+                      to={basePath ? `${basePath}/portfolio` : "portfolio"}
+                      replace
+                    />
+                  }
+                />
               </Routes>
             </Suspense>
           </ErrorBoundary>
