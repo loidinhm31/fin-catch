@@ -28,52 +28,13 @@ FinCatch App is a desktop application that integrates the **fin-catch-data** lib
 ## Project Structure
 
 ```
-fin-catch-app/
-├── src/
-│   ├── components/
-│   │   ├── atoms/          # Basic building blocks (Button, Input, Select, etc.)
-│   │   ├── molecules/      # Combinations of atoms (FormField, DateRangePicker, etc.)
-│   │   ├── organisms/      # Complex components (Forms, Charts)
-│   │   ├── templates/      # Page layouts
-│   │   └── pages/          # Complete pages
-│   ├── services/           # API service layer
-│   ├── types/             # TypeScript type definitions
-│   ├── utils/             # Utility functions
-│   ├── styles/            # Global styles
-│   ├── App.tsx            # Main application component
-│   └── main.tsx           # Application entry point
-├── src-tauri/             # Tauri backend
-└── public/                # Static assets
+apps/tauri/
+├── src/              # Tauri-specific entry point and configuration
+├── src-tauri/        # Rust backend (SQLite, auth, sync, web server)
+└── public/           # Static assets
 ```
 
-## Atomic Design Components
-
-### Atoms
-
-- `Button`: Customizable button with variants (primary, secondary, outline, ghost)
-- `Input`: Text input with error states
-- `Select`: Dropdown select with custom options
-- `Label`: Form label with required indicator
-- `DateInput`: Date and time picker
-- `ErrorText`: Error message display
-
-### Molecules
-
-- `FormField`: Label + Input/Select + Error message wrapper
-- `DateRangePicker`: From/To date selection
-- `Card`: Content container with optional title
-- `Tabs`: Tab navigation component
-
-### Organisms
-
-- `StockQueryForm`: Complete form for querying stock data
-- `GoldQueryForm`: Complete form for querying gold prices
-- `StockChart`: Interactive stock price chart with OHLCV data
-- `GoldChart`: Gold price chart with buy/sell prices
-
-### Pages
-
-- `FinancialDataPage`: Main application page with tab navigation
+UI components, adapters, and hooks are shared via `@fin-catch/ui` — see [packages/ui/README.md](../../packages/ui/README.md) for the component library and [packages/ui/DESIGN_SYSTEM.md](../../packages/ui/DESIGN_SYSTEM.md) for the design system.
 
 ## Getting Started
 
@@ -174,14 +135,7 @@ External Data Sources (VNDIRECT, SJC, Yahoo Finance, etc.)
 
 ## Design System
 
-The application uses a comprehensive design system with:
-
-- Consistent color palette (cyan, blue, orange gradients)
-- Glassmorphism effects for modern UI
-- Responsive typography
-- Custom animations (float, pulse-glow)
-- Mobile-first responsive breakpoints
-- Dark mode support
+See [packages/ui/DESIGN_SYSTEM.md](../../packages/ui/DESIGN_SYSTEM.md) for the full design system specification.
 
 ## Key Features
 

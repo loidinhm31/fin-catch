@@ -1,150 +1,30 @@
 import type { IPortfolioService, Portfolio } from "@fin-catch/shared";
-import { getSessionToken, WEB_SERVER_PORT } from "@fin-catch/ui/utils";
+import { HttpClient } from "./HttpClient";
 
-/**
- * API response wrapper from embedded server
- */
-interface ApiResponse<T> {
-  success: boolean;
-  data?: T;
-  error?: string;
-}
-
-/**
- * HTTP adapter for portfolio operations
- * Calls the embedded Axum server on port 25092
- */
-export class HttpPortfolioAdapter implements IPortfolioService {
-  private readonly baseUrl = `http://localhost:${WEB_SERVER_PORT}`;
-
-  private getUrlWithToken(endpoint: string): string {
-    const token = getSessionToken();
-    const separator = endpoint.includes("?") ? "&" : "?";
-    return token
-      ? `${this.baseUrl}${endpoint}${separator}token=${encodeURIComponent(token)}`
-      : `${this.baseUrl}${endpoint}`;
-  }
-
+export class HttpPortfolioAdapter
+  extends HttpClient
+  implements IPortfolioService
+{
   async createPortfolio(portfolio: Portfolio): Promise<string> {
-    const url = this.getUrlWithToken("/api/portfolios");
-    const response = await fetch(url, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Accept: "application/json",
-      },
-      body: JSON.stringify(portfolio),
-    });
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      throw new Error(`API error: ${response.status} - ${errorText}`);
-    }
-
-    const result: ApiResponse<string> = await response.json();
-    if (!result.success) {
-      throw new Error(result.error || "Unknown API error");
-    }
-
-    console.log("[HTTP] Created portfolio:", result.data);
-    return result.data!;
+    return this.post<Portfolio, string>("/api/portfolios", portfolio);
   }
 
   async getPortfolio(id: string): Promise<Portfolio> {
-    const url = this.getUrlWithToken(
-      `/api/portfolios/${encodeURIComponent(id)}`,
-    );
-    const response = await fetch(url, {
-      method: "GET",
-      headers: {
-        Accept: "application/json",
-      },
-    });
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      throw new Error(`API error: ${response.status} - ${errorText}`);
-    }
-
-    const result: ApiResponse<Portfolio> = await response.json();
-    if (!result.success) {
-      throw new Error(result.error || "Unknown API error");
-    }
-
-    console.log("[HTTP] Got portfolio:", result.data);
-    return result.data!;
+    return this.get<Portfolio>(`/api/portfolios/${encodeURIComponent(id)}`);
   }
 
   async listPortfolios(): Promise<Portfolio[]> {
-    const url = this.getUrlWithToken("/api/portfolios");
-    const response = await fetch(url, {
-      method: "GET",
-      headers: {
-        Accept: "application/json",
-      },
-    });
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      throw new Error(`API error: ${response.status} - ${errorText}`);
-    }
-
-    const result: ApiResponse<Portfolio[]> = await response.json();
-    if (!result.success) {
-      throw new Error(result.error || "Unknown API error");
-    }
-
-    console.log("[HTTP] Listed portfolios:", result.data?.length);
-    return result.data!;
+    return this.get<Portfolio[]>("/api/portfolios");
   }
 
   async updatePortfolio(portfolio: Portfolio): Promise<void> {
-    const url = this.getUrlWithToken(
+    await this.put<Portfolio, void>(
       `/api/portfolios/${encodeURIComponent(portfolio.id)}`,
+      portfolio,
     );
-    const response = await fetch(url, {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-        Accept: "application/json",
-      },
-      body: JSON.stringify(portfolio),
-    });
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      throw new Error(`API error: ${response.status} - ${errorText}`);
-    }
-
-    const result: ApiResponse<void> = await response.json();
-    if (!result.success) {
-      throw new Error(result.error || "Unknown API error");
-    }
-
-    console.log("[HTTP] Updated portfolio:", portfolio.id);
   }
 
   async deletePortfolio(id: string): Promise<void> {
-    const url = this.getUrlWithToken(
-      `/api/portfolios/${encodeURIComponent(id)}`,
-    );
-    const response = await fetch(url, {
-      method: "DELETE",
-      headers: {
-        Accept: "application/json",
-      },
-    });
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      throw new Error(`API error: ${response.status} - ${errorText}`);
-    }
-
-    const result: ApiResponse<void> = await response.json();
-    if (!result.success) {
-      throw new Error(result.error || "Unknown API error");
-    }
-
-    console.log("[HTTP] Deleted portfolio:", id);
+    await this.del<void>(`/api/portfolios/${encodeURIComponent(id)}`);
   }
 }

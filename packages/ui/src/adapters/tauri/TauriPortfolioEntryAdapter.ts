@@ -1,43 +1,24 @@
-import { invoke } from "@tauri-apps/api/core";
 import type { IPortfolioEntryService, PortfolioEntry } from "@fin-catch/shared";
+import { tauriInvoke } from "./tauriInvoke";
 
-/**
- * Tauri adapter for portfolio entry operations
- * Wraps invoke() calls to Rust backend
- */
 export class TauriPortfolioEntryAdapter implements IPortfolioEntryService {
   async createEntry(entry: PortfolioEntry): Promise<string> {
-    console.log("[Tauri IPC] create_entry", entry);
-    const id = await invoke<string>("create_entry", { entry });
-    console.log("[Tauri IPC Response]", id);
-    return id;
+    return tauriInvoke<string>("create_entry", { entry });
   }
 
   async getEntry(id: string): Promise<PortfolioEntry> {
-    console.log("[Tauri IPC] get_entry", id);
-    const entry = await invoke<PortfolioEntry>("get_entry", { id });
-    console.log("[Tauri IPC Response]", entry);
-    return entry;
+    return tauriInvoke<PortfolioEntry>("get_entry", { id });
   }
 
   async listEntries(portfolioId: string): Promise<PortfolioEntry[]> {
-    console.log("[Tauri IPC] list_entries", portfolioId);
-    const entries = await invoke<PortfolioEntry[]>("list_entries", {
-      portfolioId,
-    });
-    console.log("[Tauri IPC Response]", entries);
-    return entries;
+    return tauriInvoke<PortfolioEntry[]>("list_entries", { portfolioId });
   }
 
   async updateEntry(entry: PortfolioEntry): Promise<void> {
-    console.log("[Tauri IPC] update_entry", entry);
-    await invoke<void>("update_entry", { entry });
-    console.log("[Tauri IPC Response] Entry updated");
+    await tauriInvoke<void>("update_entry", { entry });
   }
 
   async deleteEntry(id: string): Promise<void> {
-    console.log("[Tauri IPC] delete_entry", id);
-    await invoke<void>("delete_entry", { id });
-    console.log("[Tauri IPC Response] Entry deleted");
+    await tauriInvoke<void>("delete_entry", { id });
   }
 }

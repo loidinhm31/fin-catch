@@ -3362,6 +3362,8 @@ dependencies = [
 [[package]]
 name = "qm-fin-catch-data"
 version = "0.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "af883c81e6886d17ed7e5204a602435adc5d03aae432b03d7277dd2b26dd0eb9"
 dependencies = [
  "anyhow",
  "async-trait",
@@ -3378,6 +3380,8 @@ dependencies = [
 [[package]]
 name = "qm-sync-client"
 version = "0.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "89cb4872a06b69e2f826063ec1a1edec286412f585b5dc03588d8461734922bb"
 dependencies = [
  "async-trait",
  "chrono",
@@ -3395,6 +3399,8 @@ dependencies = [
 [[package]]
 name = "qm-sync-engine"
 version = "0.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "85297ffc88fd46339be7ab54b4721bd702a8bbf4c8c4d6128f4fddb4b7e7014f"
 dependencies = [
  "async-trait",
  "chrono",
