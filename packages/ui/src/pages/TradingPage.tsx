@@ -11,15 +11,7 @@ import { usePlatformServices } from "@fin-catch/ui/platform";
  * - Verify OTP for platforms that require it
  * - View connection status and disconnect
  */
-/**
- * Props for TradingPage
- */
-export interface TradingPageProps {
-  /** Base path for navigation */
-  basePath?: string;
-}
-
-export const TradingPage: React.FC<TradingPageProps> = ({ basePath }) => {
+export const TradingPage: React.FC = () => {
   const { trading, auth } = usePlatformServices();
 
   // Check if user is authenticated (trading requires qm-center auth)
@@ -187,7 +179,7 @@ export const TradingPage: React.FC<TradingPageProps> = ({ basePath }) => {
         </div>
 
         {/* Trading Platform Connect Component */}
-        <TradingPlatformConnect tradingService={trading} basePath={basePath} />
+        <TradingPlatformConnect tradingService={trading} />
       </div>
     </div>
   );

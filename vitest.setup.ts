@@ -1,4 +1,5 @@
 import "@testing-library/jest-dom";
+import { beforeEach, vi } from "vitest";
 
 // Mock import.meta.env
 const mockEnv = {
@@ -6,11 +7,10 @@ const mockEnv = {
   PROD: false,
   MODE: "test",
   VITE_QM_SYNC_SERVER_URL: "http://localhost:3000",
-  VITE_APP_ID: "fin-catch-test",
-  VITE_API_KEY: "test-api-key",
+  VITE_FIN_CATCH_APP_ID: "fin-catch-test",
+  VITE_FIN_CATCH_API_KEY: "test-api-key",
 };
 
-// @ts-expect-error - mocking import.meta.env
 globalThis.import = { meta: { env: mockEnv } };
 
 // Mock localStorage

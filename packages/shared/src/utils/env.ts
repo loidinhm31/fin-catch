@@ -3,8 +3,8 @@
  */
 export interface AppEnvironment {
   VITE_QM_SYNC_SERVER_URL: string;
-  VITE_APP_ID: string;
-  VITE_API_KEY: string;
+  VITE_FIN_CATCH_APP_ID: string;
+  VITE_FIN_CATCH_API_KEY: string;
   DEV: boolean;
   PROD: boolean;
   MODE: string;
@@ -15,8 +15,8 @@ export interface AppEnvironment {
  */
 const ENV_DEFAULTS: Partial<AppEnvironment> = {
   VITE_QM_SYNC_SERVER_URL: "http://localhost:3000",
-  VITE_APP_ID: "fin-catch",
-  VITE_API_KEY: "",
+  VITE_FIN_CATCH_APP_ID: "fin-catch",
+  VITE_FIN_CATCH_API_KEY: "",
   DEV: false,
   PROD: true,
   MODE: "production",
@@ -96,14 +96,14 @@ class EnvironmentManager {
    * Get the app ID
    */
   get appId(): string {
-    return this.get("VITE_APP_ID");
+    return this.get("VITE_FIN_CATCH_APP_ID");
   }
 
   /**
    * Get the API key
    */
   get apiKey(): string {
-    return this.get("VITE_API_KEY");
+    return this.get("VITE_FIN_CATCH_API_KEY");
   }
 }
 

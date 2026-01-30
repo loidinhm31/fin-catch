@@ -41,8 +41,6 @@ interface TradingPlatformConnectProps {
   /** Callback when connection status changes */
   /** Callback when connection status changes */
   onStatusChange?: (platform: TradingPlatformId, status: TradingStatus) => void;
-  /** Base path for navigation */
-  basePath?: string;
 }
 
 /**
@@ -62,7 +60,6 @@ type ConnectionStep = "select" | "login" | "otp" | "connected";
 export const TradingPlatformConnect: React.FC<TradingPlatformConnectProps> = ({
   tradingService,
   onStatusChange,
-  basePath,
 }) => {
   // Platform selection state
   const [platforms, setPlatforms] = useState<TradingPlatform[]>([]);
@@ -755,7 +752,6 @@ export const TradingPlatformConnect: React.FC<TradingPlatformConnectProps> = ({
             <TradingAccountInfo
               tradingService={tradingService}
               platform={selectedPlatform.id}
-              basePath={basePath}
             />
           )}
 

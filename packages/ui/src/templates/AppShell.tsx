@@ -37,7 +37,7 @@ import {
   Sidebar,
 } from "@fin-catch/ui/organisms";
 import "@fin-catch/ui/styles";
-import { useAuth } from "@fin-catch/ui/hooks";
+import { useAuth, useNav } from "@fin-catch/ui/hooks";
 
 type Page = "financial-data" | "portfolio" | "trading" | "settings";
 
@@ -59,23 +59,16 @@ export interface AppShellProps {
    * Callback when user requests logout - allows parent app to handle logout
    */
   onLogoutRequest?: () => void;
-
-  /**
-   * Base path for navigation when embedded (e.g., "/fin-catch")
-   * If not provided, navigation uses relative paths (for standalone mode with BrowserRouter)
-   */
-  basePath?: string;
 }
 
 export function AppShell({
   skipAuth: skipAuthProp = false,
   embedded = false,
   onLogoutRequest,
-  basePath,
 }: AppShellProps = {}) {
   // Navigation hooks
   const location = useLocation();
-  const navigate = useNavigate();
+  const { to, nav } = useNav();
 
   const [localSkipAuth, setLocalSkipAuth] = useState(false);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
@@ -102,26 +95,13 @@ export function AppShell({
   const currentPage = getCurrentPage();
 
   const handleNavigate = (page: Page) => {
-    // Build the target path
-    let pagePath;
-    switch (page) {
-      case "financial-data":
-        pagePath = "market";
-        break;
-      case "trading":
-        pagePath = "trading";
-        break;
-      case "settings":
-        pagePath = "settings";
-        break;
-      case "portfolio":
-      default:
-        pagePath = "portfolio";
-        break;
-    }
-    // Use absolute paths when basePath is provided (embedded mode), otherwise relative (standalone)
-    const targetPath = basePath ? `${basePath}/${pagePath}` : pagePath;
-    navigate(targetPath);
+    const pageMap: Record<Page, string> = {
+      "financial-data": "market",
+      trading: "trading",
+      settings: "settings",
+      portfolio: "portfolio",
+    };
+    nav(pageMap[page] || "portfolio");
   };
 
   // Use either the prop or local state for skip auth
@@ -221,33 +201,20 @@ export function AppShell({
                 {/* More specific route must come before less specific */}
                 <Route
                   path="trading/operations"
-                  element={<TradingOperationsPage basePath={basePath} />}
+                  element={<TradingOperationsPage />}
                 />
-                <Route
-                  path="trading"
-                  element={<TradingPage basePath={basePath} />}
-                />
+                <Route path="trading" element={<TradingPage />} />
                 <Route
                   path="settings"
                   element={<SettingsPage onLogout={handleLogout} />}
                 />
                 <Route
                   path="/"
-                  element={
-                    <Navigate
-                      to={basePath ? `${basePath}/portfolio` : "portfolio"}
-                      replace
-                    />
-                  }
+                  element={<Navigate to={to("portfolio")} replace />}
                 />
                 <Route
                   path="*"
-                  element={
-                    <Navigate
-                      to={basePath ? `${basePath}/portfolio` : "portfolio"}
-                      replace
-                    />
-                  }
+                  element={<Navigate to={to("portfolio")} replace />}
                 />
               </Routes>
             </Suspense>

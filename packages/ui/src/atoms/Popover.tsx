@@ -1,6 +1,7 @@
 import * as React from "react";
 import * as PopoverPrimitive from "@radix-ui/react-popover";
 import { cn } from "@fin-catch/shared";
+import { usePortalContainer } from "@fin-catch/ui/hooks";
 
 const Popover = PopoverPrimitive.Root;
 
@@ -10,15 +11,11 @@ const PopoverAnchor = PopoverPrimitive.Anchor;
 
 const PopoverContent = React.forwardRef<
   React.ElementRef<typeof PopoverPrimitive.Content>,
-  React.ComponentPropsWithoutRef<typeof PopoverPrimitive.Content> & {
-    container?: HTMLElement | null;
-  }
->(
-  (
-    { className, align = "center", sideOffset = 4, container, ...props },
-    ref,
-  ) => (
-    <PopoverPrimitive.Portal container={container}>
+  React.ComponentPropsWithoutRef<typeof PopoverPrimitive.Content>
+>(({ className, align = "center", sideOffset = 4, ...props }, ref) => {
+  const container = usePortalContainer();
+  return (
+    <PopoverPrimitive.Portal container={container ?? undefined}>
       <PopoverPrimitive.Content
         ref={ref}
         align={align}
@@ -45,8 +42,8 @@ const PopoverContent = React.forwardRef<
         {...props}
       />
     </PopoverPrimitive.Portal>
-  ),
-);
+  );
+});
 PopoverContent.displayName = PopoverPrimitive.Content.displayName;
 
 export { Popover, PopoverTrigger, PopoverContent, PopoverAnchor };

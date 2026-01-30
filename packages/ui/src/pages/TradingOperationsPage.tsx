@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useCallback } from "react";
-import { useSearchParams, useNavigate } from "react-router-dom";
+import { useSearchParams } from "react-router-dom";
+import { useNav } from "@fin-catch/ui/hooks";
 import {
   ArrowLeft,
   RefreshCw,
@@ -76,15 +77,8 @@ function saveCollapsedSections(state: {
  * - Order book (today's orders) - collapsible
  * - Holdings (current positions) - collapsible
  */
-export interface TradingOperationsPageProps {
-  /** Base path for navigation */
-  basePath?: string;
-}
-
-export const TradingOperationsPage: React.FC<TradingOperationsPageProps> = ({
-  basePath,
-}) => {
-  const navigate = useNavigate();
+export const TradingOperationsPage: React.FC = () => {
+  const { nav } = useNav();
   const [searchParams] = useSearchParams();
 
   // Get params from URL
@@ -351,7 +345,7 @@ export const TradingOperationsPage: React.FC<TradingOperationsPageProps> = ({
 
   // Handle back navigation
   const handleBack = () => {
-    navigate(basePath ? `${basePath}/trading` : "/trading");
+    nav("trading");
   };
 
   // Refresh all data

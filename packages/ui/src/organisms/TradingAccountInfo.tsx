@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNav } from "@fin-catch/ui/hooks";
 import {
   AlertCircle,
   ArrowRightLeft,
@@ -30,8 +30,6 @@ interface TradingAccountInfoProps {
   tradingService: ITradingAuthService;
   /** Platform to show account info for */
   platform: TradingPlatformId;
-  /** Base path for navigation (e.g. /fin-catch) */
-  basePath?: string;
 }
 
 /**
@@ -56,9 +54,8 @@ const formatCurrency = (value: number): string => {
 export const TradingAccountInfo: React.FC<TradingAccountInfoProps> = ({
   tradingService,
   platform,
-  basePath,
 }) => {
-  const navigate = useNavigate();
+  const { to, nav } = useNav();
 
   // Account info state
   const [accountInfo, setAccountInfo] = useState<TradingAccountInfoType | null>(
@@ -664,11 +661,8 @@ export const TradingAccountInfo: React.FC<TradingAccountInfoProps> = ({
           <Button
             variant="primary"
             onClick={() => {
-              const path = basePath
-                ? `${basePath}/trading/operations`
-                : "/trading/operations";
-              navigate(
-                `${path}?platform=${platform}&account=${selectedAccount.id}`,
+              nav(
+                `trading/operations?platform=${platform}&account=${selectedAccount.id}`,
               );
             }}
             className="w-full"

@@ -30,10 +30,11 @@ import {
   setTradingAuthService,
 } from "@fin-catch/ui/adapters";
 import type { FinCatchEmbedProps } from "./types";
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { IPlatformServices, PlatformProvider } from "@fin-catch/ui/platform";
 import { AppShell } from "@fin-catch/ui/templates";
 import { BrowserRouter } from "react-router-dom";
+import { BasePathContext, PortalContainerContext } from "../hooks/useNav";
 
 /**
  * Get server URL from environment or default
@@ -74,8 +75,8 @@ function getApiKey(): string {
   try {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const env = (import.meta as any).env;
-    if (env?.VITE_API_KEY) {
-      return env.VITE_API_KEY;
+    if (env?.VITE_FIN_CATCH_API_KEY) {
+      return env.VITE_FIN_CATCH_API_KEY;
     }
   } catch {
     // Not in a Vite environment
@@ -169,19 +170,31 @@ export function FinCatchApp({
   // Determine if we should skip auth (tokens provided externally)
   const skipAuth = !!(authTokens?.accessToken && authTokens?.refreshToken);
 
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [portalContainer, setPortalContainer] = useState<HTMLElement | null>(
+    null,
+  );
+
+  useEffect(() => {
+    setPortalContainer(containerRef.current);
+  }, []);
+
   const content = (
     <AppShell
       skipAuth={skipAuth}
       embedded={embedded}
       onLogoutRequest={onLogoutRequest}
-      basePath={basePath}
     />
   );
 
   return (
-    <div className={className}>
+    <div ref={containerRef} className={className}>
       <PlatformProvider services={services}>
-        {useRouter ? <BrowserRouter>{content}</BrowserRouter> : content}
+        <BasePathContext.Provider value={basePath || ""}>
+          <PortalContainerContext.Provider value={portalContainer}>
+            {useRouter ? <BrowserRouter>{content}</BrowserRouter> : content}
+          </PortalContainerContext.Provider>
+        </BasePathContext.Provider>
       </PlatformProvider>
     </div>
   );

@@ -2,6 +2,7 @@ import * as React from "react";
 import * as DialogPrimitive from "@radix-ui/react-dialog";
 import { X } from "lucide-react";
 import { cn } from "@fin-catch/shared";
+import { usePortalContainer } from "@fin-catch/ui/hooks";
 
 const Dialog = DialogPrimitive.Root;
 
@@ -31,45 +32,48 @@ DialogOverlay.displayName = DialogPrimitive.Overlay.displayName;
 const DialogContent = React.forwardRef<
   React.ElementRef<typeof DialogPrimitive.Content>,
   React.ComponentPropsWithoutRef<typeof DialogPrimitive.Content>
->(({ className, children, ...props }, ref) => (
-  <DialogPortal>
-    <DialogOverlay />
-    <DialogPrimitive.Content
-      ref={ref}
-      className={cn(
-        "fixed left-[50%] top-[50%] z-[100] translate-x-[-50%] translate-y-[-50%]",
-        "w-[calc(100%-2rem)] max-w-lg max-h-[90vh]",
-        "flex flex-col rounded-2xl",
-        "data-[state=open]:animate-in data-[state=closed]:animate-out",
-        "data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0",
-        "data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95",
-        "data-[state=closed]:slide-out-to-left-1/2 data-[state=closed]:slide-out-to-top-[48%]",
-        "data-[state=open]:slide-in-from-left-1/2 data-[state=open]:slide-in-from-top-[48%]",
-        className,
-      )}
-      style={{
-        background: "var(--glass-bg-dark-strong)",
-        backdropFilter: "var(--blur-xl)",
-        WebkitBackdropFilter: "var(--blur-xl)",
-        boxShadow: "var(--shadow-xl)",
-        border: "1px solid var(--glass-border-medium)",
-      }}
-      {...props}
-    >
-      {children}
-      <DialogPrimitive.Close
-        className="absolute right-4 top-4 w-10 h-10 rounded-full flex items-center justify-center transition-all opacity-70 hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:ring-offset-2 disabled:pointer-events-none"
+>(({ className, children, ...props }, ref) => {
+  const container = usePortalContainer();
+  return (
+    <DialogPortal container={container ?? undefined}>
+      <DialogOverlay />
+      <DialogPrimitive.Content
+        ref={ref}
+        className={cn(
+          "fixed left-[50%] top-[50%] z-[100] translate-x-[-50%] translate-y-[-50%]",
+          "w-[calc(100%-2rem)] max-w-lg max-h-[90vh]",
+          "flex flex-col rounded-2xl",
+          "data-[state=open]:animate-in data-[state=closed]:animate-out",
+          "data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0",
+          "data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95",
+          "data-[state=closed]:slide-out-to-left-1/2 data-[state=closed]:slide-out-to-top-[48%]",
+          "data-[state=open]:slide-in-from-left-1/2 data-[state=open]:slide-in-from-top-[48%]",
+          className,
+        )}
         style={{
-          backgroundColor: "rgba(255, 255, 255, 0.1)",
-          color: "var(--color-text-primary)",
+          background: "var(--glass-bg-dark-strong)",
+          backdropFilter: "var(--blur-xl)",
+          WebkitBackdropFilter: "var(--blur-xl)",
+          boxShadow: "var(--shadow-xl)",
+          border: "1px solid var(--glass-border-medium)",
         }}
+        {...props}
       >
-        <X className="h-5 w-5" />
-        <span className="sr-only">Close</span>
-      </DialogPrimitive.Close>
-    </DialogPrimitive.Content>
-  </DialogPortal>
-));
+        {children}
+        <DialogPrimitive.Close
+          className="absolute right-4 top-4 w-10 h-10 rounded-full flex items-center justify-center transition-all opacity-70 hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:ring-offset-2 disabled:pointer-events-none"
+          style={{
+            backgroundColor: "rgba(255, 255, 255, 0.1)",
+            color: "var(--color-text-primary)",
+          }}
+        >
+          <X className="h-5 w-5" />
+          <span className="sr-only">Close</span>
+        </DialogPrimitive.Close>
+      </DialogPrimitive.Content>
+    </DialogPortal>
+  );
+});
 DialogContent.displayName = DialogPrimitive.Content.displayName;
 
 const DialogHeader = ({

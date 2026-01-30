@@ -173,13 +173,13 @@ export const SyncSettings: React.FC<SyncSettingsProps> = ({ onLogout }) => {
         <div className="flex items-center gap-3 mb-3">
           <div style={{ color: getStatusColor() }}>{getStatusIcon()}</div>
           <div className="flex-1">
-            <p className="text-sm font-semibold text-[var(--color-text-primary)]">
+            <p className="text-sm font-semibold text-text-primary">
               {getStatusText()}
             </p>
             {syncStatus?.lastSyncAt && (
               <div className="flex items-center gap-1 mt-1">
-                <Clock className="w-3 h-3 text-[var(--color-text-tertiary)]" />
-                <p className="text-xs text-[var(--color-text-tertiary)]">
+                <Clock className="w-3 h-3 text-(--color-text-tertiary)" />
+                <p className="text-xs text-(--color-text-tertiary)">
                   Last sync: {formatTimestamp(syncStatus.lastSyncAt)}
                 </p>
               </div>
@@ -232,12 +232,10 @@ export const SyncSettings: React.FC<SyncSettingsProps> = ({ onLogout }) => {
                     className="w-4 h-4 mb-1"
                     style={{ color: "#00d4ff" }}
                   />
-                  <span className="text-lg font-bold text-[var(--color-text-primary)]">
+                  <span className="text-lg font-bold text-text-primary">
                     {syncResult.pushed}
                   </span>
-                  <span className="text-xs text-[var(--color-text-secondary)]">
-                    Pushed
-                  </span>
+                  <span className="text-xs text-text-secondary">Pushed</span>
                 </div>
 
                 {/* Pulled */}
@@ -249,12 +247,10 @@ export const SyncSettings: React.FC<SyncSettingsProps> = ({ onLogout }) => {
                     className="w-4 h-4 mb-1"
                     style={{ color: "#7b61ff" }}
                   />
-                  <span className="text-lg font-bold text-[var(--color-text-primary)]">
+                  <span className="text-lg font-bold text-text-primary">
                     {syncResult.pulled}
                   </span>
-                  <span className="text-xs text-[var(--color-text-secondary)]">
-                    Pulled
-                  </span>
+                  <span className="text-xs text-text-secondary">Pulled</span>
                 </div>
 
                 {/* Conflicts */}
@@ -279,9 +275,7 @@ export const SyncSettings: React.FC<SyncSettingsProps> = ({ onLogout }) => {
                   >
                     {syncResult.conflicts}
                   </span>
-                  <span className="text-xs text-[var(--color-text-secondary)]">
-                    Conflicts
-                  </span>
+                  <span className="text-xs text-text-secondary">Conflicts</span>
                 </div>
               </div>
             )}
@@ -292,8 +286,8 @@ export const SyncSettings: React.FC<SyncSettingsProps> = ({ onLogout }) => {
                 className="flex items-center gap-1 mt-3 pt-2 border-t"
                 style={{ borderColor: "rgba(255, 255, 255, 0.1)" }}
               >
-                <Clock className="w-3 h-3 text-[var(--color-text-tertiary)]" />
-                <span className="text-xs text-[var(--color-text-tertiary)]">
+                <Clock className="w-3 h-3 text-(--color-text-tertiary)" />
+                <span className="text-xs text-(--color-text-tertiary)">
                   Completed at {formatTimestamp(syncResult.syncedAt)}
                 </span>
               </div>
@@ -344,14 +338,14 @@ export const SyncSettings: React.FC<SyncSettingsProps> = ({ onLogout }) => {
             boxShadow: "0 4px 16px rgba(0, 0, 0, 0.2)",
           }}
         >
-          <h3 className="text-sm font-semibold text-[var(--color-text-primary)] mb-3">
+          <h3 className="text-sm font-semibold text-text-primary mb-3">
             Account Information
           </h3>
 
           {authStatus.username && (
             <div className="flex items-center gap-2 mb-2">
               <User className="w-4 h-4" style={{ color: "#00d4ff" }} />
-              <span className="text-sm text-[var(--color-text-secondary)]">
+              <span className="text-sm text-text-secondary">
                 {authStatus.username}
               </span>
             </div>
@@ -360,7 +354,7 @@ export const SyncSettings: React.FC<SyncSettingsProps> = ({ onLogout }) => {
           {authStatus.email && (
             <div className="flex items-center gap-2">
               <Mail className="w-4 h-4" style={{ color: "#00d4ff" }} />
-              <span className="text-sm text-[var(--color-text-secondary)]">
+              <span className="text-sm text-text-secondary">
                 {authStatus.email}
               </span>
             </div>
@@ -378,7 +372,7 @@ export const SyncSettings: React.FC<SyncSettingsProps> = ({ onLogout }) => {
           boxShadow: "0 4px 16px rgba(0, 0, 0, 0.2)",
         }}
       >
-        <h3 className="text-sm font-semibold text-[var(--color-text-primary)] mb-3">
+        <h3 className="text-sm font-semibold text-text-primary mb-3">
           Server Configuration
         </h3>
 
@@ -458,10 +452,8 @@ export const SyncSettings: React.FC<SyncSettingsProps> = ({ onLogout }) => {
               className="w-8 h-8 mx-auto mb-2"
               style={{ color: "#718096" }}
             />
-            <p className="text-sm text-[var(--color-text-secondary)] mb-1">
-              Not logged in
-            </p>
-            <p className="text-xs text-[var(--color-text-tertiary)]">
+            <p className="text-sm text-text-secondary mb-1">Not logged in</p>
+            <p className="text-xs text-(--color-text-tertiary)">
               Please log in to enable sync
             </p>
           </div>
