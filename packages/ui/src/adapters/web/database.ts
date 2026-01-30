@@ -58,22 +58,13 @@ export class FinCatchDatabase extends Dexie {
     super("FinCatchDB");
 
     // Define schema
-    // Version 1: Initial schema
     this.version(1).stores({
-      // Primary key is id, indexed by created_at
-      portfolios: "id, created_at, sync_version",
-      // Primary key is id, indexed by portfolio_id and created_at
-      portfolioEntries:
-        "id, portfolio_id, asset_type, symbol, created_at, sync_version",
-      // Primary key is id, indexed by entry_id
-      couponPayments: "id, entry_id, payment_date, sync_version",
-    });
-
-    // Version 2: Add sync metadata tables
-    this.version(2).stores({
+      // Primary key is id, indexed by created_at and sync fields
       portfolios: "id, created_at, sync_version, synced_at",
+      // Primary key is id, indexed by portfolio_id, created_at, and sync fields
       portfolioEntries:
         "id, portfolio_id, asset_type, symbol, created_at, sync_version, synced_at",
+      // Primary key is id, indexed by entry_id, payment_date, and sync fields
       couponPayments: "id, entry_id, payment_date, sync_version, synced_at",
       // Sync metadata (checkpoint, config, etc.)
       _syncMeta: "key",

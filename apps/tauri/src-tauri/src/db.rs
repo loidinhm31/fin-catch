@@ -141,8 +141,6 @@ impl Database {
             [],
         )?;
 
-        // Run migrations for existing databases
-        Self::run_migrations(&conn)?;
 
         // Create bond_coupon_payments table with UUID primary key
         conn.execute(
@@ -189,36 +187,6 @@ impl Database {
         })
     }
 
-    /// Run database migrations for existing databases
-    fn run_migrations(conn: &Connection) -> Result<()> {
-        // Check if alert columns exist, add them if not
-        let columns: Vec<String> = conn
-            .prepare("PRAGMA table_info(portfolio_entries)")?
-            .query_map([], |row| row.get::<_, String>(1))?
-            .filter_map(|r| r.ok())
-            .collect();
-
-        if !columns.contains(&"target_price".to_string()) {
-            conn.execute("ALTER TABLE portfolio_entries ADD COLUMN target_price REAL", [])?;
-        }
-        if !columns.contains(&"stop_loss".to_string()) {
-            conn.execute("ALTER TABLE portfolio_entries ADD COLUMN stop_loss REAL", [])?;
-        }
-        if !columns.contains(&"alert_enabled".to_string()) {
-            conn.execute("ALTER TABLE portfolio_entries ADD COLUMN alert_enabled INTEGER DEFAULT 1", [])?;
-        }
-        if !columns.contains(&"last_alert_at".to_string()) {
-            conn.execute("ALTER TABLE portfolio_entries ADD COLUMN last_alert_at INTEGER", [])?;
-        }
-        if !columns.contains(&"alert_count".to_string()) {
-            conn.execute("ALTER TABLE portfolio_entries ADD COLUMN alert_count INTEGER", [])?;
-        }
-        if !columns.contains(&"last_alert_type".to_string()) {
-            conn.execute("ALTER TABLE portfolio_entries ADD COLUMN last_alert_type TEXT", [])?;
-        }
-
-        Ok(())
-    }
 
     // Portfolio CRUD operations
     pub fn create_portfolio(&self, portfolio: &Portfolio) -> Result<String> {

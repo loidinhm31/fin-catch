@@ -70,3 +70,4 @@ futures = "0.3"
 [target.'cfg(not(target_os = "android"))'.dependencies]
 machine-uid = "0.5"
 
+[workspace]
