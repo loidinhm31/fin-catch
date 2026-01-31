@@ -25,7 +25,7 @@ import {
   getPortfolioEntryService,
   getPortfolioService,
   getSyncService,
-} from "@fin-catch/ui/adapters";
+} from "@fin-catch/ui/adapters/factory";
 import { isTauri } from "@fin-catch/ui/utils";
 
 class FinCatchAPI {

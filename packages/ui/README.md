@@ -19,14 +19,14 @@ See [DESIGN_SYSTEM.md](./DESIGN_SYSTEM.md) for the full design system specificat
 ## Export Paths
 
 ```ts
-import { Button } from "@fin-catch/ui/atoms";
-import { FormField } from "@fin-catch/ui/molecules";
-import { OrderForm } from "@fin-catch/ui/organisms";
-import { PortfolioPage } from "@fin-catch/ui/pages";
-import { AppShell } from "@fin-catch/ui/templates";
+import { Button } from "@fin-catch/ui/components/atoms";
+import { FormField } from "@fin-catch/ui/components/molecules";
+import { OrderForm } from "@fin-catch/ui/components/organisms";
+import { PortfolioPage } from "@fin-catch/ui/components/pages";
+import { AppShell } from "@fin-catch/ui/components/templates";
 import { useAuth } from "@fin-catch/ui/hooks";
 import { serviceLogger } from "@fin-catch/ui/utils";
-import { TauriPortfolioAdapter } from "@fin-catch/ui/adapters";
+import { TauriPortfolioAdapter } from "@fin-catch/ui/adapters/tauri";
 import { PlatformProvider } from "@fin-catch/ui/platform";
 import { FinCatchApp } from "@fin-catch/ui/embed";
 ```

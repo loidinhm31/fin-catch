@@ -7,20 +7,6 @@
 
 import { isTauri } from "@fin-catch/ui/utils";
 import {
-  QmServerAuthAdapter,
-  QmServerDataAdapter,
-  IndexedDBPortfolioAdapter,
-  IndexedDBPortfolioEntryAdapter,
-  IndexedDBCouponPaymentAdapter,
-  IndexedDBSyncAdapter,
-  TradingAuthAdapter,
-  MarketDataAdapter,
-  TauriAuthAdapter,
-  TauriCouponPaymentAdapter,
-  TauriDataAdapter,
-  TauriPortfolioAdapter,
-  TauriPortfolioEntryAdapter,
-  TauriSyncAdapter,
   setAuthService,
   setCouponPaymentService,
   setDataService,
@@ -28,11 +14,31 @@ import {
   setPortfolioService,
   setSyncService,
   setTradingAuthService,
-} from "@fin-catch/ui/adapters";
+} from "@fin-catch/ui/adapters/factory";
+import {
+  IndexedDBCouponPaymentAdapter,
+  IndexedDBPortfolioAdapter,
+  IndexedDBPortfolioEntryAdapter,
+  IndexedDBSyncAdapter,
+} from "@fin-catch/ui/adapters/web";
+import {
+  MarketDataAdapter,
+  QmServerAuthAdapter,
+  QmServerDataAdapter,
+  TradingAuthAdapter,
+} from "@fin-catch/ui/adapters/shared";
+import {
+  TauriAuthAdapter,
+  TauriCouponPaymentAdapter,
+  TauriDataAdapter,
+  TauriPortfolioAdapter,
+  TauriPortfolioEntryAdapter,
+  TauriSyncAdapter,
+} from "@fin-catch/ui/adapters/tauri";
 import type { FinCatchEmbedProps } from "./types";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { IPlatformServices, PlatformProvider } from "@fin-catch/ui/platform";
-import { AppShell } from "@fin-catch/ui/templates";
+import { AppShell } from "@fin-catch/ui/components/templates";
 import { BrowserRouter } from "react-router-dom";
 import { BasePathContext, PortalContainerContext } from "../hooks/useNav";
 

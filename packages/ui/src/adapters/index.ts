@@ -69,4 +69,4 @@ export {
   setAuthService,
   setSyncService,
   setTradingAuthService,
-} from "./ServiceFactory";
+} from "./factory/ServiceFactory";

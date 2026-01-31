@@ -15,7 +15,7 @@ import {
   db,
   getCurrentTimestamp,
   SYNC_META_KEYS,
-} from "@fin-catch/ui/adapters";
+} from "@fin-catch/ui/adapters/web";
 import type { Checkpoint, PullRecord, SyncRecord } from "@fin-catch/shared";
 
 /**

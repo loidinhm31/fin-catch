@@ -1,9 +1,9 @@
 // Atomic design components
-export * from "./atoms";
-export * from "./molecules";
-export * from "./organisms";
-export * from "./templates";
-export * from "./pages";
+export * from "./components/atoms";
+export * from "./components/molecules";
+export * from "./components/organisms";
+export * from "./components/templates";
+export * from "./components/pages";
 
 // Logic and Utilities
 export * from "./hooks";
