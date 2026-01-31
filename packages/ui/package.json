@@ -6,7 +6,6 @@
   "main": "./src/index.ts",
   "types": "./src/index.ts",
   "exports": {
-    ".": "./src/index.ts",
     "./components/atoms": "./src/components/atoms/index.ts",
     "./components/molecules": "./src/components/molecules/index.ts",
     "./components/organisms": "./src/components/organisms/index.ts",

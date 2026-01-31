@@ -10,7 +10,7 @@ import type {
   IPortfolioService,
   ISyncService,
   ITradingAuthService,
-} from "../interfaces";
+} from "./interfaces";
 
 // Tauri Adapters (for storage via Tauri invoke)
 import {

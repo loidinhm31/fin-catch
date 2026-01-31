@@ -1,72 +1,7 @@
-// Re-export interfaces
-export type {
-  IPortfolioService,
-  IPortfolioEntryService,
-  ICouponPaymentService,
-  IDataService,
-  IAuthService,
-  ISyncService,
-  ITradingAuthService,
-} from "./interfaces";
+export * from "./shared";
 
-// Re-export shared adapters (used by both Tauri and Web for APIs)
-export {
-  QmServerDataAdapter,
-  type QmServerConfig,
-  QmServerAuthAdapter,
-  type QmServerAuthConfig,
-  TradingAuthAdapter,
-  type TradingAuthConfig,
-  MarketDataAdapter,
-  type MarketDataConfig,
-} from "./shared";
+export * from "./web";
 
-// Re-export IndexedDB adapters (for http/browser applications)
-export {
-  IndexedDBPortfolioAdapter,
-  IndexedDBPortfolioEntryAdapter,
-  IndexedDBCouponPaymentAdapter,
-  IndexedDBSyncAdapter,
-  IndexedDBSyncStorage,
-  createIndexedDBSyncAdapter,
-  db,
-  generateId,
-  getCurrentTimestamp,
-  FinCatchDatabase,
-  SYNC_META_KEYS,
-  type SyncMeta,
-  type PendingChange,
-  type IndexedDBSyncAdapterConfig,
-  type TokenProvider,
-  type TokenSaver,
-} from "./web";
+export * from "./tauri";
 
-// Re-export Tauri adapters (for desktop/Tauri applications)
-export {
-  TauriPortfolioAdapter,
-  TauriPortfolioEntryAdapter,
-  TauriCouponPaymentAdapter,
-  TauriDataAdapter,
-  TauriAuthAdapter,
-  TauriSyncAdapter,
-} from "./tauri";
-
-// Re-export factory functions
-export {
-  getPortfolioService,
-  getPortfolioEntryService,
-  getCouponPaymentService,
-  getDataService,
-  getAuthService,
-  getSyncService,
-  getTradingAuthService,
-  getAllServices,
-  resetServices,
-  setPortfolioService,
-  setPortfolioEntryService,
-  setCouponPaymentService,
-  setDataService,
-  setAuthService,
-  setSyncService,
-  setTradingAuthService,
-} from "./factory/ServiceFactory";
+export * from "./factory";
