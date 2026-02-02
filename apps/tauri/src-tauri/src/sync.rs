@@ -7,6 +7,7 @@ use qm_sync_client::{Checkpoint, ReqwestHttpClient, QmSyncClient, SyncClientConf
 
 use crate::auth::AuthService;
 use crate::db::{BondCouponPayment, Database, Portfolio, PortfolioEntry};
+use crate::sync_table_map;
 
 /// Sync service for synchronizing local data with qm-sync
 #[derive(Clone)]
@@ -194,7 +195,7 @@ impl SyncService {
         let deleted_entries = self.db.query_deleted_entries().map_err(|e| e.to_string())?;
         for entry in deleted_entries {
             records.push(SyncRecord {
-                table_name: "portfolio_entries".to_string(),
+                table_name: "portfolioEntries".to_string(),
                 row_id: entry.id,
                 data: serde_json::json!({}),
                 version: entry.sync_version,
@@ -215,7 +216,7 @@ impl SyncService {
             let deleted_payments = self.db.query_deleted_payments(&portfolio.id).map_err(|e| e.to_string())?;
             for payment in deleted_payments {
                 records.push(SyncRecord {
-                    table_name: "bond_coupon_payments".to_string(),
+                    table_name: "bondCouponPayments".to_string(),
                     row_id: payment.id,
                     data: serde_json::json!({}),
                     version: payment.sync_version,
@@ -305,7 +306,7 @@ impl SyncService {
         }
 
         Ok(SyncRecord {
-            table_name: "portfolio_entries".to_string(),
+            table_name: "portfolioEntries".to_string(),
             row_id: entry.id.clone(),
             data,
             version: entry.sync_version,
@@ -335,7 +336,7 @@ impl SyncService {
         }
 
         Ok(SyncRecord {
-            table_name: "bond_coupon_payments".to_string(),
+            table_name: "bondCouponPayments".to_string(),
             row_id: payment.id.clone(),
             data,
             version: payment.sync_version,
@@ -356,15 +357,15 @@ impl SyncService {
         // Sort non-deleted: parents first (portfolios=0, entries=1, payments=2)
         non_deleted.sort_by_key(|r| match r.table_name.as_str() {
             "portfolios" => 0,
-            "portfolio_entries" => 1,
-            "bond_coupon_payments" => 2,
+            "portfolioEntries" => 1,
+            "bondCouponPayments" => 2,
             _ => 3,
         });
 
         // Sort deleted: children first (payments=0, entries=1, portfolios=2)
         deleted.sort_by_key(|r| match r.table_name.as_str() {
-            "bond_coupon_payments" => 0,
-            "portfolio_entries" => 1,
+            "bondCouponPayments" => 0,
+            "portfolioEntries" => 1,
             "portfolios" => 2,
             _ => 3,
         });
@@ -373,8 +374,8 @@ impl SyncService {
         for record in non_deleted {
             match record.table_name.as_str() {
                 "portfolios" => self.apply_portfolio_change(record)?,
-                "portfolio_entries" => self.apply_entry_change(record).await?,
-                "bond_coupon_payments" => self.apply_payment_change(record).await?,
+                "portfolioEntries" => self.apply_entry_change(record).await?,
+                "bondCouponPayments" => self.apply_payment_change(record).await?,
                 _ => {
                     eprintln!("Unknown table: {}", record.table_name);
                 }
@@ -385,8 +386,8 @@ impl SyncService {
         for record in deleted {
             match record.table_name.as_str() {
                 "portfolios" => self.apply_portfolio_change(record)?,
-                "portfolio_entries" => self.apply_entry_change(record).await?,
-                "bond_coupon_payments" => self.apply_payment_change(record).await?,
+                "portfolioEntries" => self.apply_entry_change(record).await?,
+                "bondCouponPayments" => self.apply_payment_change(record).await?,
                 _ => {
                     eprintln!("Unknown table: {}", record.table_name);
                 }
@@ -535,15 +536,17 @@ impl SyncService {
                 // Hard-delete locally after successful push of deleted record
                 match record.table_name.as_str() {
                     "portfolios" => self.db.hard_delete_portfolio(&record.row_id),
-                    "portfolio_entries" => self.db.hard_delete_entry(&record.row_id),
-                    "bond_coupon_payments" => self.db.hard_delete_payment(&record.row_id),
+                    "portfolioEntries" => self.db.hard_delete_entry(&record.row_id),
+                    "bondCouponPayments" => self.db.hard_delete_payment(&record.row_id),
                     _ => Ok(()),
                 }.map_err(|e| e.to_string())?;
             } else {
+                // Convert camelCase sync table name to snake_case local DB table name
+                let db_table = sync_table_map::sync_to_db(&record.table_name);
                 // Normal: update synced_at for active records
                 let query = format!(
                     "UPDATE {} SET synced_at = ?, sync_version = sync_version + 1 WHERE id = ?",
-                    record.table_name
+                    db_table
                 );
                 self.db
                     .execute_sql(&query, &[&synced_at.to_string(), &record.row_id])

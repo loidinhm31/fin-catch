@@ -26,7 +26,7 @@
       ],
       "primaryKey": "rowId"
     },
-    "portfolio_entries": {
+    "portfolioEntries": {
       "columns": [
         {
           "name": "portfolioSyncUuid",
@@ -166,7 +166,7 @@
       ],
       "primaryKey": "rowId"
     },
-    "bond_coupon_payments": {
+    "bondCouponPayments": {
       "columns": [
         {
           "name": "entrySyncUuid",

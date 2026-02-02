@@ -1,6 +1,7 @@
 mod db;
 mod auth;
 mod sync;
+mod sync_table_map;
 mod session;
 mod shared_auth;
 mod shared_sync;

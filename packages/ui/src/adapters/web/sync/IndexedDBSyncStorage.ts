@@ -60,7 +60,7 @@ export class IndexedDBSyncStorage {
     for (const entry of entries) {
       if (entry.synced_at === undefined || entry.synced_at === null) {
         records.push({
-          tableName: "portfolio_entries",
+          tableName: "portfolioEntries",
           rowId: entry.id,
           data: {
             portfolioSyncUuid: entry.portfolio_id,
@@ -102,7 +102,7 @@ export class IndexedDBSyncStorage {
     for (const payment of payments) {
       if (payment.synced_at === undefined || payment.synced_at === null) {
         records.push({
-          tableName: "bond_coupon_payments",
+          tableName: "bondCouponPayments",
           rowId: payment.id,
           data: {
             entrySyncUuid: payment.entry_id,
@@ -123,10 +123,10 @@ export class IndexedDBSyncStorage {
       .filter((change) => change.operation === "delete")
       .toArray();
     for (const change of pendingDeletes) {
-      // Map local table names to server table names
+      // Map local Dexie table names to camelCase sync protocol table names
       let tableName = change.tableName;
-      if (tableName === "portfolioEntries") tableName = "portfolio_entries";
-      if (tableName === "couponPayments") tableName = "bond_coupon_payments";
+      if (tableName === "portfolioEntries") tableName = "portfolioEntries";
+      if (tableName === "couponPayments") tableName = "bondCouponPayments";
 
       records.push({
         tableName,
@@ -254,10 +254,9 @@ export class IndexedDBSyncStorage {
    */
   private serverToLocalTableName(tableName: string): string {
     switch (tableName) {
-      case "portfolio_entries":
+      case "portfolioEntries":
         return "portfolioEntries";
-      case "bond_coupon_payments":
-      case "coupon_payments":
+      case "bondCouponPayments":
         return "couponPayments";
       default:
         return tableName;
@@ -491,12 +490,9 @@ export class IndexedDBSyncStorage {
       case "portfolios":
         return db.portfolios;
       case "portfolioEntries":
-      case "portfolio_entries":
         return db.portfolioEntries;
-      case "couponPayments":
-      case "coupon_payments":
       case "bondCouponPayments":
-      case "bond_coupon_payments":
+      case "couponPayments":
         return db.couponPayments;
       default:
         return undefined;
@@ -513,12 +509,9 @@ export class IndexedDBSyncStorage {
       case "portfolios":
         return 0;
       case "portfolioEntries":
-      case "portfolio_entries":
         return 1;
-      case "couponPayments":
-      case "coupon_payments":
       case "bondCouponPayments":
-      case "bond_coupon_payments":
+      case "couponPayments":
         return 2;
       default:
         return 99;
