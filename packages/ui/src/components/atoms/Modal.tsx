@@ -166,7 +166,13 @@ export const Modal: React.FC<ModalProps> = ({
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>
         </DialogHeader>
-        <div className="overflow-y-auto px-6 py-6 flex-1">{children}</div>
+        <div
+          className="overflow-y-auto px-6 py-6 flex-1"
+          onWheel={(e) => e.stopPropagation()}
+          onTouchMove={(e) => e.stopPropagation()}
+        >
+          {children}
+        </div>
       </DialogContent>
     </Dialog>
   );
