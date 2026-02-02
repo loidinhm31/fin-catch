@@ -103,6 +103,37 @@ export const getDefaultDateRange = (): { from: Date; to: Date } => {
 /**
  * Validate date range
  */
+/**
+ * Returns a Unix timestamp (seconds) adjusted to last Friday if current time
+ * is Saturday, Sunday, or Monday before 02:00 GMT (markets closed).
+ */
+export const getLastTradingTimestamp = (nowMs: number = Date.now()): number => {
+  const now = new Date(nowMs);
+  const utcDay = now.getUTCDay(); // 0=Sun, 1=Mon, ..., 6=Sat
+  const utcHour = now.getUTCHours();
+  const utcMinute = now.getUTCMinutes();
+
+  let daysBack = 0;
+  if (utcDay === 6)
+    daysBack = 1; // Saturday → Friday
+  else if (utcDay === 0)
+    daysBack = 2; // Sunday → Friday
+  else if (utcDay === 1 && (utcHour < 2 || (utcHour === 2 && utcMinute < 15)))
+    daysBack = 3; // Monday before 02:15 GMT → Friday
+
+  if (daysBack === 0) return Math.floor(nowMs / 1000);
+
+  // Snap to the most recent Saturday 02:00 UTC (end of Friday trading window)
+  // so that (to - 86400) = Friday 02:00 UTC (start of Friday trading window)
+  const saturday = new Date(nowMs);
+  if (utcDay === 0)
+    saturday.setUTCDate(saturday.getUTCDate() - 1); // Sun → Sat
+  else if (utcDay === 1) saturday.setUTCDate(saturday.getUTCDate() - 2); // Mon → Sat
+  // utcDay === 6 is already Saturday
+  saturday.setUTCHours(2, 0, 0, 0);
+  return Math.floor(saturday.getTime() / 1000);
+};
+
 export const isValidDateRange = (from: Date, to: Date): boolean => {
   return from < to;
 };

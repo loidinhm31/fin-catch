@@ -5,7 +5,7 @@
  * Combines QmSyncClient and IndexedDBSyncStorage to provide full sync functionality.
  */
 
-import type { ISyncService } from "@fin-catch/shared/services";
+import type { ISyncService } from "@fin-catch/ui/adapters/factory/interfaces";
 import type { SyncResult, SyncStatus } from "@fin-catch/shared/types";
 import {
   createSyncClientConfig,

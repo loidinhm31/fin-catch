@@ -4,22 +4,8 @@
  * Provides IndexedDB-based sync with qm-center-server.
  */
 
-// Client
-export {
-  QmSyncClient,
-  createSyncClientConfig,
-  fetchHttpClient,
-  type HttpClientFn,
-} from "@fin-catch/shared";
-
 // Storage
-export { IndexedDBSyncStorage } from "./IndexedDBSyncStorage";
+export * from "./IndexedDBSyncStorage";
 
 // Adapter
-export {
-  IndexedDBSyncAdapter,
-  createIndexedDBSyncAdapter,
-  type IndexedDBSyncAdapterConfig,
-  type TokenProvider,
-  type TokenSaver,
-} from "./IndexedDBSyncAdapter";
+export * from "./IndexedDBSyncAdapter";

@@ -1,6 +1,7 @@
 import { finCatchAPI } from "@fin-catch/ui/services";
 import {
   CurrencyCode,
+  getLastTradingTimestamp,
   HoldingPerformance,
   PortfolioEntry,
   PortfolioHoldingsPerformance,
@@ -86,11 +87,12 @@ export const calculateHoldingPerformance = async (
       let priceScale = 1;
 
       if (entry.asset_type === "stock") {
+        const adjustedTs = getLastTradingTimestamp(timestamp * 1000);
         const response = await finCatchAPI.fetchStockHistory({
           symbol: entry.symbol,
           resolution: "1D" as const,
-          from: timestamp - 86400,
-          to: timestamp,
+          from: adjustedTs - 86400 - 1,
+          to: adjustedTs,
           source: entry.source as any,
         });
 

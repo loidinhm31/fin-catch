@@ -1,7 +1,6 @@
 // Sync types for data synchronization with qm-sync
 
 // Re-export sync protocol types from @qm-center/sync-client-types (single source of truth)
-// Note: AuthResponse and RefreshResponse are already in ./auth.ts
 export type {
   SyncRecord,
   Checkpoint,

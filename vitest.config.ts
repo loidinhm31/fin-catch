@@ -25,19 +25,25 @@ export default defineConfig({
     alias: {
       "@fin-catch/shared": resolve(__dirname, "packages/shared/src"),
       "@fin-catch/ui": resolve(__dirname, "packages/ui/src"),
-      "@fin-catch/ui/atoms": resolve(__dirname, "packages/ui/src/atoms"),
+      "@fin-catch/ui/atoms": resolve(
+        __dirname,
+        "packages/ui/src/components/atoms",
+      ),
       "@fin-catch/ui/molecules": resolve(
         __dirname,
-        "packages/ui/src/molecules",
+        "packages/ui/src/components/molecules",
       ),
       "@fin-catch/ui/organisms": resolve(
         __dirname,
-        "packages/ui/src/organisms",
+        "packages/ui/src/components/organisms",
+      ),
+      "@fin-catch/ui/pages": resolve(
+        __dirname,
+        "packages/ui/src/components/pages",
       ),
       "@fin-catch/ui/hooks": resolve(__dirname, "packages/ui/src/hooks"),
       "@fin-catch/ui/utils": resolve(__dirname, "packages/ui/src/utils"),
       "@fin-catch/ui/services": resolve(__dirname, "packages/ui/src/services"),
-      "@fin-catch/ui/pages": resolve(__dirname, "packages/ui/src/pages"),
       "@fin-catch/ui/types": resolve(__dirname, "packages/ui/src/types"),
     },
   },
