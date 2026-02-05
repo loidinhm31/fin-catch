@@ -5,12 +5,12 @@ import type {
   GoldPremiumResponse,
   GoldPriceRequest,
   GoldPriceResponse,
-  IDataService,
   StockHistoryRequest,
   StockHistoryResponse,
 } from "@fin-catch/shared";
 import { serviceLogger } from "@fin-catch/ui/utils";
 import { HttpClient } from "./HttpClient";
+import { IDataService } from "@fin-catch/ui/adapters/factory/interfaces";
 
 export class HttpDataAdapter extends HttpClient implements IDataService {
   async fetchStockHistory(

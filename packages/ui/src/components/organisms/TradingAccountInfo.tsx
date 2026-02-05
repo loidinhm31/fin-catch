@@ -14,13 +14,13 @@ import {
   Wallet,
 } from "lucide-react";
 import type {
-  ITradingAuthService,
   TradingAccountBalance,
   TradingAccountInfo as TradingAccountInfoType,
   TradingPlatformId,
   TradingSubAccount,
 } from "@fin-catch/shared";
 import { Button } from "@fin-catch/ui/components/atoms";
+import { ITradingAuthService } from "@fin-catch/ui/adapters/factory/interfaces";
 
 /**
  * Props for TradingAccountInfo component

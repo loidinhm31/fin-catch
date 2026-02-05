@@ -1,4 +1,4 @@
-import type { IPortfolioEntryService } from "@fin-catch/shared/services";
+import type { IPortfolioEntryService } from "@fin-catch/ui/adapters/factory/interfaces";
 import type { PortfolioEntry } from "@fin-catch/shared/types";
 import { db } from "./database";
 import { withSyncTracking, trackDelete } from "./indexedDbHelpers";

@@ -1,5 +1,4 @@
 import type {
-  ITradingAuthService,
   TradingPlatform,
   TradingPlatformId,
   TradingSession,
@@ -14,6 +13,7 @@ import type {
 } from "@fin-catch/shared";
 import { AUTH_STORAGE_KEYS, env } from "@fin-catch/shared";
 import { serviceLogger } from "@fin-catch/ui/utils";
+import { ITradingAuthService } from "@fin-catch/ui/adapters/factory/interfaces";
 
 /**
  * Configuration for TradingAuthAdapter

@@ -147,8 +147,8 @@ export function AppShell({
     checkAuthStatus();
   };
 
-  // In embedded mode, show a simplified layout without outer navigation
-  const showNavigation = !embedded;
+  // Always show navigation - embedded prop is only for theme isolation now
+  const showNavigation = true;
 
   return (
     <BrowserSyncInitializer>
@@ -159,7 +159,7 @@ export function AppShell({
             "linear-gradient(135deg, #0F172A 0%, #0A0E27 50%, #1E1B4B 100%)",
         }}
       >
-        {/* Desktop Sidebar - Hidden on mobile and in embedded mode */}
+        {/* Desktop Sidebar - Hidden on mobile */}
         {showNavigation && (isAuthenticated || skipAuth) && (
           <Sidebar
             currentPage={currentPage}
@@ -170,7 +170,7 @@ export function AppShell({
           />
         )}
 
-        {/* Header with Sync Status - Mobile only, desktop has sidebar, hidden in embedded mode */}
+        {/* Header with Sync Status - Mobile only, desktop has sidebar */}
         {showNavigation && (isAuthenticated || skipAuth) && (
           <div
             className="fixed top-0 left-0 right-0 z-40 flex justify-end px-4 py-3 md:hidden"
@@ -186,14 +186,10 @@ export function AppShell({
           </div>
         )}
 
-        {/* Page Content - Adjust margins for sidebar on desktop (no margins in embedded mode) */}
+        {/* Page Content - Adjust margins for sidebar on desktop */}
         <div
-          className={`transition-all duration-300 ${
-            embedded
-              ? "pt-4 pb-4"
-              : `pt-15 md:pt-6 pb-24 md:pb-6 ${
-                  isSidebarCollapsed ? "md:ml-16" : "md:ml-64"
-                }`
+          className={`transition-all duration-300 pt-15 md:pt-6 pb-24 md:pb-6 ${
+            isSidebarCollapsed ? "md:ml-16" : "md:ml-64"
           }`}
         >
           <ErrorBoundary>
@@ -224,7 +220,7 @@ export function AppShell({
           </ErrorBoundary>
         </div>
 
-        {/* Mobile Bottom Navigation - Hidden on desktop and in embedded mode */}
+        {/* Mobile Bottom Navigation - Hidden on desktop */}
         {showNavigation && (isAuthenticated || skipAuth) && (
           <BottomNav currentPage={currentPage} onNavigate={handleNavigate} />
         )}

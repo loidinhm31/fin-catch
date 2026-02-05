@@ -1,8 +1,6 @@
-import type {
-  BondCouponPayment,
-  ICouponPaymentService,
-} from "@fin-catch/shared";
+import type { BondCouponPayment } from "@fin-catch/shared";
 import { HttpClient } from "./HttpClient";
+import { ICouponPaymentService } from "@fin-catch/ui/adapters/factory/interfaces";
 
 export class HttpCouponPaymentAdapter
   extends HttpClient

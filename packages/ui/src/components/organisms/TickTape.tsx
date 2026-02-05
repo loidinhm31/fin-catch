@@ -97,9 +97,10 @@ export const TickTape: React.FC<TickTapeProps> = ({
     // Connect to market data stream
     const disconnect = marketData.connect(
       platform,
-      (msg) => handleMessageRef.current(msg),
-      (err) => handleErrorRef.current(err),
-      (status) => handleStatusChangeRef.current(status),
+      (msg: MarketDataMessage) => handleMessageRef.current(msg),
+      (err: Error) => handleErrorRef.current(err),
+      (status: MarketDataConnectionStatus) =>
+        handleStatusChangeRef.current(status),
     );
 
     // Symbol subscription is handled by the parent (MarketDataTicker subscribes to symbol topics)

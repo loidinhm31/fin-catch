@@ -41,6 +41,7 @@ import { IPlatformServices, PlatformProvider } from "@fin-catch/ui/platform";
 import { AppShell } from "@fin-catch/ui/components/templates";
 import { BrowserRouter } from "react-router-dom";
 import { BasePathContext, PortalContainerContext } from "../hooks/useNav";
+import { ThemeProvider, DialogProvider } from "@fin-catch/ui/contexts";
 
 /**
  * Get server URL from environment or default
@@ -147,19 +148,6 @@ export function FinCatchApp({
     };
   }, []);
 
-  // Inject services into the singleton factory
-  useEffect(() => {
-    setPortfolioService(services.portfolio);
-    setPortfolioEntryService(services.portfolioEntry);
-    setCouponPaymentService(services.couponPayment);
-    setDataService(services.data);
-    setAuthService(services.auth);
-    setSyncService(services.sync);
-    if (services.trading) {
-      setTradingAuthService(services.trading);
-    }
-  }, [services]);
-
   // If external auth tokens are provided, save them to the auth service
   useEffect(() => {
     if (authTokens?.accessToken && authTokens?.refreshToken) {
@@ -196,11 +184,15 @@ export function FinCatchApp({
   return (
     <div ref={containerRef} className={className}>
       <PlatformProvider services={services}>
-        <BasePathContext.Provider value={basePath || ""}>
-          <PortalContainerContext.Provider value={portalContainer}>
-            {useRouter ? <BrowserRouter>{content}</BrowserRouter> : content}
-          </PortalContainerContext.Provider>
-        </BasePathContext.Provider>
+        <ThemeProvider embedded={embedded}>
+          <DialogProvider>
+            <BasePathContext.Provider value={basePath || ""}>
+              <PortalContainerContext.Provider value={portalContainer}>
+                {useRouter ? <BrowserRouter>{content}</BrowserRouter> : content}
+              </PortalContainerContext.Provider>
+            </BasePathContext.Provider>
+          </DialogProvider>
+        </ThemeProvider>
       </PlatformProvider>
     </div>
   );

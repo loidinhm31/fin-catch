@@ -1,5 +1,6 @@
-import type { IPortfolioService, Portfolio } from "@fin-catch/shared";
+import type { Portfolio } from "@fin-catch/shared";
 import { HttpClient } from "./HttpClient";
+import { IPortfolioService } from "@fin-catch/ui/adapters/factory/interfaces";
 
 export class HttpPortfolioAdapter
   extends HttpClient

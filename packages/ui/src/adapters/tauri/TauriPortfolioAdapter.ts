@@ -1,5 +1,6 @@
-import type { IPortfolioService, Portfolio } from "@fin-catch/shared";
+import type { Portfolio } from "@fin-catch/shared";
 import { tauriInvoke } from "./tauriInvoke";
+import { IPortfolioService } from "@fin-catch/ui/adapters/factory/interfaces";
 
 export class TauriPortfolioAdapter implements IPortfolioService {
   async createPortfolio(portfolio: Portfolio): Promise<string> {

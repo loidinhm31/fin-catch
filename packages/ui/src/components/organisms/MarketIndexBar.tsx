@@ -99,14 +99,15 @@ export const MarketIndexBar: React.FC<MarketIndexBarProps> = ({
     // Connect to market data stream
     const disconnect = marketData.connect(
       platform,
-      (msg) => handleMessageRef.current(msg),
-      (err) => handleErrorRef.current(err),
-      (status) => handleStatusChangeRef.current(status),
+      (msg: MarketDataMessage) => handleMessageRef.current(msg),
+      (err: Error) => handleErrorRef.current(err),
+      (status: MarketDataConnectionStatus) =>
+        handleStatusChangeRef.current(status),
     );
 
     // Subscribe to indexes after a short delay
     const subscribeTimeout = setTimeout(() => {
-      marketData.subscribeIndexes(platform, indexes).catch((err) => {
+      marketData.subscribeIndexes(platform, indexes).catch((err: Error) => {
         console.error("[MarketIndexBar] Subscribe error:", err);
         setError(err.message);
         setLoading(false);

@@ -28,7 +28,7 @@ FinCatch App is a desktop application that integrates the **fin-catch-data** lib
 ## Project Structure
 
 ```
-apps/tauri/
+apps/native/
 ├── src/              # Tauri-specific entry point and configuration
 ├── src-tauri/        # Rust backend (SQLite, auth, sync, web server)
 └── public/           # Static assets

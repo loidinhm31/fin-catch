@@ -13,7 +13,6 @@ import {
   User,
 } from "lucide-react";
 import type {
-  ITradingAuthService,
   TradingPlatform,
   TradingPlatformId,
   TradingSession,
@@ -31,6 +30,7 @@ import {
   SelectValue,
 } from "@fin-catch/ui/components/atoms";
 import { TradingAccountInfo } from "./TradingAccountInfo";
+import { ITradingAuthService } from "@fin-catch/ui/adapters/factory/interfaces";
 
 /**
  * Props for TradingPlatformConnect component
@@ -38,7 +38,6 @@ import { TradingAccountInfo } from "./TradingAccountInfo";
 interface TradingPlatformConnectProps {
   /** Trading auth service instance */
   tradingService: ITradingAuthService;
-  /** Callback when connection status changes */
   /** Callback when connection status changes */
   onStatusChange?: (platform: TradingPlatformId, status: TradingStatus) => void;
 }

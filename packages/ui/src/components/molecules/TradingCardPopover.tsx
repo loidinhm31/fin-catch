@@ -2,7 +2,6 @@ import React, { useState, useCallback } from "react";
 import type {
   StockInfo,
   TopPrice,
-  ITradingAuthService,
   TradingPlatformId,
   LoanPackage,
 } from "@fin-catch/shared";
@@ -14,6 +13,7 @@ import {
 import { TradingCard } from "./TradingCard";
 import { CompactOrderForm } from "@fin-catch/ui/components/organisms";
 import { useFrozenPrice } from "@fin-catch/ui/hooks";
+import { ITradingAuthService } from "@fin-catch/ui/adapters/factory/interfaces";
 
 /**
  * Props for TradingCardPopover component

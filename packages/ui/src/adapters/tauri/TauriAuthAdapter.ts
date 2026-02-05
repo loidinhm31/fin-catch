@@ -1,10 +1,6 @@
-import type {
-  AuthResponse,
-  AuthStatus,
-  IAuthService,
-  SyncConfig,
-} from "@fin-catch/shared";
+import type { AuthResponse, AuthStatus, SyncConfig } from "@fin-catch/shared";
 import { tauriInvoke } from "./tauriInvoke";
+import { IAuthService } from "@fin-catch/ui/adapters/factory/interfaces";
 
 export class TauriAuthAdapter implements IAuthService {
   async configureSync(config: SyncConfig): Promise<void> {

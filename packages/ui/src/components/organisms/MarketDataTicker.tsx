@@ -102,14 +102,15 @@ export const MarketDataTicker: React.FC<MarketDataTickerProps> = ({
     // Connect to market data stream using refs to avoid re-connection on callback changes
     const disconnect = marketData.connect(
       platform,
-      (msg) => handleMessageRef.current(msg),
-      (err) => handleErrorRef.current(err),
-      (status) => handleStatusChangeRef.current(status),
+      (msg: MarketDataMessage) => handleMessageRef.current(msg),
+      (err: Error) => handleErrorRef.current(err),
+      (status: MarketDataConnectionStatus) =>
+        handleStatusChangeRef.current(status),
     );
 
     // Subscribe to symbol after a short delay to ensure connection
     const subscribeTimeout = setTimeout(() => {
-      marketData.subscribe(platform, symbol).catch((err) => {
+      marketData.subscribe(platform, symbol).catch((err: Error) => {
         console.error("[MarketDataTicker] Subscribe error:", err);
         setError(err.message);
         setLoading(false);

@@ -1,11 +1,7 @@
-import type {
-  AuthResponse,
-  AuthStatus,
-  IAuthService,
-  SyncConfig,
-} from "@fin-catch/shared";
+import type { AuthResponse, AuthStatus, SyncConfig } from "@fin-catch/shared";
 import { AUTH_STORAGE_KEYS, env } from "@fin-catch/shared";
 import { serviceLogger } from "@fin-catch/ui/utils";
+import { IAuthService } from "@fin-catch/ui/adapters/factory/interfaces";
 
 /**
  * Configuration for QmServerAuthAdapter

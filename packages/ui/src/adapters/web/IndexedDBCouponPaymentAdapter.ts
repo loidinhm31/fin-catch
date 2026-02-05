@@ -1,4 +1,4 @@
-import type { ICouponPaymentService } from "@fin-catch/shared/services";
+import type { ICouponPaymentService } from "@fin-catch/ui/adapters/factory/interfaces";
 import type { BondCouponPayment } from "@fin-catch/shared/types";
 import { db } from "./database";
 import { withSyncTracking, trackDelete } from "./indexedDbHelpers";

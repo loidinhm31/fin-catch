@@ -1,8 +1,6 @@
-import type {
-  BondCouponPayment,
-  ICouponPaymentService,
-} from "@fin-catch/shared";
+import type { BondCouponPayment } from "@fin-catch/shared";
 import { tauriInvoke } from "./tauriInvoke";
+import { ICouponPaymentService } from "@fin-catch/ui/adapters/factory/interfaces";
 
 export class TauriCouponPaymentAdapter implements ICouponPaymentService {
   async createCouponPayment(payment: BondCouponPayment): Promise<string> {

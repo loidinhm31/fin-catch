@@ -5,12 +5,12 @@ import type {
   GoldPremiumResponse,
   GoldPriceRequest,
   GoldPriceResponse,
-  IDataService,
   StockHistoryRequest,
   StockHistoryResponse,
 } from "@fin-catch/shared";
 import { env } from "@fin-catch/shared";
 import { serviceLogger } from "@fin-catch/ui/utils";
+import { IDataService } from "@fin-catch/ui/adapters/factory/interfaces";
 
 /**
  * Configuration for QmServerDataAdapter

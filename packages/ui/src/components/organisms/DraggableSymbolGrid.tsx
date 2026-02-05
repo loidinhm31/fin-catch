@@ -3,11 +3,11 @@ import { Reorder } from "framer-motion";
 import type {
   StockInfo,
   TopPrice,
-  ITradingAuthService,
   TradingPlatformId,
   LoanPackage,
 } from "@fin-catch/shared";
 import { TradingCardPopover } from "@fin-catch/ui/components/molecules";
+import { ITradingAuthService } from "@fin-catch/ui/adapters/factory/interfaces";
 
 /**
  * Props for DraggableSymbolGrid component

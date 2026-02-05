@@ -79,13 +79,13 @@ export const MarketDepth: React.FC<MarketDepthProps> = ({
     // Connect to market data stream using refs to avoid re-connection on callback changes
     const disconnect = marketData.connect(
       platform,
-      (msg) => handleMessageRef.current(msg),
-      (err) => handleErrorRef.current(err),
+      (msg: MarketDataMessage) => handleMessageRef.current(msg),
+      (err: Error) => handleErrorRef.current(err),
     );
 
     // Subscribe to symbol
     const subscribeTimeout = setTimeout(() => {
-      marketData.subscribe(platform, symbol).catch((err) => {
+      marketData.subscribe(platform, symbol).catch((err: Error) => {
         console.error("[MarketDepth] Subscribe error:", err);
         setError(err.message);
         setLoading(false);

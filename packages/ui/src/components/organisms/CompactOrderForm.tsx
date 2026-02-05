@@ -8,7 +8,6 @@ import {
   X,
 } from "lucide-react";
 import type {
-  ITradingAuthService,
   TradingPlatformId,
   LoanPackage,
   OrderSide,
@@ -24,6 +23,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@fin-catch/ui/components/atoms";
+import { ITradingAuthService } from "@fin-catch/ui/adapters/factory/interfaces";
 
 /**
  * Props for CompactOrderForm component

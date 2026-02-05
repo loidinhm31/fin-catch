@@ -8,7 +8,6 @@
  */
 
 import type {
-  IMarketDataService,
   StockInfo,
   TopPrice,
   Tick,
@@ -23,6 +22,7 @@ import type {
   BatchSubscribeWithOhlcResponse,
 } from "@fin-catch/shared";
 import { AUTH_STORAGE_KEYS } from "@fin-catch/shared/constants";
+import { IMarketDataService } from "@fin-catch/ui/adapters/factory/interfaces";
 
 /**
  * Configuration for MarketDataAdapter

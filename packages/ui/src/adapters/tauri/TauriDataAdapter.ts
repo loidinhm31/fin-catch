@@ -5,11 +5,11 @@ import type {
   GoldPremiumResponse,
   GoldPriceRequest,
   GoldPriceResponse,
-  IDataService,
   StockHistoryRequest,
   StockHistoryResponse,
 } from "@fin-catch/shared";
 import { tauriInvoke } from "./tauriInvoke";
+import { IDataService } from "@fin-catch/ui/adapters/factory/interfaces";
 
 export class TauriDataAdapter implements IDataService {
   async fetchStockHistory(

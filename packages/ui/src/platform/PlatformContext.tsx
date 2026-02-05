@@ -8,7 +8,7 @@ import type {
   IPortfolioService,
   ISyncService,
   ITradingAuthService,
-} from "@fin-catch/shared/services";
+} from "@fin-catch/ui/adapters/factory/interfaces";
 
 /**
  * Platform services interface for dependency injection
