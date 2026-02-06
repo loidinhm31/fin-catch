@@ -13,7 +13,7 @@ export const Card = React.memo(function Card({
 }: CardProps) {
   return (
     <div
-      className={`bg-white rounded-xl border border-gray-200 shadow-sm ${onClick ? "cursor-pointer" : ""} ${className}`}
+      className={`bg-white dark:bg-gray-800 dark:border-gray-700 rounded-xl border border-gray-200 shadow-sm ${onClick ? "cursor-pointer" : ""} ${className}`}
       onClick={onClick}
     >
       {children}

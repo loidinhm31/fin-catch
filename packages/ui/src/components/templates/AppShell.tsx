@@ -126,18 +126,6 @@ export function AppShell({
     );
   }
 
-  // Show login page if not authenticated and not skipped
-  if (!isAuthenticated && !skipAuth) {
-    return (
-      <LoginPage
-        onLoginSuccess={() => {
-          checkAuthStatus();
-        }}
-        onSkip={() => setLocalSkipAuth(true)}
-      />
-    );
-  }
-
   const handleLogout = () => {
     // If embedded with external logout handler, call it
     if (onLogoutRequest) {
@@ -160,7 +148,7 @@ export function AppShell({
         }}
       >
         {/* Desktop Sidebar - Hidden on mobile */}
-        {showNavigation && (isAuthenticated || skipAuth) && (
+        {showNavigation && (
           <Sidebar
             currentPage={currentPage}
             onNavigate={handleNavigate}
@@ -171,7 +159,7 @@ export function AppShell({
         )}
 
         {/* Header with Sync Status - Mobile only, desktop has sidebar */}
-        {showNavigation && (isAuthenticated || skipAuth) && (
+        {showNavigation && (
           <div
             className="fixed top-0 left-0 right-0 z-40 flex justify-end px-4 py-3 md:hidden"
             style={{
@@ -208,6 +196,21 @@ export function AppShell({
                   element={<SettingsPage onLogout={handleLogout} />}
                 />
                 <Route
+                  path="login"
+                  element={
+                    <LoginPage
+                      onLoginSuccess={() => {
+                        checkAuthStatus();
+                        nav("/portfolio");
+                      }}
+                      onSkip={() => {
+                        setLocalSkipAuth(true);
+                        nav("/portfolio");
+                      }}
+                    />
+                  }
+                />
+                <Route
                   path="/"
                   element={<Navigate to={to("portfolio")} replace />}
                 />
@@ -221,7 +224,7 @@ export function AppShell({
         </div>
 
         {/* Mobile Bottom Navigation - Hidden on desktop */}
-        {showNavigation && (isAuthenticated || skipAuth) && (
+        {showNavigation && (
           <BottomNav currentPage={currentPage} onNavigate={handleNavigate} />
         )}
 
