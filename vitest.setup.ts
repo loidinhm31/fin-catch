@@ -6,7 +6,7 @@ const mockEnv = {
   DEV: true,
   PROD: false,
   MODE: "test",
-  VITE_QM_SYNC_SERVER_URL: "http://localhost:3000",
+  VITE_QM_CENTER_SERVER_URL: "http://localhost:3000",
   VITE_FIN_CATCH_APP_ID: "fin-catch-test",
   VITE_FIN_CATCH_API_KEY: "test-api-key",
 };

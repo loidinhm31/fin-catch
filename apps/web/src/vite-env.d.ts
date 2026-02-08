@@ -1,7 +1,7 @@
 /// <reference types="vite/client" />
 
 interface ImportMetaEnv {
-  readonly VITE_QM_SYNC_SERVER_URL: string;
+  readonly VITE_QM_CENTER_SERVER_URL: string;
 }
 
 interface ImportMeta {

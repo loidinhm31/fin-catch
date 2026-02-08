@@ -3,7 +3,7 @@
 //! This module provides cryptographically secure session tokens
 //! for authenticating browser requests to the embedded http server.
 
-use rand::{thread_rng, RngCore};
+use rand::{rng, RngCore};
 use std::sync::{Arc, Mutex};
 
 /// Session manager for handling secure tokens
@@ -25,9 +25,9 @@ impl SessionManager {
     ///
     /// The token is 32 bytes (256 bits) of random data, encoded as 64 hex characters.
     pub fn generate_token(&self) -> String {
-        let mut rng = thread_rng();
+        let mut rng_instance = rng();
         let mut bytes = [0u8; 32];
-        rng.fill_bytes(&mut bytes);
+        rng_instance.fill_bytes(&mut bytes);
         let token = hex::encode(bytes);
 
         // Store the token

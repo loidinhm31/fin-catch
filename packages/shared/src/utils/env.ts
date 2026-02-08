@@ -2,7 +2,7 @@
  * Environment configuration interface
  */
 export interface AppEnvironment {
-  VITE_QM_SYNC_SERVER_URL: string;
+  VITE_QM_CENTER_SERVER_URL: string;
   VITE_FIN_CATCH_APP_ID: string;
   VITE_FIN_CATCH_API_KEY: string;
   DEV: boolean;
@@ -14,7 +14,7 @@ export interface AppEnvironment {
  * Default values for environment variables
  */
 const ENV_DEFAULTS: Partial<AppEnvironment> = {
-  VITE_QM_SYNC_SERVER_URL: "http://localhost:3000",
+  VITE_QM_CENTER_SERVER_URL: "http://localhost:3000",
   VITE_FIN_CATCH_APP_ID: "fin-catch",
   VITE_FIN_CATCH_API_KEY: "",
   DEV: false,
@@ -89,7 +89,7 @@ class EnvironmentManager {
    * Get the sync server URL
    */
   get serverUrl(): string {
-    return this.get("VITE_QM_SYNC_SERVER_URL");
+    return this.get("VITE_QM_CENTER_SERVER_URL");
   }
 
   /**

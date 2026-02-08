@@ -25,6 +25,7 @@ use axum::{
 };
 use futures::stream::Stream;
 use qm_fin_catch_data::{DataSourceGateway, ExchangeRateRequest, GoldPremiumRequest, GoldPriceRequest, StockHistoryRequest};
+use rust_embed::RustEmbed;
 use serde::{Deserialize, Serialize};
 use std::convert::Infallible;
 use std::sync::{Arc, Mutex};
