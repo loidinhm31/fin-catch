@@ -10,6 +10,7 @@ import type {
   Order,
   PlaceOrderRequest,
   Deal,
+  SyncConfig,
 } from "@fin-catch/shared";
 import { AUTH_STORAGE_KEYS, env } from "@fin-catch/shared";
 import { serviceLogger } from "@fin-catch/ui/utils";
@@ -32,7 +33,7 @@ function getDefaultBaseUrl(): string {
 /**
  * HTTP adapter for trading platform authentication
  *
- * Calls qm-sync-server trading endpoints.
+ * Calls qm-center-server trading endpoints.
  * Requires qm-center JWT authentication (Bearer token).
  */
 export class TradingAuthAdapter implements ITradingAuthService {
@@ -50,6 +51,22 @@ export class TradingAuthAdapter implements ITradingAuthService {
   private getStoredValue(key: string): string | null {
     if (typeof localStorage === "undefined") return null;
     return localStorage.getItem(key);
+  }
+
+  private setStoredValue(key: string, value: string): void {
+    if (typeof localStorage === "undefined") return;
+    localStorage.setItem(key, value);
+  }
+
+  /**
+   * Configure trading service settings (server URL)
+   */
+  async configureSync(config: SyncConfig): Promise<void> {
+    if (config.serverUrl) {
+      this.baseUrl = config.serverUrl;
+      this.setStoredValue(AUTH_STORAGE_KEYS.SERVER_URL, config.serverUrl);
+    }
+    serviceLogger.trading(`Trading service configured: ${this.baseUrl}`);
   }
 
   /**

@@ -210,7 +210,7 @@ export const CouponPaymentsSection: React.FC<CouponPaymentsSectionProps> = ({
                         color: "var(--cube-gray-900)",
                       }}
                     >
-                      {formatDate(payment.payment_date)}
+                      {formatDate(payment.paymentDate)}
                     </p>
                     <p
                       style={{

@@ -1,5 +1,8 @@
 import { AuthResponse, AuthStatus, SyncConfig } from "@fin-catch/shared";
 
+/** Sync config with all required fields (used when reading current config) */
+export type RequiredSyncConfig = Required<SyncConfig>;
+
 /**
  * Auth service interface for user authentication
  * Implemented by platform-specific adapters
@@ -9,6 +12,11 @@ export interface IAuthService {
    * Configure sync settings (server URL, app ID, API key)
    */
   configureSync(config: SyncConfig): Promise<void>;
+
+  /**
+   * Get current sync configuration
+   */
+  getSyncConfig(): RequiredSyncConfig;
 
   /**
    * Register a new user

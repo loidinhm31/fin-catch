@@ -10,17 +10,17 @@ export interface HoldingPerformanceData {
 
 export interface HoldingPerformance {
   entry: PortfolioEntry;
-  performance_data: {
+  performanceData: {
     timestamp: number;
     value: number; // Normalized to 100 at purchase date
   }[];
-  current_return: number; // Percentage return from purchase
+  currentReturn: number; // Percentage return from purchase
   color: string; // Chart line color
 }
 
 export interface PortfolioHoldingsPerformance {
   holdings: HoldingPerformance[];
-  start_date: number;
-  end_date: number;
+  startDate: number;
+  endDate: number;
   currency: CurrencyCode;
 }

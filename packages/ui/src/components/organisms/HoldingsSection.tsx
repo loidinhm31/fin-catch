@@ -46,7 +46,7 @@ export const HoldingsSection: React.FC<HoldingsSectionProps> = ({
     setExpandedEntries(newExpanded);
   };
 
-  const entriesCount = performance?.entries_performance.length || 0;
+  const entriesCount = performance?.entriesPerformance.length || 0;
 
   return (
     <div className="mb-6">
@@ -105,7 +105,7 @@ export const HoldingsSection: React.FC<HoldingsSectionProps> = ({
         </div>
       ) : (
         <div className="space-y-3">
-          {performance?.entries_performance.map((entryPerf) => (
+          {performance?.entriesPerformance.map((entryPerf) => (
             <HoldingCard
               key={entryPerf.entry.id}
               entryPerf={entryPerf}

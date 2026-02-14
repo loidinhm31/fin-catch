@@ -14,6 +14,7 @@
     "./styles": "./src/styles/global.css",
     "./contexts": "./src/contexts/index.ts",
     "./platform": "./src/platform/index.ts",
+    "./adapters": "./src/adapters/index.ts",
     "./adapters/http": "./src/adapters/http/index.ts",
     "./adapters/tauri": "./src/adapters/tauri/index.ts",
     "./adapters/web": "./src/adapters/web/index.ts",

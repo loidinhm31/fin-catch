@@ -1,4 +1,4 @@
-import { PortfolioEntry } from "@fin-catch/shared/types";
+import { PortfolioEntry } from "@fin-catch/shared";
 
 /**
  * Portfolio entry service interface

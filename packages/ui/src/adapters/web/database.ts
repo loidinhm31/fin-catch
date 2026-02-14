@@ -2,7 +2,7 @@
  * IndexedDB Database Setup using Dexie
  *
  * Dexie provides a minimalistic wrapper for IndexedDB with a powerful
- * and intuitive API. Database schema matches the SQLite schema used in the Tauri app.
+ * and intuitive API. All fields use camelCase to match the server schema.
  */
 
 import Dexie, { type EntityTable, type Table } from "dexie";
@@ -10,7 +10,7 @@ import type {
   BondCouponPayment,
   Portfolio,
   PortfolioEntry,
-} from "@fin-catch/shared/types";
+} from "@fin-catch/shared";
 
 // =============================================================================
 // Sync Metadata Types
@@ -57,20 +57,37 @@ export class FinCatchDatabase extends Dexie {
   constructor() {
     super("FinCatchDB");
 
-    // Define schema
+    // Version 1: Legacy snake_case schema (kept for migration reference)
     this.version(1).stores({
-      // Primary key is id, indexed by created_at and sync fields
       portfolios: "id, created_at, sync_version, synced_at",
-      // Primary key is id, indexed by portfolio_id, created_at, and sync fields
       portfolioEntries:
         "id, portfolio_id, asset_type, symbol, created_at, sync_version, synced_at",
-      // Primary key is id, indexed by entry_id, payment_date, and sync fields
       couponPayments: "id, entry_id, payment_date, sync_version, synced_at",
-      // Sync metadata (checkpoint, config, etc.)
       _syncMeta: "key",
-      // Pending changes queue
       _pendingChanges: "++id, tableName, rowId",
     });
+
+    // Version 2: camelCase schema (matches server)
+    this.version(2)
+      .stores({
+        portfolios: "id, createdAt, syncVersion, syncedAt",
+        portfolioEntries:
+          "id, portfolioId, assetType, symbol, createdAt, syncVersion, syncedAt",
+        couponPayments: "id, entryId, paymentDate, syncVersion, syncedAt",
+        _syncMeta: "key",
+        _pendingChanges: "++id, tableName, rowId",
+      })
+      .upgrade((trans) => {
+        // Clear all data on upgrade - fresh start with camelCase
+        // This is acceptable since data syncs from server
+        return Promise.all([
+          trans.table("portfolios").clear(),
+          trans.table("portfolioEntries").clear(),
+          trans.table("couponPayments").clear(),
+          trans.table("_syncMeta").clear(),
+          trans.table("_pendingChanges").clear(),
+        ]);
+      });
 
     // Map table names
     this.portfolios = this.table("portfolios");

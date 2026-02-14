@@ -7,14 +7,14 @@ export interface BenchmarkData {
 }
 
 export interface PortfolioBenchmarkComparison {
-  portfolio_data: BenchmarkData[];
-  benchmark_data: BenchmarkData[];
-  benchmark_name: string;
-  start_date: number;
-  end_date: number;
+  portfolioData: BenchmarkData[];
+  benchmarkData: BenchmarkData[];
+  benchmarkName: string;
+  startDate: number;
+  endDate: number;
   currency: CurrencyCode;
-  portfolio_return: number; // Percentage return
-  benchmark_return: number; // Percentage return
+  portfolioReturn: number; // Percentage return
+  benchmarkReturn: number; // Percentage return
   outperformance: number; // Portfolio return - benchmark return
 }
 

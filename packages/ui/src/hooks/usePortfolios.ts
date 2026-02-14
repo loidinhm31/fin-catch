@@ -1,6 +1,10 @@
 import { useCallback, useEffect, useState } from "react";
 import { Portfolio } from "@fin-catch/shared";
-import { finCatchAPI } from "@fin-catch/ui/services";
+import {
+  listPortfolios,
+  createPortfolio as createPortfolioService,
+  deletePortfolio as deletePortfolioService,
+} from "@fin-catch/ui/services";
 
 export const usePortfolios = () => {
   const [portfolios, setPortfolios] = useState<Portfolio[]>([]);
@@ -13,7 +17,7 @@ export const usePortfolios = () => {
   const loadPortfolios = useCallback(async () => {
     setIsLoading(true);
     try {
-      const portfolioList = await finCatchAPI.listPortfolios();
+      const portfolioList = await listPortfolios();
       setPortfolios(portfolioList);
       // Use functional update to avoid circular dependency on selectedPortfolioId
       setSelectedPortfolioId((prev) => {
@@ -33,14 +37,14 @@ export const usePortfolios = () => {
   }, []);
 
   const createPortfolio = async (portfolio: Portfolio): Promise<string> => {
-    const portfolioId = await finCatchAPI.createPortfolio(portfolio);
+    const portfolioId = await createPortfolioService(portfolio);
     await loadPortfolios();
     setSelectedPortfolioId(portfolioId);
     return portfolioId;
   };
 
   const deletePortfolio = async (portfolioId: string) => {
-    await finCatchAPI.deletePortfolio(portfolioId);
+    await deletePortfolioService(portfolioId);
     await loadPortfolios();
     if (selectedPortfolioId === portfolioId) {
       setSelectedPortfolioId(portfolios.length > 1 ? portfolios[0].id : null);

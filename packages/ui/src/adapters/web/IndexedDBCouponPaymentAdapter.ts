@@ -1,5 +1,5 @@
 import type { ICouponPaymentService } from "@fin-catch/ui/adapters/factory/interfaces";
-import type { BondCouponPayment } from "@fin-catch/shared/types";
+import type { BondCouponPayment } from "@fin-catch/shared";
 import { db } from "./database";
 import { withSyncTracking, trackDelete } from "./indexedDbHelpers";
 
@@ -12,9 +12,9 @@ export class IndexedDBCouponPaymentAdapter implements ICouponPaymentService {
 
   async listCouponPayments(entryId: string): Promise<BondCouponPayment[]> {
     return db.couponPayments
-      .where("entry_id")
+      .where("entryId")
       .equals(entryId)
-      .sortBy("payment_date");
+      .sortBy("paymentDate");
   }
 
   async updateCouponPayment(payment: BondCouponPayment): Promise<void> {
@@ -32,7 +32,7 @@ export class IndexedDBCouponPaymentAdapter implements ICouponPaymentService {
       async () => {
         const payment = await db.couponPayments.get(id);
         if (payment) {
-          await trackDelete("couponPayments", id, payment.sync_version || 0);
+          await trackDelete("couponPayments", id, payment.syncVersion || 0);
         }
         await db.couponPayments.delete(id);
       },

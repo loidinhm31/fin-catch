@@ -1,5 +1,5 @@
 import type { IPortfolioEntryService } from "@fin-catch/ui/adapters/factory/interfaces";
-import type { PortfolioEntry } from "@fin-catch/shared/types";
+import type { PortfolioEntry } from "@fin-catch/shared";
 import { db } from "./database";
 import { withSyncTracking, trackDelete } from "./indexedDbHelpers";
 
@@ -20,7 +20,7 @@ export class IndexedDBPortfolioEntryAdapter implements IPortfolioEntryService {
 
   async listEntries(portfolioId: string): Promise<PortfolioEntry[]> {
     return db.portfolioEntries
-      .where("portfolio_id")
+      .where("portfolioId")
       .equals(portfolioId)
       .toArray();
   }
@@ -41,20 +41,20 @@ export class IndexedDBPortfolioEntryAdapter implements IPortfolioEntryService {
         const entry = await db.portfolioEntries.get(id);
 
         const payments = await db.couponPayments
-          .where("entry_id")
+          .where("entryId")
           .equals(id)
           .toArray();
         for (const payment of payments) {
           await trackDelete(
             "couponPayments",
             payment.id,
-            payment.sync_version || 0,
+            payment.syncVersion || 0,
           );
         }
-        await db.couponPayments.where("entry_id").equals(id).delete();
+        await db.couponPayments.where("entryId").equals(id).delete();
 
         if (entry) {
-          await trackDelete("portfolioEntries", id, entry.sync_version || 0);
+          await trackDelete("portfolioEntries", id, entry.syncVersion || 0);
         }
 
         await db.portfolioEntries.delete(id);

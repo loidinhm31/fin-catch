@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { KeyRound, Lock, Mail, ShieldCheck, User } from "lucide-react";
-import { finCatchAPI } from "@fin-catch/ui/services";
+import { authLogin, authRegister } from "@fin-catch/ui/services";
 import { Button, Input, Label } from "@fin-catch/ui/components/atoms";
 
 interface LoginPageProps {
@@ -35,7 +35,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({
 
     try {
       // Then login
-      await finCatchAPI.authLogin(loginEmail, loginPassword);
+      await authLogin(loginEmail, loginPassword);
       onLoginSuccess();
     } catch (err) {
       setError(
@@ -70,11 +70,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({
 
     try {
       // Then register
-      await finCatchAPI.authRegister(
-        registerUsername,
-        registerEmail,
-        registerPassword,
-      );
+      await authRegister(registerUsername, registerEmail, registerPassword);
       onLoginSuccess();
     } catch (err) {
       setError(

@@ -32,7 +32,7 @@ export const GoldHoldingCard: React.FC<GoldHoldingCardProps> = ({
   formatDate,
 }) => {
   const entry = entryPerf.entry;
-  const isPositive = entryPerf.gain_loss >= 0;
+  const isPositive = entryPerf.gainLoss >= 0;
 
   return (
     <div className="glass-card p-4">
@@ -88,7 +88,7 @@ export const GoldHoldingCard: React.FC<GoldHoldingCardProps> = ({
                   color: "var(--cube-gray-900)",
                 }}
               >
-                {formatCurrency(entryPerf.current_value)}
+                {formatCurrency(entryPerf.currentValue)}
               </p>
             </div>
             <div>
@@ -107,7 +107,7 @@ export const GoldHoldingCard: React.FC<GoldHoldingCardProps> = ({
                   color: isPositive ? "#10b981" : "#ef4444",
                 }}
               >
-                {formatCurrency(entryPerf.gain_loss)}
+                {formatCurrency(entryPerf.gainLoss)}
               </p>
               <p
                 style={{
@@ -115,7 +115,7 @@ export const GoldHoldingCard: React.FC<GoldHoldingCardProps> = ({
                   color: isPositive ? "#10b981" : "#ef4444",
                 }}
               >
-                {formatPercentage(entryPerf.gain_loss_percentage)}
+                {formatPercentage(entryPerf.gainLossPercentage)}
               </p>
             </div>
           </div>
@@ -205,7 +205,7 @@ export const GoldHoldingCard: React.FC<GoldHoldingCardProps> = ({
                   color: "var(--cube-gray-900)",
                 }}
               >
-                {formatCurrency(entryPerf.purchase_price || 0)}
+                {formatCurrency(entryPerf.purchasePrice || 0)}
               </p>
             </div>
             <div>
@@ -224,7 +224,7 @@ export const GoldHoldingCard: React.FC<GoldHoldingCardProps> = ({
                   color: "var(--cube-gray-900)",
                 }}
               >
-                {formatCurrency(entryPerf.current_price)}
+                {formatCurrency(entryPerf.currentPrice)}
               </p>
             </div>
             <div>
@@ -243,12 +243,12 @@ export const GoldHoldingCard: React.FC<GoldHoldingCardProps> = ({
                   color: "var(--cube-gray-900)",
                 }}
               >
-                {formatDate(entry.purchase_date)}
+                {formatDate(entry.purchaseDate)}
               </p>
             </div>
             {entry.currency &&
               entry.currency !== displayCurrency &&
-              entryPerf.exchange_rate && (
+              entryPerf.exchangeRate && (
                 <div className="col-span-2">
                   <p
                     style={{
@@ -265,13 +265,13 @@ export const GoldHoldingCard: React.FC<GoldHoldingCardProps> = ({
                       color: "var(--cube-gray-900)",
                     }}
                   >
-                    1 {entry.currency} = {entryPerf.exchange_rate.toFixed(4)}{" "}
+                    1 {entry.currency} = {entryPerf.exchangeRate.toFixed(4)}{" "}
                     {displayCurrency}
                   </p>
                 </div>
               )}
           </div>
-          {entry.gold_type && (
+          {entry.goldType && (
             <div>
               <p
                 style={{
@@ -288,7 +288,7 @@ export const GoldHoldingCard: React.FC<GoldHoldingCardProps> = ({
                   color: "var(--cube-gray-900)",
                 }}
               >
-                {entry.gold_type}
+                {entry.goldType}
               </p>
             </div>
           )}

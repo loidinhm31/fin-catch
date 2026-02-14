@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Wallet } from "lucide-react";
-import { finCatchAPI } from "@fin-catch/ui/services";
+import { createPortfolio } from "@fin-catch/ui/services";
 import { Portfolio } from "@fin-catch/shared";
 import {
   Button,
@@ -38,12 +38,12 @@ export const CreatePortfolioModal: React.FC<CreatePortfolioModalProps> = ({
 
     setIsSubmitting(true);
     try {
-      const portfolioId = await finCatchAPI.createPortfolio({
+      const portfolioId = await createPortfolio({
         id: "", // Backend will generate UUID
         name: name.trim(),
         description: description.trim() || undefined,
-        created_at: Math.floor(Date.now() / 1000),
-        sync_version: 1,
+        createdAt: Math.floor(Date.now() / 1000),
+        syncVersion: 1,
       });
 
       // Reset form
@@ -55,8 +55,8 @@ export const CreatePortfolioModal: React.FC<CreatePortfolioModalProps> = ({
         id: portfolioId,
         name: name.trim(),
         description: description.trim() || undefined,
-        created_at: Math.floor(Date.now() / 1000),
-        sync_version: 1,
+        createdAt: Math.floor(Date.now() / 1000),
+        syncVersion: 1,
       });
       onClose();
     } catch (err) {

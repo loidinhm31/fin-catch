@@ -18,7 +18,7 @@ import type {
   TradingSession,
   TradingStatus,
 } from "@fin-catch/shared";
-import { AUTH_STORAGE_KEYS } from "@fin-catch/shared/constants";
+import { AUTH_STORAGE_KEYS } from "@fin-catch/shared";
 import {
   Button,
   Input,

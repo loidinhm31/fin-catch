@@ -37,7 +37,7 @@ export const useHoldingsPerformance = (
         break;
       case "ALL":
         if (entries.length > 0) {
-          start = Math.min(...entries.map((e) => e.purchase_date));
+          start = Math.min(...entries.map((e) => e.purchaseDate));
         } else {
           start = now - 365 * 86400;
         }

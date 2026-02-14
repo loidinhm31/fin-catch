@@ -1,6 +1,11 @@
 import { useCallback, useEffect, useState } from "react";
 import { PortfolioEntry } from "@fin-catch/shared";
-import { finCatchAPI } from "@fin-catch/ui/services";
+import {
+  listEntries,
+  createEntry as createEntryService,
+  updateEntry as updateEntryService,
+  deleteEntry as deleteEntryService,
+} from "@fin-catch/ui/services";
 
 export const usePortfolioEntries = (portfolioId: string | null) => {
   const [entries, setEntries] = useState<PortfolioEntry[]>([]);
@@ -10,7 +15,7 @@ export const usePortfolioEntries = (portfolioId: string | null) => {
   const loadEntries = useCallback(async (id: string) => {
     setIsLoading(true);
     try {
-      const entryList = await finCatchAPI.listEntries(id);
+      const entryList = await listEntries(id);
       setEntries(entryList);
       setError(null);
     } catch (err) {
@@ -21,21 +26,21 @@ export const usePortfolioEntries = (portfolioId: string | null) => {
   }, []);
 
   const createEntry = async (entry: PortfolioEntry) => {
-    await finCatchAPI.createEntry(entry);
+    await createEntryService(entry);
     if (portfolioId) {
       await loadEntries(portfolioId);
     }
   };
 
   const updateEntry = async (entry: PortfolioEntry) => {
-    await finCatchAPI.updateEntry(entry);
+    await updateEntryService(entry);
     if (portfolioId) {
       await loadEntries(portfolioId);
     }
   };
 
   const deleteEntry = async (entryId: string) => {
-    await finCatchAPI.deleteEntry(entryId);
+    await deleteEntryService(entryId);
     if (portfolioId) {
       await loadEntries(portfolioId);
     }

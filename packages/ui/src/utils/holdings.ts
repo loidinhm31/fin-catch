@@ -1,4 +1,4 @@
-import { finCatchAPI } from "@fin-catch/ui/services";
+import { fetchStockHistory, fetchGoldPrice } from "@fin-catch/ui/services";
 import {
   CurrencyCode,
   getLastTradingTimestamp,
@@ -42,7 +42,7 @@ export const calculateHoldingPerformance = async (
   const timestamps: number[] = [];
 
   // Use entry purchase date as the start if it's later than requested start
-  const effectiveStart = Math.max(startDate, entry.purchase_date);
+  const effectiveStart = Math.max(startDate, entry.purchaseDate);
 
   // Generate timestamps at intervals
   for (let ts = effectiveStart; ts <= endDate; ts += intervalDays * 86400) {
@@ -60,17 +60,17 @@ export const calculateHoldingPerformance = async (
   let purchasePriceCurrency: CurrencyCode = entry.currency || "USD";
 
   // Calculate purchase price in display currency (with proper scaling)
-  if (entry.asset_type === "stock") {
-    purchasePrice = entry.purchase_price;
-  } else if (entry.asset_type === "gold") {
+  if (entry.assetType === "stock") {
+    purchasePrice = entry.purchasePrice;
+  } else if (entry.assetType === "gold") {
     // For gold, convert purchase price to per-tael if needed
     const userUnit = entry.unit || "tael";
     if (userUnit === "mace") {
-      purchasePrice = entry.purchase_price * 10; // Convert to per tael
+      purchasePrice = entry.purchasePrice * 10; // Convert to per tael
     } else if (userUnit === "gram") {
-      purchasePrice = entry.purchase_price * 37.5; // Convert to per tael
+      purchasePrice = entry.purchasePrice * 37.5; // Convert to per tael
     } else {
-      purchasePrice = entry.purchase_price;
+      purchasePrice = entry.purchasePrice;
     }
   }
 
@@ -86,9 +86,9 @@ export const calculateHoldingPerformance = async (
       let currentPriceCurrency: CurrencyCode = entry.currency || "USD";
       let priceScale = 1;
 
-      if (entry.asset_type === "stock") {
+      if (entry.assetType === "stock") {
         const adjustedTs = getLastTradingTimestamp(timestamp * 1000);
-        const response = await finCatchAPI.fetchStockHistory({
+        const response = await fetchStockHistory({
           symbol: entry.symbol,
           resolution: "1D" as const,
           from: adjustedTs - 86400 - 1,
@@ -101,13 +101,13 @@ export const calculateHoldingPerformance = async (
           priceScale = (response.metadata?.price_scale as number) ?? 1;
           currentPrice = rawPrice * priceScale;
         }
-      } else if (entry.asset_type === "gold") {
+      } else if (entry.assetType === "gold") {
         const goldSource = entry.source as "sjc";
         if (!goldSource || goldSource !== "sjc") {
           continue;
         }
 
-        const response = await finCatchAPI.fetchGoldPrice({
+        const response = await fetchGoldPrice({
           gold_price_id: entry.symbol,
           from: timestamp - 86400,
           to: timestamp,
@@ -192,8 +192,8 @@ export const calculateAllHoldingsPerformance = async (
 
       holdings.push({
         entry,
-        performance_data: performanceData,
-        current_return: currentReturn,
+        performanceData: performanceData,
+        currentReturn: currentReturn,
         color: CHART_COLORS[i % CHART_COLORS.length],
       });
     }
@@ -204,8 +204,8 @@ export const calculateAllHoldingsPerformance = async (
 
     return {
       holdings,
-      start_date: startDate,
-      end_date: endDate,
+      startDate: startDate,
+      endDate: endDate,
       currency: displayCurrency,
     };
   } catch (error) {

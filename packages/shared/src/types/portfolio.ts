@@ -5,57 +5,57 @@ export interface Portfolio {
   id: string; // UUID
   name: string;
   description?: string;
-  base_currency?: CurrencyCode; // Portfolio's base currency for valuation
-  created_at: number; // Unix timestamp in seconds
-  sync_version: number;
-  synced_at?: number;
+  baseCurrency?: CurrencyCode; // Portfolio's base currency for valuation
+  createdAt: number; // Unix timestamp in seconds
+  syncVersion: number;
+  syncedAt?: number;
 }
 
 export interface PortfolioEntry {
   id: string; // UUID
-  portfolio_id: string; // UUID reference
-  asset_type: "stock" | "gold" | "bond";
+  portfolioId: string; // UUID reference
+  assetType: "stock" | "gold" | "bond";
   symbol: string;
   quantity: number;
-  purchase_price: number;
+  purchasePrice: number;
   currency?: CurrencyCode; // Currency of the purchase price
-  purchase_date: number; // Unix timestamp in seconds
+  purchaseDate: number; // Unix timestamp in seconds
   notes?: string;
   tags?: string; // JSON array as string
-  transaction_fees?: number;
+  transactionFees?: number;
   source?: string;
-  created_at: number;
+  createdAt: number;
   // Gold-specific fields
   unit?: "gram" | "mace" | "tael" | "ounce" | "kg"; // Unit of quantity for gold
-  gold_type?: string; // Type of gold (e.g., "1" for SJC HCMC, "2" for SJC Hanoi, "49" for SJC rings)
+  goldType?: string; // Type of gold (e.g., "1" for SJC HCMC, "2" for SJC Hanoi, "49" for SJC rings)
   // Bond-specific fields
-  face_value?: number; // Par/nominal value
-  coupon_rate?: number; // Annual rate as percentage (e.g., 5.0)
-  maturity_date?: number; // Unix timestamp
-  coupon_frequency?: "annual" | "semiannual" | "quarterly" | "monthly";
-  current_market_price?: number; // User-entered current price
-  last_price_update?: number; // Unix timestamp of last price update
+  faceValue?: number; // Par/nominal value
+  couponRate?: number; // Annual rate as percentage (e.g., 5.0)
+  maturityDate?: number; // Unix timestamp
+  couponFrequency?: "annual" | "semiannual" | "quarterly" | "monthly";
+  currentMarketPrice?: number; // User-entered current price
+  lastPriceUpdate?: number; // Unix timestamp of last price update
   ytm?: number; // Yield to Maturity as percentage (used in calculated mode)
   // Stock alert fields (synced to server, monitoring handled by qm-sync)
-  target_price?: number; // Take-profit price
-  stop_loss?: number; // Stop-loss price
-  alert_enabled?: boolean; // Alerts active (default true when prices set)
+  targetPrice?: number; // Take-profit price
+  stopLoss?: number; // Stop-loss price
+  alertEnabled?: boolean; // Alerts active (default true when prices set)
   // Alert tracking fields (updated by server when alerts trigger)
-  last_alert_at?: number; // Unix timestamp of last triggered alert
-  alert_count?: number; // Number of times alert has been triggered (max 3, then auto-disable)
-  last_alert_type?: "target" | "stop_loss"; // Type of last triggered alert
-  sync_version: number;
-  synced_at?: number;
+  lastAlertAt?: number; // Unix timestamp of last triggered alert
+  alertCount?: number; // Number of times alert has been triggered (max 3, then auto-disable)
+  lastAlertType?: "target" | "stop_loss"; // Type of last triggered alert
+  syncVersion: number;
+  syncedAt?: number;
 }
 
 // Price alert event data (received from qm-sync server)
 export interface PriceAlertEvent {
-  entry_id: string;
+  entryId: string;
   symbol: string;
-  alert_type: "target" | "stop_loss";
-  current_price: number;
-  threshold_price: number;
-  triggered_at: number;
+  alertType: "target" | "stop_loss";
+  currentPrice: number;
+  thresholdPrice: number;
+  triggeredAt: number;
 }
 
 // Portfolio with entries
@@ -65,67 +65,67 @@ export interface PortfolioWithEntries extends Portfolio {
 
 // Portfolio performance metrics
 export interface PortfolioPerformance {
-  total_value: number;
-  total_cost: number;
-  total_gain_loss: number;
-  total_gain_loss_percentage: number;
+  totalValue: number;
+  totalCost: number;
+  totalGainLoss: number;
+  totalGainLossPercentage: number;
   currency: CurrencyCode; // Currency of the calculated values
-  entries_performance: EntryPerformance[];
+  entriesPerformance: EntryPerformance[];
 }
 
 export interface EntryPerformance {
   entry: PortfolioEntry;
-  current_price: number;
-  purchase_price?: number; // Scaled purchase price in display currency
-  current_value: number;
-  total_cost: number;
-  gain_loss: number;
-  gain_loss_percentage: number;
-  price_source: string;
+  currentPrice: number;
+  purchasePrice?: number; // Scaled purchase price in display currency
+  currentValue: number;
+  totalCost: number;
+  gainLoss: number;
+  gainLossPercentage: number;
+  priceSource: string;
   currency: CurrencyCode; // Currency of the calculated values
-  exchange_rate?: number; // Exchange rate used if conversion was needed
+  exchangeRate?: number; // Exchange rate used if conversion was needed
 }
 
 // Historical portfolio value for charting
 export interface PortfolioHistoricalValue {
   timestamp: number;
-  total_value: number;
-  total_cost: number;
-  gain_loss: number;
-  gain_loss_percentage: number;
+  totalValue: number;
+  totalCost: number;
+  gainLoss: number;
+  gainLossPercentage: number;
 }
 
 // Bond coupon payment tracking
 export interface BondCouponPayment {
   id: string; // UUID
-  entry_id: string; // UUID reference to PortfolioEntry.id
-  payment_date: number; // Unix timestamp
+  entryId: string; // UUID reference to PortfolioEntry.id
+  paymentDate: number; // Unix timestamp
   amount: number; // Coupon amount received
   currency: CurrencyCode; // Payment currency
   notes?: string;
-  created_at: number;
-  sync_version: number;
-  synced_at?: number;
+  createdAt: number;
+  syncVersion: number;
+  syncedAt?: number;
 }
 
 // Form data for creating/editing entries
 export interface PortfolioEntryFormData {
-  asset_type: "stock" | "gold" | "bond";
+  assetType: "stock" | "gold" | "bond";
   symbol: string;
   quantity: string;
-  purchase_price: string;
+  purchasePrice: string;
   currency?: CurrencyCode;
-  purchase_date: Date;
+  purchaseDate: Date;
   notes?: string;
   tags?: string[];
-  transaction_fees?: string;
+  transactionFees?: string;
   source?: string;
 }
 
 // Asset allocation data for pie chart
 export interface AssetAllocation {
   symbol: string;
-  asset_type: "stock" | "gold" | "bond";
+  assetType: "stock" | "gold" | "bond";
   value: number;
   percentage: number;
   color: string;

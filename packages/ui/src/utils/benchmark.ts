@@ -1,4 +1,4 @@
-import { finCatchAPI } from "@fin-catch/ui/services";
+import { fetchStockHistory, fetchGoldPrice } from "@fin-catch/ui/services";
 import {
   BenchmarkData,
   BenchmarkOption,
@@ -38,7 +38,7 @@ export const calculatePortfolioHistoricalPerformance = async (
 
     for (const entry of entries) {
       // Skip if entry was purchased after this timestamp
-      if (entry.purchase_date > timestamp) {
+      if (entry.purchaseDate > timestamp) {
         continue;
       }
 
@@ -47,8 +47,8 @@ export const calculatePortfolioHistoricalPerformance = async (
         let currentPriceCurrency: CurrencyCode = entry.currency || "USD";
         let priceScale = 1;
 
-        if (entry.asset_type === "stock") {
-          const response = await finCatchAPI.fetchStockHistory({
+        if (entry.assetType === "stock") {
+          const response = await fetchStockHistory({
             symbol: entry.symbol,
             resolution: "1D" as const,
             from: timestamp - 86400,
@@ -61,13 +61,13 @@ export const calculatePortfolioHistoricalPerformance = async (
             priceScale = (response.metadata?.price_scale as number) ?? 1;
             currentPrice = rawPrice * priceScale;
           }
-        } else if (entry.asset_type === "gold") {
+        } else if (entry.assetType === "gold") {
           const goldSource = entry.source as "sjc";
           if (!goldSource || goldSource !== "sjc") {
             continue;
           }
 
-          const response = await finCatchAPI.fetchGoldPrice({
+          const response = await fetchGoldPrice({
             gold_price_id: entry.symbol,
             from: timestamp - 86400,
             to: timestamp,
@@ -91,7 +91,7 @@ export const calculatePortfolioHistoricalPerformance = async (
 
         // Calculate quantity in proper units (for gold, convert to taels)
         let quantityInBaseUnit = entry.quantity;
-        if (entry.asset_type === "gold") {
+        if (entry.assetType === "gold") {
           const userUnit = entry.unit || "tael";
           if (userUnit === "mace") {
             quantityInBaseUnit = entry.quantity / 10;
@@ -139,7 +139,7 @@ export const fetchBenchmarkData = async (
   const result: BenchmarkData[] = [];
 
   try {
-    const response = await finCatchAPI.fetchStockHistory({
+    const response = await fetchStockHistory({
       symbol: benchmark.symbol,
       resolution: "1D" as const,
       from: startDate,
@@ -217,14 +217,14 @@ export const calculateBenchmarkComparison = async (
         : 0;
 
     return {
-      portfolio_data: portfolioData,
-      benchmark_data: benchmarkData,
-      benchmark_name: benchmark.name,
-      start_date: startDate,
-      end_date: endDate,
+      portfolioData: portfolioData,
+      benchmarkData: benchmarkData,
+      benchmarkName: benchmark.name,
+      startDate: startDate,
+      endDate: endDate,
       currency: displayCurrency,
-      portfolio_return: portfolioReturn,
-      benchmark_return: benchmarkReturn,
+      portfolioReturn: portfolioReturn,
+      benchmarkReturn: benchmarkReturn,
       outperformance: portfolioReturn - benchmarkReturn,
     };
   } catch (error) {

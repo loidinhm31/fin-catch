@@ -1,6 +1,11 @@
 import { useEffect, useState } from "react";
 import { BondCouponPayment } from "@fin-catch/shared";
-import { finCatchAPI } from "@fin-catch/ui/services";
+import {
+  listCouponPayments,
+  createCouponPayment,
+  updateCouponPayment,
+  deleteCouponPayment,
+} from "@fin-catch/ui/services";
 
 export const useCouponPayments = (entryId: string | null) => {
   const [payments, setPayments] = useState<BondCouponPayment[]>([]);
@@ -16,7 +21,7 @@ export const useCouponPayments = (entryId: string | null) => {
     setIsLoading(true);
     setError(null);
     try {
-      const data = await finCatchAPI.listCouponPayments(entryId);
+      const data = await listCouponPayments(entryId);
       setPayments(data);
     } catch (err) {
       const errorMessage =
@@ -35,7 +40,7 @@ export const useCouponPayments = (entryId: string | null) => {
 
     setError(null);
     try {
-      await finCatchAPI.createCouponPayment(payment);
+      await createCouponPayment(payment);
       await loadPayments(); // Reload to get updated list
     } catch (err) {
       const errorMessage =
@@ -48,7 +53,7 @@ export const useCouponPayments = (entryId: string | null) => {
   const updatePayment = async (payment: BondCouponPayment): Promise<void> => {
     setError(null);
     try {
-      await finCatchAPI.updateCouponPayment(payment);
+      await updateCouponPayment(payment);
       await loadPayments(); // Reload to get updated list
     } catch (err) {
       const errorMessage =
@@ -61,7 +66,7 @@ export const useCouponPayments = (entryId: string | null) => {
   const deletePayment = async (paymentId: string): Promise<void> => {
     setError(null);
     try {
-      await finCatchAPI.deleteCouponPayment(paymentId);
+      await deleteCouponPayment(paymentId);
       await loadPayments(); // Reload to get updated list
     } catch (err) {
       const errorMessage =

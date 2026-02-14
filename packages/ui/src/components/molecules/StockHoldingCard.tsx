@@ -38,21 +38,21 @@ export const StockHoldingCard: React.FC<StockHoldingCardProps> = ({
   formatDate,
 }) => {
   const entry = entryPerf.entry;
-  const isPositive = entryPerf.gain_loss >= 0;
+  const isPositive = entryPerf.gainLoss >= 0;
 
   // Alert status helpers
-  const hasAlerts = entry.target_price || entry.stop_loss;
-  const alertsEnabled = entry.alert_enabled !== false;
+  const hasAlerts = entry.targetPrice || entry.stopLoss;
+  const alertsEnabled = entry.alertEnabled !== false;
   // Note: alert_triggered state now managed by qm-sync server
   // Triggered alerts are shown via PriceAlertToast component
 
   // Calculate distance to thresholds
-  const currentPrice = entryPerf.current_price;
-  const targetDistance = entry.target_price
-    ? ((entry.target_price - currentPrice) / currentPrice) * 100
+  const currentPrice = entryPerf.currentPrice;
+  const targetDistance = entry.targetPrice
+    ? ((entry.targetPrice - currentPrice) / currentPrice) * 100
     : null;
-  const stopLossDistance = entry.stop_loss
-    ? ((entry.stop_loss - currentPrice) / currentPrice) * 100
+  const stopLossDistance = entry.stopLoss
+    ? ((entry.stopLoss - currentPrice) / currentPrice) * 100
     : null;
 
   return (
@@ -123,7 +123,7 @@ export const StockHoldingCard: React.FC<StockHoldingCardProps> = ({
                   color: "var(--cube-gray-900)",
                 }}
               >
-                {formatCurrency(entryPerf.current_value)}
+                {formatCurrency(entryPerf.currentValue)}
               </p>
             </div>
             <div>
@@ -142,7 +142,7 @@ export const StockHoldingCard: React.FC<StockHoldingCardProps> = ({
                   color: isPositive ? "#10b981" : "#ef4444",
                 }}
               >
-                {formatCurrency(entryPerf.gain_loss)}
+                {formatCurrency(entryPerf.gainLoss)}
               </p>
               <p
                 style={{
@@ -150,7 +150,7 @@ export const StockHoldingCard: React.FC<StockHoldingCardProps> = ({
                   color: isPositive ? "#10b981" : "#ef4444",
                 }}
               >
-                {formatPercentage(entryPerf.gain_loss_percentage)}
+                {formatPercentage(entryPerf.gainLossPercentage)}
               </p>
             </div>
           </div>
@@ -229,7 +229,7 @@ export const StockHoldingCard: React.FC<StockHoldingCardProps> = ({
                   color: "var(--cube-gray-900)",
                 }}
               >
-                {formatCurrency(entryPerf.purchase_price || 0)}
+                {formatCurrency(entryPerf.purchasePrice || 0)}
               </p>
             </div>
             <div>
@@ -248,7 +248,7 @@ export const StockHoldingCard: React.FC<StockHoldingCardProps> = ({
                   color: "var(--cube-gray-900)",
                 }}
               >
-                {formatCurrency(entryPerf.current_price)}
+                {formatCurrency(entryPerf.currentPrice)}
               </p>
             </div>
             <div>
@@ -267,12 +267,12 @@ export const StockHoldingCard: React.FC<StockHoldingCardProps> = ({
                   color: "var(--cube-gray-900)",
                 }}
               >
-                {formatDate(entry.purchase_date)}
+                {formatDate(entry.purchaseDate)}
               </p>
             </div>
             {entry.currency &&
               entry.currency !== displayCurrency &&
-              entryPerf.exchange_rate && (
+              entryPerf.exchangeRate && (
                 <div className="col-span-2">
                   <p
                     style={{
@@ -289,7 +289,7 @@ export const StockHoldingCard: React.FC<StockHoldingCardProps> = ({
                       color: "var(--cube-gray-900)",
                     }}
                   >
-                    1 {entry.currency} = {entryPerf.exchange_rate.toFixed(4)}{" "}
+                    1 {entry.currency} = {entryPerf.exchangeRate.toFixed(4)}{" "}
                     {displayCurrency}
                   </p>
                 </div>
@@ -316,7 +316,7 @@ export const StockHoldingCard: React.FC<StockHoldingCardProps> = ({
                 </p>
               </div>
               <div className="grid grid-cols-2 gap-3">
-                {entry.target_price && (
+                {entry.targetPrice && (
                   <div>
                     <p
                       style={{
@@ -333,7 +333,7 @@ export const StockHoldingCard: React.FC<StockHoldingCardProps> = ({
                         color: "var(--cube-gray-900)",
                       }}
                     >
-                      {formatCurrency(entry.target_price)}
+                      {formatCurrency(entry.targetPrice)}
                       {targetDistance !== null && (
                         <span
                           style={{
@@ -349,7 +349,7 @@ export const StockHoldingCard: React.FC<StockHoldingCardProps> = ({
                     </p>
                   </div>
                 )}
-                {entry.stop_loss && (
+                {entry.stopLoss && (
                   <div>
                     <p
                       style={{
@@ -366,7 +366,7 @@ export const StockHoldingCard: React.FC<StockHoldingCardProps> = ({
                         color: "var(--cube-gray-900)",
                       }}
                     >
-                      {formatCurrency(entry.stop_loss)}
+                      {formatCurrency(entry.stopLoss)}
                       {stopLossDistance !== null && (
                         <span
                           style={{

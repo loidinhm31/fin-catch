@@ -5,10 +5,8 @@
  * Provides methods for tracking pending changes, applying remote changes,
  * and managing sync checkpoints.
  *
- * Sync tracking approach (matches Rust/SQLite implementation):
- * - Creates/updates: Records have synced_at = undefined (pending)
- * - Deletes: Tracked in _pendingChanges table before hard delete
- * - After successful sync: synced_at is set, _pendingChanges entries removed
+ * Both local and server use camelCase field names - no conversion needed.
+ * Only FK references need mapping: portfolioId <-> portfolioSyncUuid, entryId <-> entrySyncUuid
  */
 
 import {
@@ -30,89 +28,89 @@ export class IndexedDBSyncStorage {
    * Get all records that have pending changes (not yet synced).
    *
    * This combines two sources:
-   * 1. Records where synced_at is undefined (creates/updates) - like Rust implementation
+   * 1. Records where syncedAt is undefined (creates/updates)
    * 2. Records in _pendingChanges table with operation="delete" (deletes)
    */
   async getPendingChanges(): Promise<SyncRecord[]> {
     const records: SyncRecord[] = [];
 
-    // 1. Get unsynced portfolios (synced_at is undefined)
+    // 1. Get unsynced portfolios (syncedAt is undefined)
     const portfolios = await db.portfolios.toArray();
     for (const portfolio of portfolios) {
-      if (portfolio.synced_at === undefined || portfolio.synced_at === null) {
+      if (portfolio.syncedAt === undefined || portfolio.syncedAt === null) {
         records.push({
           tableName: "portfolios",
           rowId: portfolio.id,
           data: {
             name: portfolio.name,
             description: portfolio.description,
-            baseCurrency: portfolio.base_currency,
-            createdAt: portfolio.created_at,
+            baseCurrency: portfolio.baseCurrency,
+            createdAt: portfolio.createdAt,
           },
-          version: portfolio.sync_version || 1,
+          version: portfolio.syncVersion || 1,
           deleted: false,
         });
       }
     }
 
-    // 2. Get unsynced portfolio entries (synced_at is undefined)
+    // 2. Get unsynced portfolio entries (syncedAt is undefined)
     const entries = await db.portfolioEntries.toArray();
     for (const entry of entries) {
-      if (entry.synced_at === undefined || entry.synced_at === null) {
+      if (entry.syncedAt === undefined || entry.syncedAt === null) {
         records.push({
           tableName: "portfolioEntries",
           rowId: entry.id,
           data: {
-            portfolioSyncUuid: entry.portfolio_id,
-            assetType: entry.asset_type,
+            portfolioSyncUuid: entry.portfolioId, // Map FK reference for server
+            assetType: entry.assetType,
             symbol: entry.symbol,
             quantity: entry.quantity,
-            purchasePrice: entry.purchase_price,
+            purchasePrice: entry.purchasePrice,
             currency: entry.currency,
-            purchaseDate: entry.purchase_date,
+            purchaseDate: entry.purchaseDate,
             notes: entry.notes,
             tags: entry.tags,
-            transactionFees: entry.transaction_fees,
+            transactionFees: entry.transactionFees,
             source: entry.source,
-            createdAt: entry.created_at,
+            createdAt: entry.createdAt,
             unit: entry.unit,
-            goldType: entry.gold_type,
-            faceValue: entry.face_value,
-            couponRate: entry.coupon_rate,
-            maturityDate: entry.maturity_date,
-            couponFrequency: entry.coupon_frequency,
-            currentMarketPrice: entry.current_market_price,
-            lastPriceUpdate: entry.last_price_update,
+            goldType: entry.goldType,
+            faceValue: entry.faceValue,
+            couponRate: entry.couponRate,
+            maturityDate: entry.maturityDate,
+            couponFrequency: entry.couponFrequency,
+            currentMarketPrice: entry.currentMarketPrice,
+            lastPriceUpdate: entry.lastPriceUpdate,
             ytm: entry.ytm,
-            targetPrice: entry.target_price,
-            stopLoss: entry.stop_loss,
-            alertEnabled: entry.alert_enabled,
-            lastAlertAt: entry.last_alert_at,
-            alertCount: entry.alert_count,
-            lastAlertType: entry.last_alert_type,
+            targetPrice: entry.targetPrice,
+            stopLoss: entry.stopLoss,
+            alertEnabled: entry.alertEnabled,
+            lastAlertAt: entry.lastAlertAt,
+            alertCount: entry.alertCount,
+            lastAlertType: entry.lastAlertType,
           },
-          version: entry.sync_version || 1,
+          version: entry.syncVersion || 1,
           deleted: false,
         });
       }
     }
 
-    // 3. Get unsynced coupon payments (synced_at is undefined)
+    // 3. Get unsynced coupon payments (syncedAt is undefined)
     const payments = await db.couponPayments.toArray();
     for (const payment of payments) {
-      if (payment.synced_at === undefined || payment.synced_at === null) {
+      if (payment.syncedAt === undefined || payment.syncedAt === null) {
         records.push({
           tableName: "bondCouponPayments",
           rowId: payment.id,
           data: {
-            entrySyncUuid: payment.entry_id,
-            paymentDate: payment.payment_date,
+            entrySyncUuid: payment.entryId, // Map FK reference for server
+            paymentDate: payment.paymentDate,
             amount: payment.amount,
             currency: payment.currency,
             notes: payment.notes,
-            createdAt: payment.created_at,
+            createdAt: payment.createdAt,
           },
-          version: payment.sync_version || 1,
+          version: payment.syncVersion || 1,
           deleted: false,
         });
       }
@@ -123,9 +121,8 @@ export class IndexedDBSyncStorage {
       .filter((change) => change.operation === "delete")
       .toArray();
     for (const change of pendingDeletes) {
-      // Map local Dexie table names to camelCase sync protocol table names
+      // Map local Dexie table names to sync protocol table names
       let tableName = change.tableName;
-      if (tableName === "portfolioEntries") tableName = "portfolioEntries";
       if (tableName === "couponPayments") tableName = "bondCouponPayments";
 
       records.push({
@@ -149,19 +146,19 @@ export class IndexedDBSyncStorage {
     // Count unsynced portfolios
     const portfolios = await db.portfolios.toArray();
     count += portfolios.filter(
-      (p) => p.synced_at === undefined || p.synced_at === null,
+      (p) => p.syncedAt === undefined || p.syncedAt === null,
     ).length;
 
     // Count unsynced entries
     const entries = await db.portfolioEntries.toArray();
     count += entries.filter(
-      (e) => e.synced_at === undefined || e.synced_at === null,
+      (e) => e.syncedAt === undefined || e.syncedAt === null,
     ).length;
 
     // Count unsynced payments
     const payments = await db.couponPayments.toArray();
     count += payments.filter(
-      (p) => p.synced_at === undefined || p.synced_at === null,
+      (p) => p.syncedAt === undefined || p.syncedAt === null,
     ).length;
 
     // Count pending deletes
@@ -210,7 +207,7 @@ export class IndexedDBSyncStorage {
 
   /**
    * Mark records as synced after successful push.
-   * Remove from pending changes and update synced_at on the records.
+   * Remove from pending changes and update syncedAt on the records.
    */
   async markSynced(
     recordIds: Array<{ tableName: string; rowId: string }>,
@@ -235,13 +232,13 @@ export class IndexedDBSyncStorage {
             .where({ tableName: localTableName, rowId })
             .delete();
 
-          // Update synced_at on the actual record (if it still exists - not for deletes)
+          // Update syncedAt on the actual record (if it still exists - not for deletes)
           const table = this.getTable(tableName);
           if (table) {
             // Only update if record exists (won't exist for deletes)
             const exists = await table.get(rowId);
             if (exists) {
-              await table.update(rowId, { synced_at: now });
+              await table.update(rowId, { syncedAt: now });
             }
           }
         }
@@ -254,8 +251,6 @@ export class IndexedDBSyncStorage {
    */
   private serverToLocalTableName(tableName: string): string {
     switch (tableName) {
-      case "portfolioEntries":
-        return "portfolioEntries";
       case "bondCouponPayments":
         return "couponPayments";
       default:
@@ -309,6 +304,7 @@ export class IndexedDBSyncStorage {
 
   /**
    * Insert or update a record from the server.
+   * Server and local both use camelCase - only FK references need mapping.
    */
   private async upsertRecord(
     record: PullRecord,
@@ -320,58 +316,28 @@ export class IndexedDBSyncStorage {
       return;
     }
 
-    // Build the data object with server data
-    // Use Record<string, unknown> to allow dynamic property access
+    // Build the data object - server already sends camelCase
     const data: Record<string, unknown> = {
       ...record.data,
       id: record.rowId,
-      sync_version: record.version,
-      synced_at: syncedAt,
+      syncVersion: record.version,
+      syncedAt: syncedAt,
     };
 
-    // Convert camelCase to snake_case for all known fields
-    // This handles the mismatch between server (camelCase) and local DB (snake_case)
-    this.convertCamelToSnake(data, "createdAt", "created_at");
-    this.convertCamelToSnake(data, "syncVersion", "sync_version");
-    this.convertCamelToSnake(data, "syncedAt", "synced_at");
+    // Map FK references from server naming to local naming
+    // Server uses portfolioSyncUuid/entrySyncUuid, local uses portfolioId/entryId
+    if (data.portfolioSyncUuid !== undefined) {
+      data.portfolioId = data.portfolioSyncUuid;
+      delete data.portfolioSyncUuid;
+    }
+    if (data.entrySyncUuid !== undefined) {
+      data.entryId = data.entrySyncUuid;
+      delete data.entrySyncUuid;
+    }
 
-    // Portfolio entry fields
-    this.convertCamelToSnake(data, "portfolioId", "portfolio_id");
-    this.convertCamelToSnake(data, "portfolioSyncUuid", "portfolio_id"); // Server uses this name
-    this.convertCamelToSnake(data, "assetType", "asset_type");
-    this.convertCamelToSnake(data, "purchasePrice", "purchase_price");
-    this.convertCamelToSnake(data, "purchaseDate", "purchase_date");
-    this.convertCamelToSnake(data, "transactionFees", "transaction_fees");
-    this.convertCamelToSnake(data, "goldType", "gold_type");
-    this.convertCamelToSnake(data, "faceValue", "face_value");
-    this.convertCamelToSnake(data, "couponRate", "coupon_rate");
-    this.convertCamelToSnake(data, "maturityDate", "maturity_date");
-    this.convertCamelToSnake(data, "couponFrequency", "coupon_frequency");
-    this.convertCamelToSnake(
-      data,
-      "currentMarketPrice",
-      "current_market_price",
-    );
-    this.convertCamelToSnake(data, "lastPriceUpdate", "last_price_update");
-    this.convertCamelToSnake(data, "targetPrice", "target_price");
-    this.convertCamelToSnake(data, "stopLoss", "stop_loss");
-    this.convertCamelToSnake(data, "alertEnabled", "alert_enabled");
-    // Alert tracking fields (server-updated)
-    this.convertCamelToSnake(data, "lastAlertAt", "last_alert_at");
-    this.convertCamelToSnake(data, "alertCount", "alert_count");
-    this.convertCamelToSnake(data, "lastAlertType", "last_alert_type");
-
-    // Coupon payment fields
-    this.convertCamelToSnake(data, "entryId", "entry_id");
-    this.convertCamelToSnake(data, "entrySyncUuid", "entry_id"); // Server might use this
-    this.convertCamelToSnake(data, "paymentDate", "payment_date");
-
-    // Portfolio fields
-    this.convertCamelToSnake(data, "baseCurrency", "base_currency");
-
-    // Ensure created_at exists (use current time as fallback)
-    if (!data.created_at) {
-      data.created_at = syncedAt;
+    // Ensure createdAt exists (use current time as fallback)
+    if (!data.createdAt) {
+      data.createdAt = syncedAt;
     }
 
     console.log(
@@ -381,20 +347,6 @@ export class IndexedDBSyncStorage {
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     await table.put(data as any);
-  }
-
-  /**
-   * Convert a camelCase field to snake_case if it exists.
-   */
-  private convertCamelToSnake(
-    data: Record<string, unknown>,
-    camelKey: string,
-    snakeKey: string,
-  ): void {
-    if (data[camelKey] !== undefined && data[snakeKey] === undefined) {
-      data[snakeKey] = data[camelKey];
-      delete data[camelKey];
-    }
   }
 
   /**
@@ -472,18 +424,11 @@ export class IndexedDBSyncStorage {
   }
 
   // =========================================================================
-  // Note: Token storage has been removed from IndexedDBSyncStorage
-  // Tokens are now managed by the auth service (single source of truth)
-  // The sync adapter receives tokens via a provider function from auth service
-  // =========================================================================
-
-  // =========================================================================
   // Helpers
   // =========================================================================
 
   /**
    * Get the Dexie table by name.
-   * Handles both camelCase (local) and snake_case (server) naming conventions.
    */
   private getTable(tableName: string) {
     switch (tableName) {
@@ -502,7 +447,6 @@ export class IndexedDBSyncStorage {
   /**
    * Get table order for FK-safe insert/delete ordering.
    * Lower = parent (insert first, delete last)
-   * Handles both camelCase (local) and snake_case (server) naming conventions.
    */
   private getTableOrder(tableName: string): number {
     switch (tableName) {

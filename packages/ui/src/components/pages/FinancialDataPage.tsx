@@ -16,7 +16,11 @@ import {
   StockHistoryRequest,
   StockHistoryResponse,
 } from "@fin-catch/shared";
-import { finCatchAPI } from "@fin-catch/ui/services";
+import {
+  fetchStockHistory,
+  fetchGoldPrice,
+  fetchGoldPremium as fetchGoldPremiumService,
+} from "@fin-catch/ui/services";
 import { DateRangePicker } from "@fin-catch/ui/components/molecules";
 
 type ActiveTab = "stock" | "gold";
@@ -71,7 +75,7 @@ export const FinancialDataPage: React.FC = () => {
     setStockError(null);
 
     try {
-      const response = await finCatchAPI.fetchStockHistory(request);
+      const response = await fetchStockHistory(request);
 
       if (response.status === "error") {
         setStockError(response.error || "Failed to fetch stock data");
@@ -95,7 +99,7 @@ export const FinancialDataPage: React.FC = () => {
     setGoldError(null);
 
     try {
-      const response = await finCatchAPI.fetchGoldPrice(request);
+      const response = await fetchGoldPrice(request);
 
       if (response.status === "error") {
         setGoldError(response.error || "Failed to fetch gold data");
@@ -137,10 +141,7 @@ export const FinancialDataPage: React.FC = () => {
         stock_source: "yahoo_finance",
       };
 
-      const response = await finCatchAPI.fetchGoldPremium(
-        request,
-        abortController.signal,
-      );
+      const response = await fetchGoldPremiumService(request);
 
       if (response.status === "error") {
         setGoldPremiumError(

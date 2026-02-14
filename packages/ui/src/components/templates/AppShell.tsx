@@ -6,11 +6,7 @@ import {
   BottomNav,
   SyncStatusIndicator,
 } from "@fin-catch/ui/components/molecules";
-import {
-  BrowserSyncInitializer,
-  PriceAlertToast,
-  Sidebar,
-} from "@fin-catch/ui/components/organisms";
+import { PriceAlertToast, Sidebar } from "@fin-catch/ui/components/organisms";
 import "@fin-catch/ui/styles";
 import { useAuth, useNav } from "@fin-catch/ui/hooks";
 
@@ -139,98 +135,96 @@ export function AppShell({
   const showNavigation = true;
 
   return (
-    <BrowserSyncInitializer>
-      <div
-        className="min-h-screen"
-        style={{
-          background:
-            "linear-gradient(135deg, #0F172A 0%, #0A0E27 50%, #1E1B4B 100%)",
-        }}
-      >
-        {/* Desktop Sidebar - Hidden on mobile */}
-        {showNavigation && (
-          <Sidebar
-            currentPage={currentPage}
-            onNavigate={handleNavigate}
-            onSyncTap={() => handleNavigate("settings")}
-            isCollapsed={isSidebarCollapsed}
-            onToggleCollapse={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
-          />
-        )}
+    <div
+      className="min-h-screen"
+      style={{
+        background:
+          "linear-gradient(135deg, #0F172A 0%, #0A0E27 50%, #1E1B4B 100%)",
+      }}
+    >
+      {/* Desktop Sidebar - Hidden on mobile */}
+      {showNavigation && (
+        <Sidebar
+          currentPage={currentPage}
+          onNavigate={handleNavigate}
+          onSyncTap={() => handleNavigate("settings")}
+          isCollapsed={isSidebarCollapsed}
+          onToggleCollapse={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
+        />
+      )}
 
-        {/* Header with Sync Status - Mobile only, desktop has sidebar */}
-        {showNavigation && (
-          <div
-            className="fixed top-0 left-0 right-0 z-40 flex justify-end px-4 py-3 md:hidden"
-            style={{
-              background: "rgba(15, 23, 42, 0.85)",
-              backdropFilter: "blur(16px)",
-              WebkitBackdropFilter: "blur(16px)",
-              borderBottom: "1px solid rgba(255, 255, 255, 0.1)",
-              boxShadow: "0 4px 20px rgba(0, 0, 0, 0.4)",
-            }}
-          >
-            <SyncStatusIndicator onTap={() => handleNavigate("settings")} />
-          </div>
-        )}
-
-        {/* Page Content - Adjust margins for sidebar on desktop */}
+      {/* Header with Sync Status - Mobile only, desktop has sidebar */}
+      {showNavigation && (
         <div
-          className={`transition-all duration-300 pt-15 md:pt-6 pb-24 md:pb-6 ${
-            isSidebarCollapsed ? "md:ml-16" : "md:ml-64"
-          }`}
+          className="fixed top-0 left-0 right-0 z-40 flex justify-end px-4 py-3 md:hidden"
+          style={{
+            background: "rgba(15, 23, 42, 0.85)",
+            backdropFilter: "blur(16px)",
+            WebkitBackdropFilter: "blur(16px)",
+            borderBottom: "1px solid rgba(255, 255, 255, 0.1)",
+            boxShadow: "0 4px 20px rgba(0, 0, 0, 0.4)",
+          }}
         >
-          <ErrorBoundary>
-            <Suspense fallback={<LoadingSpinner />}>
-              <Routes>
-                <Route path="market" element={<FinancialDataPage />} />
-                <Route path="portfolio" element={<PortfolioPage />} />
-                {/* More specific route must come before less specific */}
-                <Route
-                  path="trading/operations"
-                  element={<TradingOperationsPage />}
-                />
-                <Route path="trading" element={<TradingPage />} />
-                <Route
-                  path="settings"
-                  element={<SettingsPage onLogout={handleLogout} />}
-                />
-                <Route
-                  path="login"
-                  element={
-                    <LoginPage
-                      onLoginSuccess={() => {
-                        checkAuthStatus();
-                        nav("/portfolio");
-                      }}
-                      onSkip={() => {
-                        setLocalSkipAuth(true);
-                        nav("/portfolio");
-                      }}
-                    />
-                  }
-                />
-                <Route
-                  path="/"
-                  element={<Navigate to={to("portfolio")} replace />}
-                />
-                <Route
-                  path="*"
-                  element={<Navigate to={to("portfolio")} replace />}
-                />
-              </Routes>
-            </Suspense>
-          </ErrorBoundary>
+          <SyncStatusIndicator onTap={() => handleNavigate("settings")} />
         </div>
+      )}
 
-        {/* Mobile Bottom Navigation - Hidden on desktop */}
-        {showNavigation && (
-          <BottomNav currentPage={currentPage} onNavigate={handleNavigate} />
-        )}
-
-        {/* Price Alert Toast Notifications */}
-        <PriceAlertToast />
+      {/* Page Content - Adjust margins for sidebar on desktop */}
+      <div
+        className={`transition-all duration-300 pt-15 md:pt-6 pb-24 md:pb-6 ${
+          isSidebarCollapsed ? "md:ml-16" : "md:ml-64"
+        }`}
+      >
+        <ErrorBoundary>
+          <Suspense fallback={<LoadingSpinner />}>
+            <Routes>
+              <Route path="market" element={<FinancialDataPage />} />
+              <Route path="portfolio" element={<PortfolioPage />} />
+              {/* More specific route must come before less specific */}
+              <Route
+                path="trading/operations"
+                element={<TradingOperationsPage />}
+              />
+              <Route path="trading" element={<TradingPage />} />
+              <Route
+                path="settings"
+                element={<SettingsPage onLogout={handleLogout} />}
+              />
+              <Route
+                path="login"
+                element={
+                  <LoginPage
+                    onLoginSuccess={() => {
+                      checkAuthStatus();
+                      nav("/portfolio");
+                    }}
+                    onSkip={() => {
+                      setLocalSkipAuth(true);
+                      nav("/portfolio");
+                    }}
+                  />
+                }
+              />
+              <Route
+                path="/"
+                element={<Navigate to={to("portfolio")} replace />}
+              />
+              <Route
+                path="*"
+                element={<Navigate to={to("portfolio")} replace />}
+              />
+            </Routes>
+          </Suspense>
+        </ErrorBoundary>
       </div>
-    </BrowserSyncInitializer>
+
+      {/* Mobile Bottom Navigation - Hidden on desktop */}
+      {showNavigation && (
+        <BottomNav currentPage={currentPage} onNavigate={handleNavigate} />
+      )}
+
+      {/* Price Alert Toast Notifications */}
+      <PriceAlertToast />
+    </div>
   );
 }

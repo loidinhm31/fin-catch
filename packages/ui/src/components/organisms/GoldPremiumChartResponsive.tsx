@@ -49,19 +49,19 @@ export const GoldPremiumChartResponsive: React.FC<
   // If not showing full chart, only display the most recent data point
   const displayData = showFullChart ? data : [data[data.length - 1]];
 
-  // Format data for chart
+  // Format data for chart (API returns snake_case)
   const chartData = displayData.map((point) => ({
     time: formatTimestampForChart(point.timestamp, "1D"),
     timestamp: point.timestamp,
-    target_price: point.target_price,
-    market_price_vnd: point.market_price_vnd,
-    premium_rate: point.premium_rate,
-    premium_value: point.premium_value,
-    market_price_usd: point.market_price_usd,
-    stock_price_timestamp: point.stock_price_timestamp,
-    exchange_rate: point.exchange_rate,
-    exchange_rate_timestamp: point.exchange_rate_timestamp,
-    gold_type: point.gold_type,
+    targetPrice: point.target_price,
+    marketPriceVnd: point.market_price_vnd,
+    premiumRate: point.premium_rate,
+    premiumValue: point.premium_value,
+    marketPriceUsd: point.market_price_usd,
+    stockPriceTimestamp: point.stock_price_timestamp,
+    exchangeRate: point.exchange_rate,
+    exchangeRateTimestamp: point.exchange_rate_timestamp,
+    goldType: point.gold_type,
   }));
 
   const handleBrushChange = (newIndex: BrushChangeEvent) => {
@@ -340,14 +340,14 @@ export const GoldPremiumChartResponsive: React.FC<
               fontSize: `${activeDimensions.fontSize}px`,
             }}
             formatter={(value: any, name: string | number | undefined) => {
-              if (name === "premium_rate") {
+              if (name === "premiumRate") {
                 return [formatPercent(Number(value)), "Premium Rate"];
-              } else if (name === "target_price") {
+              } else if (name === "targetPrice") {
                 return [
                   formatCurrencyValue(Number(value)) + " VND",
                   "Target Price",
                 ];
-              } else if (name === "market_price_vnd") {
+              } else if (name === "marketPriceVnd") {
                 return [
                   formatCurrencyValue(Number(value)) + " VND",
                   "Market Price (VND)",
@@ -370,7 +370,7 @@ export const GoldPremiumChartResponsive: React.FC<
           )}
           <Bar
             yAxisId="right"
-            dataKey="premium_rate"
+            dataKey="premiumRate"
             fill="url(#premiumGradient)"
             name="Premium Rate (%)"
             radius={[4, 4, 0, 0]}
@@ -378,7 +378,7 @@ export const GoldPremiumChartResponsive: React.FC<
           <Line
             yAxisId="left"
             type="monotone"
-            dataKey="target_price"
+            dataKey="targetPrice"
             stroke="#ffaa00"
             strokeWidth={isMobile ? 2 : 2.5}
             dot={false}
@@ -393,7 +393,7 @@ export const GoldPremiumChartResponsive: React.FC<
           <Line
             yAxisId="left"
             type="monotone"
-            dataKey="market_price_vnd"
+            dataKey="marketPriceVnd"
             stroke="#00ff88"
             strokeWidth={isMobile ? 2 : 2.5}
             dot={false}

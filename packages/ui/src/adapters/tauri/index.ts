@@ -1,7 +1,8 @@
-// Re-export all Tauri adapters
-export { TauriPortfolioAdapter } from "./TauriPortfolioAdapter";
-export { TauriPortfolioEntryAdapter } from "./TauriPortfolioEntryAdapter";
-export { TauriCouponPaymentAdapter } from "./TauriCouponPaymentAdapter";
+/**
+ * Tauri adapters for native functionality
+ *
+ * These adapters use IPC to call native Rust commands in the Tauri backend.
+ * Only used when running in a Tauri webview (detected via isTauri()).
+ */
+
 export { TauriDataAdapter } from "./TauriDataAdapter";
-export { TauriAuthAdapter } from "./TauriAuthAdapter";
-export { TauriSyncAdapter } from "./TauriSyncAdapter";

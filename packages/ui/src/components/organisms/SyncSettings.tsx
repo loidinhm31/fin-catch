@@ -10,8 +10,20 @@ import {
   Server,
 } from "lucide-react";
 import { Button, Input, Label } from "@fin-catch/ui/components/atoms";
-import { finCatchAPI } from "@fin-catch/ui/services";
-import { AuthStatus, SyncResult, SyncStatus } from "@fin-catch/shared";
+import {
+  authGetStatus,
+  syncGetStatus,
+  configureSync,
+  syncNow,
+  syncWithProgress,
+} from "@fin-catch/ui/services";
+import {
+  AuthStatus,
+  SyncProgress,
+  SyncResult,
+  SyncStatus,
+} from "@fin-catch/shared";
+import { isTauri } from "@fin-catch/ui/utils";
 
 interface SyncSettingsProps {
   onLogout?: () => void;
@@ -23,6 +35,7 @@ export const SyncSettings: React.FC<SyncSettingsProps> = () => {
   const [serverUrl, setServerUrl] = useState("http://localhost:3000");
   const [isSyncing, setIsSyncing] = useState(false);
   const [syncResult, setSyncResult] = useState<SyncResult | null>(null);
+  const [syncProgress, setSyncProgress] = useState<SyncProgress | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isLoadingStatus, setIsLoadingStatus] = useState(true);
 
@@ -35,13 +48,13 @@ export const SyncSettings: React.FC<SyncSettingsProps> = () => {
     setIsLoadingStatus(true);
     try {
       const [auth, sync] = await Promise.all([
-        finCatchAPI.authGetStatus(),
-        finCatchAPI.syncGetStatus(),
+        authGetStatus(),
+        syncGetStatus(),
       ]);
       setAuthStatus(auth);
       setSyncStatus(sync);
-      if (sync.serverUrl) {
-        setServerUrl(sync.serverUrl);
+      if (auth.serverUrl) {
+        setServerUrl(auth.serverUrl);
       }
       setError(null);
     } catch (err) {
@@ -53,10 +66,8 @@ export const SyncSettings: React.FC<SyncSettingsProps> = () => {
 
   const handleConfigureSync = async () => {
     try {
-      await finCatchAPI.authConfigureSync({
+      await configureSync({
         serverUrl,
-        appId: "fin-catch",
-        apiKey: "", // API key is not needed for user auth
       });
       await loadStatus();
       setError(null);
@@ -74,16 +85,22 @@ export const SyncSettings: React.FC<SyncSettingsProps> = () => {
     setIsSyncing(true);
     setError(null);
     setSyncResult(null);
+    setSyncProgress(null);
 
     try {
-      const result = await finCatchAPI.syncNow();
+      // Use syncWithProgress from service layer
+      const result = await syncWithProgress((progress) => {
+        setSyncProgress(progress);
+      });
       setSyncResult(result);
+
       // Reload sync status to update last sync time
       await loadStatus();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Sync failed");
     } finally {
       setIsSyncing(false);
+      setSyncProgress(null);
     }
   };
 
@@ -215,6 +232,35 @@ export const SyncSettings: React.FC<SyncSettingsProps> = () => {
           </div>
         )}
 
+        {/* Sync Progress */}
+        {isSyncing && syncProgress && (
+          <div
+            className="mt-4 p-3 rounded-lg border"
+            style={{
+              background: "rgba(0, 212, 255, 0.1)",
+              borderColor: "rgba(0, 212, 255, 0.3)",
+            }}
+          >
+            <div className="flex items-center gap-2 mb-2">
+              <RefreshCw className="w-4 h-4 animate-spin text-blue-500" />
+              <span className="text-sm font-medium text-blue-400">
+                {syncProgress.phase === "pushing" ? "Pushing..." : "Pulling..."}
+              </span>
+            </div>
+            <div className="text-sm text-blue-300">
+              {syncProgress.phase === "pushing" ? (
+                <span>{syncProgress.recordsPushed} records pushed</span>
+              ) : (
+                <span>
+                  {syncProgress.recordsPulled} records pulled (page{" "}
+                  {syncProgress.currentPage})
+                  {syncProgress.hasMore && " - more pages available"}
+                </span>
+              )}
+            </div>
+          </div>
+        )}
+
         {/* Error */}
         {error && (
           <div
@@ -249,44 +295,46 @@ export const SyncSettings: React.FC<SyncSettingsProps> = () => {
         </div>
       </div>
 
-      {/* Server Configuration Card */}
-      <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm p-6">
-        <div className="flex items-start gap-4">
-          <Server className="w-6 h-6 text-blue-500" />
-          <div className="flex-1">
-            <h2 className="text-2xl font-semibold mb-2 text-gray-900 dark:text-white">
-              Server Configuration
-            </h2>
-            <p className="mb-4 text-gray-500 dark:text-gray-400">
-              Configure the sync server connection
-            </p>
+      {/* Server Configuration Card - Only shown in Tauri (native) mode */}
+      {isTauri() && (
+        <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm p-6">
+          <div className="flex items-start gap-4">
+            <Server className="w-6 h-6 text-blue-500" />
+            <div className="flex-1">
+              <h2 className="text-2xl font-semibold mb-2 text-gray-900 dark:text-white">
+                Server Configuration
+              </h2>
+              <p className="mb-4 text-gray-500 dark:text-gray-400">
+                Configure the sync server connection
+              </p>
 
-            <div className="space-y-4">
-              <div>
-                <Label htmlFor="server-url" className="mb-2 block text-sm">
-                  Server URL
-                </Label>
-                <Input
-                  id="server-url"
-                  type="text"
-                  placeholder="http://localhost:3000"
-                  value={serverUrl}
-                  onChange={(e) => setServerUrl(e.target.value)}
-                  disabled={isLoadingStatus}
-                />
+              <div className="space-y-4">
+                <div>
+                  <Label htmlFor="server-url" className="mb-2 block text-sm">
+                    Server URL
+                  </Label>
+                  <Input
+                    id="server-url"
+                    type="text"
+                    placeholder="http://localhost:3000"
+                    value={serverUrl}
+                    onChange={(e) => setServerUrl(e.target.value)}
+                    disabled={isLoadingStatus}
+                  />
+                </div>
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  onClick={handleConfigureSync}
+                  disabled={isLoadingStatus || !serverUrl}
+                >
+                  Save Configuration
+                </Button>
               </div>
-              <Button
-                variant="secondary"
-                size="sm"
-                onClick={handleConfigureSync}
-                disabled={isLoadingStatus || !serverUrl}
-              >
-                Save Configuration
-              </Button>
             </div>
           </div>
         </div>
-      </div>
+      )}
     </div>
   );
 };

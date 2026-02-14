@@ -33,7 +33,7 @@ export const BondHoldingCard: React.FC<BondHoldingCardProps> = ({
   formatDate,
 }) => {
   const entry = entryPerf.entry;
-  const isPositive = entryPerf.gain_loss >= 0;
+  const isPositive = entryPerf.gainLoss >= 0;
 
   return (
     <div className="glass-card p-4">
@@ -89,7 +89,7 @@ export const BondHoldingCard: React.FC<BondHoldingCardProps> = ({
                   color: "var(--cube-gray-900)",
                 }}
               >
-                {formatCurrency(entryPerf.current_value)}
+                {formatCurrency(entryPerf.currentValue)}
               </p>
             </div>
             <div>
@@ -108,7 +108,7 @@ export const BondHoldingCard: React.FC<BondHoldingCardProps> = ({
                   color: isPositive ? "#10b981" : "#ef4444",
                 }}
               >
-                {formatCurrency(entryPerf.gain_loss)}
+                {formatCurrency(entryPerf.gainLoss)}
               </p>
               <p
                 style={{
@@ -116,7 +116,7 @@ export const BondHoldingCard: React.FC<BondHoldingCardProps> = ({
                   color: isPositive ? "#10b981" : "#ef4444",
                 }}
               >
-                {formatPercentage(entryPerf.gain_loss_percentage)}
+                {formatPercentage(entryPerf.gainLossPercentage)}
               </p>
             </div>
           </div>
@@ -195,7 +195,7 @@ export const BondHoldingCard: React.FC<BondHoldingCardProps> = ({
                   color: "var(--cube-gray-900)",
                 }}
               >
-                {formatCurrency(entryPerf.purchase_price || 0)}
+                {formatCurrency(entryPerf.purchasePrice || 0)}
               </p>
             </div>
             <div>
@@ -214,7 +214,7 @@ export const BondHoldingCard: React.FC<BondHoldingCardProps> = ({
                   color: "var(--cube-gray-900)",
                 }}
               >
-                {formatCurrency(entryPerf.current_price)}
+                {formatCurrency(entryPerf.currentPrice)}
               </p>
             </div>
             <div>
@@ -233,12 +233,12 @@ export const BondHoldingCard: React.FC<BondHoldingCardProps> = ({
                   color: "var(--cube-gray-900)",
                 }}
               >
-                {formatDate(entry.purchase_date)}
+                {formatDate(entry.purchaseDate)}
               </p>
             </div>
             {entry.currency &&
               entry.currency !== displayCurrency &&
-              entryPerf.exchange_rate && (
+              entryPerf.exchangeRate && (
                 <div className="col-span-2">
                   <p
                     style={{
@@ -255,7 +255,7 @@ export const BondHoldingCard: React.FC<BondHoldingCardProps> = ({
                       color: "var(--cube-gray-900)",
                     }}
                   >
-                    1 {entry.currency} = {entryPerf.exchange_rate.toFixed(4)}{" "}
+                    1 {entry.currency} = {entryPerf.exchangeRate.toFixed(4)}{" "}
                     {displayCurrency}
                   </p>
                 </div>
@@ -279,8 +279,8 @@ export const BondHoldingCard: React.FC<BondHoldingCardProps> = ({
                   color: "var(--cube-gray-900)",
                 }}
               >
-                {entry.face_value
-                  ? formatCurrency(entry.face_value, entry.currency)
+                {entry.faceValue
+                  ? formatCurrency(entry.faceValue, entry.currency)
                   : "N/A"}
               </p>
             </div>
@@ -300,7 +300,7 @@ export const BondHoldingCard: React.FC<BondHoldingCardProps> = ({
                   color: "var(--cube-gray-900)",
                 }}
               >
-                {entry.coupon_rate ? `${entry.coupon_rate.toFixed(2)}%` : "N/A"}
+                {entry.couponRate ? `${entry.couponRate.toFixed(2)}%` : "N/A"}
               </p>
             </div>
             <div>
@@ -319,7 +319,7 @@ export const BondHoldingCard: React.FC<BondHoldingCardProps> = ({
                   color: "var(--cube-gray-900)",
                 }}
               >
-                {entry.maturity_date ? formatDate(entry.maturity_date) : "N/A"}
+                {entry.maturityDate ? formatDate(entry.maturityDate) : "N/A"}
               </p>
             </div>
             <div>
@@ -338,13 +338,13 @@ export const BondHoldingCard: React.FC<BondHoldingCardProps> = ({
                   color: "var(--cube-gray-900)",
                 }}
               >
-                {entry.coupon_frequency
-                  ? entry.coupon_frequency.charAt(0).toUpperCase() +
-                    entry.coupon_frequency.slice(1)
+                {entry.couponFrequency
+                  ? entry.couponFrequency.charAt(0).toUpperCase() +
+                    entry.couponFrequency.slice(1)
                   : "N/A"}
               </p>
             </div>
-            {entry.current_market_price && (
+            {entry.currentMarketPrice && (
               <div className="col-span-2">
                 <p
                   style={{
@@ -361,8 +361,8 @@ export const BondHoldingCard: React.FC<BondHoldingCardProps> = ({
                     color: "var(--cube-gray-900)",
                   }}
                 >
-                  {formatCurrency(entry.current_market_price, entry.currency)}
-                  {entry.last_price_update && (
+                  {formatCurrency(entry.currentMarketPrice, entry.currency)}
+                  {entry.lastPriceUpdate && (
                     <span
                       style={{
                         fontSize: "var(--text-xs)",
@@ -370,7 +370,7 @@ export const BondHoldingCard: React.FC<BondHoldingCardProps> = ({
                         marginLeft: "4px",
                       }}
                     >
-                      (Updated: {formatDate(entry.last_price_update)})
+                      (Updated: {formatDate(entry.lastPriceUpdate)})
                     </span>
                   )}
                 </p>

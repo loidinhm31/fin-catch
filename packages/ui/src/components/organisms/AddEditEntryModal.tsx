@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { finCatchAPI } from "@fin-catch/ui/services";
+import { getSources, updateEntry, createEntry } from "@fin-catch/ui/services";
 import {
   CurrencyCode,
   dateToUnixTimestamp,
@@ -80,54 +80,52 @@ export const AddEditEntryModal: React.FC<AddEditEntryModalProps> = ({
   // Initialize form with editing entry data
   useEffect(() => {
     if (editingEntry) {
-      setAssetType(editingEntry.asset_type);
+      setAssetType(editingEntry.assetType);
       setSymbol(editingEntry.symbol);
       setQuantity(editingEntry.quantity?.toString() || "");
-      setPurchasePrice(editingEntry.purchase_price?.toString() || "");
+      setPurchasePrice(editingEntry.purchasePrice?.toString() || "");
       setCurrency(editingEntry.currency || "USD");
       setPurchaseDate(
-        editingEntry.purchase_date
-          ? new Date(editingEntry.purchase_date * 1000)
+        editingEntry.purchaseDate
+          ? new Date(editingEntry.purchaseDate * 1000)
           : undefined,
       );
       setNotes(editingEntry.notes || "");
       setTags(editingEntry.tags || "");
-      setFees(editingEntry.transaction_fees?.toString() || "");
+      setFees(editingEntry.transactionFees?.toString() || "");
       setSource(editingEntry.source || "");
       setGoldUnit((editingEntry.unit as any) || "mace");
-      setGoldType(
-        editingEntry.asset_type === "gold" ? editingEntry.symbol : "",
-      );
+      setGoldType(editingEntry.assetType === "gold" ? editingEntry.symbol : "");
       // Initialize price alert fields (stock only)
-      if (editingEntry.asset_type === "stock") {
-        setTargetPrice(editingEntry.target_price?.toString() || "");
-        setStopLoss(editingEntry.stop_loss?.toString() || "");
-        setAlertEnabled(editingEntry.alert_enabled !== false);
+      if (editingEntry.assetType === "stock") {
+        setTargetPrice(editingEntry.targetPrice?.toString() || "");
+        setStopLoss(editingEntry.stopLoss?.toString() || "");
+        setAlertEnabled(editingEntry.alertEnabled !== false);
       }
       // Initialize bond fields
-      if (editingEntry.asset_type === "bond") {
+      if (editingEntry.assetType === "bond") {
         setBondIdentifier(editingEntry.symbol);
-        setFaceValue(editingEntry.face_value?.toString() || "");
-        setCouponRate(editingEntry.coupon_rate?.toString() || "");
+        setFaceValue(editingEntry.faceValue?.toString() || "");
+        setCouponRate(editingEntry.couponRate?.toString() || "");
         setMaturityDate(
-          editingEntry.maturity_date
-            ? new Date(editingEntry.maturity_date * 1000)
+          editingEntry.maturityDate
+            ? new Date(editingEntry.maturityDate * 1000)
             : undefined,
         );
         setCouponFrequency(
-          (editingEntry.coupon_frequency as any) || "semiannual",
+          (editingEntry.couponFrequency as any) || "semiannual",
         );
         setCurrentMarketPrice(
-          editingEntry.current_market_price?.toString() || "",
+          editingEntry.currentMarketPrice?.toString() || "",
         );
         setYtm(editingEntry.ytm?.toString() || "");
         // Set bond input mode based on whether ytm exists
         if (editingEntry.ytm) {
           setBondInputMode("calculated");
-          // Calculate totalInvestment from quantity and purchase_price
-          if (editingEntry.quantity && editingEntry.purchase_price) {
+          // Calculate totalInvestment from quantity and purchasePrice
+          if (editingEntry.quantity && editingEntry.purchasePrice) {
             setTotalInvestment(
-              (editingEntry.quantity * editingEntry.purchase_price).toString(),
+              (editingEntry.quantity * editingEntry.purchasePrice).toString(),
             );
           }
         }
@@ -168,7 +166,7 @@ export const AddEditEntryModal: React.FC<AddEditEntryModalProps> = ({
   useEffect(() => {
     const fetchSources = async () => {
       try {
-        const sources = await finCatchAPI.getSources();
+        const sources = await getSources();
         if (sources.stock) {
           setStockSources(sources.stock);
         }
@@ -400,8 +398,8 @@ export const AddEditEntryModal: React.FC<AddEditEntryModalProps> = ({
 
       const entryData: PortfolioEntry = {
         id: editingEntry?.id || "", // Backend will generate UUID for new entries
-        portfolio_id: portfolioId,
-        asset_type: assetType,
+        portfolioId: portfolioId,
+        assetType: assetType,
         symbol:
           assetType === "bond"
             ? bondIdentifier
@@ -409,32 +407,32 @@ export const AddEditEntryModal: React.FC<AddEditEntryModalProps> = ({
               ? goldType
               : symbol,
         quantity: parseFloat(quantity),
-        purchase_price: parseFloat(purchasePrice),
+        purchasePrice: parseFloat(purchasePrice),
         currency,
-        purchase_date: purchaseDate ? dateToUnixTimestamp(purchaseDate) : 0,
+        purchaseDate: purchaseDate ? dateToUnixTimestamp(purchaseDate) : 0,
         notes: notes.trim() || undefined,
         tags: tags.trim() || undefined,
-        transaction_fees: fees ? parseFloat(fees) : undefined,
+        transactionFees: fees ? parseFloat(fees) : undefined,
         source: source || undefined,
-        created_at: editingEntry?.created_at || Math.floor(Date.now() / 1000),
+        createdAt: editingEntry?.createdAt || Math.floor(Date.now() / 1000),
         unit: assetType === "gold" ? goldUnit : undefined,
-        gold_type: assetType === "gold" ? goldType : undefined,
+        goldType: assetType === "gold" ? goldType : undefined,
         // Bond-specific fields
-        face_value: assetType === "bond" ? parseFloat(faceValue) : undefined,
-        coupon_rate: assetType === "bond" ? parseFloat(couponRate) : undefined,
-        maturity_date:
+        faceValue: assetType === "bond" ? parseFloat(faceValue) : undefined,
+        couponRate: assetType === "bond" ? parseFloat(couponRate) : undefined,
+        maturityDate:
           assetType === "bond" && maturityDate
             ? dateToUnixTimestamp(maturityDate)
             : undefined,
-        coupon_frequency: assetType === "bond" ? couponFrequency : undefined,
-        // Only save current_market_price for direct mode (when ytm is not set)
-        current_market_price:
+        couponFrequency: assetType === "bond" ? couponFrequency : undefined,
+        // Only save currentMarketPrice for direct mode (when ytm is not set)
+        currentMarketPrice:
           assetType === "bond" &&
           bondInputMode === "direct" &&
           currentMarketPrice
             ? parseFloat(currentMarketPrice)
             : undefined,
-        last_price_update:
+        lastPriceUpdate:
           assetType === "bond" &&
           bondInputMode === "direct" &&
           currentMarketPrice
@@ -442,24 +440,24 @@ export const AddEditEntryModal: React.FC<AddEditEntryModalProps> = ({
             : undefined,
         ytm: assetType === "bond" && ytm ? parseFloat(ytm) : undefined,
         // Price alert fields (stock only)
-        target_price:
+        targetPrice:
           assetType === "stock" && targetPrice
             ? parseFloat(targetPrice)
             : undefined,
-        stop_loss:
+        stopLoss:
           assetType === "stock" && stopLoss ? parseFloat(stopLoss) : undefined,
-        alert_enabled:
+        alertEnabled:
           assetType === "stock" && (targetPrice || stopLoss)
             ? alertEnabled
             : undefined,
-        sync_version: editingEntry?.sync_version || 1,
-        synced_at: editingEntry?.synced_at,
+        syncVersion: editingEntry?.syncVersion || 1,
+        syncedAt: editingEntry?.syncedAt,
       };
 
       if (editingEntry) {
-        await finCatchAPI.updateEntry(entryData);
+        await updateEntry(entryData);
       } else {
-        await finCatchAPI.createEntry(entryData);
+        await createEntry(entryData);
       }
 
       resetForm();

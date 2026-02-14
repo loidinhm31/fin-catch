@@ -17,7 +17,8 @@ import type {
   BatchSubscribeOptions,
   IndexSubscribeOptions,
   BatchSubscribeWithOhlcResponse,
-} from "@fin-catch/shared/types";
+  SyncConfig,
+} from "@fin-catch/shared";
 
 /**
  * Market data service interface
@@ -25,6 +26,10 @@ import type {
  * Manages SSE connections for real-time market data streaming.
  */
 export interface IMarketDataService {
+  /**
+   * Configure market data service settings (server URL)
+   */
+  configureSync(config: SyncConfig): Promise<void>;
   /**
    * Start SSE connection for market data streaming
    *

@@ -1,4 +1,4 @@
-import { finCatchAPI } from "@fin-catch/ui/services";
+import { fetchExchangeRate } from "@fin-catch/ui/services";
 import type {
   CURRENCY_SYMBOLS,
   CurrencyCode,
@@ -49,8 +49,7 @@ async function getCurrencyToVNDRate(
     to: timestamp,
   };
 
-  const response: ExchangeRateResponse =
-    await finCatchAPI.fetchExchangeRate(request);
+  const response: ExchangeRateResponse = await fetchExchangeRate(request);
 
   if (response.status === "ok" && response.data && response.data.length > 0) {
     // Get the most recent rate - use sell rate for conversions

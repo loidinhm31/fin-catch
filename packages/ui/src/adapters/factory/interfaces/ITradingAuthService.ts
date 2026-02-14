@@ -10,7 +10,8 @@ import {
   Order,
   PlaceOrderRequest,
   Deal,
-} from "@fin-catch/shared/types";
+  SyncConfig,
+} from "@fin-catch/shared";
 
 /**
  * Trading platform authentication service interface
@@ -30,6 +31,11 @@ import {
  * One session per platform per user.
  */
 export interface ITradingAuthService {
+  /**
+   * Configure trading service settings (server URL)
+   */
+  configureSync(config: SyncConfig): Promise<void>;
+
   /**
    * Get list of supported trading platforms
    */

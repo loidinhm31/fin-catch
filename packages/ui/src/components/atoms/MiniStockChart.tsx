@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useMemo } from "react";
 import { Loader2 } from "lucide-react";
 import type { StockCandle } from "@fin-catch/shared";
-import { finCatchAPI } from "@fin-catch/ui/services";
+import { fetchStockHistory } from "@fin-catch/ui/services";
 
 /**
  * Props for MiniStockChart component
@@ -55,7 +55,7 @@ export const MiniStockChart: React.FC<MiniStockChartProps> = ({
         const to = Math.floor(Date.now() / 1000);
         const from = to - days * 24 * 60 * 60;
 
-        const response = await finCatchAPI.fetchStockHistory({
+        const response = await fetchStockHistory({
           symbol: symbol.toUpperCase(),
           resolution: "1D",
           from,

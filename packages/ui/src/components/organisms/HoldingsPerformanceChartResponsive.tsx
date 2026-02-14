@@ -47,7 +47,7 @@ export const HoldingsPerformanceChartResponsive: React.FC<
   const timestampMap = new Map<number, any>();
 
   data.holdings.forEach((holding) => {
-    holding.performance_data.forEach((point) => {
+    holding.performanceData.forEach((point) => {
       if (!timestampMap.has(point.timestamp)) {
         timestampMap.set(point.timestamp, {
           timestamp: point.timestamp,
@@ -73,7 +73,7 @@ export const HoldingsPerformanceChartResponsive: React.FC<
   const renderPerformanceCards = () => (
     <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 mb-4">
       {data.holdings.map((holding) => {
-        const isPositive = holding.current_return >= 0;
+        const isPositive = holding.currentReturn >= 0;
         return (
           <div key={holding.entry.id} className="glass-card p-2">
             <div className="flex items-center gap-2 mb-1">
@@ -99,7 +99,7 @@ export const HoldingsPerformanceChartResponsive: React.FC<
               }}
             >
               {isPositive ? "+" : ""}
-              {holding.current_return.toFixed(2)}%
+              {holding.currentReturn.toFixed(2)}%
             </p>
           </div>
         );

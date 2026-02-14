@@ -46,10 +46,10 @@ export const PerformanceSummaryCard: React.FC<PerformanceSummaryCardProps> = ({
                 color: "var(--cube-gray-900)",
               }}
             >
-              {formatCurrency(performance.total_value)}
+              {formatCurrency(performance.totalValue)}
             </h2>
           </div>
-          {performance.total_gain_loss >= 0 ? (
+          {performance.totalGainLoss >= 0 ? (
             <TrendingUp className="w-12 h-12" style={{ color: "#10b981" }} />
           ) : (
             <TrendingDown className="w-12 h-12" style={{ color: "#ef4444" }} />
@@ -74,10 +74,10 @@ export const PerformanceSummaryCard: React.FC<PerformanceSummaryCardProps> = ({
               style={{
                 fontSize: "var(--text-lg)",
                 fontWeight: "var(--font-bold)",
-                color: performance.total_gain_loss >= 0 ? "#10b981" : "#ef4444",
+                color: performance.totalGainLoss >= 0 ? "#10b981" : "#ef4444",
               }}
             >
-              {formatCurrency(performance.total_gain_loss)}
+              {formatCurrency(performance.totalGainLoss)}
             </p>
           </div>
           <div>
@@ -96,12 +96,12 @@ export const PerformanceSummaryCard: React.FC<PerformanceSummaryCardProps> = ({
                 fontSize: "var(--text-lg)",
                 fontWeight: "var(--font-bold)",
                 color:
-                  performance.total_gain_loss_percentage >= 0
+                  performance.totalGainLossPercentage >= 0
                     ? "#10b981"
                     : "#ef4444",
               }}
             >
-              {formatPercentage(performance.total_gain_loss_percentage)}
+              {formatPercentage(performance.totalGainLossPercentage)}
             </p>
           </div>
         </div>

@@ -7,7 +7,7 @@ import type {
   GoldPriceResponse,
   StockHistoryRequest,
   StockHistoryResponse,
-} from "@fin-catch/shared/types";
+} from "@fin-catch/shared";
 
 /**
  * Data service interface for external market data

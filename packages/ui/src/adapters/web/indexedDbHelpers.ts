@@ -2,9 +2,9 @@ import { db, generateId, getCurrentTimestamp } from "./database";
 
 interface SyncTracked {
   id?: string;
-  created_at?: number;
-  sync_version?: number;
-  synced_at?: number;
+  createdAt?: number;
+  syncVersion?: number;
+  syncedAt?: number;
 }
 
 export function withSyncTracking<T extends SyncTracked>(
@@ -15,9 +15,9 @@ export function withSyncTracking<T extends SyncTracked>(
   return {
     ...entity,
     id: entity.id || generateId(),
-    created_at: entity.created_at || now,
-    sync_version: (existing?.sync_version || 0) + 1,
-    synced_at: undefined,
+    createdAt: entity.createdAt || now,
+    syncVersion: (existing?.syncVersion || 0) + 1,
+    syncedAt: undefined,
   };
 }
 

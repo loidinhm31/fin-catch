@@ -1,5 +1,5 @@
 import type { IPortfolioService } from "@fin-catch/ui/adapters/factory/interfaces";
-import type { Portfolio } from "@fin-catch/shared/types";
+import type { Portfolio } from "@fin-catch/shared";
 import { db } from "./database";
 import { withSyncTracking, trackDelete } from "./indexedDbHelpers";
 
@@ -20,7 +20,7 @@ export class IndexedDBPortfolioAdapter implements IPortfolioService {
 
   async listPortfolios(): Promise<Portfolio[]> {
     const portfolios = await db.portfolios.toArray();
-    portfolios.sort((a, b) => (b.created_at || 0) - (a.created_at || 0));
+    portfolios.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
     return portfolios;
   }
 
@@ -44,34 +44,34 @@ export class IndexedDBPortfolioAdapter implements IPortfolioService {
       async () => {
         const portfolio = await db.portfolios.get(id);
         const entries = await db.portfolioEntries
-          .where("portfolio_id")
+          .where("portfolioId")
           .equals(id)
           .toArray();
 
         for (const entry of entries) {
           const payments = await db.couponPayments
-            .where("entry_id")
+            .where("entryId")
             .equals(entry.id)
             .toArray();
           for (const payment of payments) {
             await trackDelete(
               "couponPayments",
               payment.id,
-              payment.sync_version || 0,
+              payment.syncVersion || 0,
             );
           }
-          await db.couponPayments.where("entry_id").equals(entry.id).delete();
+          await db.couponPayments.where("entryId").equals(entry.id).delete();
           await trackDelete(
             "portfolioEntries",
             entry.id,
-            entry.sync_version || 0,
+            entry.syncVersion || 0,
           );
         }
 
-        await db.portfolioEntries.where("portfolio_id").equals(id).delete();
+        await db.portfolioEntries.where("portfolioId").equals(id).delete();
 
         if (portfolio) {
-          await trackDelete("portfolios", id, portfolio.sync_version || 0);
+          await trackDelete("portfolios", id, portfolio.syncVersion || 0);
         }
 
         await db.portfolios.delete(id);

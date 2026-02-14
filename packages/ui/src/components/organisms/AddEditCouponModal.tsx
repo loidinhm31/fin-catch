@@ -43,8 +43,8 @@ export const AddEditCouponModal: React.FC<AddEditCouponModalProps> = ({
   useEffect(() => {
     if (editingPayment) {
       setPaymentDate(
-        editingPayment.payment_date
-          ? new Date(editingPayment.payment_date * 1000)
+        editingPayment.paymentDate
+          ? new Date(editingPayment.paymentDate * 1000)
           : undefined,
       );
       setAmount(editingPayment.amount?.toString() || "");
@@ -87,14 +87,14 @@ export const AddEditCouponModal: React.FC<AddEditCouponModalProps> = ({
     try {
       const paymentData: BondCouponPayment = {
         id: editingPayment?.id || "", // Backend will generate UUID for new payments
-        entry_id: entryId,
-        payment_date: paymentTimestamp,
+        entryId: entryId,
+        paymentDate: paymentTimestamp,
         amount: parseFloat(amount),
         currency,
         notes: notes.trim() || undefined,
-        created_at: editingPayment?.created_at || Math.floor(Date.now() / 1000),
-        sync_version: editingPayment?.sync_version || 1,
-        synced_at: editingPayment?.synced_at,
+        createdAt: editingPayment?.createdAt || Math.floor(Date.now() / 1000),
+        syncVersion: editingPayment?.syncVersion || 1,
+        syncedAt: editingPayment?.syncedAt,
       };
 
       await onSave(paymentData);

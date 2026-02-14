@@ -1,6 +1,10 @@
 import { useEffect, useState, useCallback, useRef } from "react";
 import { AuthStatus } from "@fin-catch/shared";
-import { finCatchAPI } from "@fin-catch/ui/services";
+import {
+  authGetStatus,
+  authLogout,
+  authRefreshToken,
+} from "@fin-catch/ui/services";
 
 export interface UseAuthOptions {
   /**
@@ -34,7 +38,7 @@ export const useAuth = (options: UseAuthOptions = {}) => {
     isCheckingRef.current = true;
     setIsLoading(true);
     try {
-      const status = await finCatchAPI.authGetStatus();
+      const status = await authGetStatus();
       setAuthStatus(status);
       setError(null);
     } catch (err) {
@@ -50,7 +54,7 @@ export const useAuth = (options: UseAuthOptions = {}) => {
 
   const logout = useCallback(async () => {
     try {
-      await finCatchAPI.authLogout();
+      await authLogout();
       setAuthStatus({ isAuthenticated: false });
       setError(null);
     } catch (err) {
@@ -60,7 +64,7 @@ export const useAuth = (options: UseAuthOptions = {}) => {
 
   const refreshToken = useCallback(async () => {
     try {
-      await finCatchAPI.authRefreshToken();
+      await authRefreshToken();
       await checkAuthStatus();
       setError(null);
     } catch (err) {

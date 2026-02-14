@@ -7,7 +7,7 @@ import {
   CloudOff,
   RefreshCw,
 } from "lucide-react";
-import { finCatchAPI } from "@fin-catch/ui/services";
+import { syncGetStatus, syncNow } from "@fin-catch/ui/services";
 import { AUTH_STORAGE_KEYS, SyncStatus } from "@fin-catch/shared";
 
 /**
@@ -42,7 +42,7 @@ export const SyncStatusIndicator: React.FC<SyncStatusIndicatorProps> = ({
       setIsAuthenticated(auth.isAuthenticated);
 
       // Only get sync status from server
-      const sync = await finCatchAPI.syncGetStatus();
+      const sync = await syncGetStatus();
       setSyncStatus(sync);
       setError(null);
     } catch (err) {
@@ -70,7 +70,7 @@ export const SyncStatusIndicator: React.FC<SyncStatusIndicatorProps> = ({
     setError(null);
 
     try {
-      const result = await finCatchAPI.syncNow();
+      const result = await syncNow();
       setLastSyncSuccess(result.success);
       // Reload status after sync
       await loadStatus();

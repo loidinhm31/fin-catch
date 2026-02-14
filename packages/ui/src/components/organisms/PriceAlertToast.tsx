@@ -22,7 +22,7 @@ export const PriceAlertToast: React.FC<PriceAlertToastProps> = ({
   const [toasts, setToasts] = useState<ToastItem[]>([]);
 
   const addToast = useCallback((alert: PriceAlertEvent) => {
-    const id = `${alert.entry_id}-${alert.triggered_at}`;
+    const id = `${alert.entryId}-${alert.triggeredAt}`;
     setToasts((prev) => {
       // Don't add duplicate toasts
       if (prev.some((t) => t.id === id)) {
@@ -78,7 +78,7 @@ export const PriceAlertToast: React.FC<PriceAlertToastProps> = ({
           className="animate-slide-up cursor-pointer"
           style={{
             backgroundColor:
-              toast.alert.alert_type === "target" ? "#d1fae5" : "#fee2e2",
+              toast.alert.alertType === "target" ? "#d1fae5" : "#fee2e2",
             borderRadius: "12px",
             boxShadow: "0 4px 12px rgba(0, 0, 0, 0.15)",
             overflow: "hidden",
@@ -89,14 +89,14 @@ export const PriceAlertToast: React.FC<PriceAlertToastProps> = ({
               <div className="flex-1">
                 <div className="flex items-center gap-2 mb-1">
                   <span className="text-lg">
-                    {toast.alert.alert_type === "target" ? "🎯" : "🛑"}
+                    {toast.alert.alertType === "target" ? "🎯" : "🛑"}
                   </span>
                   <span
                     style={{
                       fontSize: "var(--text-base)",
                       fontWeight: "var(--font-bold)",
                       color:
-                        toast.alert.alert_type === "target"
+                        toast.alert.alertType === "target"
                           ? "#065f46"
                           : "#991b1b",
                     }}
@@ -107,12 +107,12 @@ export const PriceAlertToast: React.FC<PriceAlertToastProps> = ({
                     style={{
                       fontSize: "var(--text-sm)",
                       color:
-                        toast.alert.alert_type === "target"
+                        toast.alert.alertType === "target"
                           ? "#047857"
                           : "#b91c1c",
                     }}
                   >
-                    {toast.alert.alert_type === "target"
+                    {toast.alert.alertType === "target"
                       ? "Target Reached!"
                       : "Stop Loss Hit!"}
                   </span>
@@ -125,14 +125,14 @@ export const PriceAlertToast: React.FC<PriceAlertToastProps> = ({
                 >
                   <span>Current: </span>
                   <span style={{ fontWeight: "var(--font-semibold)" }}>
-                    {toast.alert.current_price.toLocaleString(undefined, {
+                    {toast.alert.currentPrice.toLocaleString(undefined, {
                       minimumFractionDigits: 2,
                       maximumFractionDigits: 2,
                     })}
                   </span>
                   <span> | Threshold: </span>
                   <span style={{ fontWeight: "var(--font-semibold)" }}>
-                    {toast.alert.threshold_price.toLocaleString(undefined, {
+                    {toast.alert.thresholdPrice.toLocaleString(undefined, {
                       minimumFractionDigits: 2,
                       maximumFractionDigits: 2,
                     })}
@@ -158,7 +158,7 @@ export const PriceAlertToast: React.FC<PriceAlertToastProps> = ({
             className="h-1"
             style={{
               backgroundColor:
-                toast.alert.alert_type === "target" ? "#10b981" : "#ef4444",
+                toast.alert.alertType === "target" ? "#10b981" : "#ef4444",
               animation: `shrink ${duration}ms linear`,
               transformOrigin: "left",
             }}

@@ -5,16 +5,6 @@
  * like qm-center-app. It sets up all necessary services and providers.
  */
 
-import { isTauri } from "@fin-catch/ui/utils";
-import {
-  setAuthService,
-  setCouponPaymentService,
-  setDataService,
-  setPortfolioEntryService,
-  setPortfolioService,
-  setSyncService,
-  setTradingAuthService,
-} from "@fin-catch/ui/adapters/factory";
 import {
   IndexedDBCouponPaymentAdapter,
   IndexedDBPortfolioAdapter,
@@ -27,77 +17,29 @@ import {
   QmServerDataAdapter,
   TradingAuthAdapter,
 } from "@fin-catch/ui/adapters/shared";
-import {
-  TauriAuthAdapter,
-  TauriCouponPaymentAdapter,
-  TauriDataAdapter,
-  TauriPortfolioAdapter,
-  TauriPortfolioEntryAdapter,
-  TauriSyncAdapter,
-} from "@fin-catch/ui/adapters/tauri";
+import { TauriDataAdapter } from "@fin-catch/ui/adapters/tauri";
 import type { FinCatchEmbedProps } from "./types";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { IPlatformServices, PlatformProvider } from "@fin-catch/ui/platform";
 import { AppShell } from "@fin-catch/ui/components/templates";
 import { BrowserRouter } from "react-router-dom";
 import { BasePathContext, PortalContainerContext } from "../hooks/useNav";
-import { ThemeProvider, DialogProvider } from "@fin-catch/ui/contexts";
-
-/**
- * Get server URL from environment or default
- */
-function getServerUrl(): string {
-  try {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const env = (import.meta as any).env;
-    if (env?.VITE_QM_CENTER_SERVER_URL) {
-      return env.VITE_QM_CENTER_SERVER_URL;
-    }
-  } catch {
-    // Not in a Vite environment
-  }
-  return "http://localhost:3000";
-}
-
-/**
- * Get app ID from environment or default
- */
-function getAppId(): string {
-  try {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const env = (import.meta as any).env;
-    if (env?.VITE_APP_ID) {
-      return env.VITE_APP_ID;
-    }
-  } catch {
-    // Not in a Vite environment
-  }
-  return "fin-catch";
-}
-
-/**
- * Get API key from environment or default
- */
-function getApiKey(): string {
-  try {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const env = (import.meta as any).env;
-    if (env?.VITE_FIN_CATCH_API_KEY) {
-      return env.VITE_FIN_CATCH_API_KEY;
-    }
-  } catch {
-    // Not in a Vite environment
-  }
-  return "";
-}
+import { DialogProvider, ThemeProvider } from "@fin-catch/ui/contexts";
+import { isTauri } from "@fin-catch/ui/utils";
+import {
+  getAllServices,
+  setAuthService,
+  setCouponPaymentService,
+  setDataService,
+  setMarketDataService,
+  setPortfolioEntryService,
+  setPortfolioService,
+  setSyncService,
+  setTradingAuthService,
+} from "@fin-catch/ui/adapters";
 
 /**
  * FinCatchApp - Main embeddable component
- *
- * When embedded in another app (like qm-center-app), this component:
- * 1. Uses shared localStorage tokens for SSO
- * 2. Hides outer navigation (sidebar, header) in embedded mode
- * 3. Notifies parent app on logout request
  */
 export function FinCatchApp({
   authTokens,
@@ -107,51 +49,44 @@ export function FinCatchApp({
   className,
   basePath,
 }: FinCatchEmbedProps) {
-  // Create services - memoized to prevent recreation on every render
-  const services = useMemo<IPlatformServices>(() => {
-    // If running in Tauri, use Tauri adapters
+  // Initialize services synchronously before first render
+  const platform = useMemo<IPlatformServices>(() => {
+    // Data storage services - all platforms use IndexedDB
+    setPortfolioService(new IndexedDBPortfolioAdapter());
+    setPortfolioEntryService(new IndexedDBPortfolioEntryAdapter());
+    setCouponPaymentService(new IndexedDBCouponPaymentAdapter());
+
+    // Data service - platform-specific for performance
     if (isTauri()) {
-      return {
-        portfolio: new TauriPortfolioAdapter(),
-        portfolioEntry: new TauriPortfolioEntryAdapter(),
-        couponPayment: new TauriCouponPaymentAdapter(),
-        data: new TauriDataAdapter(),
-        auth: new TauriAuthAdapter(),
-        sync: new TauriSyncAdapter(),
-        trading: new TradingAuthAdapter(),
-        marketData: new MarketDataAdapter(),
-      };
+      setDataService(new TauriDataAdapter());
+    } else {
+      setDataService(new QmServerDataAdapter());
     }
 
-    // Create auth adapter first (single source of truth for tokens)
-    const authAdapter = new QmServerAuthAdapter();
+    // Auth service - single source of truth for tokens
+    const auth = new QmServerAuthAdapter();
+    setAuthService(auth);
 
-    // Create sync adapter with token provider from auth service
+    // Sync service - configured with auth token provider and dynamic config
     const syncAdapter = new IndexedDBSyncAdapter({
-      serverUrl: getServerUrl(),
-      appId: getAppId(),
-      apiKey: getApiKey(),
-      getTokens: () => authAdapter.getTokens(),
+      getConfig: () => auth.getSyncConfig(),
+      getTokens: () => auth.getTokens(),
       saveTokens: (accessToken, refreshToken, userId) =>
-        authAdapter.saveTokensExternal(accessToken, refreshToken, userId),
+        auth.saveTokensExternal(accessToken, refreshToken, userId),
     });
+    setSyncService(syncAdapter);
 
-    return {
-      portfolio: new IndexedDBPortfolioAdapter(),
-      portfolioEntry: new IndexedDBPortfolioEntryAdapter(),
-      couponPayment: new IndexedDBCouponPaymentAdapter(),
-      data: new QmServerDataAdapter(),
-      auth: authAdapter,
-      sync: syncAdapter,
-      trading: new TradingAuthAdapter(),
-      marketData: new MarketDataAdapter(),
-    };
+    // Trading services (optional)
+    setTradingAuthService(new TradingAuthAdapter());
+    setMarketDataService(new MarketDataAdapter());
+
+    return getAllServices();
   }, []);
 
   // If external auth tokens are provided, save them to the auth service
   useEffect(() => {
     if (authTokens?.accessToken && authTokens?.refreshToken) {
-      services.auth
+      platform.auth
         .saveTokensExternal?.(
           authTokens.accessToken,
           authTokens.refreshToken,
@@ -159,7 +94,7 @@ export function FinCatchApp({
         )
         .catch(console.error);
     }
-  }, [authTokens, services.auth]);
+  }, [authTokens, platform.auth]);
 
   // Determine if we should skip auth (tokens provided externally)
   const skipAuth = !!(authTokens?.accessToken && authTokens?.refreshToken);
@@ -183,7 +118,7 @@ export function FinCatchApp({
 
   return (
     <div ref={containerRef} className={className}>
-      <PlatformProvider services={services}>
+      <PlatformProvider services={platform}>
         <ThemeProvider embedded={embedded}>
           <DialogProvider>
             <BasePathContext.Provider value={basePath || ""}>

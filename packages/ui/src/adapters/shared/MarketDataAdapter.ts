@@ -20,8 +20,9 @@ import type {
   BatchSubscribeOptions,
   IndexSubscribeOptions,
   BatchSubscribeWithOhlcResponse,
+  SyncConfig,
 } from "@fin-catch/shared";
-import { AUTH_STORAGE_KEYS } from "@fin-catch/shared/constants";
+import { AUTH_STORAGE_KEYS } from "@fin-catch/shared";
 import { IMarketDataService } from "@fin-catch/ui/adapters/factory/interfaces";
 
 /**
@@ -142,6 +143,22 @@ export class MarketDataAdapter implements IMarketDataService {
   private getStoredValue(key: string): string | null {
     if (typeof localStorage === "undefined") return null;
     return localStorage.getItem(key);
+  }
+
+  private setStoredValue(key: string, value: string): void {
+    if (typeof localStorage === "undefined") return;
+    localStorage.setItem(key, value);
+  }
+
+  /**
+   * Configure market data service settings (server URL)
+   */
+  async configureSync(config: SyncConfig): Promise<void> {
+    if (config.serverUrl) {
+      this.baseUrl = config.serverUrl;
+      this.setStoredValue(AUTH_STORAGE_KEYS.SERVER_URL, config.serverUrl);
+    }
+    console.log(`[MarketDataAdapter] Configured: ${this.baseUrl}`);
   }
 
   /**

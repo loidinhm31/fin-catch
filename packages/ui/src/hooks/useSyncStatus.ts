@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { SyncStatus, AUTH_STORAGE_KEYS } from "@fin-catch/shared";
-import { finCatchAPI } from "@fin-catch/ui/services";
+import { syncGetStatus, syncNow } from "@fin-catch/ui/services";
 
 /**
  * Check auth status from localStorage without calling the server.
@@ -43,7 +43,7 @@ export function useSyncStatus(
       setIsAuthenticated(auth.isAuthenticated);
 
       // Only get sync status from server
-      const sync = await finCatchAPI.syncGetStatus();
+      const sync = await syncGetStatus();
       setSyncStatus(sync);
       setError(null);
     } catch (err) {
@@ -63,7 +63,7 @@ export function useSyncStatus(
     setError(null);
 
     try {
-      const result = await finCatchAPI.syncNow();
+      const result = await syncNow();
       setLastSyncSuccess(result.success);
       await loadStatus();
     } catch (err) {

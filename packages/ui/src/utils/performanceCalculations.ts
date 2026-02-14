@@ -5,7 +5,11 @@ import {
   PortfolioEntry,
   PortfolioPerformance,
 } from "@fin-catch/shared";
-import { finCatchAPI } from "@fin-catch/ui/services";
+import {
+  fetchStockHistory,
+  fetchGoldPrice,
+  listCouponPayments,
+} from "@fin-catch/ui/services";
 import { convertCurrency } from "./currency";
 
 /**
@@ -117,9 +121,9 @@ export const calculatePortfolioPerformance = async (
       let currentPriceCurrency: CurrencyCode = entry.currency || "USD";
       let priceScale = 1;
 
-      if (entry.asset_type === "stock") {
+      if (entry.assetType === "stock") {
         const tradingTs = getLastTradingTimestamp();
-        const response = await finCatchAPI.fetchStockHistory({
+        const response = await fetchStockHistory({
           symbol: entry.symbol,
           resolution: "1D" as const,
           from: tradingTs - 86400 - 1,
@@ -132,7 +136,7 @@ export const calculatePortfolioPerformance = async (
           priceScale = (response.metadata?.price_scale as number) ?? 1;
           currentPrice = rawPrice * priceScale;
         }
-      } else if (entry.asset_type === "gold") {
+      } else if (entry.assetType === "gold") {
         const goldSource = entry.source as "sjc";
         if (!goldSource || goldSource !== "sjc") {
           console.warn(
@@ -141,7 +145,7 @@ export const calculatePortfolioPerformance = async (
           continue;
         }
 
-        const response = await finCatchAPI.fetchGoldPrice({
+        const response = await fetchGoldPrice({
           gold_price_id: entry.symbol,
           from: Math.floor(Date.now() / 1000) - 86400,
           to: Math.floor(Date.now() / 1000),
@@ -154,35 +158,35 @@ export const calculatePortfolioPerformance = async (
           currentPrice = rawPrice * priceScale;
           currentPriceCurrency = "VND";
         }
-      } else if (entry.asset_type === "bond") {
+      } else if (entry.assetType === "bond") {
         // For bonds, calculate present value if we have all required data
         if (
-          entry.face_value &&
-          entry.coupon_rate !== undefined &&
+          entry.faceValue &&
+          entry.couponRate !== undefined &&
           entry.ytm !== undefined &&
-          entry.maturity_date &&
-          entry.coupon_frequency
+          entry.maturityDate &&
+          entry.couponFrequency
         ) {
           // Calculate current market value using present value formula
           currentPrice = calculateBondPresentValue(
-            entry.face_value,
-            entry.coupon_rate,
+            entry.faceValue,
+            entry.couponRate,
             entry.ytm,
-            entry.maturity_date,
-            entry.coupon_frequency,
+            entry.maturityDate,
+            entry.couponFrequency,
           );
         } else if (
-          entry.current_market_price !== undefined &&
-          entry.current_market_price > 0
+          entry.currentMarketPrice !== undefined &&
+          entry.currentMarketPrice > 0
         ) {
-          // Fallback to manual current_market_price if calculation data is not available
-          currentPrice = entry.current_market_price;
-        } else if (entry.face_value) {
-          // Fallback to face_value
-          currentPrice = entry.face_value;
+          // Fallback to manual currentMarketPrice if calculation data is not available
+          currentPrice = entry.currentMarketPrice;
+        } else if (entry.faceValue) {
+          // Fallback to faceValue
+          currentPrice = entry.faceValue;
         } else {
           // Final fallback to purchase price
-          currentPrice = entry.purchase_price;
+          currentPrice = entry.purchasePrice;
         }
         currentPriceCurrency = entry.currency || "USD";
         priceScale = 1; // No scaling for bonds
@@ -195,19 +199,19 @@ export const calculatePortfolioPerformance = async (
       );
 
       let scaledPurchasePrice: number;
-      if (entry.asset_type === "stock") {
+      if (entry.assetType === "stock") {
         // Purchase price was entered by user in actual price, no scaling needed
-        scaledPurchasePrice = entry.purchase_price;
+        scaledPurchasePrice = entry.purchasePrice;
       } else {
         const userUnit = entry.unit || "tael";
         if (userUnit === "mace") {
-          scaledPurchasePrice = entry.purchase_price * 10;
+          scaledPurchasePrice = entry.purchasePrice * 10;
         } else if (userUnit === "tael") {
-          scaledPurchasePrice = entry.purchase_price;
+          scaledPurchasePrice = entry.purchasePrice;
         } else if (userUnit === "gram") {
-          scaledPurchasePrice = entry.purchase_price * 37.5;
+          scaledPurchasePrice = entry.purchasePrice * 37.5;
         } else {
-          scaledPurchasePrice = entry.purchase_price;
+          scaledPurchasePrice = entry.purchasePrice;
         }
       }
 
@@ -217,9 +221,9 @@ export const calculatePortfolioPerformance = async (
         displayCurrency,
       );
 
-      const feesInDisplayCurrency = entry.transaction_fees
+      const feesInDisplayCurrency = entry.transactionFees
         ? await convertCurrency(
-            entry.transaction_fees,
+            entry.transactionFees,
             entry.currency || "USD",
             displayCurrency,
           )
@@ -231,7 +235,7 @@ export const calculatePortfolioPerformance = async (
           : 1.0;
 
       let quantityInTaels = entry.quantity;
-      if (entry.asset_type === "gold") {
+      if (entry.assetType === "gold") {
         const userUnit = entry.unit || "tael";
         if (userUnit === "mace") {
           quantityInTaels = entry.quantity / 10;
@@ -247,9 +251,9 @@ export const calculatePortfolioPerformance = async (
 
       // Fetch and sum coupon payments for bonds
       let couponIncomeInDisplayCurrency = 0;
-      if (entry.asset_type === "bond" && entry.id) {
+      if (entry.assetType === "bond" && entry.id) {
         try {
-          const couponPayments = await finCatchAPI.listCouponPayments(entry.id);
+          const couponPayments = await listCouponPayments(entry.id);
           for (const payment of couponPayments) {
             const convertedAmount = await convertCurrency(
               payment.amount,
@@ -272,19 +276,19 @@ export const calculatePortfolioPerformance = async (
         totalCost > 0 ? (gainLoss / totalCost) * 100 : 0;
 
       let priceSource: string;
-      if (entry.asset_type === "bond") {
+      if (entry.assetType === "bond") {
         if (
-          entry.face_value &&
-          entry.coupon_rate !== undefined &&
+          entry.faceValue &&
+          entry.couponRate !== undefined &&
           entry.ytm !== undefined &&
-          entry.maturity_date &&
-          entry.coupon_frequency
+          entry.maturityDate &&
+          entry.couponFrequency
         ) {
           priceSource = "calculated";
-        } else if (entry.current_market_price) {
+        } else if (entry.currentMarketPrice) {
           priceSource = "manual";
         } else {
-          priceSource = "face_value";
+          priceSource = "faceValue";
         }
       } else {
         priceSource = entry.source || "unknown";
@@ -292,24 +296,24 @@ export const calculatePortfolioPerformance = async (
 
       entriesPerformance.push({
         entry,
-        current_price: currentPriceInDisplayCurrency,
-        purchase_price: purchasePriceInDisplayCurrency,
-        current_value: currentValue,
-        total_cost: totalCost,
-        gain_loss: gainLoss,
-        gain_loss_percentage: gainLossPercentage,
-        price_source: priceSource,
+        currentPrice: currentPriceInDisplayCurrency,
+        purchasePrice: purchasePriceInDisplayCurrency,
+        currentValue: currentValue,
+        totalCost: totalCost,
+        gainLoss: gainLoss,
+        gainLossPercentage: gainLossPercentage,
+        priceSource: priceSource,
         currency: displayCurrency,
-        exchange_rate: exchangeRate,
+        exchangeRate: exchangeRate,
       });
     }
 
     const totalValue = entriesPerformance.reduce(
-      (sum, e) => sum + e.current_value,
+      (sum, e) => sum + e.currentValue,
       0,
     );
     const totalCost = entriesPerformance.reduce(
-      (sum, e) => sum + e.total_cost,
+      (sum, e) => sum + e.totalCost,
       0,
     );
     const totalGainLoss = totalValue - totalCost;
@@ -317,12 +321,12 @@ export const calculatePortfolioPerformance = async (
       totalCost > 0 ? (totalGainLoss / totalCost) * 100 : 0;
 
     return {
-      total_value: totalValue,
-      total_cost: totalCost,
-      total_gain_loss: totalGainLoss,
-      total_gain_loss_percentage: totalGainLossPercentage,
+      totalValue: totalValue,
+      totalCost: totalCost,
+      totalGainLoss: totalGainLoss,
+      totalGainLossPercentage: totalGainLossPercentage,
       currency: displayCurrency,
-      entries_performance: entriesPerformance,
+      entriesPerformance: entriesPerformance,
     };
   } catch (err) {
     console.error("Failed to calculate performance:", err);

@@ -23,7 +23,7 @@ export interface HoldingCardProps {
 
 export const HoldingCard: React.FC<HoldingCardProps> = (props) => {
   const { entryPerf } = props;
-  const assetType = entryPerf.entry.asset_type;
+  const assetType = entryPerf.entry.assetType;
 
   switch (assetType) {
     case "stock":

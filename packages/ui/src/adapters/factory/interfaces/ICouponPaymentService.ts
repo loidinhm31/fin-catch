@@ -1,4 +1,4 @@
-import { BondCouponPayment } from "@fin-catch/shared/types";
+import { BondCouponPayment } from "@fin-catch/shared";
 
 /**
  * Coupon payment service interface
