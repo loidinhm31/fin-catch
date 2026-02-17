@@ -71,100 +71,78 @@ export const PriceAlertToast: React.FC<PriceAlertToastProps> = ({
 
   return (
     <div className="fixed bottom-20 right-4 z-50 flex flex-col gap-2 max-w-sm">
-      {toasts.map((toast) => (
-        <div
-          key={toast.id}
-          onClick={() => onAlertClick?.(toast.alert)}
-          className="animate-slide-up cursor-pointer"
-          style={{
-            backgroundColor:
-              toast.alert.alertType === "target" ? "#d1fae5" : "#fee2e2",
-            borderRadius: "12px",
-            boxShadow: "0 4px 12px rgba(0, 0, 0, 0.15)",
-            overflow: "hidden",
-          }}
-        >
-          <div className="p-4">
-            <div className="flex items-start justify-between gap-2">
-              <div className="flex-1">
-                <div className="flex items-center gap-2 mb-1">
-                  <span className="text-lg">
-                    {toast.alert.alertType === "target" ? "🎯" : "🛑"}
-                  </span>
-                  <span
-                    style={{
-                      fontSize: "var(--text-base)",
-                      fontWeight: "var(--font-bold)",
-                      color:
-                        toast.alert.alertType === "target"
-                          ? "#065f46"
-                          : "#991b1b",
-                    }}
-                  >
-                    {toast.alert.symbol}
-                  </span>
-                  <span
-                    style={{
-                      fontSize: "var(--text-sm)",
-                      color:
-                        toast.alert.alertType === "target"
-                          ? "#047857"
-                          : "#b91c1c",
-                    }}
-                  >
-                    {toast.alert.alertType === "target"
-                      ? "Target Reached!"
-                      : "Stop Loss Hit!"}
-                  </span>
-                </div>
-                <div
-                  style={{
-                    fontSize: "var(--text-sm)",
-                    color: "var(--cube-gray-700)",
-                  }}
-                >
-                  <span>Current: </span>
-                  <span style={{ fontWeight: "var(--font-semibold)" }}>
-                    {toast.alert.currentPrice.toLocaleString(undefined, {
-                      minimumFractionDigits: 2,
-                      maximumFractionDigits: 2,
-                    })}
-                  </span>
-                  <span> | Threshold: </span>
-                  <span style={{ fontWeight: "var(--font-semibold)" }}>
-                    {toast.alert.thresholdPrice.toLocaleString(undefined, {
-                      minimumFractionDigits: 2,
-                      maximumFractionDigits: 2,
-                    })}
-                  </span>
-                </div>
-              </div>
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  removeToast(toast.id);
-                }}
-                className="p-1 rounded-full hover:bg-black/10 transition-colors"
-              >
-                <X
-                  className="w-4 h-4"
-                  style={{ color: "var(--cube-gray-600)" }}
-                />
-              </button>
-            </div>
-          </div>
-          {/* Progress bar */}
+      {toasts.map((toast) => {
+        const isTarget = toast.alert.alertType === "target";
+        return (
           <div
-            className="h-1"
-            style={{
-              backgroundColor:
-                toast.alert.alertType === "target" ? "#10b981" : "#ef4444",
-              animation: `shrink ${duration}ms linear`,
-              transformOrigin: "left",
-            }}
-          />
-        </div>
-      ))}
+            key={toast.id}
+            onClick={() => onAlertClick?.(toast.alert)}
+            className={`
+              animate-slide-up cursor-pointer rounded-xl shadow-[--shadow-md] overflow-hidden
+              ${isTarget ? "bg-green-100" : "bg-red-100"}
+            `}
+          >
+            <div className="p-4">
+              <div className="flex items-start justify-between gap-2">
+                <div className="flex-1">
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className="text-lg">{isTarget ? "🎯" : "🛑"}</span>
+                    <span
+                      className={`text-base font-bold ${
+                        isTarget ? "text-green-900" : "text-red-900"
+                      }`}
+                    >
+                      {toast.alert.symbol}
+                    </span>
+                    <span
+                      className={`text-sm ${
+                        isTarget ? "text-green-700" : "text-red-700"
+                      }`}
+                    >
+                      {isTarget ? "Target Reached!" : "Stop Loss Hit!"}
+                    </span>
+                  </div>
+                  <div className="text-sm text-gray-700">
+                    <span>Current: </span>
+                    <span className="font-semibold">
+                      {toast.alert.currentPrice.toLocaleString(undefined, {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2,
+                      })}
+                    </span>
+                    <span> | Threshold: </span>
+                    <span className="font-semibold">
+                      {toast.alert.thresholdPrice.toLocaleString(undefined, {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2,
+                      })}
+                    </span>
+                  </div>
+                </div>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    removeToast(toast.id);
+                  }}
+                  className="p-1 rounded-full hover:bg-black/10 transition-colors"
+                >
+                  <X className="w-4 h-4 text-gray-600" />
+                </button>
+              </div>
+            </div>
+            {/* Progress bar */}
+            <div
+              className={`h-1 ${
+                isTarget ? "bg-[--color-green-500]" : "bg-[--color-red-500]"
+              }`}
+              style={{
+                animation: `shrink ${duration}ms linear`,
+                transformOrigin: "left",
+              }}
+            />
+          </div>
+        );
+      })}
 
       <style>{`
         @keyframes shrink {

@@ -124,13 +124,13 @@ export const MiniStockChart: React.FC<MiniStockChartProps> = ({
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          background: "rgba(0, 0, 0, 0.1)",
+          background: "var(--color-black-10)",
           borderRadius: "6px",
         }}
       >
         <Loader2
           className="animate-spin"
-          style={{ width: 16, height: 16, color: "#00d4ff" }}
+          style={{ width: 16, height: 16, color: "var(--color-market-live)" }}
         />
       </div>
     );
@@ -180,10 +180,12 @@ export const MiniStockChart: React.FC<MiniStockChartProps> = ({
   // Create path for filled area (line + bottom edge)
   const areaPath = `${linePath} L ${svgWidth} ${svgHeight} L 0 ${svgHeight} Z`;
 
-  const color = isPositive ? "#00ff88" : "#ff3366";
+  const color = isPositive
+    ? "var(--color-trade-buy)"
+    : "var(--color-trade-sell)";
   const fillColor = isPositive
-    ? "rgba(0, 255, 136, 0.2)"
-    : "rgba(255, 51, 102, 0.2)";
+    ? "var(--color-trade-buy-bg)"
+    : "var(--color-trade-sell-bg)";
 
   // Calculate change percentage
   const changePercent =
@@ -247,8 +249,8 @@ export const MiniStockChart: React.FC<MiniStockChartProps> = ({
           padding: "2px 4px",
           borderRadius: "3px",
           background: isPositive
-            ? "rgba(0, 255, 136, 0.2)"
-            : "rgba(255, 51, 102, 0.2)",
+            ? "var(--color-trade-buy-bg)"
+            : "var(--color-trade-sell-bg)",
           color,
         }}
       >

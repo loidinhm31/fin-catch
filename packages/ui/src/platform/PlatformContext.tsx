@@ -21,7 +21,7 @@ export interface IPlatformServices {
   data: IDataService;
   auth: IAuthService;
   sync: ISyncService;
-  /** Trading platform auth service (optional - requires qm-center auth) */
+  /** Trading platform auth service (optional - requires qm-hub auth) */
   trading?: ITradingAuthService;
   /** Market data streaming service (optional - requires trading session) */
   marketData?: IMarketDataService;

@@ -40,7 +40,10 @@ export const GoldPremiumChartResponsive: React.FC<
 
   if (!data || data.length === 0) {
     return (
-      <div className="flex items-center justify-center h-64 text-gray-500 dark:text-gray-400">
+      <div
+        className="flex items-center justify-center h-64"
+        style={{ color: "var(--color-text-secondary)" }}
+      >
         No data available
       </div>
     );
@@ -81,9 +84,7 @@ export const GoldPremiumChartResponsive: React.FC<
         {/* Compact Premium Rate Badge */}
         <div
           className={`p-3 sm:p-4 rounded-xl mb-3 ${
-            isPremiumPositive
-              ? "bg-gradient-to-r from-yellow-100 to-orange-100"
-              : "bg-gradient-to-r from-blue-100 to-cyan-100"
+            isPremiumPositive ? "bg-[#FACC15]/20" : "bg-[#06B6D4]/20"
           } border-2 ${isPremiumPositive ? "border-yellow-300" : "border-blue-300"}`}
         >
           <div className="flex items-center justify-between flex-wrap gap-2">
@@ -255,12 +256,12 @@ export const GoldPremiumChartResponsive: React.FC<
           </defs>
           <CartesianGrid
             strokeDasharray="3 3"
-            stroke="rgba(123, 97, 255, 0.2)"
+            stroke="var(--chart-grid)"
             vertical={false}
           />
           <XAxis
             dataKey="time"
-            stroke="#a0aec0"
+            stroke="var(--chart-axis)"
             style={{
               fontSize: `${activeDimensions.tickFontSize}px`,
               fontWeight: "500",
@@ -268,12 +269,12 @@ export const GoldPremiumChartResponsive: React.FC<
             angle={activeDimensions.angleXAxis}
             textAnchor="end"
             height={activeDimensions.marginBottom}
-            tick={{ fill: "#a0aec0" }}
+            tick={{ fill: "var(--chart-axis)" }}
             interval={xAxisInterval as any}
           />
           <YAxis
             yAxisId="left"
-            stroke="#a0aec0"
+            stroke="var(--chart-axis)"
             style={{
               fontSize: `${activeDimensions.tickFontSize}px`,
               fontWeight: "500",
@@ -285,7 +286,7 @@ export const GoldPremiumChartResponsive: React.FC<
                     angle: -90,
                     position: "insideLeft",
                     style: {
-                      fill: "#ffffff",
+                      fill: "var(--chart-label)",
                       fontWeight: "600",
                       fontSize: `${activeDimensions.labelFontSize}px`,
                     },
@@ -293,13 +294,13 @@ export const GoldPremiumChartResponsive: React.FC<
                 : undefined
             }
             tickFormatter={formatCurrencyCompact}
-            tick={{ fill: "#a0aec0" }}
+            tick={{ fill: "var(--chart-axis)" }}
             width={isMobile ? 60 : 80}
           />
           <YAxis
             yAxisId="right"
             orientation="right"
-            stroke="#a0aec0"
+            stroke="var(--chart-axis)"
             style={{
               fontSize: `${activeDimensions.tickFontSize}px`,
               fontWeight: "500",
@@ -311,7 +312,7 @@ export const GoldPremiumChartResponsive: React.FC<
                     angle: 90,
                     position: "insideRight",
                     style: {
-                      fill: "#ffffff",
+                      fill: "var(--chart-label)",
                       fontWeight: "600",
                       fontSize: `${activeDimensions.labelFontSize}px`,
                     },
@@ -319,23 +320,22 @@ export const GoldPremiumChartResponsive: React.FC<
                 : undefined
             }
             tickFormatter={(value) => value.toFixed(1) + "%"}
-            tick={{ fill: "#a0aec0" }}
+            tick={{ fill: "var(--chart-axis)" }}
             width={isMobile ? 45 : 60}
           />
           <Tooltip
             contentStyle={{
-              backgroundColor: "rgba(26, 31, 58, 0.95)",
-              border: "1px solid rgba(0, 212, 255, 0.3)",
+              backgroundColor: "var(--glass-bg-compact)",
+              border: "1px solid var(--color-sync-pending-border)",
               borderRadius: "12px",
-              color: "#ffffff",
+              color: "var(--chart-label)",
               fontWeight: "600",
               fontSize: `${activeDimensions.fontSize}px`,
-              boxShadow:
-                "0 8px 24px rgba(0, 0, 0, 0.3), 0 0 24px rgba(0, 212, 255, 0.2)",
+              boxShadow: "var(--shadow-glass-sm)",
               backdropFilter: "blur(12px)",
             }}
             labelStyle={{
-              color: "#00d4ff",
+              color: "var(--chart-volume-start)",
               marginBottom: "8px",
               fontSize: `${activeDimensions.fontSize}px`,
             }}
@@ -362,7 +362,7 @@ export const GoldPremiumChartResponsive: React.FC<
               wrapperStyle={{
                 fontWeight: "600",
                 paddingTop: "16px",
-                color: "#ffffff",
+                color: "var(--chart-label)",
                 fontSize: `${activeDimensions.legendFontSize}px`,
               }}
               iconType="line"
@@ -386,7 +386,7 @@ export const GoldPremiumChartResponsive: React.FC<
             activeDot={{
               r: isMobile ? 4 : 6,
               fill: "#ffaa00",
-              stroke: "#ffffff",
+              stroke: "var(--chart-label)",
               strokeWidth: 2,
             }}
           />
@@ -394,14 +394,14 @@ export const GoldPremiumChartResponsive: React.FC<
             yAxisId="left"
             type="monotone"
             dataKey="marketPriceVnd"
-            stroke="#00ff88"
+            stroke="var(--color-trade-buy)"
             strokeWidth={isMobile ? 2 : 2.5}
             dot={false}
             name="Market Price (VND)"
             activeDot={{
               r: isMobile ? 4 : 6,
-              fill: "#00ff88",
-              stroke: "#ffffff",
+              fill: "var(--color-trade-buy)",
+              stroke: "var(--chart-label)",
               strokeWidth: 2,
             }}
           />
@@ -409,8 +409,8 @@ export const GoldPremiumChartResponsive: React.FC<
             <Brush
               dataKey="time"
               height={activeDimensions.brushHeight}
-              stroke="rgba(123, 97, 255, 0.6)"
-              fill="rgba(26, 31, 58, 0.6)"
+              stroke="var(--color-market-purple-border)"
+              fill="var(--glass-bg-card)"
               travellerWidth={isMobile ? 15 : 10}
               startIndex={brushIndex.startIndex}
               endIndex={brushIndex.endIndex}

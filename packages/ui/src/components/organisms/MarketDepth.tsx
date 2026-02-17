@@ -138,16 +138,19 @@ export const MarketDepth: React.FC<MarketDepthProps> = ({
       <div
         className="p-4 rounded-2xl border backdrop-blur-xl"
         style={{
-          background: "rgba(10, 14, 39, 0.5)",
-          borderColor: "rgba(0, 212, 255, 0.3)",
+          background: "var(--glass-bg-ticker)",
+          borderColor: "var(--color-sync-pending-border)",
         }}
       >
         <div className="flex items-center justify-center py-8">
           <Loader2
             className="w-5 h-5 animate-spin"
-            style={{ color: "#00d4ff" }}
+            style={{ color: "var(--color-market-live)" }}
           />
-          <span className="ml-2 text-sm" style={{ color: "#9ca3af" }}>
+          <span
+            className="ml-2 text-sm"
+            style={{ color: "var(--color-text-gray-light)" }}
+          >
             Loading order book...
           </span>
         </div>
@@ -161,12 +164,12 @@ export const MarketDepth: React.FC<MarketDepthProps> = ({
       <div
         className="p-4 rounded-2xl border backdrop-blur-xl"
         style={{
-          background: "rgba(10, 14, 39, 0.5)",
-          borderColor: "rgba(255, 51, 102, 0.3)",
+          background: "var(--glass-bg-ticker)",
+          borderColor: "var(--color-trade-sell-border)",
         }}
       >
         <div className="text-center py-4">
-          <p className="text-sm" style={{ color: "#ff3366" }}>
+          <p className="text-sm" style={{ color: "var(--color-trade-sell)" }}>
             {error}
           </p>
         </div>
@@ -180,12 +183,15 @@ export const MarketDepth: React.FC<MarketDepthProps> = ({
       <div
         className="p-4 rounded-2xl border backdrop-blur-xl"
         style={{
-          background: "rgba(10, 14, 39, 0.5)",
-          borderColor: "rgba(0, 212, 255, 0.3)",
+          background: "var(--glass-bg-ticker)",
+          borderColor: "var(--color-sync-pending-border)",
         }}
       >
         <div className="text-center py-4">
-          <p className="text-sm" style={{ color: "#9ca3af" }}>
+          <p
+            className="text-sm"
+            style={{ color: "var(--color-text-gray-light)" }}
+          >
             Waiting for order book data...
           </p>
         </div>
@@ -200,23 +206,32 @@ export const MarketDepth: React.FC<MarketDepthProps> = ({
     <div
       className="p-4 rounded-2xl border backdrop-blur-xl"
       style={{
-        background: "rgba(10, 14, 39, 0.5)",
-        borderColor: "rgba(0, 212, 255, 0.3)",
+        background: "var(--glass-bg-ticker)",
+        borderColor: "var(--color-sync-pending-border)",
       }}
     >
       {/* Header */}
       <div className="flex items-center justify-between mb-3">
         <div className="flex flex-col">
-          <h3 className="text-sm font-semibold" style={{ color: "#9ca3af" }}>
+          <h3
+            className="text-sm font-semibold"
+            style={{ color: "var(--color-text-gray-light)" }}
+          >
             Order Book
           </h3>
           {orderBook?.timestamp && (
-            <span className="text-[10px]" style={{ color: "#6b7280" }}>
+            <span
+              className="text-[10px]"
+              style={{ color: "var(--color-text-tertiary)" }}
+            >
               Last update: {formatTime(orderBook.timestamp)}
             </span>
           )}
         </div>
-        <span className="text-xs" style={{ color: "#6b7280" }}>
+        <span
+          className="text-xs"
+          style={{ color: "var(--color-text-tertiary)" }}
+        >
           {symbol}
         </span>
       </div>
@@ -224,7 +239,7 @@ export const MarketDepth: React.FC<MarketDepthProps> = ({
       {/* Column Headers */}
       <div
         className="grid grid-cols-2 gap-1 mb-2 text-xs font-medium"
-        style={{ color: "#6b7280" }}
+        style={{ color: "var(--color-text-tertiary)" }}
       >
         <div className="flex justify-between px-2">
           <span>Price</span>
@@ -268,15 +283,24 @@ export const MarketDepth: React.FC<MarketDepthProps> = ({
       {/* Spread */}
       <div
         className="mt-3 pt-3 border-t flex items-center justify-center gap-2"
-        style={{ borderColor: "rgba(255, 255, 255, 0.1)" }}
+        style={{ borderColor: "var(--color-white-10)" }}
       >
-        <span className="text-xs" style={{ color: "#6b7280" }}>
+        <span
+          className="text-xs"
+          style={{ color: "var(--color-text-tertiary)" }}
+        >
           Spread:
         </span>
-        <span className="text-xs font-medium" style={{ color: "#00d4ff" }}>
+        <span
+          className="text-xs font-medium"
+          style={{ color: "var(--color-market-live)" }}
+        >
           {spread.toFixed(2)}
         </span>
-        <span className="text-xs" style={{ color: "#6b7280" }}>
+        <span
+          className="text-xs"
+          style={{ color: "var(--color-text-tertiary)" }}
+        >
           (
           {orderBook.bids[0]
             ? ((spread / orderBook.bids[0].price) * 100).toFixed(2)
@@ -314,9 +338,10 @@ const OrderBookRow: React.FC<OrderBookRowProps> = ({
   onClick,
 }) => {
   const widthPercent = maxVolume > 0 ? (level.volume / maxVolume) * 100 : 0;
-  const color = side === "bid" ? "#00ff88" : "#ff3366";
+  const color =
+    side === "bid" ? "var(--color-trade-buy)" : "var(--color-trade-sell)";
   const bgColor =
-    side === "bid" ? "rgba(0, 255, 136, 0.1)" : "rgba(255, 51, 102, 0.1)";
+    side === "bid" ? "var(--color-trade-buy-bg)" : "var(--color-trade-sell-bg)";
 
   return (
     <div
@@ -341,7 +366,7 @@ const OrderBookRow: React.FC<OrderBookRowProps> = ({
         <span className="font-medium" style={{ color }}>
           {level.price.toLocaleString("vi-VN")}
         </span>
-        <span style={{ color: "#9ca3af" }}>
+        <span style={{ color: "var(--color-text-gray-light)" }}>
           {(level.volume / 100).toLocaleString("vi-VN")}
         </span>
       </div>

@@ -21,7 +21,7 @@ const SelectTrigger = React.forwardRef<
       "flex h-10 items-center justify-between rounded-lg px-3 py-2 text-sm",
       "placeholder:text-[var(--color-text-muted)]",
       "focus:outline-none focus:border-[var(--color-violet-500)]",
-      "focus:shadow-[0_0_0_3px_rgba(139,92,246,0.3),0_0_15px_rgba(139,92,246,0.2)]",
+      "focus:ring-violet-500/30 focus:shadow-glow-violet",
       "disabled:cursor-not-allowed disabled:opacity-50",
       "[&>span]:line-clamp-1",
       className,
@@ -142,9 +142,9 @@ const SelectItem = React.forwardRef<
     className={cn(
       "relative flex w-full cursor-pointer select-none items-center rounded-md py-2 pl-8 pr-2 text-sm outline-none",
       "transition-colors duration-150",
-      "focus:bg-[rgba(139,92,246,0.2)]",
+      "focus:bg-violet-500/20",
       "data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
-      "data-[state=checked]:bg-[rgba(139,92,246,0.3)]",
+      "data-[state=checked]:bg-violet-500/30",
       className,
     )}
     style={{

@@ -16,7 +16,7 @@ export const ErrorText = React.memo(function ErrorText({
       className={className}
       style={{
         fontSize: "var(--text-sm)",
-        color: "#dc2626",
+        color: "var(--color-red-500)",
         fontWeight: "var(--font-medium)",
         marginTop: "var(--space-1)",
       }}

@@ -121,27 +121,56 @@ export const SyncSettings: React.FC<SyncSettingsProps> = () => {
   return (
     <div className="space-y-6 max-w-lg mx-auto">
       {/* Cloud Sync Status Card */}
-      <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm p-6">
+      <div
+        className="rounded-xl shadow-sm p-6"
+        style={{
+          background: "var(--glass-bg-dark-strong)",
+          borderWidth: "1px",
+          borderStyle: "solid",
+          borderColor: "var(--glass-border-light)",
+        }}
+      >
         <div className="flex items-start gap-4">
-          <Cloud className="w-6 h-6 text-blue-500" />
+          <Cloud
+            className="w-6 h-6"
+            style={{ color: "var(--color-blue-500)" }}
+          />
           <div className="flex-1">
-            <h2 className="text-2xl font-semibold mb-2 text-gray-900 dark:text-white">
+            <h2
+              className="text-2xl font-semibold mb-2"
+              style={{ color: "var(--color-text-primary)" }}
+            >
               Cloud Sync
             </h2>
-            <p className="mb-4 text-gray-500 dark:text-gray-400">
+            <p
+              className="mb-4"
+              style={{ color: "var(--color-text-secondary)" }}
+            >
               Keep your data synchronized across devices
             </p>
 
             {/* Status indicator */}
             <div className="flex items-center gap-2 mb-4">
               {isSyncing ? (
-                <RefreshCw className="w-4 h-4 animate-spin text-blue-500" />
+                <RefreshCw
+                  className="w-4 h-4 animate-spin"
+                  style={{ color: "var(--color-blue-500)" }}
+                />
               ) : authStatus?.isAuthenticated ? (
-                <CheckCircle2 className="w-4 h-4 text-green-500" />
+                <CheckCircle2
+                  className="w-4 h-4"
+                  style={{ color: "var(--color-green-500)" }}
+                />
               ) : (
-                <CloudOff className="w-4 h-4 text-gray-400" />
+                <CloudOff
+                  className="w-4 h-4"
+                  style={{ color: "var(--color-text-muted)" }}
+                />
               )}
-              <span className="text-sm text-gray-500 dark:text-gray-400">
+              <span
+                className="text-sm"
+                style={{ color: "var(--color-text-secondary)" }}
+              >
                 {isSyncing
                   ? "Syncing..."
                   : authStatus?.isAuthenticated
@@ -149,7 +178,10 @@ export const SyncSettings: React.FC<SyncSettingsProps> = () => {
                     : "Not logged in"}
               </span>
               {syncStatus?.lastSyncAt && (
-                <span className="text-xs text-gray-400">
+                <span
+                  className="text-xs"
+                  style={{ color: "var(--color-text-muted)" }}
+                >
                   — Last sync: {formatTimestamp(syncStatus.lastSyncAt)}
                 </span>
               )}
@@ -161,9 +193,11 @@ export const SyncSettings: React.FC<SyncSettingsProps> = () => {
                 <div
                   className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold mb-4"
                   style={{
-                    background: "rgba(0, 212, 255, 0.1)",
-                    color: "#00d4ff",
-                    border: "1px solid rgba(0, 212, 255, 0.3)",
+                    background: "var(--color-sync-pending-bg)",
+                    color: "var(--color-sync-pending-text)",
+                    borderWidth: "1px",
+                    borderStyle: "solid",
+                    borderColor: "var(--color-sync-pending-border)",
                   }}
                 >
                   <AlertCircle className="w-3 h-3" />
@@ -177,24 +211,37 @@ export const SyncSettings: React.FC<SyncSettingsProps> = () => {
         {/* Sync Result */}
         {syncResult && (
           <div
-            className="mt-4 p-4 rounded-lg border"
+            className="mt-4 p-4 rounded-lg"
             style={{
               background: syncResult.success
-                ? "rgba(0, 255, 136, 0.1)"
-                : "rgba(255, 51, 102, 0.1)",
+                ? "var(--color-alert-success-bg)"
+                : "var(--color-alert-error-bg)",
+              borderWidth: "1px",
+              borderStyle: "solid",
               borderColor: syncResult.success
-                ? "rgba(0, 255, 136, 0.3)"
-                : "rgba(255, 51, 102, 0.3)",
+                ? "var(--color-alert-success-border)"
+                : "var(--color-alert-error-border)",
             }}
           >
             <div className="flex items-center gap-2 mb-3">
               {syncResult.success ? (
-                <CheckCircle2 className="w-4 h-4 text-green-500" />
+                <CheckCircle2
+                  className="w-4 h-4"
+                  style={{ color: "var(--color-green-500)" }}
+                />
               ) : (
-                <AlertCircle className="w-4 h-4 text-red-500" />
+                <AlertCircle
+                  className="w-4 h-4"
+                  style={{ color: "var(--color-red-500)" }}
+                />
               )}
               <span
-                className={`text-sm font-semibold ${syncResult.success ? "text-green-500" : "text-red-500"}`}
+                className="text-sm font-semibold"
+                style={{
+                  color: syncResult.success
+                    ? "var(--color-alert-success-text)"
+                    : "var(--color-alert-error-text)",
+                }}
               >
                 {syncResult.success
                   ? "Sync completed"
@@ -204,28 +251,88 @@ export const SyncSettings: React.FC<SyncSettingsProps> = () => {
 
             {syncResult.success && (
               <div className="grid grid-cols-3 gap-3">
-                <div className="text-center p-2 rounded bg-black/20 border border-gray-700">
-                  <ArrowUpCircle className="w-4 h-4 mx-auto mb-1 text-blue-500" />
-                  <div className="text-lg font-bold text-white">
+                <div
+                  className="text-center p-2 rounded"
+                  style={{
+                    background: "var(--color-stat-box-bg)",
+                    borderWidth: "1px",
+                    borderStyle: "solid",
+                    borderColor: "var(--color-stat-box-border)",
+                  }}
+                >
+                  <ArrowUpCircle
+                    className="w-4 h-4 mx-auto mb-1"
+                    style={{ color: "var(--color-blue-500)" }}
+                  />
+                  <div
+                    className="text-lg font-bold"
+                    style={{ color: "var(--color-stat-box-text)" }}
+                  >
                     {syncResult.pushed}
                   </div>
-                  <div className="text-xs text-gray-400">Pushed</div>
+                  <div
+                    className="text-xs"
+                    style={{ color: "var(--color-stat-box-label)" }}
+                  >
+                    Pushed
+                  </div>
                 </div>
-                <div className="text-center p-2 rounded bg-black/20 border border-gray-700">
-                  <ArrowDownCircle className="w-4 h-4 mx-auto mb-1 text-purple-500" />
-                  <div className="text-lg font-bold text-white">
+                <div
+                  className="text-center p-2 rounded"
+                  style={{
+                    background: "var(--color-stat-box-bg)",
+                    borderWidth: "1px",
+                    borderStyle: "solid",
+                    borderColor: "var(--color-stat-box-border)",
+                  }}
+                >
+                  <ArrowDownCircle
+                    className="w-4 h-4 mx-auto mb-1"
+                    style={{ color: "var(--color-nav-portfolio-active)" }}
+                  />
+                  <div
+                    className="text-lg font-bold"
+                    style={{ color: "var(--color-stat-box-text)" }}
+                  >
                     {syncResult.pulled}
                   </div>
-                  <div className="text-xs text-gray-400">Pulled</div>
+                  <div
+                    className="text-xs"
+                    style={{ color: "var(--color-stat-box-label)" }}
+                  >
+                    Pulled
+                  </div>
                 </div>
-                <div className="text-center p-2 rounded bg-black/20 border border-gray-700">
+                <div
+                  className="text-center p-2 rounded"
+                  style={{
+                    background: "var(--color-stat-box-bg)",
+                    borderWidth: "1px",
+                    borderStyle: "solid",
+                    borderColor: "var(--color-stat-box-border)",
+                  }}
+                >
                   <AlertCircle
-                    className={`w-4 h-4 mx-auto mb-1 ${syncResult.conflicts > 0 ? "text-amber-500" : "text-gray-400"}`}
+                    className="w-4 h-4 mx-auto mb-1"
+                    style={{
+                      color:
+                        syncResult.conflicts > 0
+                          ? "var(--color-amber-500)"
+                          : "var(--color-text-muted)",
+                    }}
                   />
-                  <div className="text-lg font-bold text-white">
+                  <div
+                    className="text-lg font-bold"
+                    style={{ color: "var(--color-stat-box-text)" }}
+                  >
                     {syncResult.conflicts}
                   </div>
-                  <div className="text-xs text-gray-400">Conflicts</div>
+                  <div
+                    className="text-xs"
+                    style={{ color: "var(--color-stat-box-label)" }}
+                  >
+                    Conflicts
+                  </div>
                 </div>
               </div>
             )}
@@ -235,19 +342,30 @@ export const SyncSettings: React.FC<SyncSettingsProps> = () => {
         {/* Sync Progress */}
         {isSyncing && syncProgress && (
           <div
-            className="mt-4 p-3 rounded-lg border"
+            className="mt-4 p-3 rounded-lg"
             style={{
-              background: "rgba(0, 212, 255, 0.1)",
-              borderColor: "rgba(0, 212, 255, 0.3)",
+              background: "var(--color-sync-progress-bg)",
+              borderWidth: "1px",
+              borderStyle: "solid",
+              borderColor: "var(--color-sync-progress-border)",
             }}
           >
             <div className="flex items-center gap-2 mb-2">
-              <RefreshCw className="w-4 h-4 animate-spin text-blue-500" />
-              <span className="text-sm font-medium text-blue-400">
+              <RefreshCw
+                className="w-4 h-4 animate-spin"
+                style={{ color: "var(--color-blue-500)" }}
+              />
+              <span
+                className="text-sm font-medium"
+                style={{ color: "var(--color-sync-progress-text)" }}
+              >
                 {syncProgress.phase === "pushing" ? "Pushing..." : "Pulling..."}
               </span>
             </div>
-            <div className="text-sm text-blue-300">
+            <div
+              className="text-sm"
+              style={{ color: "var(--color-sync-progress-text)" }}
+            >
               {syncProgress.phase === "pushing" ? (
                 <span>{syncProgress.recordsPushed} records pushed</span>
               ) : (
@@ -264,11 +382,13 @@ export const SyncSettings: React.FC<SyncSettingsProps> = () => {
         {/* Error */}
         {error && (
           <div
-            className="mt-4 p-3 rounded-lg text-sm border"
+            className="mt-4 p-3 rounded-lg text-sm"
             style={{
-              background: "rgba(255, 51, 102, 0.1)",
-              borderColor: "rgba(255, 51, 102, 0.3)",
-              color: "#ff3366",
+              background: "var(--color-alert-error-bg)",
+              borderWidth: "1px",
+              borderStyle: "solid",
+              borderColor: "var(--color-alert-error-border)",
+              color: "var(--color-alert-error-text)",
             }}
           >
             {error}
@@ -297,14 +417,31 @@ export const SyncSettings: React.FC<SyncSettingsProps> = () => {
 
       {/* Server Configuration Card - Only shown in Tauri (native) mode */}
       {isTauri() && (
-        <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm p-6">
+        <div
+          className="rounded-xl shadow-sm p-6"
+          style={{
+            background: "var(--glass-bg-dark-strong)",
+            borderWidth: "1px",
+            borderStyle: "solid",
+            borderColor: "var(--glass-border-light)",
+          }}
+        >
           <div className="flex items-start gap-4">
-            <Server className="w-6 h-6 text-blue-500" />
+            <Server
+              className="w-6 h-6"
+              style={{ color: "var(--color-blue-500)" }}
+            />
             <div className="flex-1">
-              <h2 className="text-2xl font-semibold mb-2 text-gray-900 dark:text-white">
+              <h2
+                className="text-2xl font-semibold mb-2"
+                style={{ color: "var(--color-text-primary)" }}
+              >
                 Server Configuration
               </h2>
-              <p className="mb-4 text-gray-500 dark:text-gray-400">
+              <p
+                className="mb-4"
+                style={{ color: "var(--color-text-secondary)" }}
+              >
                 Configure the sync server connection
               </p>
 

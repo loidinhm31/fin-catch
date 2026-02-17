@@ -42,16 +42,6 @@ function formatPercent(percent: number | undefined): string {
 }
 
 /**
- * Get color based on change direction
- */
-function getChangeColor(change: number | undefined): string {
-  if (change === undefined || change === null || change === 0) {
-    return "#fbbf24"; // amber/yellow for no change
-  }
-  return change > 0 ? "#22c55e" : "#ef4444"; // green / red
-}
-
-/**
  * SymbolCard component
  *
  * Compact card showing symbol, price, change indicator, and optional OHLC bar.
@@ -68,44 +58,59 @@ export const SymbolCard: React.FC<SymbolCardProps> = ({
   const change = stockInfo?.change ?? 0;
   const changePercent = stockInfo?.changePercent;
   const lastPrice = stockInfo?.lastPrice;
-  const color = getChangeColor(change);
 
   const TrendIcon = change > 0 ? TrendingUp : change < 0 ? TrendingDown : Minus;
+
+  // Determine change state for Tailwind classes
+  const isPositive = change > 0;
+  const isNegative = change < 0;
+  const isNeutral = change === 0;
 
   return (
     <div
       className={`
         relative p-3 rounded-lg cursor-pointer transition-all duration-200
         hover:scale-[1.02] active:scale-[0.98]
-        ${isSelected ? "ring-2" : ""}
+        border backdrop-blur-md
+        ${
+          isSelected
+            ? "bg-[--color-sync-pending-bg] border-[--color-sync-pending-border] ring-2 ring-[--color-market-live]"
+            : "bg-[--glass-bg-card] border-[--color-border-primary]"
+        }
       `}
-      style={
-        {
-          background: isSelected
-            ? "rgba(0, 212, 255, 0.1)"
-            : "rgba(15, 23, 42, 0.6)",
-          border: isSelected
-            ? "1px solid rgba(0, 212, 255, 0.5)"
-            : "1px solid rgba(100, 116, 139, 0.2)",
-          // Ring color is handled via Tailwind's ring-cyan-400 class
-          "--tw-ring-color": "#00d4ff",
-        } as React.CSSProperties
-      }
       onClick={onClick}
     >
       {/* Header: Symbol & Trend Icon */}
       <div className="flex items-center justify-between mb-2">
-        <span className="font-semibold text-white text-sm">{symbol}</span>
-        <TrendIcon className="h-4 w-4" style={{ color }} />
+        <span className="font-semibold text-[--color-text-primary] text-sm">
+          {symbol}
+        </span>
+        <TrendIcon
+          className={`h-4 w-4 ${
+            isPositive
+              ? "text-[--color-trade-buy]"
+              : isNegative
+                ? "text-[--color-trade-sell]"
+                : "text-[--color-amber-400]"
+          }`}
+        />
       </div>
 
       {/* Price */}
       <div className="flex items-baseline gap-2 mb-1">
-        <span className="text-lg font-bold" style={{ color }}>
+        <span
+          className={`text-lg font-bold ${
+            isPositive
+              ? "text-[--color-trade-buy]"
+              : isNegative
+                ? "text-[--color-trade-sell]"
+                : "text-[--color-amber-400]"
+          }`}
+        >
           {formatPrice(lastPrice)}
         </span>
         {stockInfo?.volume && (
-          <span className="text-[10px] text-gray-500">
+          <span className="text-[10px] text-[--color-text-muted]">
             Vol: {(stockInfo.volume / 1000).toFixed(0)}K
           </span>
         )}
@@ -113,21 +118,29 @@ export const SymbolCard: React.FC<SymbolCardProps> = ({
 
       {/* Change */}
       <div className="flex items-center gap-2">
-        <span className="text-xs" style={{ color }}>
+        <span
+          className={`text-xs ${
+            isPositive
+              ? "text-[--color-trade-buy]"
+              : isNegative
+                ? "text-[--color-trade-sell]"
+                : "text-[--color-amber-400]"
+          }`}
+        >
           {change >= 0 ? "+" : ""}
           {formatPrice(Math.abs(change))}
         </span>
         <span
-          className="text-xs px-1.5 py-0.5 rounded"
-          style={{
-            backgroundColor:
-              change > 0
-                ? "rgba(34, 197, 94, 0.2)"
-                : change < 0
-                  ? "rgba(239, 68, 68, 0.2)"
-                  : "rgba(251, 191, 36, 0.2)",
-            color,
-          }}
+          className={`
+            text-xs px-1.5 py-0.5 rounded
+            ${
+              isPositive
+                ? "bg-[--color-alert-success-bg] text-[--color-trade-buy]"
+                : isNegative
+                  ? "bg-[--color-alert-error-bg] text-[--color-trade-sell]"
+                  : "bg-[--color-alert-warning-bg] text-[--color-amber-400]"
+            }
+          `}
         >
           {formatPercent(changePercent)}
         </span>
@@ -135,7 +148,7 @@ export const SymbolCard: React.FC<SymbolCardProps> = ({
 
       {/* OHLC Bar (optional) */}
       {showOhlc && (
-        <div className="mt-2 pt-2 border-t border-gray-700/50">
+        <div className="mt-2 pt-2 border-t border-[--color-white-10]">
           <OhlcDisplay
             ohlc={ohlc ?? null}
             height={32}
@@ -148,22 +161,22 @@ export const SymbolCard: React.FC<SymbolCardProps> = ({
 
       {/* Reference/Ceiling/Floor indicator */}
       {stockInfo && (stockInfo.ceiling || stockInfo.floor) && (
-        <div className="mt-2 flex justify-between text-[9px] text-gray-500">
+        <div className="mt-2 flex justify-between text-[9px] text-[--color-text-muted]">
           <span>
             F:{" "}
-            <span className="text-cyan-400">
+            <span className="text-[--chart-floor]">
               {formatPrice(stockInfo.floor)}
             </span>
           </span>
           <span>
             R:{" "}
-            <span className="text-yellow-400">
+            <span className="text-[--chart-reference]">
               {formatPrice(stockInfo.refPrice)}
             </span>
           </span>
           <span>
             C:{" "}
-            <span className="text-purple-400">
+            <span className="text-[--chart-ceiling]">
               {formatPrice(stockInfo.ceiling)}
             </span>
           </span>
@@ -178,21 +191,15 @@ export const SymbolCard: React.FC<SymbolCardProps> = ({
  */
 export const SymbolCardSkeleton: React.FC = () => {
   return (
-    <div
-      className="p-3 rounded-lg animate-pulse"
-      style={{
-        background: "rgba(15, 23, 42, 0.6)",
-        border: "1px solid rgba(100, 116, 139, 0.2)",
-      }}
-    >
+    <div className="p-3 rounded-lg animate-pulse bg-[--glass-bg-card] border border-[--color-border-primary]">
       <div className="flex items-center justify-between mb-2">
-        <div className="h-4 w-12 bg-gray-700 rounded" />
-        <div className="h-4 w-4 bg-gray-700 rounded" />
+        <div className="h-4 w-12 bg-[--color-border-primary] rounded" />
+        <div className="h-4 w-4 bg-[--color-border-primary] rounded" />
       </div>
-      <div className="h-6 w-20 bg-gray-700 rounded mb-1" />
+      <div className="h-6 w-20 bg-[--color-border-primary] rounded mb-1" />
       <div className="flex gap-2">
-        <div className="h-4 w-12 bg-gray-700 rounded" />
-        <div className="h-4 w-14 bg-gray-700 rounded" />
+        <div className="h-4 w-12 bg-[--color-border-primary] rounded" />
+        <div className="h-4 w-14 bg-[--color-border-primary] rounded" />
       </div>
     </div>
   );

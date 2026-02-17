@@ -6,7 +6,18 @@
 @import "@fontsource/space-grotesk/600.css";
 @import "@fontsource/space-grotesk/700.css";
 
+@import "@fontsource/jetbrains-mono/300.css";
+@import "@fontsource/jetbrains-mono/400.css";
+@import "@fontsource/jetbrains-mono/500.css";
+@import "@fontsource/jetbrains-mono/600.css";
+@import "@fontsource/jetbrains-mono/700.css";
+
 @source "../**/*.{ts,tsx}";
+
+/* Theme variants */
+@custom-variant light (&:where(.light, .light *));
+@custom-variant cyber (&:where(.cyber, .cyber *));
+
 
 /* ============================================
    FINCATCH - DARK MODE FINTECH/CRYPTO THEME
@@ -29,12 +40,12 @@
   /* Primary accent - Gold */
   --color-amber-600: #d97706;
   /* Hover state */
-  --color-violet-500: #8b5cf6;
-  /* CTA Primary */
-  --color-violet-600: #7c3aed;
-  /* CTA Hover */
-  --color-violet-700: #6d28d9;
-  /* CTA Active */
+  --color-violet-500: #3B82F6;
+  /* CTA Primary - Blue (cyber theme) */
+  --color-violet-600: #2563EB;
+  /* CTA Hover - Blue */
+  --color-violet-700: #1D4ED8;
+  /* CTA Active - Blue */
   /* Crypto Accent Colors */
   --color-cyan-400: #22d3ee;
   /* Tech accent - Bright cyan */
@@ -78,8 +89,8 @@
   /* Increased from 0.1 */
   --glass-border-medium: rgba(255, 255, 255, 0.2);
   /* Increased from 0.15 */
-  --glass-border-glow: rgba(139, 92, 246, 0.4);
-  /* Violet glow - increased from 0.3 */
+  --glass-border-glow: rgba(59, 130, 246, 0.4);
+  /* Blue glow - cyber theme */
   /* ===== BACKDROP BLUR ===== */
   --blur-xs: blur(4px);
   --blur-sm: blur(8px);
@@ -159,7 +170,8 @@
   --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.4);
   --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
   --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.6);
-  --shadow-glow-violet: 0 0 20px rgba(139, 92, 246, 0.4);
+  --shadow-glow-violet: 0 0 20px rgba(59, 130, 246, 0.4);
+  /* Blue glow - cyber theme */
   --shadow-glow-cyan: 0 0 20px rgba(34, 211, 238, 0.3);
 
   /* ===== TRANSITIONS ===== */
@@ -175,6 +187,296 @@
   --z-overlay: 30;
   --z-modal: 40;
   --z-tooltip: 50;
+
+  /* ===== SEMANTIC NAVIGATION COLORS ===== */
+  --color-nav-market-active: #22D3EE;
+  --color-nav-market-bg: rgba(34, 211, 238, 0.15);
+  --color-nav-portfolio-active: #8B5CF6;
+  --color-nav-portfolio-bg: rgba(139, 92, 246, 0.15);
+  --color-nav-trading-active: #00FF88;
+  --color-nav-trading-bg: rgba(0, 255, 136, 0.15);
+  --color-nav-settings-active: #00D4FF;
+  --color-nav-settings-bg: rgba(0, 212, 255, 0.15);
+  --color-nav-inactive: #94A3B8;
+
+  /* ===== ACTION BUTTON COLORS ===== */
+  --color-action-edit-bg: rgba(59, 130, 246, 0.15);
+  --color-action-edit-hover: rgba(59, 130, 246, 0.25);
+  --color-action-edit-icon: #2563eb;
+  --color-action-delete-bg: rgba(239, 68, 68, 0.15);
+  --color-action-delete-hover: rgba(239, 68, 68, 0.25);
+  --color-action-delete-icon: #dc2626;
+  --color-action-expand-bg: rgba(100, 116, 139, 0.15);
+  --color-action-expand-hover: rgba(100, 116, 139, 0.25);
+  --color-action-expand-icon: #64748b;
+
+  /* ===== BADGE COLORS ===== */
+  --color-badge-stock-bg: rgba(59, 130, 246, 0.15);
+  --color-badge-stock-text: #3b82f6;
+  --color-badge-gold-bg: rgba(250, 204, 21, 0.2);
+  --color-badge-gold-text: #fbbf24;
+  --color-badge-bond-bg: rgba(168, 85, 247, 0.15);
+  --color-badge-bond-text: #a855f7;
+  --color-badge-currency-match-bg: rgba(16, 185, 129, 0.15);
+  --color-badge-currency-match-text: #10b981;
+  --color-badge-currency-diff-bg: rgba(236, 72, 153, 0.15);
+  --color-badge-currency-diff-text: #ec4899;
+
+  /* ===== ALERT/INFO BOX COLORS ===== */
+  --color-alert-error-bg: rgba(239, 68, 68, 0.1);
+  --color-alert-error-border: rgba(239, 68, 68, 0.3);
+  --color-alert-error-text: #ef4444;
+  --color-alert-info-bg: rgba(59, 130, 246, 0.1);
+  --color-alert-info-border: rgba(59, 130, 246, 0.3);
+  --color-alert-info-text: #3b82f6;
+  --color-alert-success-bg: rgba(34, 197, 94, 0.1);
+  --color-alert-success-border: rgba(34, 197, 94, 0.3);
+  --color-alert-success-text: #22c55e;
+  --color-alert-warning-bg: rgba(251, 191, 36, 0.1);
+  --color-alert-warning-border: rgba(251, 191, 36, 0.3);
+  --color-alert-warning-text: #fbbf24;
+
+  /* ===== SYNC STATUS COLORS ===== */
+  --color-sync-pending-bg: rgba(0, 212, 255, 0.1);
+  --color-sync-pending-border: rgba(0, 212, 255, 0.3);
+  --color-sync-pending-text: #00d4ff;
+  --color-sync-progress-bg: rgba(59, 130, 246, 0.1);
+  --color-sync-progress-border: rgba(59, 130, 246, 0.3);
+  --color-sync-progress-text: #3b82f6;
+
+  /* ===== STAT BOX COLORS ===== */
+  --color-stat-box-bg: rgba(15, 23, 42, 0.4);
+  --color-stat-box-border: rgba(255, 255, 255, 0.1);
+  --color-stat-box-text: #f8fafc;
+  --color-stat-box-label: #94a3b8;
+
+  /* ===== TAB BUTTON COLORS ===== */
+  --color-tab-active-stock: #06B6D4;
+  --color-tab-active-gold: #FACC15;
+  --color-tab-inactive-text: #64748b;
+
+  /* ===== TRADING & MARKET DATA COLORS ===== */
+  /* Trading Actions */
+  --color-trade-buy: #00ff88;
+  --color-trade-sell: #ff3366;
+  --color-trade-buy-bg: rgba(0, 255, 136, 0.2);
+  --color-trade-buy-border: rgba(0, 255, 136, 0.5);
+  --color-trade-sell-bg: rgba(255, 51, 102, 0.2);
+  --color-trade-sell-border: rgba(255, 51, 102, 0.5);
+  --color-trade-neutral: #9ca3af;
+
+  /* Market Data */
+  --color-market-live: #00d4ff;
+  --color-market-purple: #7b61ff;
+  --color-market-purple-bg: rgba(123, 97, 255, 0.2);
+  --color-market-purple-border: rgba(123, 97, 255, 0.2);
+
+  /* Glass Variants for Trading UI */
+  --glass-bg-card: rgba(26, 31, 58, 0.6);
+  --glass-bg-compact: rgba(26, 31, 58, 0.95);
+  --glass-bg-ticker: rgba(10, 14, 39, 0.5);
+  --glass-bg-input: rgba(15, 23, 42, 0.5);
+  --glass-bg-input-disabled: rgba(15, 23, 42, 0.3);
+
+  /* Trading Shadows */
+  --shadow-glow-green: 0 0 15px rgba(16, 185, 129, 0.5);
+  --shadow-glow-red: 0 0 15px rgba(220, 38, 38, 0.5);
+  --shadow-glow-purple: 0 0 20px rgba(123, 97, 255, 0.3);
+  --shadow-glass-sm: 0 8px 32px rgba(0, 0, 0, 0.3);
+  --shadow-glass-md: 0 12px 40px rgba(0, 0, 0, 0.4);
+
+  /* Chart Colors */
+  --chart-axis: #a0aec0;
+  --chart-grid: rgba(123, 97, 255, 0.2);
+  --chart-volume-start: #00d4ff;
+  --chart-volume-stop: rgba(0, 212, 255, 0.1);
+  --chart-label: #ffffff;
+  --chart-ceiling: #a855f7;
+  --chart-reference: #eab308;
+  --chart-floor: #06b6d4;
+
+  /* Additional Text Shades */
+  --color-text-tertiary: #6b7280;
+  --color-text-gray-light: #9ca3af;
+
+  /* Opacity Helpers */
+  --color-white-10: rgba(255, 255, 255, 0.1);
+  --color-white-5: rgba(255, 255, 255, 0.05);
+  --color-black-10: rgba(0, 0, 0, 0.1);
+  --color-black-20: rgba(0, 0, 0, 0.2);
+  --color-black-30: rgba(0, 0, 0, 0.3);
+  --color-black-40: rgba(0, 0, 0, 0.4);
+}
+
+/* ===== LIGHT THEME ===== */
+.light,
+[data-theme="light"] {
+  /* Light Background Colors */
+  --color-bg-primary: #f8fafc;
+  --color-bg-secondary: #f1f5f9;
+  --color-bg-tertiary: #ffffff;
+
+  /* Light Text Colors */
+  --color-text-primary: #0f172a;
+  --color-text-secondary: #475569;
+  --color-text-muted: #64748b;
+
+  /* Light Border Colors */
+  --color-border-primary: #e2e8f0;
+  --color-border-secondary: #cbd5e1;
+
+  /* Fintech Brand Colors - Light Mode */
+  --color-violet-500: #7c3aed;
+  --color-violet-600: #6d28d9;
+  --color-violet-700: #5b21b6;
+
+  /* Light Glassmorphism */
+  --glass-bg-dark: rgba(255, 255, 255, 0.8);
+  --glass-bg-dark-strong: rgba(255, 255, 255, 0.95);
+  --glass-bg-darker: rgba(248, 250, 252, 0.9);
+  --glass-border-light: rgba(0, 0, 0, 0.1);
+  --glass-border-medium: rgba(0, 0, 0, 0.15);
+  --glass-border-glow: rgba(124, 58, 237, 0.3);
+
+  /* Light Shadows */
+  --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+  --shadow-glow-violet: 0 0 20px rgba(124, 58, 237, 0.2);
+  --shadow-glow-cyan: 0 0 20px rgba(6, 182, 212, 0.15);
+
+  /* Light Theme Navigation Colors - stay vibrant */
+  /* Navigation colors stay the same - they work in light mode */
+
+  /* Light Theme Action Buttons - lighter backgrounds */
+  --color-action-edit-bg: rgba(59, 130, 246, 0.1);
+  --color-action-edit-hover: rgba(59, 130, 246, 0.2);
+  --color-action-edit-icon: #1d4ed8;
+  --color-action-delete-bg: rgba(239, 68, 68, 0.1);
+  --color-action-delete-hover: rgba(239, 68, 68, 0.2);
+  --color-action-delete-icon: #b91c1c;
+  --color-action-expand-bg: rgba(100, 116, 139, 0.1);
+  --color-action-expand-hover: rgba(100, 116, 139, 0.2);
+  --color-action-expand-icon: #475569;
+
+  /* Light Theme Badges - softer backgrounds */
+  --color-badge-stock-bg: #dbeafe;
+  --color-badge-stock-text: #1e40af;
+  --color-badge-gold-bg: #fef3c7;
+  --color-badge-gold-text: #92400e;
+  --color-badge-bond-bg: #f3e8ff;
+  --color-badge-bond-text: #6b21a8;
+  --color-badge-currency-match-bg: #d1fae5;
+  --color-badge-currency-match-text: #065f46;
+  --color-badge-currency-diff-bg: #fce7f3;
+  --color-badge-currency-diff-text: #9f1239;
+
+  /* Light Theme Alerts - lighter backgrounds */
+  --color-alert-error-bg: #fee2e2;
+  --color-alert-error-border: #fca5a5;
+  --color-alert-error-text: #991b1b;
+  --color-alert-info-bg: #dbeafe;
+  --color-alert-info-border: #93c5fd;
+  --color-alert-info-text: #1e40af;
+  --color-alert-success-bg: #d1fae5;
+  --color-alert-success-border: #6ee7b7;
+  --color-alert-success-text: #065f46;
+  --color-alert-warning-bg: #fef3c7;
+  --color-alert-warning-border: #fcd34d;
+  --color-alert-warning-text: #92400e;
+
+  /* Light Theme Sync Status */
+  --color-sync-pending-bg: #cffafe;
+  --color-sync-pending-border: #67e8f9;
+  --color-sync-pending-text: #0e7490;
+  --color-sync-progress-bg: #dbeafe;
+  --color-sync-progress-border: #93c5fd;
+  --color-sync-progress-text: #1e40af;
+
+  /* Light Theme Stat Boxes */
+  --color-stat-box-bg: rgba(248, 250, 252, 0.8);
+  --color-stat-box-border: rgba(0, 0, 0, 0.1);
+  --color-stat-box-text: #0f172a;
+  --color-stat-box-label: #64748b;
+
+  /* Light Theme Tabs - darker inactive text */
+  --color-tab-inactive-text: #475569;
+
+  /* Light Theme Trading & Market Data */
+  --glass-bg-card: rgba(255, 255, 255, 0.8);
+  --glass-bg-compact: rgba(255, 255, 255, 0.95);
+  --glass-bg-ticker: rgba(248, 250, 252, 0.9);
+  --glass-bg-input: rgba(248, 250, 252, 0.8);
+  --glass-bg-input-disabled: rgba(248, 250, 252, 0.5);
+  --chart-grid: rgba(100, 116, 139, 0.2);
+  --chart-axis: #64748b;
+
+  color-scheme: light;
+}
+
+/* Light theme body and shadow-body */
+.light,
+.light .shadow-body,
+[data-theme="light"],
+[data-theme="light"] .shadow-body {
+  background: var(--color-bg-primary);
+  color: var(--color-text-primary);
+}
+
+/* Light mode button overrides - solid colors, no gradients */
+.light .btn-primary,
+[data-theme="light"] .btn-primary {
+  background: var(--color-violet-500);
+  box-shadow: var(--shadow-md);
+}
+
+.light .btn-primary:hover,
+[data-theme="light"] .btn-primary:hover {
+  background: var(--color-violet-600);
+}
+
+/* Light mode glass cards */
+.light .glass-card,
+[data-theme="light"] .glass-card {
+  background: var(--glass-bg-dark-strong);
+  border-color: var(--glass-border-light);
+}
+
+/* Light mode glass inputs */
+.light .glass-input,
+[data-theme="light"] .glass-input {
+  background: var(--glass-bg-dark-strong);
+  border-color: var(--glass-border-light);
+  color: var(--color-text-primary);
+}
+
+.light .glass-input:focus,
+[data-theme="light"] .glass-input:focus {
+  border-color: var(--color-violet-500);
+  box-shadow:
+    0 0 0 3px rgba(124, 58, 237, 0.2),
+    0 0 15px rgba(124, 58, 237, 0.15);
+}
+
+/* Light mode glass buttons */
+.light .glass-button,
+[data-theme="light"] .glass-button {
+  background: var(--glass-bg-dark);
+  border-color: var(--glass-border-light);
+  color: var(--color-text-primary);
+}
+
+.light .glass-button:hover,
+[data-theme="light"] .glass-button:hover {
+  background: var(--glass-bg-dark-strong);
+  border-color: var(--glass-border-medium);
+}
+
+/* Light mode scrollbar */
+.light::-webkit-scrollbar-thumb,
+[data-theme="light"]::-webkit-scrollbar-thumb {
+  background: var(--color-violet-500);
 }
 
 /* ===== BODY & HTML - DARK MODE BASE ===== */
@@ -238,8 +540,7 @@ h6 {
 }
 
 .glass-input {
-  background: rgba(15, 23, 42, 0.8);
-  /* Increased from 0.6 for better contrast */
+  background: var(--glass-bg-dark-strong);
   backdrop-filter: var(--blur-sm);
   -webkit-backdrop-filter: var(--blur-sm);
   border-radius: var(--radius-lg);
@@ -255,8 +556,7 @@ h6 {
   box-shadow:
     0 0 0 3px rgba(139, 92, 246, 0.3),
     0 0 15px rgba(139, 92, 246, 0.2);
-  background: rgba(15, 23, 42, 0.95);
-  /* Increased from 0.8 */
+  background: var(--glass-bg-dark-strong);
 }
 
 .glass-button {
@@ -283,9 +583,7 @@ h6 {
 /* ===== BUTTONS - FINTECH STYLE ===== */
 
 .btn-primary {
-  background: linear-gradient(135deg,
-      var(--color-violet-500) 0%,
-      var(--color-violet-600) 100%);
+  background: var(--color-violet-500);
   color: var(--color-text-primary);
   font-weight: var(--font-bold);
   font-family: var(--font-heading);
@@ -300,9 +598,7 @@ h6 {
 }
 
 .btn-primary:hover {
-  background: linear-gradient(135deg,
-      var(--color-violet-600) 0%,
-      var(--color-violet-700) 100%);
+  background: var(--color-violet-600);
   box-shadow: var(--shadow-xl), var(--shadow-glow-violet);
   transform: translateY(-2px);
 }
@@ -359,30 +655,27 @@ h6 {
 }
 
 .crypto-decoration::before {
-  background: linear-gradient(135deg,
-      var(--color-cyan-400) 0%,
-      var(--color-blue-500) 100%);
+  background: var(--color-cyan-500);
   transform: rotate(45deg);
   opacity: 0.6;
   box-shadow: var(--shadow-glow-cyan);
 }
 
 .crypto-decoration::after {
-  background: linear-gradient(135deg,
-      var(--color-violet-500) 0%,
-      var(--color-violet-600) 100%);
+  background: var(--color-violet-500);
   transform: rotate(-12deg);
   opacity: 0.5;
+  box-shadow: 0 0 15px rgba(59, 130, 246, 0.3);
 }
 
 .crypto-decoration.gold::before {
-  background: linear-gradient(135deg,
-      var(--color-amber-400) 0%,
-      var(--color-amber-500) 100%);
+  background: #FACC15;
+  box-shadow: 0 0 20px rgba(250, 204, 21, 0.4);
 }
 
 .crypto-decoration.pink::before {
-  background: linear-gradient(135deg, var(--color-violet-500) 0%, #ec4899 100%);
+  background: #A855F7;
+  box-shadow: 0 0 20px rgba(168, 85, 247, 0.4);
 }
 
 /* Backwards compatibility aliases */
@@ -401,29 +694,27 @@ h6 {
 }
 
 .cube-decoration::before {
-  background: linear-gradient(135deg,
-      var(--color-cyan-400) 0%,
-      var(--color-blue-500) 100%);
+  background: var(--color-cyan-500);
   transform: rotate(45deg);
   opacity: 0.6;
+  box-shadow: var(--shadow-glow-cyan);
 }
 
 .cube-decoration::after {
-  background: linear-gradient(135deg,
-      var(--color-violet-500) 0%,
-      var(--color-violet-600) 100%);
+  background: var(--color-violet-500);
   transform: rotate(-12deg);
   opacity: 0.5;
+  box-shadow: 0 0 15px rgba(59, 130, 246, 0.3);
 }
 
 .cube-decoration.cube-yellow::before {
-  background: linear-gradient(135deg,
-      var(--color-amber-400) 0%,
-      var(--color-amber-500) 100%);
+  background: #FACC15;
+  box-shadow: 0 0 20px rgba(250, 204, 21, 0.4);
 }
 
 .cube-decoration.cube-pink::before {
-  background: linear-gradient(135deg, var(--color-violet-500) 0%, #ec4899 100%);
+  background: #A855F7;
+  box-shadow: 0 0 20px rgba(168, 85, 247, 0.4);
 }
 
 /* ===== ANIMATIONS ===== */
@@ -548,7 +839,7 @@ h6 {
 .animate-shimmer {
   background: linear-gradient(90deg,
       transparent,
-      rgba(139, 92, 246, 0.2),
+      rgba(59, 130, 246, 0.1),
       transparent);
   background-size: 1000px 100%;
   animation: shimmer 3s infinite;
@@ -628,30 +919,29 @@ h6 {
 /* ===== SCREEN BACKGROUNDS - DARK GRADIENTS ===== */
 
 .screen-welcome {
-  background: linear-gradient(135deg,
-      var(--color-bg-secondary) 0%,
-      var(--color-bg-primary) 50%,
-      #1e1b4b 100%);
+  background: var(--color-bg-primary);
+  background-image:
+    linear-gradient(rgba(59, 130, 246, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(59, 130, 246, 0.03) 1px, transparent 1px);
+  background-size: 20px 20px;
   min-height: 100vh;
   position: relative;
   overflow: hidden;
 }
 
 .screen-explore {
-  background: linear-gradient(135deg,
-      var(--color-bg-primary) 0%,
-      var(--color-bg-secondary) 50%,
-      #0f172a 100%);
+  background: var(--color-bg-primary);
+  background-image:
+    linear-gradient(rgba(59, 130, 246, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(59, 130, 246, 0.03) 1px, transparent 1px);
+  background-size: 20px 20px;
   min-height: 100vh;
   position: relative;
   overflow: hidden;
 }
 
 .screen-detail {
-  background: linear-gradient(135deg,
-      var(--color-bg-secondary) 0%,
-      var(--color-bg-tertiary) 50%,
-      var(--color-bg-primary) 100%);
+  background: var(--color-bg-secondary);
   min-height: 100vh;
   position: relative;
   overflow: hidden;
@@ -665,22 +955,21 @@ h6 {
   padding: var(--space-4);
 }
 
+.cyber-grid-pattern {
+  background-image:
+    linear-gradient(rgba(59, 130, 246, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(59, 130, 246, 0.03) 1px, transparent 1px);
+  background-size: 20px 20px;
+}
+
 .text-gradient-cyber {
-  background: linear-gradient(135deg,
-      var(--color-cyan-400) 0%,
-      var(--color-violet-500) 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  color: var(--color-violet-500);
+  text-shadow: 0 0 10px rgba(59, 130, 246, 0.5);
 }
 
 .text-gradient-gold {
-  background: linear-gradient(135deg,
-      var(--color-amber-400) 0%,
-      var(--color-amber-500) 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  color: #FACC15;
+  text-shadow: 0 0 10px rgba(250, 204, 21, 0.4);
 }
 
 /* ===== TEXT OPACITY HELPERS - HIGH CONTRAST ===== */
@@ -737,17 +1026,13 @@ h6 {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: linear-gradient(180deg,
-      var(--color-violet-500) 0%,
-      var(--color-violet-600) 100%);
+  background: var(--color-violet-500);
   border-radius: var(--radius-sm);
   border: 2px solid var(--color-bg-secondary);
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(180deg,
-      var(--color-violet-600) 0%,
-      var(--color-violet-700) 100%);
+  background: var(--color-violet-600);
 }
 
 /* ===== REDUCED MOTION - ACCESSIBILITY ===== */
@@ -935,4 +1220,314 @@ select:active {
 /* Ensure the popover content itself is properly styled */
 [data-radix-popper-content-wrapper]>[data-state] {
   position: relative !important;
+}
+
+/* ===== CYBER THEME - Developer Terminal Aesthetic ===== */
+.cyber,
+[data-theme="cyber"] {
+  /* Backgrounds - VS Code inspired */
+  --color-bg-primary: #0F172A;
+  --color-bg-secondary: #1E293B;
+  --color-bg-tertiary: #0a0e1a;
+
+  /* Fintech Brand Colors - Cyber override with syntax palette */
+  --color-amber-400: #FACC15;
+  --color-amber-500: #F97316;
+  --color-amber-600: #EA580C;
+  --color-violet-500: #06B6D4;  /* Primary accent - Cyan */
+  --color-violet-600: #0891B2;  /* Cyan hover */
+  --color-violet-700: #0e7490;  /* Cyan active */
+
+  /* Cyber Accent Colors - Syntax highlighting palette */
+  --color-cyan-400: #22d3ee;
+  --color-cyan-500: #06B6D4;
+  --color-blue-400: #60A5FA;
+  --color-blue-500: #3B82F6;
+
+  /* Status Colors - Cyber syntax palette */
+  --color-green-400: #4ade80;
+  --color-green-500: #10B981;  /* Success - Green */
+  --color-red-400: #f87171;
+  --color-red-500: #DC2626;    /* Error - Red */
+
+  /* Text Colors - Brighter for terminal */
+  --color-text-primary: #F1F5F9;
+  --color-text-secondary: #94A3B8;
+  --color-text-muted: #64748B;
+
+  /* Border Colors */
+  --color-border-primary: #334155;
+  --color-border-secondary: #1E293B;
+
+  /* Glassmorphism - Enhanced with cyan borders */
+  --glass-bg-dark: rgba(30, 41, 59, 0.95);
+  --glass-bg-dark-strong: rgba(15, 23, 42, 0.98);
+  --glass-bg-darker: rgba(10, 14, 26, 0.95);
+  --glass-border-light: rgba(6, 182, 212, 0.3);   /* Cyan border */
+  --glass-border-medium: rgba(6, 182, 212, 0.5);  /* Cyan border medium */
+  --glass-border-glow: rgba(6, 182, 212, 0.6);    /* Cyan glow */
+
+  /* Typography - IBM Plex Sans for body, JetBrains Mono for data */
+  --font-heading: "JetBrains Mono", "Fira Code", ui-monospace, monospace;
+  --font-base: "JetBrains Mono", "Fira Code", ui-monospace, monospace;
+  --font-mono: "JetBrains Mono", "Fira Code", ui-monospace, monospace;
+  --font-data: "JetBrains Mono", "Fira Code", ui-monospace, monospace;
+
+  /* Multi-layer Glows - Syntax palette */
+  --shadow-glow-violet: 0 0 10px rgba(6, 182, 212, 0.4),
+                        0 0 20px rgba(6, 182, 212, 0.2),
+                        0 0 30px rgba(6, 182, 212, 0.1);  /* Cyan glow */
+  --shadow-glow-cyan: 0 0 10px rgba(6, 182, 212, 0.4),
+                      0 0 20px rgba(6, 182, 212, 0.2),
+                      0 0 30px rgba(6, 182, 212, 0.1);
+  --shadow-glow-green: 0 0 10px rgba(16, 185, 129, 0.5),
+                       0 0 20px rgba(16, 185, 129, 0.3);
+  --shadow-glow-purple: 0 0 10px rgba(168, 85, 247, 0.4),
+                        0 0 20px rgba(168, 85, 247, 0.2);
+
+  /* Semantic Navigation Colors - Syntax palette */
+  --color-nav-market-active: #06B6D4;     /* Cyan */
+  --color-nav-market-bg: rgba(6, 182, 212, 0.15);
+  --color-nav-portfolio-active: #A855F7;  /* Purple */
+  --color-nav-portfolio-bg: rgba(168, 85, 247, 0.15);
+  --color-nav-trading-active: #10B981;    /* Green */
+  --color-nav-trading-bg: rgba(16, 185, 129, 0.15);
+  --color-nav-settings-active: #F97316;   /* Orange */
+  --color-nav-settings-bg: rgba(249, 115, 22, 0.15);
+
+  /* Badge Colors - Syntax palette */
+  --color-badge-stock-bg: rgba(59, 130, 246, 0.15);
+  --color-badge-stock-text: #3b82f6;      /* Blue */
+  --color-badge-gold-bg: rgba(250, 204, 21, 0.2);
+  --color-badge-gold-text: #FACC15;       /* Yellow */
+  --color-badge-bond-bg: rgba(168, 85, 247, 0.15);
+  --color-badge-bond-text: #A855F7;       /* Purple */
+
+  /* Trading Colors - Syntax palette */
+  --color-trade-buy: #10B981;             /* Green */
+  --color-trade-sell: #DC2626;            /* Red */
+  --color-trade-buy-bg: rgba(16, 185, 129, 0.2);
+  --color-trade-buy-border: rgba(16, 185, 129, 0.5);
+  --color-trade-sell-bg: rgba(220, 38, 38, 0.2);
+  --color-trade-sell-border: rgba(220, 38, 38, 0.5);
+
+  /* Market Data Colors */
+  --color-market-purple: #A855F7;         /* Purple for special */
+  --color-market-purple-bg: rgba(168, 85, 247, 0.2);
+  --color-market-purple-border: rgba(168, 85, 247, 0.2);
+
+  /* Chart Colors - Syntax palette */
+  --chart-grid: rgba(6, 182, 212, 0.1);   /* Cyan grid */
+  --chart-volume-start: #06B6D4;          /* Cyan gradient start */
+  --chart-reference: #FACC15;             /* Yellow reference lines */
+  --chart-floor: #06B6D4;                 /* Cyan floor */
+  --chart-ceiling: #A855F7;               /* Purple ceiling */
+
+  /* Action Button Colors */
+  --color-action-edit-icon: #06B6D4;      /* Cyan for edit */
+}
+
+/* Cyber theme body background and fonts */
+.cyber,
+.cyber .shadow-body,
+[data-theme="cyber"],
+[data-theme="cyber"] .shadow-body {
+  background: var(--color-bg-primary);
+  color: var(--color-text-primary);
+}
+
+/* Cyber theme font application */
+.cyber,
+.cyber *,
+[data-theme="cyber"],
+[data-theme="cyber"] * {
+  font-family: var(--font-base, "IBM Plex Sans", sans-serif);
+}
+
+/* Cyber theme monospace fonts */
+.cyber .font-mono,
+.cyber code,
+.cyber pre,
+[data-theme="cyber"] .font-mono,
+[data-theme="cyber"] code,
+[data-theme="cyber"] pre {
+  font-family: "JetBrains Mono", "Fira Code", ui-monospace, monospace;
+}
+
+/* Cyber glass card */
+.cyber .glass-card,
+[data-theme="cyber"] .glass-card {
+  background: var(--glass-bg-dark);
+  border-color: var(--glass-border-medium);
+}
+
+.cyber .glass-card:hover,
+[data-theme="cyber"] .glass-card:hover {
+  box-shadow: var(--shadow-lg), 0 0 15px rgba(59, 130, 246, 0.2);
+}
+
+/* Cyber primary button - solid colors, no gradients */
+.cyber .btn-primary,
+[data-theme="cyber"] .btn-primary {
+  background: #3B82F6;
+  box-shadow: var(--shadow-glow-violet);
+}
+
+.cyber .btn-primary:hover,
+[data-theme="cyber"] .btn-primary:hover {
+  background: #2563EB;
+}
+
+/* Cyber security badge */
+.cyber .security-badge,
+[data-theme="cyber"] .security-badge {
+  color: #3B82F6;
+  border-color: var(--glass-border-glow);
+  box-shadow: var(--shadow-glow-violet);
+}
+
+/* Cyber accent text - solid color, no gradient */
+.cyber .text-gradient-cyber,
+[data-theme="cyber"] .text-gradient-cyber {
+  color: #3B82F6;
+  background: none;
+  -webkit-text-fill-color: currentColor;
+}
+
+/* Cyber grid pattern */
+.cyber-grid-pattern {
+  background-image:
+    linear-gradient(rgba(59, 130, 246, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(59, 130, 246, 0.03) 1px, transparent 1px);
+  background-size: 20px 20px;
+}
+
+/* Cyber glass input */
+.cyber-glass-input {
+  background-color: #0F172A;
+  border: 1px solid rgba(51, 65, 85, 1);
+  color: #F1F5F9;
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 0.875rem;
+  transition: all 200ms;
+}
+
+.cyber-glass-input:focus {
+  border-color: #3B82F6;
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+}
+
+/* Cyber scrollbar - solid color */
+.cyber::-webkit-scrollbar-thumb,
+[data-theme="cyber"]::-webkit-scrollbar-thumb {
+  background: #06B6D4;  /* Cyan scrollbar */
+}
+
+/* ===== CYBER THEME UTILITY CLASSES ===== */
+
+/* Grid Pattern Background */
+.cyber-grid-bg {
+  background-image:
+    linear-gradient(rgba(6, 182, 212, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(6, 182, 212, 0.03) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
+/* Scanline Animation */
+@keyframes scanline {
+  0% { transform: translateY(-100%); }
+  100% { transform: translateY(100%); }
+}
+
+.cyber-scanline {
+  position: relative;
+  overflow: hidden;
+}
+
+.cyber-scanline::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    transparent 0%,
+    rgba(6, 182, 212, 0.1) 50%,
+    transparent 100%
+  );
+  height: 200%;
+  animation: scanline 8s linear infinite;
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* Terminal Header Style */
+.cyber-terminal-header {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #06B6D4;
+}
+
+/* Data Display (Monospace) */
+.cyber-data {
+  font-family: var(--font-data);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
+}
+
+/* Glow Text Effects */
+.cyber-glow-cyan {
+  color: #06B6D4;
+  text-shadow: 0 0 10px rgba(6, 182, 212, 0.6),
+               0 0 20px rgba(6, 182, 212, 0.3);
+}
+
+.cyber-glow-green {
+  color: #10B981;
+  text-shadow: 0 0 10px rgba(16, 185, 129, 0.6),
+               0 0 20px rgba(16, 185, 129, 0.3);
+}
+
+.cyber-glow-yellow {
+  color: #FACC15;
+  text-shadow: 0 0 10px rgba(250, 204, 21, 0.6),
+               0 0 20px rgba(250, 204, 21, 0.3);
+}
+
+.cyber-glow-purple {
+  color: #A855F7;
+  text-shadow: 0 0 10px rgba(168, 85, 247, 0.6),
+               0 0 20px rgba(168, 85, 247, 0.3);
+}
+
+.cyber-glow-red {
+  color: #DC2626;
+  text-shadow: 0 0 10px rgba(220, 38, 38, 0.6),
+               0 0 20px rgba(220, 38, 38, 0.3);
+}
+
+/* Card Glow */
+.cyber-card-glow {
+  box-shadow:
+    0 0 10px rgba(6, 182, 212, 0.2),
+    0 0 20px rgba(6, 182, 212, 0.1),
+    0 4px 20px rgba(0, 0, 0, 0.4);
+}
+
+.cyber-card-glow:hover {
+  box-shadow:
+    0 0 15px rgba(6, 182, 212, 0.4),
+    0 0 30px rgba(6, 182, 212, 0.2),
+    0 8px 32px rgba(0, 0, 0, 0.5);
+}
+
+/* Accessibility: Disable scanline animation for reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .cyber-scanline::before {
+    animation: none;
+    display: none;
+  }
 }

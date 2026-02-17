@@ -107,8 +107,12 @@ export const StockEntryForm: React.FC<StockEntryFormProps> = ({
                   <span
                     className="px-2 py-0.5 rounded-full text-xs"
                     style={{
-                      backgroundColor: alertEnabled ? "#d1fae5" : "#f3f4f6",
-                      color: alertEnabled ? "#065f46" : "#6b7280",
+                      backgroundColor: alertEnabled
+                        ? "var(--color-alert-success-bg)"
+                        : "var(--color-bg-secondary)",
+                      color: alertEnabled
+                        ? "#065f46"
+                        : "var(--color-text-tertiary)",
                     }}
                   >
                     {alertEnabled ? "Active" : "Disabled"}

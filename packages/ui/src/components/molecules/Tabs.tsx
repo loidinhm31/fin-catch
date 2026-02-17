@@ -19,25 +19,39 @@ export const Tabs: React.FC<TabsProps> = ({
   onChange,
   className = "",
 }) => {
+  const [hoveredTab, setHoveredTab] = React.useState<string | null>(null);
+
   return (
     <div
-      className={`flex space-x-2 border-b border-gray-200 dark:border-gray-700 ${className}`}
+      className={`flex space-x-2 ${className}`}
+      style={{
+        borderBottom: "1px solid var(--glass-border-light)",
+      }}
     >
       {tabs.map((tab) => {
         const isActive = tab.id === activeTab;
+        const isHovered = hoveredTab === tab.id;
         return (
           <button
             key={tab.id}
             onClick={() => onChange(tab.id)}
-            className={`
-              flex items-center space-x-2 px-4 py-3 font-medium text-sm transition-all duration-200
-              border-b-2 -mb-[1px]
-              ${
-                isActive
-                  ? "border-cyan-500 text-cyan-600 dark:text-cyan-400"
-                  : "border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:border-gray-300 dark:hover:border-gray-600"
-              }
-            `}
+            onMouseEnter={() => setHoveredTab(tab.id)}
+            onMouseLeave={() => setHoveredTab(null)}
+            className="flex items-center space-x-2 px-4 py-3 font-medium text-sm transition-all duration-200"
+            style={{
+              borderBottom: "2px solid",
+              borderBottomColor: isActive
+                ? "var(--color-cyan-500)"
+                : isHovered
+                  ? "var(--glass-border-medium)"
+                  : "transparent",
+              marginBottom: "-1px",
+              color: isActive
+                ? "var(--color-cyan-500)"
+                : isHovered
+                  ? "var(--color-text-primary)"
+                  : "var(--color-text-secondary)",
+            }}
           >
             {tab.icon && <span>{tab.icon}</span>}
             <span>{tab.label}</span>

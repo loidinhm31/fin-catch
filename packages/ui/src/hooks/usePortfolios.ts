@@ -3,6 +3,7 @@ import { Portfolio } from "@fin-catch/shared";
 import {
   listPortfolios,
   createPortfolio as createPortfolioService,
+  updatePortfolio as updatePortfolioService,
   deletePortfolio as deletePortfolioService,
 } from "@fin-catch/ui/services";
 
@@ -43,6 +44,11 @@ export const usePortfolios = () => {
     return portfolioId;
   };
 
+  const updatePortfolio = async (portfolio: Portfolio): Promise<void> => {
+    await updatePortfolioService(portfolio);
+    await loadPortfolios();
+  };
+
   const deletePortfolio = async (portfolioId: string) => {
     await deletePortfolioService(portfolioId);
     await loadPortfolios();
@@ -69,6 +75,7 @@ export const usePortfolios = () => {
     setError,
     loadPortfolios,
     createPortfolio,
+    updatePortfolio,
     deletePortfolio,
   };
 };

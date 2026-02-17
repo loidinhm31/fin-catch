@@ -37,7 +37,7 @@ export const HoldingsChartSection: React.FC<HoldingsChartSectionProps> = ({
         {!showChart && (
           <button
             onClick={onShowChart}
-            className="bg-gradient-to-r from-purple-300 to-pink-600 text-white px-4 py-2 rounded-xl font-bold shadow-lg hover:shadow-xl transition-all flex items-center gap-2"
+            className="bg-[#A855F7] text-white px-4 py-2 rounded-xl font-bold shadow-[0_0_15px_rgba(168,85,247,0.5)] hover:shadow-xl transition-all flex items-center gap-2"
             style={{ fontSize: "var(--text-sm)" }}
           >
             <BarChart3 className="w-4 h-4" />
@@ -68,7 +68,7 @@ export const HoldingsChartSection: React.FC<HoldingsChartSectionProps> = ({
                   onClick={() => onTimeframeChange(tf)}
                   className={`px-3 py-2 rounded-lg font-bold transition-all ${
                     timeframe === tf
-                      ? "bg-gradient-to-r from-cyan-400 to-blue-600 text-white shadow-md"
+                      ? "bg-[#06B6D4] text-white shadow-[0_0_12px_rgba(6,182,212,0.5)]"
                       : "glass-button"
                   }`}
                   style={{ fontSize: "var(--text-xs)" }}

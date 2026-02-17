@@ -14,7 +14,7 @@ import { usePlatformServices } from "@fin-catch/ui/platform";
 export const TradingPage: React.FC = () => {
   const { trading, auth } = usePlatformServices();
 
-  // Check if user is authenticated (trading requires qm-center auth)
+  // Check if user is authenticated (trading requires qm-hub auth)
   const [isAuthenticated, setIsAuthenticated] = React.useState<boolean | null>(
     null,
   );
@@ -34,14 +34,17 @@ export const TradingPage: React.FC = () => {
           <div
             className="rounded-2xl p-8 border text-center"
             style={{
-              background: "rgba(26, 31, 58, 0.6)",
+              background: "var(--glass-bg-card)",
               backdropFilter: "blur(16px)",
-              borderColor: "rgba(123, 97, 255, 0.2)",
+              borderColor: "var(--color-market-purple-border)",
             }}
           >
             <div
               className="w-8 h-8 mx-auto mb-4 rounded-full border-2 border-t-transparent animate-spin"
-              style={{ borderColor: "#00d4ff", borderTopColor: "transparent" }}
+              style={{
+                borderColor: "var(--color-cyan-400)",
+                borderTopColor: "transparent",
+              }}
             />
             <p style={{ color: "var(--color-text-secondary)" }}>
               Checking authentication...
@@ -60,18 +63,18 @@ export const TradingPage: React.FC = () => {
           <div
             className="rounded-2xl p-8 border text-center"
             style={{
-              background: "rgba(26, 31, 58, 0.6)",
+              background: "var(--glass-bg-dark)",
               backdropFilter: "blur(16px)",
-              borderColor: "rgba(255, 163, 0, 0.3)",
+              borderColor: "var(--color-alert-warning-border)",
             }}
           >
             <div
               className="w-16 h-16 mx-auto mb-4 rounded-full flex items-center justify-center"
-              style={{ background: "rgba(255, 163, 0, 0.1)" }}
+              style={{ background: "var(--color-alert-warning-bg)" }}
             >
               <svg
                 className="w-8 h-8"
-                style={{ color: "#ffa500" }}
+                style={{ color: "var(--color-amber-500)" }}
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
@@ -114,18 +117,18 @@ export const TradingPage: React.FC = () => {
           <div
             className="rounded-2xl p-8 border text-center"
             style={{
-              background: "rgba(26, 31, 58, 0.6)",
+              background: "var(--glass-bg-dark)",
               backdropFilter: "blur(16px)",
-              borderColor: "rgba(255, 51, 102, 0.3)",
+              borderColor: "var(--color-alert-error-border)",
             }}
           >
             <div
               className="w-16 h-16 mx-auto mb-4 rounded-full flex items-center justify-center"
-              style={{ background: "rgba(255, 51, 102, 0.1)" }}
+              style={{ background: "var(--color-alert-error-bg)" }}
             >
               <svg
                 className="w-8 h-8"
-                style={{ color: "#ff3366" }}
+                style={{ color: "var(--color-red-400)" }}
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
@@ -157,8 +160,8 @@ export const TradingPage: React.FC = () => {
   }
 
   return (
-    <div className="p-4 md:p-6">
-      <div className="max-w-2xl mx-auto">
+    <div className="cyber-grid-bg cyber-scanline min-h-screen p-4 md:p-6 relative">
+      <div className="max-w-2xl mx-auto relative z-10">
         {/* Page Header */}
         <div className="mb-6">
           <h1

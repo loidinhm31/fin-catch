@@ -63,7 +63,7 @@ const DialogContent = React.forwardRef<
         <DialogPrimitive.Close
           className="absolute right-4 top-4 w-10 h-10 rounded-full flex items-center justify-center transition-all opacity-70 hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:ring-offset-2 disabled:pointer-events-none"
           style={{
-            backgroundColor: "rgba(255, 255, 255, 0.1)",
+            backgroundColor: "var(--color-white-10)",
             color: "var(--color-text-primary)",
           }}
         >

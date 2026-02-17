@@ -213,9 +213,9 @@ export const FinancialDataPage: React.FC = () => {
   }, [premiumAbortController]);
 
   return (
-    <div className="screen-explore">
+    <div className="screen-explore cyber-grid-bg min-h-screen">
       {/* Main glass container */}
-      <div className=" relative z-10 mx-4 pb-28 min-h-[calc(100vh-4rem)] overflow-hidden">
+      <div className="relative z-10 mx-4 pb-28 min-h-[calc(100vh-4rem)] overflow-hidden">
         <div className="h-full">
           {/* Header */}
           <div className="flex justify-between items-center mb-8">
@@ -248,24 +248,42 @@ export const FinancialDataPage: React.FC = () => {
           <div className="flex gap-3 mb-3">
             <button
               onClick={() => setActiveTab("stock")}
-              className={`flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-xl font-bold transition-all ${
+              className="flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-xl font-bold transition-all"
+              style={
                 activeTab === "stock"
-                  ? "bg-gradient-to-r from-cyan-300 to-blue-700 text-white shadow-lg"
-                  : "glass-button text-gray-700"
-              }`}
-              style={{ fontSize: "var(--text-sm)" }}
+                  ? {
+                      background: "var(--color-tab-active-stock)",
+                      color: "var(--color-text-primary)",
+                      boxShadow: "var(--shadow-glow-cyan)",
+                      fontSize: "var(--text-sm)",
+                    }
+                  : {
+                      background: "var(--glass-bg-dark)",
+                      color: "var(--color-tab-inactive-text)",
+                      fontSize: "var(--text-sm)",
+                    }
+              }
             >
               <TrendingUp className="w-5 h-5" />
               STOCK
             </button>
             <button
               onClick={() => setActiveTab("gold")}
-              className={`flex-1 flex items-center justify-center gap-2 py-2 px-2 rounded-xl font-bold transition-all ${
+              className="flex-1 flex items-center justify-center gap-2 py-2 px-2 rounded-xl font-bold transition-all"
+              style={
                 activeTab === "gold"
-                  ? "bg-gradient-to-r from-yellow-400 to-orange-500 text-white shadow-lg"
-                  : "glass-button text-gray-700"
-              }`}
-              style={{ fontSize: "var(--text-sm)" }}
+                  ? {
+                      background: "var(--color-tab-active-gold)",
+                      color: "var(--color-text-primary)",
+                      boxShadow: "0 0 15px rgba(251, 191, 36, 0.5)",
+                      fontSize: "var(--text-sm)",
+                    }
+                  : {
+                      background: "var(--glass-bg-dark)",
+                      color: "var(--color-tab-inactive-text)",
+                      fontSize: "var(--text-sm)",
+                    }
+              }
             >
               <Coins className="w-5 h-5" />
               GOLD
@@ -301,11 +319,19 @@ export const FinancialDataPage: React.FC = () => {
 
           {/* Error Display */}
           {currentError && (
-            <div className="mb-6 p-4 bg-red-100 border border-red-300 rounded-xl">
+            <div
+              className="mb-6 p-4 rounded-xl"
+              style={{
+                backgroundColor: "var(--color-alert-error-bg)",
+                borderWidth: "1px",
+                borderStyle: "solid",
+                borderColor: "var(--color-alert-error-border)",
+              }}
+            >
               <p
                 style={{
                   fontWeight: "var(--font-bold)",
-                  color: "#dc2626",
+                  color: "var(--color-alert-error-text)",
                   fontSize: "var(--text-sm)",
                 }}
               >
@@ -313,7 +339,7 @@ export const FinancialDataPage: React.FC = () => {
               </p>
               <p
                 style={{
-                  color: "#dc2626",
+                  color: "var(--color-alert-error-text)",
                   fontSize: "var(--text-xs)",
                   marginTop: "var(--space-1)",
                 }}
@@ -574,7 +600,7 @@ export const FinancialDataPage: React.FC = () => {
                 onClick={handleToggleGoldPremium}
                 className={`flex items-center gap-2 px-4 py-2 rounded-xl font-bold transition-all ${
                   showGoldPremium
-                    ? "bg-gradient-to-r from-yellow-400 to-orange-500 text-white shadow-lg"
+                    ? "bg-amber-400 text-white shadow-amber-500/50"
                     : "glass-button text-gray-700"
                 }`}
                 style={{ fontSize: "var(--text-sm)" }}
@@ -593,8 +619,8 @@ export const FinancialDataPage: React.FC = () => {
                       onClick={handleToggleFullChart}
                       className="btn-primary"
                       style={{
-                        background:
-                          "linear-gradient(90deg, #facc15 0%, #fb923c 100%)",
+                        background: "var(--color-amber-400)",
+                        boxShadow: "0 0 15px rgba(251, 191, 36, 0.5)",
                       }}
                     >
                       {showFullPremiumChart
@@ -632,11 +658,19 @@ export const FinancialDataPage: React.FC = () => {
 
                 {/* Error Display */}
                 {goldPremiumError && (
-                  <div className="p-4 bg-red-100 border border-red-300 rounded-xl">
+                  <div
+                    className="p-4 rounded-xl"
+                    style={{
+                      backgroundColor: "var(--color-alert-error-bg)",
+                      borderWidth: "1px",
+                      borderStyle: "solid",
+                      borderColor: "var(--color-alert-error-border)",
+                    }}
+                  >
                     <p
                       style={{
                         fontWeight: "var(--font-bold)",
-                        color: "#dc2626",
+                        color: "var(--color-alert-error-text)",
                         fontSize: "var(--text-sm)",
                       }}
                     >
@@ -644,7 +678,7 @@ export const FinancialDataPage: React.FC = () => {
                     </p>
                     <p
                       style={{
-                        color: "#dc2626",
+                        color: "var(--color-alert-error-text)",
                         fontSize: "var(--text-xs)",
                         marginTop: "var(--space-1)",
                       }}
@@ -666,12 +700,20 @@ export const FinancialDataPage: React.FC = () => {
 
                     {/* Metadata Display */}
                     {goldPremiumData.metadata && (
-                      <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-xl">
+                      <div
+                        className="mt-6 p-4 rounded-xl"
+                        style={{
+                          backgroundColor: "var(--color-alert-info-bg)",
+                          borderWidth: "1px",
+                          borderStyle: "solid",
+                          borderColor: "var(--color-alert-info-border)",
+                        }}
+                      >
                         <h4
                           style={{
                             fontSize: "var(--text-sm)",
                             fontWeight: "var(--font-bold)",
-                            color: "#1e293b",
+                            color: "var(--color-alert-info-text)",
                             marginBottom: "var(--space-2)",
                           }}
                         >
@@ -681,18 +723,22 @@ export const FinancialDataPage: React.FC = () => {
                           className="space-y-1"
                           style={{
                             fontSize: "var(--text-xs)",
-                            color: "#334155",
+                            color: "var(--color-alert-info-text)",
                             lineHeight: "1.6",
                           }}
                         >
                           <p>
-                            <strong style={{ color: "#1e293b" }}>
+                            <strong
+                              style={{ color: "var(--color-alert-info-text)" }}
+                            >
                               Formula:
                             </strong>{" "}
                             {String(goldPremiumData.metadata.formula || "N/A")}
                           </p>
                           <p>
-                            <strong style={{ color: "#1e293b" }}>
+                            <strong
+                              style={{ color: "var(--color-alert-info-text)" }}
+                            >
                               Conversion:
                             </strong>{" "}
                             {String(
@@ -700,11 +746,17 @@ export const FinancialDataPage: React.FC = () => {
                             )}
                           </p>
                           <p>
-                            <strong style={{ color: "#1e293b" }}>Note:</strong>{" "}
+                            <strong
+                              style={{ color: "var(--color-alert-info-text)" }}
+                            >
+                              Note:
+                            </strong>{" "}
                             {String(goldPremiumData.metadata.note || "N/A")}
                           </p>
                           <p>
-                            <strong style={{ color: "#1e293b" }}>
+                            <strong
+                              style={{ color: "var(--color-alert-info-text)" }}
+                            >
                               Sources:
                             </strong>{" "}
                             Gold:{" "}

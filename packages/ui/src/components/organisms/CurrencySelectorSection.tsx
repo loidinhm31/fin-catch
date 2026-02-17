@@ -34,7 +34,7 @@ export const CurrencySelectorSection: React.FC<
             onClick={() => onSelectCurrency(currency)}
             className={`px-3 py-2 rounded-lg font-bold transition-all ${
               selectedCurrency === currency
-                ? "bg-gradient-to-r from-cyan-400 to-blue-600 text-white shadow-md"
+                ? "bg-cyan-500 text-white shadow-[0_0_12px_rgba(6,182,212,0.5)]"
                 : "glass-button"
             }`}
             style={{ fontSize: "var(--text-xs)" }}

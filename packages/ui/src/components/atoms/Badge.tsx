@@ -10,17 +10,19 @@ const badgeVariants = cva(
         default:
           "bg-[var(--glass-bg-dark)] border border-[var(--glass-border-medium)] text-[var(--color-text-primary)] backdrop-blur-sm",
         primary:
-          "bg-violet-900/30 border border-violet-500/40 text-violet-400 shadow-[0_0_10px_rgba(139,92,246,0.2)]",
+          "bg-[rgba(6,182,212,0.2)] border border-[rgba(6,182,212,0.4)] text-[#06B6D4] shadow-[0_0_10px_rgba(6,182,212,0.3)]",
         secondary:
-          "bg-cyan-900/30 border border-cyan-500/40 text-cyan-400 shadow-[0_0_10px_rgba(34,211,238,0.2)]",
+          "bg-[rgba(168,85,247,0.2)] border border-[rgba(168,85,247,0.4)] text-[#A855F7] shadow-[0_0_10px_rgba(168,85,247,0.3)]",
         success:
-          "bg-green-900/30 border border-green-500/40 text-green-400 shadow-[0_0_10px_rgba(34,197,94,0.2)]",
+          "bg-[rgba(16,185,129,0.2)] border border-[rgba(16,185,129,0.4)] text-[#10B981] shadow-[0_0_10px_rgba(16,185,129,0.4)]",
         destructive:
-          "bg-red-900/30 border border-red-500/40 text-red-400 shadow-[0_0_10px_rgba(239,68,68,0.2)]",
+          "bg-[rgba(220,38,38,0.2)] border border-[rgba(220,38,38,0.4)] text-[#DC2626] shadow-[0_0_10px_rgba(220,38,38,0.4)]",
         warning:
-          "bg-amber-900/30 border border-amber-500/40 text-amber-400 shadow-[0_0_10px_rgba(245,158,11,0.2)]",
+          "bg-[rgba(250,204,21,0.2)] border border-[rgba(250,204,21,0.4)] text-[#FACC15] shadow-[0_0_10px_rgba(250,204,21,0.3)]",
         outline:
           "text-[var(--color-text-primary)] border border-[var(--glass-border-medium)] bg-transparent",
+        cyber:
+          "bg-transparent border border-[#06B6D4] text-[#06B6D4] font-mono uppercase tracking-wide",
       },
     },
     defaultVariants: {

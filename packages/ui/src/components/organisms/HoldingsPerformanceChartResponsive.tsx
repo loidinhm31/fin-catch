@@ -37,7 +37,10 @@ export const HoldingsPerformanceChartResponsive: React.FC<
 
   if (!data || !data.holdings || data.holdings.length === 0) {
     return (
-      <div className="flex items-center justify-center h-64 text-gray-500 dark:text-gray-400">
+      <div
+        className="flex items-center justify-center h-64"
+        style={{ color: "var(--color-text-secondary)" }}
+      >
         No holdings data available
       </div>
     );
@@ -135,12 +138,12 @@ export const HoldingsPerformanceChartResponsive: React.FC<
           >
             <CartesianGrid
               strokeDasharray="3 3"
-              stroke="rgba(123, 97, 255, 0.2)"
+              stroke="var(--chart-grid)"
               vertical={false}
             />
             <XAxis
               dataKey="time"
-              stroke="#a0aec0"
+              stroke="var(--chart-axis)"
               style={{
                 fontSize: `${activeDimensions.tickFontSize}px`,
                 fontWeight: "500",
@@ -148,11 +151,11 @@ export const HoldingsPerformanceChartResponsive: React.FC<
               angle={activeDimensions.angleXAxis}
               textAnchor="end"
               height={activeDimensions.marginBottom}
-              tick={{ fill: "#a0aec0" }}
+              tick={{ fill: "var(--chart-axis)" }}
               interval={xAxisInterval as any}
             />
             <YAxis
-              stroke="#a0aec0"
+              stroke="var(--chart-axis)"
               style={{
                 fontSize: `${activeDimensions.tickFontSize}px`,
                 fontWeight: "500",
@@ -164,7 +167,7 @@ export const HoldingsPerformanceChartResponsive: React.FC<
                       angle: -90,
                       position: "insideBottomLeft",
                       style: {
-                        fill: "#ffffff",
+                        fill: "var(--chart-label)",
                         fontWeight: "600",
                         fontSize: `${activeDimensions.labelFontSize}px`,
                       },
@@ -172,23 +175,22 @@ export const HoldingsPerformanceChartResponsive: React.FC<
                   : undefined
               }
               domain={["auto", "auto"]}
-              tick={{ fill: "#a0aec0" }}
+              tick={{ fill: "var(--chart-axis)" }}
               width={isMobile ? 50 : 60}
             />
             <Tooltip
               contentStyle={{
-                backgroundColor: "rgba(26, 31, 58, 0.95)",
-                border: "1px solid rgba(0, 212, 255, 0.3)",
+                backgroundColor: "var(--glass-bg-compact)",
+                border: "1px solid var(--color-sync-pending-border)",
                 borderRadius: "12px",
-                color: "#ffffff",
+                color: "var(--chart-label)",
                 fontWeight: "600",
                 fontSize: `${activeDimensions.fontSize}px`,
-                boxShadow:
-                  "0 8px 24px rgba(0, 0, 0, 0.3), 0 0 24px rgba(0, 212, 255, 0.2)",
+                boxShadow: "var(--shadow-glass-sm)",
                 backdropFilter: "blur(12px)",
               }}
               labelStyle={{
-                color: "#00d4ff",
+                color: "var(--chart-volume-start)",
                 marginBottom: "8px",
                 fontSize: `${activeDimensions.fontSize}px`,
               }}
@@ -208,7 +210,7 @@ export const HoldingsPerformanceChartResponsive: React.FC<
                 wrapperStyle={{
                   fontWeight: "600",
                   paddingTop: "16px",
-                  color: "#ffffff",
+                  color: "var(--chart-label)",
                   fontSize: `${activeDimensions.legendFontSize}px`,
                 }}
                 iconType="line"
@@ -228,7 +230,7 @@ export const HoldingsPerformanceChartResponsive: React.FC<
                 activeDot={{
                   r: isMobile ? 4 : 6,
                   fill: holding.color,
-                  stroke: "#ffffff",
+                  stroke: "var(--chart-label)",
                   strokeWidth: 2,
                 }}
                 connectNulls
@@ -238,8 +240,8 @@ export const HoldingsPerformanceChartResponsive: React.FC<
               <Brush
                 dataKey="time"
                 height={activeDimensions.brushHeight}
-                stroke="rgba(123, 97, 255, 0.6)"
-                fill="rgba(26, 31, 58, 0.6)"
+                stroke="var(--color-market-purple-border)"
+                fill="var(--glass-bg-card)"
                 travellerWidth={isMobile ? 15 : 10}
                 startIndex={brushIndex.startIndex}
                 endIndex={brushIndex.endIndex}

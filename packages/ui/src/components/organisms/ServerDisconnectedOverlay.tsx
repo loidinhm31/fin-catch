@@ -71,9 +71,9 @@ export const ServerDisconnectedOverlay: React.FC<
       <div
         className="relative max-w-md w-full mx-4 rounded-2xl overflow-hidden"
         style={{
-          background: "linear-gradient(135deg, #1a1f3a 0%, #0d1025 100%)",
-          border: "1px solid rgba(123, 97, 255, 0.3)",
-          boxShadow: "0 0 40px rgba(123, 97, 255, 0.2)",
+          background: "#1a1f3a",
+          border: "1px solid var(--color-violet-500)",
+          boxShadow: "var(--shadow-glow-violet)",
         }}
       >
         {/* Dismiss button */}
@@ -91,12 +91,13 @@ export const ServerDisconnectedOverlay: React.FC<
         <div
           className="p-8 text-white text-center"
           style={{
-            background: "linear-gradient(135deg, #ff6b35 0%, #ff3366 100%)",
+            background: "#DC2626",
+            boxShadow: "var(--shadow-glow-red)",
           }}
         >
           <div
             className="w-20 h-20 mx-auto mb-4 rounded-full flex items-center justify-center"
-            style={{ background: "rgba(255, 255, 255, 0.2)" }}
+            style={{ background: "var(--color-white-10)" }}
           >
             <WifiOff className="w-10 h-10" />
           </div>
@@ -111,7 +112,7 @@ export const ServerDisconnectedOverlay: React.FC<
           {/* Auto-close countdown */}
           <div
             className="rounded-lg p-4 text-center"
-            style={{ background: "rgba(0, 0, 0, 0.3)" }}
+            style={{ background: "var(--color-black-30)" }}
           >
             <p className="text-gray-300">
               {closeAttempted ? (
@@ -123,7 +124,7 @@ export const ServerDisconnectedOverlay: React.FC<
                   This page will close in{" "}
                   <span
                     className="font-bold text-2xl mx-1"
-                    style={{ color: "#ff3366" }}
+                    style={{ color: "var(--color-trade-sell)" }}
                   >
                     {countdown}
                   </span>{" "}
@@ -145,7 +146,8 @@ export const ServerDisconnectedOverlay: React.FC<
               onClick={handleClosePage}
               className="w-full flex items-center justify-center gap-2 px-4 py-3 font-medium rounded-xl transition-colors"
               style={{
-                background: "linear-gradient(135deg, #ff3366 0%, #ff6b35 100%)",
+                background: "#DC2626",
+                boxShadow: "var(--shadow-glow-red)",
                 color: "white",
               }}
             >
@@ -157,7 +159,8 @@ export const ServerDisconnectedOverlay: React.FC<
               onClick={handleRefresh}
               className="w-full flex items-center justify-center gap-2 px-4 py-3 font-medium rounded-xl transition-colors"
               style={{
-                background: "linear-gradient(135deg, #00d4ff 0%, #7b61ff 100%)",
+                background: "#3B82F6",
+                boxShadow: "var(--shadow-glow-violet)",
                 color: "white",
               }}
             >
@@ -170,8 +173,8 @@ export const ServerDisconnectedOverlay: React.FC<
                 onClick={onDismiss}
                 className="w-full px-4 py-3 font-medium rounded-xl transition-colors"
                 style={{
-                  background: "rgba(255, 255, 255, 0.1)",
-                  color: "#a0aec0",
+                  background: "var(--color-white-10)",
+                  color: "var(--chart-axis)",
                 }}
               >
                 Continue in Offline Mode

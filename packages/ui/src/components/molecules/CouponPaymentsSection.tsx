@@ -91,7 +91,9 @@ export const CouponPaymentsSection: React.FC<CouponPaymentsSectionProps> = ({
   if (error) {
     return (
       <div style={{ marginTop: "var(--space-3)" }}>
-        <p style={{ fontSize: "var(--text-sm)", color: "#ef4444" }}>
+        <p
+          style={{ fontSize: "var(--text-sm)", color: "var(--color-red-500)" }}
+        >
           Error loading coupon payments: {error}
         </p>
       </div>
@@ -104,7 +106,7 @@ export const CouponPaymentsSection: React.FC<CouponPaymentsSectionProps> = ({
         style={{
           marginTop: "var(--space-4)",
           paddingTop: "var(--space-4)",
-          borderTop: "1px solid rgba(0, 0, 0, 0.1)",
+          borderTop: "1px solid var(--color-black-10)",
         }}
       >
         <div
@@ -134,7 +136,8 @@ export const CouponPaymentsSection: React.FC<CouponPaymentsSectionProps> = ({
               fontSize: "var(--text-xs)",
               fontWeight: "var(--font-medium)",
               color: "#ffffff",
-              background: "linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)",
+              background: "var(--color-violet-500)",
+              boxShadow: "var(--shadow-glow-violet)",
               border: "none",
               borderRadius: "var(--radius-md)",
               cursor: "pointer",
@@ -142,8 +145,7 @@ export const CouponPaymentsSection: React.FC<CouponPaymentsSectionProps> = ({
             }}
             onMouseEnter={(e) => {
               e.currentTarget.style.transform = "translateY(-1px)";
-              e.currentTarget.style.boxShadow =
-                "0 4px 12px rgba(59, 130, 246, 0.3)";
+              e.currentTarget.style.boxShadow = "var(--shadow-md)";
             }}
             onMouseLeave={(e) => {
               e.currentTarget.style.transform = "translateY(0)";
@@ -190,9 +192,9 @@ export const CouponPaymentsSection: React.FC<CouponPaymentsSectionProps> = ({
                   justifyContent: "space-between",
                   alignItems: "center",
                   padding: "var(--space-2)",
-                  backgroundColor: "#f9fafb",
+                  backgroundColor: "var(--color-bg-secondary)",
                   borderRadius: "var(--radius-sm)",
-                  border: "1px solid #e5e7eb",
+                  border: "1px solid var(--color-border-primary)",
                 }}
               >
                 <div style={{ flex: 1 }}>
@@ -216,7 +218,7 @@ export const CouponPaymentsSection: React.FC<CouponPaymentsSectionProps> = ({
                       style={{
                         fontSize: "var(--text-sm)",
                         fontWeight: "var(--font-semibold)",
-                        color: "#10b981",
+                        color: "var(--color-green-500)",
                       }}
                     >
                       {formatCurrency(payment.amount, payment.currency)}
@@ -240,14 +242,20 @@ export const CouponPaymentsSection: React.FC<CouponPaymentsSectionProps> = ({
                     className="w-7 h-7 rounded-full bg-blue-100 flex items-center justify-center hover:bg-blue-200 transition-all"
                     style={{ border: "none", cursor: "pointer" }}
                   >
-                    <Edit className="w-3 h-3" style={{ color: "#2563eb" }} />
+                    <Edit
+                      className="w-3 h-3"
+                      style={{ color: "var(--color-action-edit-icon)" }}
+                    />
                   </button>
                   <button
                     onClick={() => handleDeletePayment(payment.id!)}
                     className="w-7 h-7 rounded-full bg-red-100 flex items-center justify-center hover:bg-red-200 transition-all"
                     style={{ border: "none", cursor: "pointer" }}
                   >
-                    <Trash2 className="w-3 h-3" style={{ color: "#dc2626" }} />
+                    <Trash2
+                      className="w-3 h-3"
+                      style={{ color: "var(--color-action-delete-icon)" }}
+                    />
                   </button>
                 </div>
               </div>
@@ -260,7 +268,7 @@ export const CouponPaymentsSection: React.FC<CouponPaymentsSectionProps> = ({
             style={{
               marginTop: "var(--space-3)",
               paddingTop: "var(--space-3)",
-              borderTop: "1px solid #e5e7eb",
+              borderTop: "1px solid var(--color-border-primary)",
               display: "flex",
               justifyContent: "space-between",
               alignItems: "center",
@@ -279,7 +287,7 @@ export const CouponPaymentsSection: React.FC<CouponPaymentsSectionProps> = ({
               style={{
                 fontSize: "var(--text-base)",
                 fontWeight: "var(--font-bold)",
-                color: "#10b981",
+                color: "var(--color-green-500)",
               }}
             >
               {formatCurrency(totalInDisplayCurrency, displayCurrency)}

@@ -111,10 +111,9 @@ export function AppShell({
   if (isAuthLoading && !skipAuth) {
     return (
       <div
-        className="min-h-screen flex items-center justify-center"
+        className="min-h-screen flex items-center justify-center cyber-grid-pattern"
         style={{
-          background:
-            "linear-gradient(135deg, #0F172A 0%, #0A0E27 50%, #1E1B4B 100%)",
+          background: "var(--color-bg-primary)",
         }}
       >
         <LoadingSpinner />
@@ -136,10 +135,9 @@ export function AppShell({
 
   return (
     <div
-      className="min-h-screen"
+      className="min-h-screen cyber-grid-pattern"
       style={{
-        background:
-          "linear-gradient(135deg, #0F172A 0%, #0A0E27 50%, #1E1B4B 100%)",
+        background: "var(--color-bg-primary)",
       }}
     >
       {/* Desktop Sidebar - Hidden on mobile */}
@@ -158,11 +156,11 @@ export function AppShell({
         <div
           className="fixed top-0 left-0 right-0 z-40 flex justify-end px-4 py-3 md:hidden"
           style={{
-            background: "rgba(15, 23, 42, 0.85)",
+            background: "var(--glass-bg-dark-strong)",
             backdropFilter: "blur(16px)",
             WebkitBackdropFilter: "blur(16px)",
-            borderBottom: "1px solid rgba(255, 255, 255, 0.1)",
-            boxShadow: "0 4px 20px rgba(0, 0, 0, 0.4)",
+            borderBottom: "1px solid var(--glass-border-light)",
+            boxShadow: "var(--shadow-md)",
           }}
         >
           <SyncStatusIndicator onTap={() => handleNavigate("settings")} />

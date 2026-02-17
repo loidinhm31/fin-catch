@@ -83,7 +83,10 @@ export const SymbolSearch: React.FC<SymbolSearchProps> = ({
       {/* Search Input */}
       <div className="relative">
         <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-          <Search className="h-4 w-4" style={{ color: "#00d4ff" }} />
+          <Search
+            className="h-4 w-4"
+            style={{ color: "var(--color-market-live)" }}
+          />
         </div>
         <input
           type="text"
@@ -95,16 +98,17 @@ export const SymbolSearch: React.FC<SymbolSearchProps> = ({
           className="w-full pl-10 pr-4 py-2.5 rounded-lg text-sm transition-all duration-200
                    focus:outline-none focus:ring-2 disabled:opacity-50 disabled:cursor-not-allowed"
           style={{
-            background: "rgba(10, 14, 39, 0.5)",
-            border: "1px solid rgba(0, 212, 255, 0.3)",
+            background: "var(--glass-bg-ticker)",
+            border: "1px solid var(--color-sync-pending-border)",
             color: "white",
           }}
           onFocus={(e) => {
-            e.target.style.borderColor = "#00d4ff";
-            e.target.style.boxShadow = "0 0 0 2px rgba(0, 212, 255, 0.2)";
+            e.target.style.borderColor = "var(--color-market-live)";
+            e.target.style.boxShadow =
+              "0 0 0 2px var(--color-sync-pending-border)";
           }}
           onBlur={(e) => {
-            e.target.style.borderColor = "rgba(0, 212, 255, 0.3)";
+            e.target.style.borderColor = "var(--color-sync-pending-border)";
             e.target.style.boxShadow = "none";
           }}
         />
@@ -115,7 +119,7 @@ export const SymbolSearch: React.FC<SymbolSearchProps> = ({
             disabled={disabled}
             className="absolute inset-y-0 right-0 pr-3 flex items-center transition-colors
                      hover:text-white disabled:opacity-50"
-            style={{ color: "#00d4ff" }}
+            style={{ color: "var(--color-market-live)" }}
           >
             <span className="text-xs font-medium">GO</span>
           </button>
@@ -133,17 +137,19 @@ export const SymbolSearch: React.FC<SymbolSearchProps> = ({
             className="px-3 py-1.5 rounded text-xs font-medium transition-all duration-200
                      hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
             style={{
-              background: "rgba(15, 22, 41, 0.8)",
-              border: "1px solid rgba(0, 212, 255, 0.2)",
-              color: "#00d4ff",
+              background: "var(--glass-bg-card)",
+              border: "1px solid var(--color-sync-pending-border)",
+              color: "var(--color-market-live)",
             }}
             onMouseEnter={(e) => {
-              e.currentTarget.style.background = "rgba(0, 212, 255, 0.15)";
-              e.currentTarget.style.borderColor = "rgba(0, 212, 255, 0.4)";
+              e.currentTarget.style.background = "var(--color-sync-pending-bg)";
+              e.currentTarget.style.borderColor =
+                "var(--color-sync-pending-border)";
             }}
             onMouseLeave={(e) => {
-              e.currentTarget.style.background = "rgba(15, 22, 41, 0.8)";
-              e.currentTarget.style.borderColor = "rgba(0, 212, 255, 0.2)";
+              e.currentTarget.style.background = "var(--glass-bg-card)";
+              e.currentTarget.style.borderColor =
+                "var(--color-sync-pending-border)";
             }}
           >
             {symbol}

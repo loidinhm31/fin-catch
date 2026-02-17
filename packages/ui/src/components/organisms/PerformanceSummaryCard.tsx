@@ -25,7 +25,7 @@ export const PerformanceSummaryCard: React.FC<PerformanceSummaryCardProps> = ({
       >
         Performance
       </h2>
-      <div className="glass-card p-6 bg-gradient-to-br from-pink-100 to-purple-100">
+      <div className="glass-card p-6 bg-purple-500/10">
         <div className="flex items-center justify-between mb-4">
           <div>
             <p
@@ -50,14 +50,20 @@ export const PerformanceSummaryCard: React.FC<PerformanceSummaryCardProps> = ({
             </h2>
           </div>
           {performance.totalGainLoss >= 0 ? (
-            <TrendingUp className="w-12 h-12" style={{ color: "#10b981" }} />
+            <TrendingUp
+              className="w-12 h-12"
+              style={{ color: "var(--color-green-500)" }}
+            />
           ) : (
-            <TrendingDown className="w-12 h-12" style={{ color: "#ef4444" }} />
+            <TrendingDown
+              className="w-12 h-12"
+              style={{ color: "var(--color-red-500)" }}
+            />
           )}
         </div>
         <div
           className="grid grid-cols-2 gap-4 pt-4 border-t"
-          style={{ borderColor: "rgba(0, 0, 0, 0.1)" }}
+          style={{ borderColor: "var(--color-black-10)" }}
         >
           <div>
             <p
@@ -74,7 +80,10 @@ export const PerformanceSummaryCard: React.FC<PerformanceSummaryCardProps> = ({
               style={{
                 fontSize: "var(--text-lg)",
                 fontWeight: "var(--font-bold)",
-                color: performance.totalGainLoss >= 0 ? "#10b981" : "#ef4444",
+                color:
+                  performance.totalGainLoss >= 0
+                    ? "var(--color-green-500)"
+                    : "var(--color-red-500)",
               }}
             >
               {formatCurrency(performance.totalGainLoss)}
@@ -97,8 +106,8 @@ export const PerformanceSummaryCard: React.FC<PerformanceSummaryCardProps> = ({
                 fontWeight: "var(--font-bold)",
                 color:
                   performance.totalGainLossPercentage >= 0
-                    ? "#10b981"
-                    : "#ef4444",
+                    ? "var(--color-green-500)"
+                    : "var(--color-red-500)",
               }}
             >
               {formatPercentage(performance.totalGainLossPercentage)}

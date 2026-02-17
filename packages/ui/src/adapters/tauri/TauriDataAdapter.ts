@@ -2,7 +2,7 @@
  * Tauri Data Adapter
  *
  * Uses native IPC to call fin-catch-data commands in the Tauri backend.
- * This is faster than HTTP calls to qm-center-server for market data.
+ * This is faster than HTTP calls to qm-hub-server for market data.
  */
 
 import { invoke } from "@tauri-apps/api/core";

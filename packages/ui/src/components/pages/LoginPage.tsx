@@ -85,10 +85,9 @@ export const LoginPage: React.FC<LoginPageProps> = ({
 
   return (
     <div
-      className="min-h-screen flex items-center justify-center px-4 py-8"
+      className="min-h-screen flex items-center justify-center px-4 py-8 cyber-grid-pattern"
       style={{
-        background:
-          "linear-gradient(135deg, #0F172A 0%, #0A0E27 50%, #1E1B4B 100%)",
+        background: "var(--color-bg-primary)",
       }}
     >
       <div className="w-full max-w-md">
@@ -97,19 +96,20 @@ export const LoginPage: React.FC<LoginPageProps> = ({
           <div
             className="inline-flex items-center justify-center w-16 h-16 rounded-2xl mb-4"
             style={{
-              background: "linear-gradient(135deg, #7b61ff 0%, #00d4ff 100%)",
-              boxShadow: "0 0 30px rgba(123, 97, 255, 0.5)",
+              background: "var(--color-violet-500)",
+              boxShadow: "var(--shadow-glow-violet)",
             }}
           >
-            <ShieldCheck className="w-8 h-8 text-white" />
+            <ShieldCheck
+              className="w-8 h-8"
+              style={{ color: "var(--color-text-primary)" }}
+            />
           </div>
           <h1
             className="text-3xl font-extrabold mb-2"
             style={{
-              background: "linear-gradient(135deg, #00d4ff 0%, #7b61ff 100%)",
-              WebkitBackgroundClip: "text",
-              WebkitTextFillColor: "transparent",
-              backgroundClip: "text",
+              color: "var(--color-violet-500)",
+              textShadow: "var(--shadow-glow-violet)",
             }}
           >
             Fin Catch
@@ -123,16 +123,16 @@ export const LoginPage: React.FC<LoginPageProps> = ({
         <div
           className="rounded-2xl p-6 border"
           style={{
-            background: "rgba(26, 31, 58, 0.6)",
+            background: "var(--glass-bg-dark)",
             backdropFilter: "blur(16px)",
-            borderColor: "rgba(123, 97, 255, 0.2)",
-            boxShadow: "0 8px 32px rgba(0, 0, 0, 0.3)",
+            borderColor: "var(--glass-border-medium)",
+            boxShadow: "var(--shadow-glass-sm)",
           }}
         >
           {/* Mode Toggle */}
           <div
             className="flex gap-2 mb-6 p-1 rounded-lg"
-            style={{ background: "rgba(15, 23, 42, 0.5)" }}
+            style={{ background: "var(--glass-bg-darker)" }}
           >
             <button
               type="button"
@@ -143,14 +143,13 @@ export const LoginPage: React.FC<LoginPageProps> = ({
               className="flex-1 py-2 px-4 rounded-md text-sm font-semibold transition-all"
               style={{
                 background:
+                  mode === "login" ? "var(--color-violet-500)" : "transparent",
+                color:
                   mode === "login"
-                    ? "linear-gradient(135deg, #7b61ff 0%, #5a3fff 100%)"
-                    : "transparent",
-                color: mode === "login" ? "#ffffff" : "#a0aec0",
+                    ? "var(--color-text-primary)"
+                    : "var(--chart-axis)",
                 boxShadow:
-                  mode === "login"
-                    ? "0 4px 12px rgba(123, 97, 255, 0.4)"
-                    : "none",
+                  mode === "login" ? "var(--shadow-glow-violet)" : "none",
               }}
             >
               Login
@@ -165,13 +164,14 @@ export const LoginPage: React.FC<LoginPageProps> = ({
               style={{
                 background:
                   mode === "register"
-                    ? "linear-gradient(135deg, #7b61ff 0%, #5a3fff 100%)"
+                    ? "var(--color-violet-500)"
                     : "transparent",
-                color: mode === "register" ? "#ffffff" : "#a0aec0",
-                boxShadow:
+                color:
                   mode === "register"
-                    ? "0 4px 12px rgba(123, 97, 255, 0.4)"
-                    : "none",
+                    ? "var(--color-text-primary)"
+                    : "var(--chart-axis)",
+                boxShadow:
+                  mode === "register" ? "var(--shadow-glow-violet)" : "none",
               }}
             >
               Register
@@ -183,9 +183,9 @@ export const LoginPage: React.FC<LoginPageProps> = ({
             <div
               className="mb-4 p-3 rounded-lg text-sm border"
               style={{
-                background: "rgba(255, 51, 102, 0.1)",
-                borderColor: "rgba(255, 51, 102, 0.3)",
-                color: "#ff3366",
+                background: "var(--color-trade-sell-bg)",
+                borderColor: "var(--color-trade-sell-border)",
+                color: "var(--color-trade-sell)",
               }}
             >
               {error}
@@ -205,7 +205,10 @@ export const LoginPage: React.FC<LoginPageProps> = ({
                   }}
                 >
                   <div className="flex items-center gap-2">
-                    <Mail className="w-4 h-4" style={{ color: "#00d4ff" }} />
+                    <Mail
+                      className="w-4 h-4"
+                      style={{ color: "var(--color-market-live)" }}
+                    />
                     Email
                   </div>
                 </Label>
@@ -230,7 +233,10 @@ export const LoginPage: React.FC<LoginPageProps> = ({
                   }}
                 >
                   <div className="flex items-center gap-2">
-                    <Lock className="w-4 h-4" style={{ color: "#00d4ff" }} />
+                    <Lock
+                      className="w-4 h-4"
+                      style={{ color: "var(--color-market-live)" }}
+                    />
                     Password
                   </div>
                 </Label>
@@ -271,7 +277,10 @@ export const LoginPage: React.FC<LoginPageProps> = ({
                   }}
                 >
                   <div className="flex items-center gap-2">
-                    <User className="w-4 h-4" style={{ color: "#00d4ff" }} />
+                    <User
+                      className="w-4 h-4"
+                      style={{ color: "var(--color-market-live)" }}
+                    />
                     Username
                   </div>
                 </Label>
@@ -296,7 +305,10 @@ export const LoginPage: React.FC<LoginPageProps> = ({
                   }}
                 >
                   <div className="flex items-center gap-2">
-                    <Mail className="w-4 h-4" style={{ color: "#00d4ff" }} />
+                    <Mail
+                      className="w-4 h-4"
+                      style={{ color: "var(--color-market-live)" }}
+                    />
                     Email
                   </div>
                 </Label>
@@ -321,7 +333,10 @@ export const LoginPage: React.FC<LoginPageProps> = ({
                   }}
                 >
                   <div className="flex items-center gap-2">
-                    <Lock className="w-4 h-4" style={{ color: "#00d4ff" }} />
+                    <Lock
+                      className="w-4 h-4"
+                      style={{ color: "var(--color-market-live)" }}
+                    />
                     Password
                   </div>
                 </Label>
@@ -355,7 +370,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({
                   <div className="flex items-center gap-2">
                     <KeyRound
                       className="w-4 h-4"
-                      style={{ color: "#00d4ff" }}
+                      style={{ color: "var(--color-market-live)" }}
                     />
                     Confirm Password
                   </div>

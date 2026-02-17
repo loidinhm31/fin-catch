@@ -74,16 +74,6 @@ function formatVolume(volume: number | undefined): string {
 }
 
 /**
- * Get color based on change direction
- */
-function getChangeColor(change: number | undefined): string {
-  if (change === undefined || change === null || change === 0) {
-    return "#fbbf24"; // amber/yellow for no change
-  }
-  return change > 0 ? "#22c55e" : "#ef4444"; // green / red
-}
-
-/**
  * TradingCard component
  *
  * Enhanced trading card with detailed info and mini OHLC chart.
@@ -127,7 +117,10 @@ export const TradingCard: React.FC<TradingCardProps> = ({
   const changePercent = stockInfo?.changePercent;
   const lastPrice = stockInfo?.lastPrice;
   const volume = stockInfo?.volume;
-  const color = getChangeColor(change);
+
+  const isPositive = change > 0;
+  const isNegative = change < 0;
+  const isNeutral = change === 0;
 
   const TrendIcon = change > 0 ? TrendingUp : change < 0 ? TrendingDown : Minus;
 
@@ -140,131 +133,80 @@ export const TradingCard: React.FC<TradingCardProps> = ({
   return (
     <div
       className={`
-        relative rounded-xl cursor-pointer transition-all duration-200
-        ${isDragging ? "scale-105 shadow-2xl z-50" : "hover:scale-[1.02]"}
-        ${isSelected ? "ring-2 ring-cyan-400" : ""}
+        relative rounded-xl cursor-pointer transition-all duration-200 p-3 flex flex-col gap-2
+        w-[280px] min-h-[180px] backdrop-blur-md border
+        ${
+          isDragging
+            ? "scale-105 shadow-[--shadow-xl] z-50 rotate-[2deg] bg-[--color-sync-pending-bg] border-[--color-sync-pending-border]"
+            : isSelected
+              ? "bg-[--color-sync-pending-bg] border-[--color-sync-pending-border] ring-2 ring-[--color-market-live]"
+              : "bg-[--glass-bg-card] border-[--color-border-primary] shadow-[0_4px_12px_var(--color-black-20)] hover:scale-[1.02]"
+        }
         ${className ?? ""}
       `}
-      style={{
-        width: "280px",
-        minHeight: "180px",
-        background: isDragging
-          ? "rgba(0, 212, 255, 0.15)"
-          : isSelected
-            ? "rgba(0, 212, 255, 0.1)"
-            : "rgba(15, 23, 42, 0.7)",
-        border: isDragging
-          ? "1px solid rgba(0, 212, 255, 0.6)"
-          : isSelected
-            ? "1px solid rgba(0, 212, 255, 0.5)"
-            : "1px solid rgba(100, 116, 139, 0.2)",
-        backdropFilter: "blur(8px)",
-        boxShadow: isDragging
-          ? "0 20px 40px rgba(0, 0, 0, 0.4)"
-          : "0 4px 12px rgba(0, 0, 0, 0.2)",
-        transform: isDragging ? "rotate(2deg)" : undefined,
-        padding: "12px",
-        display: "flex",
-        flexDirection: "column",
-        gap: "8px",
-      }}
       onClick={onClick}
     >
       {/* Header: Drag Handle, Symbol, Trend Icon */}
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-        }}
-      >
-        <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
           {showDragHandle && (
             <GripVertical
-              className="w-4 h-4 cursor-grab active:cursor-grabbing"
-              style={{
-                color: "var(--color-text-secondary, #64748b)",
-                opacity: isDragging ? 1 : 0.5,
-              }}
+              className={`w-4 h-4 cursor-grab active:cursor-grabbing text-[--color-text-secondary] ${
+                isDragging ? "opacity-100" : "opacity-50"
+              }`}
             />
           )}
-          <span
-            style={{
-              fontWeight: 700,
-              fontSize: "14px",
-              color: "var(--color-text-primary, #f8fafc)",
-            }}
-          >
+          <span className="font-bold text-sm text-[--color-text-primary]">
             {symbol}
           </span>
         </div>
-        <TrendIcon className="w-4 h-4" style={{ color }} />
+        <TrendIcon
+          className={`w-4 h-4 ${
+            isPositive
+              ? "text-[--color-trade-buy]"
+              : isNegative
+                ? "text-[--color-trade-sell]"
+                : "text-[--color-amber-400]"
+          }`}
+        />
       </div>
 
       {/* Price Row */}
-      <div
-        style={{
-          display: "flex",
-          alignItems: "baseline",
-          gap: "8px",
-          flexWrap: "wrap",
-        }}
-      >
+      <div className="flex items-baseline gap-2 flex-wrap">
         <span
-          style={{
-            fontSize: "18px",
-            fontWeight: 700,
-            color,
-          }}
+          className={`text-lg font-bold ${
+            isPositive
+              ? "text-[--color-trade-buy]"
+              : isNegative
+                ? "text-[--color-trade-sell]"
+                : "text-[--color-amber-400]"
+          }`}
         >
           {formatPrice(lastPrice)}
         </span>
         <span
-          style={{
-            fontSize: "11px",
-            padding: "2px 6px",
-            borderRadius: "4px",
-            background:
-              change > 0
-                ? "rgba(34, 197, 94, 0.2)"
-                : change < 0
-                  ? "rgba(239, 68, 68, 0.2)"
-                  : "rgba(251, 191, 36, 0.2)",
-            color,
-          }}
+          className={`text-[11px] px-1.5 py-0.5 rounded ${
+            isPositive
+              ? "bg-[--color-alert-success-bg] text-[--color-trade-buy]"
+              : isNegative
+                ? "bg-[--color-alert-error-bg] text-[--color-trade-sell]"
+                : "bg-[--color-alert-warning-bg] text-[--color-amber-400]"
+          }`}
         >
           {formatPercent(changePercent)}
         </span>
-        <span
-          style={{
-            fontSize: "10px",
-            color: "var(--color-text-secondary, #94a3b8)",
-          }}
-        >
+        <span className="text-[10px] text-[--color-text-secondary]">
           Vol: {formatVolume(volume)}
         </span>
       </div>
 
       {/* Mini Stock Chart - 1 Year from DNSE */}
-      <div
-        style={{
-          flex: 1,
-          minHeight: "60px",
-          borderRadius: "6px",
-          background: "rgba(0, 0, 0, 0.2)",
-          padding: "4px",
-        }}
-      >
+      <div className="flex-1 min-h-[60px] rounded-md bg-[--color-black-20] p-1">
         <MiniStockChart symbol={symbol} height={60} width="100%" />
       </div>
 
       {/* Bid/Ask Spread */}
-      <div
-        style={{
-          paddingTop: "8px",
-          borderTop: "1px solid rgba(100, 116, 139, 0.2)",
-        }}
-      >
+      <div className="pt-2 border-t border-[--color-border-primary]">
         <BidAskSpread
           bidPrice={bidPrice}
           bidVolume={bidVolume}
@@ -276,29 +218,22 @@ export const TradingCard: React.FC<TradingCardProps> = ({
 
       {/* Reference/Ceiling/Floor indicator */}
       {stockInfo && (stockInfo.ceiling || stockInfo.floor) && (
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            fontSize: "9px",
-            color: "var(--color-text-secondary, #64748b)",
-          }}
-        >
+        <div className="flex justify-between text-[9px] text-[--color-text-secondary]">
           <span>
             F:{" "}
-            <span style={{ color: "#06b6d4" }}>
+            <span className="text-[--chart-floor]">
               {formatPrice(stockInfo.floor)}
             </span>
           </span>
           <span>
             R:{" "}
-            <span style={{ color: "#fbbf24" }}>
+            <span className="text-[--chart-reference]">
               {formatPrice(stockInfo.refPrice)}
             </span>
           </span>
           <span>
             C:{" "}
-            <span style={{ color: "#a855f7" }}>
+            <span className="text-[--chart-ceiling]">
               {formatPrice(stockInfo.ceiling)}
             </span>
           </span>
@@ -307,14 +242,7 @@ export const TradingCard: React.FC<TradingCardProps> = ({
 
       {/* MarketDepth - Order Book (compact) */}
       {showMarketDepth && platform && (
-        <div
-          style={{
-            marginTop: "5px",
-            borderTop: "1px solid rgba(100, 116, 139, 0.2)",
-            paddingTop: "2px",
-            fontSize: "10px",
-          }}
-        >
+        <div className="mt-1.5 border-t border-[--color-border-primary] pt-0.5 text-[10px]">
           <MarketDepth
             symbol={symbol}
             platform={platform}
@@ -326,14 +254,7 @@ export const TradingCard: React.FC<TradingCardProps> = ({
 
       {/* TickTape - Trade History (compact) */}
       {showTickTape && platform && (
-        <div
-          style={{
-            marginTop: "5px",
-            borderTop: "1px solid rgba(100, 116, 139, 0.2)",
-            paddingTop: "2px",
-            fontSize: "10px",
-          }}
-        >
+        <div className="mt-1.5 border-t border-[--color-border-primary] pt-0.5 text-[10px]">
           <TickTape symbol={symbol} platform={platform} maxTicks={5} />
         </div>
       )}

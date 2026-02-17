@@ -115,10 +115,10 @@ export const OhlcDisplay: React.FC<OhlcDisplayProps> = ({
   }
 
   const isBullish = candlestick?.isBullish ?? true;
-  const color = isBullish ? "#22c55e" : "#ef4444"; // green / red
+  const color = isBullish ? "#22c55e" : "var(--color-red-500)"; // green / red
   const bgColor = isBullish
-    ? "rgba(34, 197, 94, 0.2)"
-    : "rgba(239, 68, 68, 0.2)";
+    ? "var(--color-alert-success-bg)"
+    : "var(--color-alert-error-bg)";
 
   return (
     <div
@@ -165,14 +165,14 @@ export const OhlcDisplay: React.FC<OhlcDisplayProps> = ({
           style={{
             height: 8,
             width: width * 0.8,
-            backgroundColor: "rgba(100, 116, 139, 0.3)",
+            backgroundColor: "var(--color-border-primary)",
           }}
         >
           <div
             className="h-full rounded-sm"
             style={{
               width: `${volumeHeight * 3}%`,
-              backgroundColor: "rgba(100, 116, 139, 0.6)",
+              backgroundColor: "var(--color-border-primary)",
             }}
           />
         </div>
@@ -194,8 +194,8 @@ export const OhlcDisplay: React.FC<OhlcDisplayProps> = ({
             left: "50%",
             transform: "translateX(-50%)",
             marginBottom: 8,
-            background: "rgba(15, 23, 42, 0.95)",
-            border: "1px solid rgba(100, 116, 139, 0.3)",
+            background: "var(--glass-bg-compact)",
+            border: "1px solid var(--color-border-primary)",
           }}
         >
           {/* Symbol & Interval */}
@@ -239,7 +239,7 @@ export const OhlcDisplay: React.FC<OhlcDisplayProps> = ({
               height: 0,
               borderLeft: "6px solid transparent",
               borderRight: "6px solid transparent",
-              borderTop: "6px solid rgba(15, 23, 42, 0.95)",
+              borderTop: "6px solid var(--glass-bg-compact)",
             }}
           />
         </div>

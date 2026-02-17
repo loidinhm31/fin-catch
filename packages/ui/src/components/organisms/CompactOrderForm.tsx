@@ -242,7 +242,7 @@ export const CompactOrderForm: React.FC<CompactOrderFormProps> = ({
     <div
       style={{
         width: "320px",
-        background: "rgba(26, 31, 58, 0.95)",
+        background: "var(--glass-bg-compact)",
         backdropFilter: "blur(16px)",
         borderRadius: "12px",
         padding: "16px",
@@ -256,7 +256,7 @@ export const CompactOrderForm: React.FC<CompactOrderFormProps> = ({
           alignItems: "center",
           marginBottom: "12px",
           paddingBottom: "8px",
-          borderBottom: "1px solid rgba(100, 116, 139, 0.2)",
+          borderBottom: "1px solid var(--color-border-primary)",
         }}
       >
         <div>
@@ -274,7 +274,7 @@ export const CompactOrderForm: React.FC<CompactOrderFormProps> = ({
               style={{
                 marginLeft: "8px",
                 fontSize: "12px",
-                color: "#00d4ff",
+                color: "var(--color-market-live)",
               }}
             >
               @ {formatCurrency(frozenPrice)}
@@ -322,13 +322,16 @@ export const CompactOrderForm: React.FC<CompactOrderFormProps> = ({
               transition: "all 0.2s",
               background:
                 side === "NB"
-                  ? "rgba(0, 255, 136, 0.2)"
-                  : "rgba(15, 23, 42, 0.5)",
+                  ? "var(--color-trade-buy-bg)"
+                  : "var(--glass-bg-input)",
               border:
                 side === "NB"
-                  ? "1px solid rgba(0, 255, 136, 0.5)"
-                  : "1px solid rgba(123, 97, 255, 0.2)",
-              color: side === "NB" ? "#00ff88" : "var(--color-text-secondary)",
+                  ? "1px solid var(--color-trade-buy-border)"
+                  : "1px solid var(--color-market-purple-border)",
+              color:
+                side === "NB"
+                  ? "var(--color-trade-buy)"
+                  : "var(--color-text-secondary)",
               opacity: side === "NB" ? 1 : 0.7,
             }}
           >
@@ -352,13 +355,16 @@ export const CompactOrderForm: React.FC<CompactOrderFormProps> = ({
               transition: "all 0.2s",
               background:
                 side === "NS"
-                  ? "rgba(255, 51, 102, 0.2)"
-                  : "rgba(15, 23, 42, 0.5)",
+                  ? "var(--color-trade-sell-bg)"
+                  : "var(--glass-bg-input)",
               border:
                 side === "NS"
-                  ? "1px solid rgba(255, 51, 102, 0.5)"
-                  : "1px solid rgba(123, 97, 255, 0.2)",
-              color: side === "NS" ? "#ff3366" : "var(--color-text-secondary)",
+                  ? "1px solid var(--color-trade-sell-border)"
+                  : "1px solid var(--color-market-purple-border)",
+              color:
+                side === "NS"
+                  ? "var(--color-trade-sell)"
+                  : "var(--color-text-secondary)",
               opacity: side === "NS" ? 1 : 0.7,
             }}
           >
@@ -395,15 +401,15 @@ export const CompactOrderForm: React.FC<CompactOrderFormProps> = ({
                   transition: "all 0.2s",
                   background:
                     orderType === type.value
-                      ? "rgba(0, 212, 255, 0.2)"
-                      : "rgba(15, 23, 42, 0.5)",
+                      ? "var(--color-sync-pending-bg)"
+                      : "var(--glass-bg-input)",
                   border:
                     orderType === type.value
-                      ? "1px solid rgba(0, 212, 255, 0.5)"
-                      : "1px solid rgba(123, 97, 255, 0.2)",
+                      ? "1px solid var(--color-sync-pending-border)"
+                      : "1px solid var(--color-market-purple-border)",
                   color:
                     orderType === type.value
-                      ? "#00d4ff"
+                      ? "var(--color-market-live)"
                       : "var(--color-text-secondary)",
                 }}
               >
@@ -443,9 +449,9 @@ export const CompactOrderForm: React.FC<CompactOrderFormProps> = ({
               fontSize: "13px",
               outline: "none",
               background: isMarketOrder
-                ? "rgba(15, 23, 42, 0.3)"
-                : "rgba(15, 23, 42, 0.5)",
-              border: "1px solid rgba(123, 97, 255, 0.2)",
+                ? "var(--glass-bg-input-disabled)"
+                : "var(--glass-bg-input)",
+              border: "1px solid var(--color-market-purple-border)",
               color: "var(--color-text-primary)",
             }}
           />
@@ -472,10 +478,12 @@ export const CompactOrderForm: React.FC<CompactOrderFormProps> = ({
             {isLoadingPPSE ? (
               <Loader2
                 className="w-3 h-3 animate-spin"
-                style={{ color: "#00d4ff" }}
+                style={{ color: "var(--color-market-live)" }}
               />
             ) : ppse ? (
-              <span style={{ fontSize: "10px", color: "#00d4ff" }}>
+              <span
+                style={{ fontSize: "10px", color: "var(--color-market-live)" }}
+              >
                 Max: {formatCurrency(ppse.qmax)}
               </span>
             ) : null}
@@ -493,8 +501,8 @@ export const CompactOrderForm: React.FC<CompactOrderFormProps> = ({
               borderRadius: "8px",
               fontSize: "13px",
               outline: "none",
-              background: "rgba(15, 23, 42, 0.5)",
-              border: "1px solid rgba(123, 97, 255, 0.2)",
+              background: "var(--glass-bg-input)",
+              border: "1px solid var(--color-market-purple-border)",
               color: "var(--color-text-primary)",
             }}
           />
@@ -520,8 +528,8 @@ export const CompactOrderForm: React.FC<CompactOrderFormProps> = ({
               <SelectTrigger
                 className="w-full text-sm font-medium"
                 style={{
-                  background: "rgba(15, 23, 42, 0.5)",
-                  borderColor: "rgba(123, 97, 255, 0.2)",
+                  background: "var(--glass-bg-input)",
+                  borderColor: "var(--color-market-purple-border)",
                   color: "var(--color-text-primary)",
                   height: "40px",
                 }}
@@ -545,8 +553,8 @@ export const CompactOrderForm: React.FC<CompactOrderFormProps> = ({
             style={{
               padding: "8px 10px",
               borderRadius: "8px",
-              background: "rgba(0, 212, 255, 0.05)",
-              border: "1px solid rgba(0, 212, 255, 0.2)",
+              background: "var(--color-sync-pending-bg)",
+              border: "1px solid var(--color-sync-pending-border)",
             }}
           >
             <div
@@ -559,7 +567,7 @@ export const CompactOrderForm: React.FC<CompactOrderFormProps> = ({
               <span style={{ color: "var(--color-text-secondary)" }}>
                 Buying Power
               </span>
-              <span style={{ color: "#00d4ff" }}>
+              <span style={{ color: "var(--color-market-live)" }}>
                 {formatCurrency(ppse.ppse)} VND
               </span>
             </div>
@@ -575,9 +583,9 @@ export const CompactOrderForm: React.FC<CompactOrderFormProps> = ({
               gap: "8px",
               padding: "8px 10px",
               borderRadius: "8px",
-              background: "rgba(255, 51, 102, 0.1)",
-              border: "1px solid rgba(255, 51, 102, 0.3)",
-              color: "#ff3366",
+              background: "var(--color-alert-error-bg)",
+              border: "1px solid var(--color-alert-error-border)",
+              color: "var(--color-trade-sell)",
             }}
           >
             <AlertCircle className="w-4 h-4 flex-shrink-0" />
@@ -595,9 +603,12 @@ export const CompactOrderForm: React.FC<CompactOrderFormProps> = ({
                 textAlign: "center",
                 background:
                   side === "NB"
-                    ? "rgba(0, 255, 136, 0.1)"
-                    : "rgba(255, 51, 102, 0.1)",
-                color: side === "NB" ? "#00ff88" : "#ff3366",
+                    ? "var(--color-trade-buy-bg)"
+                    : "var(--color-trade-sell-bg)",
+                color:
+                  side === "NB"
+                    ? "var(--color-trade-buy)"
+                    : "var(--color-trade-sell)",
               }}
             >
               <div style={{ fontSize: "12px", fontWeight: 500 }}>
@@ -629,8 +640,12 @@ export const CompactOrderForm: React.FC<CompactOrderFormProps> = ({
                   fontSize: "12px",
                   background:
                     side === "NB"
-                      ? "linear-gradient(135deg, #00ff88 0%, #00d4ff 100%)"
-                      : "linear-gradient(135deg, #ff3366 0%, #ff6b35 100%)",
+                      ? "var(--color-green-500)"
+                      : "var(--color-red-500)",
+                  boxShadow:
+                    side === "NB"
+                      ? "var(--shadow-glow-green)"
+                      : "var(--shadow-glow-red)",
                 }}
               >
                 {isSubmitting ? (
@@ -653,8 +668,12 @@ export const CompactOrderForm: React.FC<CompactOrderFormProps> = ({
             style={{
               background:
                 side === "NB"
-                  ? "linear-gradient(135deg, #00ff88 0%, #00d4ff 100%)"
-                  : "linear-gradient(135deg, #ff3366 0%, #ff6b35 100%)",
+                  ? "var(--color-green-500)"
+                  : "var(--color-red-500)",
+              boxShadow:
+                side === "NB"
+                  ? "var(--shadow-glow-green)"
+                  : "var(--shadow-glow-red)",
             }}
           >
             <Send className="w-4 h-4 mr-2" />

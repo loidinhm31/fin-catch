@@ -56,6 +56,9 @@ export const PortfolioPage: React.FC = () => {
 
   // Modal state
   const [showCreatePortfolio, setShowCreatePortfolio] = useState(false);
+  const [editingPortfolio, setEditingPortfolio] = useState<
+    typeof selectedPortfolio | null
+  >(null);
   const [showAddEntry, setShowAddEntry] = useState(false);
   const [editingEntry, setEditingEntry] = useState<PortfolioEntry | null>(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
@@ -67,6 +70,14 @@ export const PortfolioPage: React.FC = () => {
   const handleCurrencyChange = (currency: CurrencyCode) => {
     setDisplayCurrency(currency);
     setPreference("displayCurrency", currency);
+  };
+
+  const handleEditPortfolioClick = (portfolioId: string) => {
+    const portfolio = portfolios.find((p) => p.id === portfolioId);
+    if (portfolio) {
+      setEditingPortfolio(portfolio);
+      setShowCreatePortfolio(true);
+    }
   };
 
   const handleDeletePortfolioClick = (portfolioId: string) => {
@@ -104,7 +115,7 @@ export const PortfolioPage: React.FC = () => {
   };
 
   return (
-    <div className="screen-explore">
+    <div className="screen-explore cyber-grid-bg min-h-screen">
       <div className="relative z-10 mx-4 pb-28 min-h-[calc(100vh-4rem)] overflow-hidden">
         <div className="h-full">
           {/* Header */}
@@ -138,8 +149,12 @@ export const PortfolioPage: React.FC = () => {
               portfolios={portfolios}
               selectedPortfolioId={selectedPortfolioId}
               onSelect={setSelectedPortfolioId}
+              onEdit={handleEditPortfolioClick}
               onDelete={handleDeletePortfolioClick}
-              onCreateNew={() => setShowCreatePortfolio(true)}
+              onCreateNew={() => {
+                setEditingPortfolio(null);
+                setShowCreatePortfolio(true);
+              }}
             />
 
             <CurrencySelectorSection
@@ -150,11 +165,19 @@ export const PortfolioPage: React.FC = () => {
 
           {/* Error Display */}
           {portfolioError && !showCreatePortfolio && !showAddEntry && (
-            <div className="mb-6 p-4 bg-red-100 border border-red-300 rounded-xl">
+            <div
+              className="mb-6 p-4 rounded-xl"
+              style={{
+                backgroundColor: "var(--color-alert-error-bg)",
+                borderWidth: "1px",
+                borderStyle: "solid",
+                borderColor: "var(--color-alert-error-border)",
+              }}
+            >
               <p
                 style={{
                   fontWeight: "var(--font-bold)",
-                  color: "#dc2626",
+                  color: "var(--color-alert-error-text)",
                   fontSize: "var(--text-sm)",
                 }}
               >
@@ -162,7 +185,7 @@ export const PortfolioPage: React.FC = () => {
               </p>
               <p
                 style={{
-                  color: "#dc2626",
+                  color: "var(--color-alert-error-text)",
                   fontSize: "var(--text-xs)",
                   marginTop: "var(--space-1)",
                 }}
@@ -252,14 +275,19 @@ export const PortfolioPage: React.FC = () => {
       {/* Modals */}
       <CreatePortfolioModal
         isOpen={showCreatePortfolio}
-        onClose={() => setShowCreatePortfolio(false)}
+        onClose={() => {
+          setShowCreatePortfolio(false);
+          setEditingPortfolio(null);
+        }}
         onSuccess={(portfolio) => {
           setShowCreatePortfolio(false);
+          setEditingPortfolio(null);
           loadPortfolios();
           if (portfolio.id) {
             setSelectedPortfolioId(portfolio.id);
           }
         }}
+        editingPortfolio={editingPortfolio}
       />
 
       <AddEditEntryModal

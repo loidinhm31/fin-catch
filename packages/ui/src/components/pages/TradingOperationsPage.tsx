@@ -360,10 +360,10 @@ export const TradingOperationsPage: React.FC = () => {
         <div
           className="rounded-2xl p-6 border text-center"
           style={{
-            background: "rgba(26, 31, 58, 0.6)",
+            background: "var(--glass-bg-dark)",
             backdropFilter: "blur(16px)",
-            borderColor: "rgba(255, 51, 102, 0.3)",
-            color: "#ff3366",
+            borderColor: "var(--color-alert-error-border)",
+            color: "var(--color-alert-error-text)",
           }}
         >
           Trading service not available
@@ -378,10 +378,10 @@ export const TradingOperationsPage: React.FC = () => {
         <div
           className="rounded-2xl p-6 border text-center"
           style={{
-            background: "rgba(26, 31, 58, 0.6)",
+            background: "var(--glass-bg-dark)",
             backdropFilter: "blur(16px)",
-            borderColor: "rgba(255, 51, 102, 0.3)",
-            color: "#ff3366",
+            borderColor: "var(--color-alert-error-border)",
+            color: "var(--color-alert-error-text)",
           }}
         >
           <p className="mb-4">{error}</p>
@@ -401,10 +401,10 @@ export const TradingOperationsPage: React.FC = () => {
         <div
           className="rounded-2xl p-4 md:p-6 border"
           style={{
-            background: "rgba(26, 31, 58, 0.6)",
+            background: "var(--glass-bg-dark)",
             backdropFilter: "blur(16px)",
-            borderColor: "rgba(123, 97, 255, 0.2)",
-            boxShadow: "0 8px 32px rgba(0, 0, 0, 0.3)",
+            borderColor: "var(--glass-border-medium)",
+            boxShadow: "var(--shadow-glass-sm)",
           }}
         >
           <div className="flex items-center justify-between">
@@ -421,9 +421,12 @@ export const TradingOperationsPage: React.FC = () => {
               <div className="flex items-center gap-3">
                 <div
                   className="p-2 rounded-lg"
-                  style={{ background: "rgba(0, 212, 255, 0.1)" }}
+                  style={{ background: "var(--color-sync-pending-bg)" }}
                 >
-                  <Wallet className="w-5 h-5" style={{ color: "#00d4ff" }} />
+                  <Wallet
+                    className="w-5 h-5"
+                    style={{ color: "var(--color-cyan-400)" }}
+                  />
                 </div>
                 <div>
                   <h1
@@ -461,21 +464,27 @@ export const TradingOperationsPage: React.FC = () => {
         <div
           className="rounded-2xl p-4 border"
           style={{
-            background: "rgba(26, 31, 58, 0.6)",
+            background: "var(--glass-bg-dark)",
             backdropFilter: "blur(16px)",
-            borderColor: "rgba(0, 212, 255, 0.2)",
+            borderColor: "var(--color-sync-pending-border)",
           }}
         >
           <div className="flex items-center gap-2 mb-3">
-            <LayoutGrid className="w-4 h-4" style={{ color: "#00d4ff" }} />
-            <h2 className="text-sm font-semibold" style={{ color: "#00d4ff" }}>
+            <LayoutGrid
+              className="w-4 h-4"
+              style={{ color: "var(--color-cyan-400)" }}
+            />
+            <h2
+              className="text-sm font-semibold"
+              style={{ color: "var(--color-cyan-400)" }}
+            >
               Market Watch
             </h2>
             <span
               className="text-xs px-2 py-0.5 rounded-full"
               style={{
-                background: "rgba(0, 212, 255, 0.1)",
-                color: "#00d4ff",
+                background: "var(--color-sync-pending-bg)",
+                color: "var(--color-cyan-400)",
               }}
             >
               Click card to trade
@@ -512,9 +521,9 @@ export const TradingOperationsPage: React.FC = () => {
           <div
             className="rounded-2xl border overflow-hidden"
             style={{
-              background: "rgba(26, 31, 58, 0.6)",
+              background: "var(--glass-bg-dark)",
               backdropFilter: "blur(16px)",
-              borderColor: "rgba(123, 97, 255, 0.2)",
+              borderColor: "var(--glass-border-medium)",
             }}
           >
             <button
@@ -522,17 +531,20 @@ export const TradingOperationsPage: React.FC = () => {
               className="w-full p-4 flex items-center justify-between hover:bg-white/5 transition-colors"
             >
               <div className="flex items-center gap-2">
-                <BookOpen className="w-4 h-4" style={{ color: "#00d4ff" }} />
+                <BookOpen
+                  className="w-4 h-4"
+                  style={{ color: "var(--color-cyan-400)" }}
+                />
                 <span
                   className="font-semibold text-sm"
-                  style={{ color: "#00d4ff" }}
+                  style={{ color: "var(--color-cyan-400)" }}
                 >
                   Order Book
                 </span>
                 <span
                   className="text-xs px-2 py-0.5 rounded-full"
                   style={{
-                    background: "rgba(0, 212, 255, 0.1)",
+                    background: "var(--color-sync-pending-bg)",
                     color: "var(--color-text-secondary)",
                   }}
                 >
@@ -570,9 +582,9 @@ export const TradingOperationsPage: React.FC = () => {
           <div
             className="rounded-2xl border overflow-hidden"
             style={{
-              background: "rgba(26, 31, 58, 0.6)",
+              background: "var(--glass-bg-dark)",
               backdropFilter: "blur(16px)",
-              borderColor: "rgba(123, 97, 255, 0.2)",
+              borderColor: "var(--glass-border-medium)",
             }}
           >
             <button
@@ -580,17 +592,20 @@ export const TradingOperationsPage: React.FC = () => {
               className="w-full p-4 flex items-center justify-between hover:bg-white/5 transition-colors"
             >
               <div className="flex items-center gap-2">
-                <Briefcase className="w-4 h-4" style={{ color: "#00ff88" }} />
+                <Briefcase
+                  className="w-4 h-4"
+                  style={{ color: "var(--color-nav-trading-active)" }}
+                />
                 <span
                   className="font-semibold text-sm"
-                  style={{ color: "#00ff88" }}
+                  style={{ color: "var(--color-nav-trading-active)" }}
                 >
                   Holdings
                 </span>
                 <span
                   className="text-xs px-2 py-0.5 rounded-full"
                   style={{
-                    background: "rgba(0, 255, 136, 0.1)",
+                    background: "var(--color-alert-success-bg)",
                     color: "var(--color-text-secondary)",
                   }}
                 >

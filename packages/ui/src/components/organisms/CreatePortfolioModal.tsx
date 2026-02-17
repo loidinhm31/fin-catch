@@ -1,6 +1,6 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Wallet } from "lucide-react";
-import { createPortfolio } from "@fin-catch/ui/services";
+import { createPortfolio, updatePortfolio } from "@fin-catch/ui/services";
 import { Portfolio } from "@fin-catch/shared";
 import {
   Button,
@@ -15,17 +15,32 @@ export interface CreatePortfolioModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSuccess: (portfolio: Portfolio) => void;
+  editingPortfolio?: Portfolio | null;
 }
 
 export const CreatePortfolioModal: React.FC<CreatePortfolioModalProps> = ({
   isOpen,
   onClose,
   onSuccess,
+  editingPortfolio,
 }) => {
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const isEditMode = !!editingPortfolio;
+
+  // Initialize form when editing
+  useEffect(() => {
+    if (isOpen && editingPortfolio) {
+      setName(editingPortfolio.name);
+      setDescription(editingPortfolio.description || "");
+    } else if (isOpen && !editingPortfolio) {
+      setName("");
+      setDescription("");
+    }
+  }, [isOpen, editingPortfolio]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -38,30 +53,49 @@ export const CreatePortfolioModal: React.FC<CreatePortfolioModalProps> = ({
 
     setIsSubmitting(true);
     try {
-      const portfolioId = await createPortfolio({
-        id: "", // Backend will generate UUID
-        name: name.trim(),
-        description: description.trim() || undefined,
-        createdAt: Math.floor(Date.now() / 1000),
-        syncVersion: 1,
-      });
+      let resultPortfolio: Portfolio;
+
+      if (isEditMode && editingPortfolio) {
+        // Update existing portfolio
+        const updatedPortfolio: Portfolio = {
+          ...editingPortfolio,
+          name: name.trim(),
+          description: description.trim() || undefined,
+        };
+        await updatePortfolio(updatedPortfolio);
+        resultPortfolio = updatedPortfolio;
+      } else {
+        // Create new portfolio
+        const portfolioId = await createPortfolio({
+          id: "", // Backend will generate UUID
+          name: name.trim(),
+          description: description.trim() || undefined,
+          createdAt: Math.floor(Date.now() / 1000),
+          syncVersion: 1,
+        });
+        resultPortfolio = {
+          id: portfolioId,
+          name: name.trim(),
+          description: description.trim() || undefined,
+          createdAt: Math.floor(Date.now() / 1000),
+          syncVersion: 1,
+        };
+      }
 
       // Reset form
       setName("");
       setDescription("");
       setError(null);
 
-      onSuccess({
-        id: portfolioId,
-        name: name.trim(),
-        description: description.trim() || undefined,
-        createdAt: Math.floor(Date.now() / 1000),
-        syncVersion: 1,
-      });
+      onSuccess(resultPortfolio);
       onClose();
     } catch (err) {
       setError(
-        err instanceof Error ? err.message : "Failed to create portfolio",
+        err instanceof Error
+          ? err.message
+          : isEditMode
+            ? "Failed to update portfolio"
+            : "Failed to create portfolio",
       );
     } finally {
       setIsSubmitting(false);
@@ -76,7 +110,11 @@ export const CreatePortfolioModal: React.FC<CreatePortfolioModalProps> = ({
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={handleClose} title="Create Portfolio">
+    <Modal
+      isOpen={isOpen}
+      onClose={handleClose}
+      title={isEditMode ? "Edit Portfolio" : "Create Portfolio"}
+    >
       <form onSubmit={handleSubmit}>
         <div className="space-y-4">
           {error && (
@@ -122,7 +160,13 @@ export const CreatePortfolioModal: React.FC<CreatePortfolioModalProps> = ({
               Cancel
             </Button>
             <Button type="submit" variant="primary" disabled={isSubmitting}>
-              {isSubmitting ? "Creating..." : "Create Portfolio"}
+              {isSubmitting
+                ? isEditMode
+                  ? "Saving..."
+                  : "Creating..."
+                : isEditMode
+                  ? "Save Changes"
+                  : "Create Portfolio"}
             </Button>
           </div>
         </div>

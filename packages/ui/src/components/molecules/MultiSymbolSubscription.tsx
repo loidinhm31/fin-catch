@@ -126,16 +126,17 @@ export const MultiSymbolSubscription: React.FC<
             className="w-full px-3 py-2 rounded-lg text-sm transition-all duration-200
                      focus:outline-none focus:ring-2 disabled:opacity-50 disabled:cursor-not-allowed"
             style={{
-              background: "rgba(10, 14, 39, 0.5)",
-              border: "1px solid rgba(0, 212, 255, 0.3)",
-              color: "white",
+              background: "var(--glass-bg-darker)",
+              border: "1px solid var(--color-sync-pending-border)",
+              color: "var(--color-text-primary)",
             }}
             onFocus={(e) => {
-              e.target.style.borderColor = "#00d4ff";
-              e.target.style.boxShadow = "0 0 0 2px rgba(0, 212, 255, 0.2)";
+              e.target.style.borderColor = "var(--color-cyan-400)";
+              e.target.style.boxShadow =
+                "0 0 0 2px var(--color-sync-pending-border)";
             }}
             onBlur={(e) => {
-              e.target.style.borderColor = "rgba(0, 212, 255, 0.3)";
+              e.target.style.borderColor = "var(--color-sync-pending-border)";
               e.target.style.boxShadow = "none";
             }}
           />
@@ -151,8 +152,8 @@ export const MultiSymbolSubscription: React.FC<
             className="w-4 h-4 rounded border-2 cursor-pointer
                      focus:ring-2 focus:ring-offset-0 disabled:opacity-50"
             style={{
-              borderColor: "rgba(0, 212, 255, 0.5)",
-              accentColor: "#00d4ff",
+              borderColor: "var(--color-cyan-400)",
+              accentColor: "var(--color-cyan-400)",
             }}
           />
           <span className="text-xs text-gray-400">OHLC</span>
@@ -166,9 +167,11 @@ export const MultiSymbolSubscription: React.FC<
           className="px-2 py-2 rounded-lg text-xs transition-all duration-200
                    focus:outline-none focus:ring-2 disabled:opacity-50 disabled:cursor-not-allowed"
           style={{
-            background: "rgba(10, 14, 39, 0.5)",
-            border: "1px solid rgba(0, 212, 255, 0.3)",
-            color: includeOhlc ? "white" : "rgba(255,255,255,0.4)",
+            background: "var(--glass-bg-darker)",
+            border: "1px solid var(--color-sync-pending-border)",
+            color: includeOhlc
+              ? "var(--color-text-primary)"
+              : "var(--color-text-secondary)",
           }}
         >
           {RESOLUTION_OPTIONS.map((opt) => (
@@ -186,8 +189,9 @@ export const MultiSymbolSubscription: React.FC<
           className="px-4 py-2 rounded-lg text-xs font-medium transition-all duration-200
                    hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1"
           style={{
-            background: "linear-gradient(135deg, #00d4ff 0%, #00a8cc 100%)",
-            color: "#0a0e27",
+            background: "var(--color-cyan-500)",
+            boxShadow: "var(--shadow-glow-cyan)",
+            color: "var(--color-text-primary)",
           }}
         >
           {loading ? (
@@ -211,12 +215,12 @@ export const MultiSymbolSubscription: React.FC<
                      hover:scale-105 disabled:opacity-30 disabled:cursor-not-allowed"
             style={{
               background: subscribedSymbols.includes(symbol)
-                ? "rgba(0, 212, 255, 0.2)"
-                : "rgba(15, 22, 41, 0.8)",
+                ? "var(--color-sync-pending-bg)"
+                : "var(--glass-bg-dark)",
               border: subscribedSymbols.includes(symbol)
-                ? "1px solid rgba(0, 212, 255, 0.5)"
-                : "1px solid rgba(0, 212, 255, 0.2)",
-              color: "#00d4ff",
+                ? "1px solid var(--color-sync-pending-border)"
+                : "1px solid var(--color-sync-pending-border)",
+              color: "var(--color-cyan-400)",
             }}
           >
             {symbol}
@@ -233,9 +237,9 @@ export const MultiSymbolSubscription: React.FC<
               key={symbol}
               className="flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium"
               style={{
-                background: "rgba(0, 212, 255, 0.15)",
-                border: "1px solid rgba(0, 212, 255, 0.3)",
-                color: "#00d4ff",
+                background: "var(--color-sync-pending-bg)",
+                border: "1px solid var(--color-sync-pending-border)",
+                color: "var(--color-cyan-400)",
               }}
             >
               <span>{symbol}</span>

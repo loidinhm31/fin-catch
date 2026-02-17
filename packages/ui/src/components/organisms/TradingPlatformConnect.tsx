@@ -312,13 +312,13 @@ export const TradingPlatformConnect: React.FC<TradingPlatformConnectProps> = ({
   const getStatusColor = (status: TradingStatus) => {
     switch (status) {
       case "connected":
-        return "#00ff88";
+        return "var(--color-nav-trading-active)";
       case "pending_otp":
-        return "#ffa500";
+        return "var(--color-amber-500)";
       case "expired":
-        return "#ff3366";
+        return "var(--color-red-400)";
       default:
-        return "#6b7280";
+        return "var(--color-text-muted)";
     }
   };
 
@@ -350,19 +350,22 @@ export const TradingPlatformConnect: React.FC<TradingPlatformConnectProps> = ({
     <div
       className="rounded-2xl p-6 border"
       style={{
-        background: "rgba(26, 31, 58, 0.6)",
+        background: "var(--glass-bg-dark)",
         backdropFilter: "blur(16px)",
-        borderColor: "rgba(123, 97, 255, 0.2)",
-        boxShadow: "0 8px 32px rgba(0, 0, 0, 0.3)",
+        borderColor: "var(--glass-border-medium)",
+        boxShadow: "0 8px 32px var(--color-black-30)",
       }}
     >
       {/* Header */}
       <div className="flex items-center gap-3 mb-6">
         <div
           className="p-2 rounded-lg"
-          style={{ background: "rgba(0, 212, 255, 0.1)" }}
+          style={{ background: "var(--color-sync-pending-bg)" }}
         >
-          <Link2 className="w-5 h-5" style={{ color: "#00d4ff" }} />
+          <Link2
+            className="w-5 h-5"
+            style={{ color: "var(--color-cyan-400)" }}
+          />
         </div>
         <div>
           <h2
@@ -385,9 +388,9 @@ export const TradingPlatformConnect: React.FC<TradingPlatformConnectProps> = ({
         <div
           className="mb-4 p-3 rounded-lg text-sm border flex items-center gap-2"
           style={{
-            background: "rgba(255, 51, 102, 0.1)",
-            borderColor: "rgba(255, 51, 102, 0.3)",
-            color: "#ff3366",
+            background: "var(--color-alert-error-bg)",
+            borderColor: "var(--color-alert-error-border)",
+            color: "var(--color-alert-error-text)",
           }}
         >
           <AlertCircle className="w-4 h-4 flex-shrink-0" />
@@ -413,8 +416,8 @@ export const TradingPlatformConnect: React.FC<TradingPlatformConnectProps> = ({
                 onClick={() => handleSelectPlatform(platform)}
                 className="w-full p-4 rounded-xl border text-left transition-all hover:scale-[1.02]"
                 style={{
-                  background: "rgba(15, 23, 42, 0.5)",
-                  borderColor: "rgba(123, 97, 255, 0.2)",
+                  background: "var(--glass-bg-dark)",
+                  borderColor: "var(--glass-border-medium)",
                 }}
               >
                 <div className="flex items-center justify-between">
@@ -434,7 +437,7 @@ export const TradingPlatformConnect: React.FC<TradingPlatformConnectProps> = ({
                   </div>
                   <div
                     className="p-2 rounded-lg"
-                    style={{ background: "rgba(123, 97, 255, 0.1)" }}
+                    style={{ background: "var(--color-action-edit-bg)" }}
                   >
                     <Link2
                       className="w-5 h-5"
@@ -453,7 +456,7 @@ export const TradingPlatformConnect: React.FC<TradingPlatformConnectProps> = ({
         <form onSubmit={handleLogin} className="space-y-4">
           <div
             className="text-center mb-4 p-3 rounded-lg"
-            style={{ background: "rgba(123, 97, 255, 0.1)" }}
+            style={{ background: "var(--color-action-edit-bg)" }}
           >
             <div
               className="font-semibold"
@@ -479,7 +482,10 @@ export const TradingPlatformConnect: React.FC<TradingPlatformConnectProps> = ({
               }}
             >
               <div className="flex items-center gap-2">
-                <User className="w-4 h-4" style={{ color: "#00d4ff" }} />
+                <User
+                  className="w-4 h-4"
+                  style={{ color: "var(--color-cyan-400)" }}
+                />
                 Username
               </div>
             </Label>
@@ -504,7 +510,10 @@ export const TradingPlatformConnect: React.FC<TradingPlatformConnectProps> = ({
               }}
             >
               <div className="flex items-center gap-2">
-                <Lock className="w-4 h-4" style={{ color: "#00d4ff" }} />
+                <Lock
+                  className="w-4 h-4"
+                  style={{ color: "var(--color-cyan-400)" }}
+                />
                 Password
               </div>
             </Label>
@@ -528,7 +537,10 @@ export const TradingPlatformConnect: React.FC<TradingPlatformConnectProps> = ({
               }}
             >
               <div className="flex items-center gap-2">
-                <KeyRound className="w-4 h-4" style={{ color: "#00d4ff" }} />
+                <KeyRound
+                  className="w-4 h-4"
+                  style={{ color: "var(--color-cyan-400)" }}
+                />
                 OTP Preference
               </div>
             </Label>
@@ -575,14 +587,14 @@ export const TradingPlatformConnect: React.FC<TradingPlatformConnectProps> = ({
         <form onSubmit={handleVerifyOtp} className="space-y-4">
           <div
             className="text-center mb-4 p-4 rounded-lg"
-            style={{ background: "rgba(0, 212, 255, 0.1)" }}
+            style={{ background: "var(--color-sync-pending-bg)" }}
           >
             {/* Show different icon/text based on OTP type */}
             {localStorage.getItem(AUTH_STORAGE_KEYS.OTP_TYPE) === "smart" ? (
               <>
                 <KeyRound
                   className="w-8 h-8 mx-auto mb-2"
-                  style={{ color: "#00d4ff" }}
+                  style={{ color: "var(--color-cyan-400)" }}
                 />
                 <div
                   className="font-semibold"
@@ -601,7 +613,7 @@ export const TradingPlatformConnect: React.FC<TradingPlatformConnectProps> = ({
               <>
                 <Mail
                   className="w-8 h-8 mx-auto mb-2"
-                  style={{ color: "#00d4ff" }}
+                  style={{ color: "var(--color-cyan-400)" }}
                 />
                 <div
                   className="font-semibold"
@@ -629,7 +641,10 @@ export const TradingPlatformConnect: React.FC<TradingPlatformConnectProps> = ({
               }}
             >
               <div className="flex items-center gap-2">
-                <KeyRound className="w-4 h-4" style={{ color: "#00d4ff" }} />
+                <KeyRound
+                  className="w-4 h-4"
+                  style={{ color: "var(--color-cyan-400)" }}
+                />
                 OTP Code
               </div>
             </Label>
@@ -697,8 +712,8 @@ export const TradingPlatformConnect: React.FC<TradingPlatformConnectProps> = ({
           <div
             className="p-4 rounded-xl border"
             style={{
-              background: "rgba(0, 255, 136, 0.05)",
-              borderColor: "rgba(0, 255, 136, 0.2)",
+              background: "var(--color-alert-success-bg)",
+              borderColor: "var(--color-alert-success-border)",
             }}
           >
             <div className="flex items-center gap-3">
@@ -738,8 +753,8 @@ export const TradingPlatformConnect: React.FC<TradingPlatformConnectProps> = ({
             <div
               className="p-3 rounded-lg text-sm"
               style={{
-                background: "rgba(255, 163, 0, 0.1)",
-                color: "#ffa500",
+                background: "var(--color-alert-warning-bg)",
+                color: "var(--color-amber-500)",
               }}
             >
               Your session has expired. Please reconnect to continue trading.

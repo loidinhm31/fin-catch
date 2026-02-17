@@ -214,7 +214,8 @@ export const GoldQueryForm: React.FC<GoldQueryFormProps> = ({
         disabled={isLoading}
         className="btn-primary w-full"
         style={{
-          background: "linear-gradient(90deg, #facc15 0%, #fb923c 100%)",
+          background: "var(--color-amber-400)",
+          boxShadow: "0 0 15px rgba(251, 191, 36, 0.5)",
         }}
       >
         {isLoading ? "LOADING..." : "QUERY GOLD DATA"}

@@ -20,13 +20,18 @@ export const Label = React.memo(function Label({
         fontSize: "var(--text-sm)",
         fontWeight: "var(--font-bold)",
         marginBottom: "var(--space-2)",
-        color: error ? "#dc2626" : "var(--cube-gray-900)",
+        color: error ? "var(--color-red-500)" : "var(--cube-gray-900)",
       }}
       {...props}
     >
       {children}
       {required && (
-        <span style={{ color: "#dc2626", marginLeft: "var(--space-1)" }}>
+        <span
+          style={{
+            color: "var(--color-red-500)",
+            marginLeft: "var(--space-1)",
+          }}
+        >
           *
         </span>
       )}

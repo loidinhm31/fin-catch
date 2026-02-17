@@ -293,8 +293,8 @@ export const BondEntryForm: React.FC<BondEntryFormProps> = ({
                     value={faceValue}
                     readOnly
                     style={{
-                      backgroundColor: "#f9fafb",
-                      color: "#111827",
+                      backgroundColor: "var(--color-bg-secondary)",
+                      color: "var(--color-text-primary)",
                       cursor: "not-allowed",
                       fontWeight: 600,
                     }}
@@ -307,8 +307,8 @@ export const BondEntryForm: React.FC<BondEntryFormProps> = ({
                     value={purchasePrice}
                     readOnly
                     style={{
-                      backgroundColor: "#f9fafb",
-                      color: "#111827",
+                      backgroundColor: "var(--color-bg-secondary)",
+                      color: "var(--color-text-primary)",
                       cursor: "not-allowed",
                       fontWeight: 600,
                     }}
@@ -326,8 +326,8 @@ export const BondEntryForm: React.FC<BondEntryFormProps> = ({
                     value={couponRate}
                     readOnly
                     style={{
-                      backgroundColor: "#f9fafb",
-                      color: "#111827",
+                      backgroundColor: "var(--color-bg-secondary)",
+                      color: "var(--color-text-primary)",
                       cursor: "not-allowed",
                       fontWeight: 600,
                     }}
@@ -464,10 +464,10 @@ export const BondEntryForm: React.FC<BondEntryFormProps> = ({
 
           <div
             style={{
-              backgroundColor: "#f0f9ff",
+              backgroundColor: "var(--color-alert-info-bg)",
               padding: "var(--space-3)",
               borderRadius: "var(--radius-md)",
-              border: "1px solid #bae6fd",
+              border: "1px solid var(--color-alert-info-border)",
             }}
           >
             <p style={{ fontSize: "var(--text-sm)", color: "#0369a1" }}>

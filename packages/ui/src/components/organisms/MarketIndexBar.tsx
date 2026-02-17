@@ -131,16 +131,19 @@ export const MarketIndexBar: React.FC<MarketIndexBarProps> = ({
       <div
         className="rounded-2xl border backdrop-blur-xl p-3"
         style={{
-          background: "rgba(10, 14, 39, 0.5)",
-          borderColor: "rgba(0, 212, 255, 0.2)",
+          background: "var(--glass-bg-darker)",
+          borderColor: "var(--color-sync-pending-border)",
         }}
       >
         <div className="flex items-center justify-center py-2">
           <Loader2
             className="w-5 h-5 animate-spin"
-            style={{ color: "#00d4ff" }}
+            style={{ color: "var(--color-cyan-400)" }}
           />
-          <span className="ml-2 text-sm" style={{ color: "#9ca3af" }}>
+          <span
+            className="ml-2 text-sm"
+            style={{ color: "var(--color-text-secondary)" }}
+          >
             Loading market indexes...
           </span>
         </div>
@@ -154,12 +157,12 @@ export const MarketIndexBar: React.FC<MarketIndexBarProps> = ({
       <div
         className="rounded-2xl border backdrop-blur-xl p-3"
         style={{
-          background: "rgba(10, 14, 39, 0.5)",
-          borderColor: "rgba(255, 51, 102, 0.3)",
+          background: "var(--glass-bg-darker)",
+          borderColor: "var(--color-alert-error-border)",
         }}
       >
         <div className="text-center py-2">
-          <p className="text-sm" style={{ color: "#ff3366" }}>
+          <p className="text-sm" style={{ color: "var(--color-red-400)" }}>
             {error}
           </p>
         </div>
@@ -171,8 +174,8 @@ export const MarketIndexBar: React.FC<MarketIndexBarProps> = ({
     <div
       className="rounded-2xl border backdrop-blur-xl p-3"
       style={{
-        background: "rgba(10, 14, 39, 0.5)",
-        borderColor: "rgba(0, 212, 255, 0.2)",
+        background: "var(--glass-bg-darker)",
+        borderColor: "var(--color-sync-pending-border)",
       }}
     >
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
@@ -209,26 +212,31 @@ const IndexCard: React.FC<IndexCardProps> = ({
   const change = data?.change || 0;
   const changePercent = data?.changePercent || 0;
   const isUp = change >= 0;
-  const priceColor = isUp ? "#00ff88" : "#ff3366";
+  const priceColor = isUp
+    ? "var(--color-nav-trading-active)"
+    : "var(--color-red-400)";
   const TrendIcon = isUp ? TrendingUp : TrendingDown;
 
   return (
     <div
       className="p-3 rounded-xl transition-all hover:scale-[1.02]"
       style={{
-        background: `linear-gradient(135deg, ${priceColor}08 0%, transparent 100%)`,
+        background: `${priceColor}10`,
         border: `1px solid ${priceColor}20`,
       }}
     >
       {/* Index Name */}
       <div className="flex items-center justify-between mb-1">
-        <span className="text-xs font-medium" style={{ color: "#9ca3af" }}>
+        <span
+          className="text-xs font-medium"
+          style={{ color: "var(--color-text-secondary)" }}
+        >
           {indexCode}
         </span>
         {isConnected && (
           <div
             className="w-1.5 h-1.5 rounded-full animate-pulse"
-            style={{ background: "#00ff88" }}
+            style={{ background: "var(--color-nav-trading-active)" }}
           />
         )}
       </div>
@@ -256,7 +264,7 @@ const IndexCard: React.FC<IndexCardProps> = ({
       {/* High/Low */}
       <div className="flex justify-between mt-2 pt-2 border-t border-white/5 text-[10px]">
         <div className="flex flex-col">
-          <span style={{ color: "#6b7280" }}>High</span>
+          <span style={{ color: "var(--color-text-muted)" }}>High</span>
           <span style={{ color: "white" }}>
             {data?.highestValue?.toLocaleString("vi-VN", {
               minimumFractionDigits: 2,
@@ -265,7 +273,7 @@ const IndexCard: React.FC<IndexCardProps> = ({
           </span>
         </div>
         <div className="flex flex-col items-end">
-          <span style={{ color: "#6b7280" }}>Low</span>
+          <span style={{ color: "var(--color-text-muted)" }}>Low</span>
           <span style={{ color: "white" }}>
             {data?.lowestValue?.toLocaleString("vi-VN", {
               minimumFractionDigits: 2,

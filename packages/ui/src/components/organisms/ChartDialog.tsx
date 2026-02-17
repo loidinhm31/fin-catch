@@ -28,7 +28,7 @@ export const ChartDialog: React.FC<ChartDialogProps> = ({
       <div
         className="relative w-full h-full max-w-[95vw] max-h-[95vh] rounded-2xl shadow-2xl overflow-hidden"
         style={{
-          background: "linear-gradient(135deg, #1a1f3a 0%, #2d1b4e 100%)",
+          background: "var(--glass-bg-card)",
         }}
         onClick={(e) => e.stopPropagation()}
       >
@@ -36,20 +36,20 @@ export const ChartDialog: React.FC<ChartDialogProps> = ({
         <div
           className="flex items-center justify-between px-4 py-3 sm:px-6 sm:py-4"
           style={{
-            background: "rgba(255, 255, 255, 0.05)",
-            borderBottom: "1px solid rgba(255, 255, 255, 0.1)",
+            background: "var(--color-white-5)",
+            borderBottom: "1px solid var(--color-white-10)",
           }}
         >
           <div className="flex items-center gap-2 sm:gap-3">
             <Maximize2
               className="w-4 h-4 sm:w-5 sm:h-5"
-              style={{ color: "#00d4ff" }}
+              style={{ color: "var(--color-market-live)" }}
             />
             <h2
               style={{
                 fontSize: "var(--text-lg)",
                 fontWeight: "var(--font-bold)",
-                color: "#ffffff",
+                color: "var(--color-text-primary)",
               }}
               className="sm:text-xl"
             >
@@ -60,7 +60,7 @@ export const ChartDialog: React.FC<ChartDialogProps> = ({
             onClick={onClose}
             className="p-2 rounded-lg transition-all hover:bg-white/10"
             style={{
-              color: "#ffffff",
+              color: "var(--color-text-primary)",
             }}
             aria-label="Close dialog"
           >

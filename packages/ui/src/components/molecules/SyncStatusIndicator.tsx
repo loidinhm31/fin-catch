@@ -120,14 +120,14 @@ export const SyncStatusIndicator: React.FC<SyncStatusIndicatorProps> = ({
   };
 
   const getColor = () => {
-    if (isSyncing) return "#00d4ff"; // Electric blue
-    if (!isAuthenticated) return "#718096"; // Muted
-    if (error) return "#ff3366"; // Bright red
-    if (lastSyncSuccess === false) return "#ffaa00"; // Warning
+    if (isSyncing) return "var(--color-market-live)"; // Electric blue
+    if (!isAuthenticated) return "var(--color-text-muted)"; // Muted
+    if (error) return "var(--color-trade-sell)"; // Bright red
+    if (lastSyncSuccess === false) return "var(--color-amber-400)"; // Warning
     if (syncStatus?.pendingChanges && syncStatus.pendingChanges > 0)
-      return "#00d4ff"; // Electric blue
-    if (lastSyncSuccess === true) return "#00ff88"; // Neon green
-    return "#a0aec0"; // Secondary
+      return "var(--color-market-live)"; // Electric blue
+    if (lastSyncSuccess === true) return "var(--color-trade-buy)"; // Neon green
+    return "var(--chart-axis)"; // Secondary
   };
 
   const showBadge =
@@ -153,13 +153,11 @@ export const SyncStatusIndicator: React.FC<SyncStatusIndicatorProps> = ({
       title={getTooltip()}
       className="relative p-2 rounded-lg transition-all active:scale-95"
       style={{
-        background: "rgba(26, 31, 58, 0.6)",
+        background: "var(--glass-bg-dark)",
         backdropFilter: "blur(16px)",
-        border: "1px solid rgba(123, 97, 255, 0.2)",
+        border: "1px solid var(--glass-border-medium)",
         color: getColor(),
-        boxShadow: isSyncing
-          ? "0 0 16px rgba(0, 212, 255, 0.4)"
-          : "0 2px 8px rgba(0, 0, 0, 0.2)",
+        boxShadow: isSyncing ? "var(--shadow-glow-cyan)" : "var(--shadow-sm)",
       }}
     >
       {getIcon()}
@@ -169,9 +167,9 @@ export const SyncStatusIndicator: React.FC<SyncStatusIndicatorProps> = ({
         <div
           className="absolute -top-1 -right-1 flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full text-[10px] font-bold"
           style={{
-            background: "linear-gradient(135deg, #00d4ff 0%, #7b61ff 100%)",
+            background: "var(--color-violet-500)",
             color: "#ffffff",
-            boxShadow: "0 0 12px rgba(0, 212, 255, 0.6)",
+            boxShadow: "var(--shadow-glow-violet)",
           }}
         >
           {syncStatus.pendingChanges > 99 ? "99+" : syncStatus.pendingChanges}
@@ -183,7 +181,7 @@ export const SyncStatusIndicator: React.FC<SyncStatusIndicatorProps> = ({
         <div
           className="absolute inset-0 rounded-lg animate-pulse"
           style={{
-            background: "rgba(0, 212, 255, 0.2)",
+            background: "var(--color-sync-pending-bg)",
             pointerEvents: "none",
           }}
         />

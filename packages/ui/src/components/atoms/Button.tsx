@@ -9,16 +9,18 @@ const buttonVariants = cva(
     variants: {
       variant: {
         primary:
-          "bg-gradient-to-r from-violet-500 to-violet-600 hover:from-violet-600 hover:to-violet-700 text-white shadow-[var(--shadow-glow-violet)] hover:shadow-xl focus-visible:ring-violet-500 border border-[var(--glass-border-glow)]",
+          "bg-[#06B6D4] hover:bg-[#0891B2] text-[#0F172A] shadow-[0_0_10px_rgba(6,182,212,0.4),0_0_20px_rgba(6,182,212,0.2)] hover:shadow-[0_0_15px_rgba(6,182,212,0.4),0_0_30px_rgba(6,182,212,0.2),0_8px_32px_rgba(0,0,0,0.5)] focus-visible:ring-[#06B6D4] border border-[rgba(6,182,212,0.4)]",
         secondary:
-          "bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 text-white shadow-lg hover:shadow-xl focus-visible:ring-cyan-500",
+          "bg-[#10B981] hover:bg-[#059669] text-white shadow-[0_0_10px_rgba(16,185,129,0.5),0_0_20px_rgba(16,185,129,0.3)] hover:shadow-xl focus-visible:ring-[#10B981]",
         outline:
-          "border-2 border-[var(--glass-border-medium)] text-[var(--color-text-primary)] hover:bg-[var(--glass-bg-dark)] hover:border-[var(--glass-border-glow)] focus-visible:ring-violet-500 bg-transparent backdrop-blur-sm",
+          "border-2 border-[#06B6D4] text-[var(--color-text-primary)] hover:bg-[rgba(6,182,212,0.1)] hover:border-[#0891B2] focus-visible:ring-[#06B6D4] bg-transparent backdrop-blur-md",
         ghost:
-          "text-[var(--color-text-primary)] hover:bg-[var(--glass-bg-dark)] focus-visible:ring-violet-500",
+          "text-[var(--color-text-primary)] hover:bg-[var(--glass-bg-dark)] focus-visible:ring-[#06B6D4]",
         destructive:
-          "bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white shadow-lg hover:shadow-xl focus-visible:ring-red-500",
-        link: "text-[var(--color-violet-500)] underline-offset-4 hover:underline",
+          "bg-[#DC2626] hover:bg-[#B91C1C] text-white shadow-[0_0_10px_rgba(220,38,38,0.6),0_0_20px_rgba(220,38,38,0.3)] hover:shadow-xl focus-visible:ring-[#DC2626]",
+        link: "text-[#06B6D4] underline-offset-4 hover:underline",
+        cyber:
+          "bg-transparent border-2 border-[#06B6D4] text-[#06B6D4] hover:bg-[rgba(6,182,212,0.1)] hover:shadow-[0_0_15px_rgba(6,182,212,0.4)] font-mono uppercase tracking-wide text-xs backdrop-blur-md",
       },
       size: {
         sm: "h-9 px-3 py-2 text-sm",

@@ -247,10 +247,10 @@ export const OrderForm: React.FC<OrderFormProps> = ({
     <div
       className="rounded-2xl p-6 border"
       style={{
-        background: "rgba(26, 31, 58, 0.6)",
+        background: "var(--glass-bg-card)",
         backdropFilter: "blur(16px)",
-        borderColor: "rgba(123, 97, 255, 0.2)",
-        boxShadow: "0 8px 32px rgba(0, 0, 0, 0.3)",
+        borderColor: "var(--color-market-purple-border)",
+        boxShadow: "var(--shadow-glass-sm)",
       }}
     >
       <h3
@@ -272,14 +272,17 @@ export const OrderForm: React.FC<OrderFormProps> = ({
             style={{
               background:
                 side === "NB"
-                  ? "rgba(0, 255, 136, 0.2)"
-                  : "rgba(15, 23, 42, 0.5)",
+                  ? "var(--color-trade-buy-bg)"
+                  : "var(--glass-bg-input)",
               borderColor:
                 side === "NB"
-                  ? "rgba(0, 255, 136, 0.5)"
-                  : "rgba(123, 97, 255, 0.2)",
+                  ? "var(--color-trade-buy-border)"
+                  : "var(--color-market-purple-border)",
               border: "1px solid",
-              color: side === "NB" ? "#00ff88" : "var(--color-text-secondary)",
+              color:
+                side === "NB"
+                  ? "var(--color-trade-buy)"
+                  : "var(--color-text-secondary)",
             }}
           >
             <ArrowUpCircle className="w-5 h-5" />
@@ -294,14 +297,17 @@ export const OrderForm: React.FC<OrderFormProps> = ({
             style={{
               background:
                 side === "NS"
-                  ? "rgba(255, 51, 102, 0.2)"
-                  : "rgba(15, 23, 42, 0.5)",
+                  ? "var(--color-trade-sell-bg)"
+                  : "var(--glass-bg-input)",
               borderColor:
                 side === "NS"
-                  ? "rgba(255, 51, 102, 0.5)"
-                  : "rgba(123, 97, 255, 0.2)",
+                  ? "var(--color-trade-sell-border)"
+                  : "var(--color-market-purple-border)",
               border: "1px solid",
-              color: side === "NS" ? "#ff3366" : "var(--color-text-secondary)",
+              color:
+                side === "NS"
+                  ? "var(--color-trade-sell)"
+                  : "var(--color-text-secondary)",
             }}
           >
             <ArrowDownCircle className="w-5 h-5" />
@@ -324,8 +330,8 @@ export const OrderForm: React.FC<OrderFormProps> = ({
             placeholder="VNM, FPT, VIC..."
             className="w-full p-3 rounded-xl border text-sm outline-none transition-colors uppercase"
             style={{
-              background: "rgba(15, 23, 42, 0.5)",
-              borderColor: "rgba(123, 97, 255, 0.2)",
+              background: "var(--glass-bg-input)",
+              borderColor: "var(--color-market-purple-border)",
               color: "var(--color-text-primary)",
             }}
             maxLength={10}
@@ -350,16 +356,16 @@ export const OrderForm: React.FC<OrderFormProps> = ({
                 style={{
                   background:
                     orderType === type.value
-                      ? "rgba(0, 212, 255, 0.2)"
-                      : "rgba(15, 23, 42, 0.5)",
+                      ? "var(--color-sync-pending-bg)"
+                      : "var(--glass-bg-input)",
                   borderColor:
                     orderType === type.value
-                      ? "rgba(0, 212, 255, 0.5)"
-                      : "rgba(123, 97, 255, 0.2)",
+                      ? "var(--color-sync-pending-border)"
+                      : "var(--color-market-purple-border)",
                   border: "1px solid",
                   color:
                     orderType === type.value
-                      ? "#00d4ff"
+                      ? "var(--color-market-live)"
                       : "var(--color-text-secondary)",
                 }}
                 title={type.description}
@@ -389,9 +395,9 @@ export const OrderForm: React.FC<OrderFormProps> = ({
             className="w-full p-3 rounded-xl border text-sm outline-none transition-colors"
             style={{
               background: isMarketOrder
-                ? "rgba(15, 23, 42, 0.3)"
-                : "rgba(15, 23, 42, 0.5)",
-              borderColor: "rgba(123, 97, 255, 0.2)",
+                ? "var(--glass-bg-input-disabled)"
+                : "var(--glass-bg-input)",
+              borderColor: "var(--color-market-purple-border)",
               color: "var(--color-text-primary)",
             }}
             disabled={isMarketOrder}
@@ -412,10 +418,13 @@ export const OrderForm: React.FC<OrderFormProps> = ({
             {isLoadingPPSE ? (
               <Loader2
                 className="w-4 h-4 animate-spin"
-                style={{ color: "#00d4ff" }}
+                style={{ color: "var(--color-market-live)" }}
               />
             ) : ppse ? (
-              <span className="text-xs" style={{ color: "#00d4ff" }}>
+              <span
+                className="text-xs"
+                style={{ color: "var(--color-market-live)" }}
+              >
                 Max: {formatCurrency(ppse.qmax)}
               </span>
             ) : null}
@@ -427,8 +436,8 @@ export const OrderForm: React.FC<OrderFormProps> = ({
             placeholder="100, 200, 300..."
             className="w-full p-3 rounded-xl border text-sm outline-none transition-colors"
             style={{
-              background: "rgba(15, 23, 42, 0.5)",
-              borderColor: "rgba(123, 97, 255, 0.2)",
+              background: "var(--glass-bg-input)",
+              borderColor: "var(--color-market-purple-border)",
               color: "var(--color-text-primary)",
             }}
             step="100"
@@ -452,8 +461,8 @@ export const OrderForm: React.FC<OrderFormProps> = ({
               <SelectTrigger
                 className="w-full text-sm font-medium"
                 style={{
-                  background: "rgba(15, 23, 42, 0.5)",
-                  borderColor: "rgba(123, 97, 255, 0.2)",
+                  background: "var(--glass-bg-input)",
+                  borderColor: "var(--color-market-purple-border)",
                   color: "var(--color-text-primary)",
                   height: "46px", // Match input height
                 }}
@@ -476,15 +485,15 @@ export const OrderForm: React.FC<OrderFormProps> = ({
           <div
             className="p-3 rounded-xl border"
             style={{
-              background: "rgba(0, 212, 255, 0.05)",
-              borderColor: "rgba(0, 212, 255, 0.2)",
+              background: "var(--color-sync-pending-bg)",
+              borderColor: "var(--color-sync-pending-border)",
             }}
           >
             <div className="flex justify-between text-sm">
               <span style={{ color: "var(--color-text-secondary)" }}>
                 Buying Power
               </span>
-              <span style={{ color: "#00d4ff" }}>
+              <span style={{ color: "var(--color-market-live)" }}>
                 {formatCurrency(ppse.ppse)} VND
               </span>
             </div>
@@ -496,9 +505,9 @@ export const OrderForm: React.FC<OrderFormProps> = ({
           <div
             className="flex items-center gap-2 p-3 rounded-xl border"
             style={{
-              background: "rgba(255, 51, 102, 0.1)",
-              borderColor: "rgba(255, 51, 102, 0.3)",
-              color: "#ff3366",
+              background: "var(--color-alert-error-bg)",
+              borderColor: "var(--color-alert-error-border)",
+              color: "var(--color-trade-sell)",
             }}
           >
             <AlertCircle className="w-4 h-4 flex-shrink-0" />
@@ -514,9 +523,12 @@ export const OrderForm: React.FC<OrderFormProps> = ({
               style={{
                 background:
                   side === "NB"
-                    ? "rgba(0, 255, 136, 0.1)"
-                    : "rgba(255, 51, 102, 0.1)",
-                color: side === "NB" ? "#00ff88" : "#ff3366",
+                    ? "var(--color-trade-buy-bg)"
+                    : "var(--color-trade-sell-bg)",
+                color:
+                  side === "NB"
+                    ? "var(--color-trade-buy)"
+                    : "var(--color-trade-sell)",
               }}
             >
               <div className="text-sm font-medium">
@@ -546,8 +558,12 @@ export const OrderForm: React.FC<OrderFormProps> = ({
                 style={{
                   background:
                     side === "NB"
-                      ? "linear-gradient(135deg, #00ff88 0%, #00d4ff 100%)"
-                      : "linear-gradient(135deg, #ff3366 0%, #ff6b35 100%)",
+                      ? "var(--color-green-500)"
+                      : "var(--color-red-500)",
+                  boxShadow:
+                    side === "NB"
+                      ? "var(--shadow-glow-green)"
+                      : "var(--shadow-glow-red)",
                 }}
               >
                 {isSubmitting ? (
@@ -570,8 +586,12 @@ export const OrderForm: React.FC<OrderFormProps> = ({
             style={{
               background:
                 side === "NB"
-                  ? "linear-gradient(135deg, #00ff88 0%, #00d4ff 100%)"
-                  : "linear-gradient(135deg, #ff3366 0%, #ff6b35 100%)",
+                  ? "var(--color-green-500)"
+                  : "var(--color-red-500)",
+              boxShadow:
+                side === "NB"
+                  ? "var(--shadow-glow-green)"
+                  : "var(--shadow-glow-red)",
             }}
           >
             <Send className="w-4 h-4 mr-2" />

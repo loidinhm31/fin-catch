@@ -13,30 +13,35 @@ export function BottomNav({ currentPage, onNavigate }: BottomNavProps) {
     label: string;
     icon: typeof LineChart;
     activeColor: string;
+    activeBg: string;
   }[] = [
     {
       id: "financial-data",
       label: "Market",
       icon: LineChart,
-      activeColor: "#22D3EE",
+      activeColor: "var(--color-nav-market-active)",
+      activeBg: "var(--color-nav-market-bg)",
     },
     {
       id: "portfolio",
       label: "Portfolio",
       icon: Wallet,
-      activeColor: "#8B5CF6",
+      activeColor: "var(--color-nav-portfolio-active)",
+      activeBg: "var(--color-nav-portfolio-bg)",
     },
     {
       id: "trading",
       label: "Trading",
       icon: ArrowLeftRight,
-      activeColor: "#00FF88",
+      activeColor: "var(--color-nav-trading-active)",
+      activeBg: "var(--color-nav-trading-bg)",
     },
     {
       id: "settings",
       label: "Settings",
       icon: Settings,
-      activeColor: "#00D4FF",
+      activeColor: "var(--color-nav-settings-active)",
+      activeBg: "var(--color-nav-settings-bg)",
     },
   ];
 
@@ -44,17 +49,17 @@ export function BottomNav({ currentPage, onNavigate }: BottomNavProps) {
     <nav
       className="fixed bottom-0 left-0 right-0 z-50 border-t md:hidden"
       style={{
-        background: "rgba(15, 23, 42, 0.85)",
+        background: "var(--glass-bg-dark-strong)",
         backdropFilter: "blur(16px)",
         WebkitBackdropFilter: "blur(16px)",
-        borderTopColor: "rgba(255, 255, 255, 0.1)",
-        boxShadow: "0 -4px 20px rgba(0, 0, 0, 0.4)",
+        borderTopColor: "var(--glass-border-light)",
+        boxShadow: "var(--shadow-md)",
         paddingBottom: "env(safe-area-inset-bottom, 0px)",
       }}
     >
       <div className="max-w-lg mx-auto px-4">
         <div className="flex justify-around items-center py-2">
-          {navItems.map(({ id, label, icon: Icon, activeColor }) => {
+          {navItems.map(({ id, label, icon: Icon, activeColor, activeBg }) => {
             const isActive = currentPage === id;
             return (
               <button
@@ -62,8 +67,8 @@ export function BottomNav({ currentPage, onNavigate }: BottomNavProps) {
                 onClick={() => onNavigate(id)}
                 className="flex flex-col items-center justify-center gap-1 px-4 py-2 rounded-xl transition-all min-w-[70px] min-h-[56px]"
                 style={{
-                  color: isActive ? activeColor : "#64748B",
-                  background: isActive ? `${activeColor}26` : "transparent",
+                  color: isActive ? activeColor : "var(--color-nav-inactive)",
+                  background: isActive ? activeBg : "transparent",
                   fontFamily: "var(--font-heading)",
                 }}
               >

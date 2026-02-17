@@ -39,10 +39,8 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
   };
 
   const confirmButtonColors = {
-    warning:
-      "bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600",
-    danger:
-      "bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700",
+    warning: "bg-amber-400 hover:bg-amber-500 shadow-glow-amber",
+    danger: "bg-red-600 hover:bg-red-700 shadow-glow-red",
   };
 
   const handleConfirm = () => {

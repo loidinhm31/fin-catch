@@ -145,10 +145,10 @@ export const TickTape: React.FC<TickTapeProps> = ({
   const getSideColor = (side: string): string => {
     const upperSide = side.toUpperCase();
     if (upperSide === "BUY" || upperSide === "B" || upperSide === "SIDE_BUY")
-      return "#00ff88";
+      return "var(--color-trade-buy)";
     if (upperSide === "SELL" || upperSide === "S" || upperSide === "SIDE_SELL")
-      return "#ff3366";
-    return "#9ca3af"; // Neutral
+      return "var(--color-trade-sell)";
+    return "var(--color-trade-neutral)"; // Neutral
   };
 
   // Get side label
@@ -161,22 +161,38 @@ export const TickTape: React.FC<TickTapeProps> = ({
     return "ATC";
   };
 
+  // Get side background color
+  const getSideBgColor = (side: string): string => {
+    const upperSide = side.toUpperCase();
+    if (upperSide === "BUY" || upperSide === "B" || upperSide === "SIDE_BUY")
+      return "var(--color-trade-buy-bg)";
+    if (upperSide === "SELL" || upperSide === "S" || upperSide === "SIDE_SELL")
+      return "var(--color-trade-sell-bg)";
+    return "var(--color-trade-neutral)"; // Neutral with 20% opacity
+  };
+
   return (
     <div
       className="rounded-2xl border backdrop-blur-xl overflow-hidden"
       style={{
-        background: "rgba(10, 14, 39, 0.5)",
-        borderColor: "rgba(0, 212, 255, 0.2)",
+        background: "var(--glass-bg-ticker)",
+        borderColor: "var(--color-sync-pending-border)",
       }}
     >
       {/* Header */}
       <div
         className="px-4 py-3 border-b flex items-center justify-between"
-        style={{ borderColor: "rgba(255, 255, 255, 0.1)" }}
+        style={{ borderColor: "var(--color-white-10)" }}
       >
         <div className="flex items-center gap-2">
-          <Activity className="w-4 h-4" style={{ color: "#00d4ff" }} />
-          <span className="text-sm font-semibold" style={{ color: "white" }}>
+          <Activity
+            className="w-4 h-4"
+            style={{ color: "var(--color-market-live)" }}
+          />
+          <span
+            className="text-sm font-semibold"
+            style={{ color: "var(--color-text-primary)" }}
+          >
             Trade History
           </span>
         </div>
@@ -184,8 +200,8 @@ export const TickTape: React.FC<TickTapeProps> = ({
           <span
             className="px-2 py-0.5 rounded text-xs font-medium"
             style={{
-              background: "rgba(0, 212, 255, 0.1)",
-              color: "#00d4ff",
+              background: "var(--color-sync-pending-bg)",
+              color: "var(--color-market-live)",
             }}
           >
             {symbol}
@@ -193,7 +209,7 @@ export const TickTape: React.FC<TickTapeProps> = ({
           {connectionStatus === "connected" && (
             <div
               className="w-2 h-2 rounded-full animate-pulse"
-              style={{ background: "#00ff88" }}
+              style={{ background: "var(--color-trade-buy)" }}
             />
           )}
         </div>
@@ -203,9 +219,9 @@ export const TickTape: React.FC<TickTapeProps> = ({
       <div
         className="grid grid-cols-4 gap-2 px-4 py-2 text-xs font-medium border-b"
         style={{
-          color: "#6b7280",
-          borderColor: "rgba(255, 255, 255, 0.05)",
-          background: "rgba(0, 0, 0, 0.2)",
+          color: "var(--color-text-tertiary)",
+          borderColor: "var(--color-white-5)",
+          background: "var(--color-black-20)",
         }}
       >
         <div>Time</div>
@@ -220,9 +236,12 @@ export const TickTape: React.FC<TickTapeProps> = ({
           <div className="flex items-center justify-center py-8">
             <Loader2
               className="w-5 h-5 animate-spin"
-              style={{ color: "#00d4ff" }}
+              style={{ color: "var(--color-market-live)" }}
             />
-            <span className="ml-2 text-sm" style={{ color: "#9ca3af" }}>
+            <span
+              className="ml-2 text-sm"
+              style={{ color: "var(--color-text-gray-light)" }}
+            >
               Waiting for trades...
             </span>
           </div>
@@ -230,7 +249,7 @@ export const TickTape: React.FC<TickTapeProps> = ({
 
         {error && ticks.length === 0 && (
           <div className="text-center py-8">
-            <p className="text-sm" style={{ color: "#ff3366" }}>
+            <p className="text-sm" style={{ color: "var(--color-trade-sell)" }}>
               {error}
             </p>
           </div>
@@ -238,7 +257,10 @@ export const TickTape: React.FC<TickTapeProps> = ({
 
         {ticks.length === 0 && !loading && !error && (
           <div className="text-center py-8">
-            <p className="text-sm" style={{ color: "#9ca3af" }}>
+            <p
+              className="text-sm"
+              style={{ color: "var(--color-text-gray-light)" }}
+            >
               No trades yet
             </p>
           </div>
@@ -246,6 +268,7 @@ export const TickTape: React.FC<TickTapeProps> = ({
 
         {ticks.map((tick, index) => {
           const sideColor = getSideColor(tick.side);
+          const sideBgColor = getSideBgColor(tick.side);
           const isEven = index % 2 === 0;
 
           return (
@@ -253,10 +276,10 @@ export const TickTape: React.FC<TickTapeProps> = ({
               key={`${tick.timestamp}-${index}`}
               className="grid grid-cols-4 gap-2 px-4 py-2 text-sm transition-colors hover:bg-white/5"
               style={{
-                background: isEven ? "transparent" : "rgba(0, 0, 0, 0.1)",
+                background: isEven ? "transparent" : "var(--color-black-10)",
               }}
             >
-              <div style={{ color: "#9ca3af" }}>
+              <div style={{ color: "var(--color-text-gray-light)" }}>
                 {formatTime(tick.timestamp)}
               </div>
               <div
@@ -265,14 +288,17 @@ export const TickTape: React.FC<TickTapeProps> = ({
               >
                 {tick.price.toLocaleString("vi-VN")}
               </div>
-              <div className="text-right" style={{ color: "white" }}>
+              <div
+                className="text-right"
+                style={{ color: "var(--color-text-primary)" }}
+              >
                 {tick.volume.toLocaleString("vi-VN")}
               </div>
               <div className="text-center">
                 <span
                   className="px-2 py-0.5 rounded text-xs font-medium"
                   style={{
-                    background: `${sideColor}20`,
+                    background: sideBgColor,
                     color: sideColor,
                   }}
                 >
@@ -289,9 +315,9 @@ export const TickTape: React.FC<TickTapeProps> = ({
         <div
           className="px-4 py-2 border-t text-xs flex justify-between items-center"
           style={{
-            color: "#6b7280",
-            borderColor: "rgba(255, 255, 255, 0.05)",
-            background: "rgba(0, 0, 0, 0.2)",
+            color: "var(--color-text-tertiary)",
+            borderColor: "var(--color-white-5)",
+            background: "var(--color-black-20)",
           }}
         >
           <span>Showing {ticks.length} recent trades</span>

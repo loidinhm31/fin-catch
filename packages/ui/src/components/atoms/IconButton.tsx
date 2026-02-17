@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { LucideIcon } from "lucide-react";
 
 export interface IconButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
@@ -7,12 +7,35 @@ export interface IconButtonProps extends React.ButtonHTMLAttributes<HTMLButtonEl
   size?: "sm" | "md" | "lg";
 }
 
-const variantStyles: Record<string, string> = {
-  primary: "bg-blue-100 hover:bg-blue-200 text-blue-600",
-  secondary: "bg-gray-100 hover:bg-gray-200 text-gray-700",
-  danger: "bg-red-100 hover:bg-red-200 text-red-600",
-  warning: "bg-yellow-100 hover:bg-yellow-200 text-yellow-600",
-  info: "bg-cyan-100 hover:bg-cyan-200 text-cyan-600",
+const variantStyles: Record<
+  string,
+  { bg: string; hoverBg: string; color: string }
+> = {
+  primary: {
+    bg: "var(--color-action-edit-bg)",
+    hoverBg: "var(--color-action-edit-hover)",
+    color: "var(--color-action-edit-icon)",
+  },
+  secondary: {
+    bg: "var(--color-action-expand-bg)",
+    hoverBg: "var(--color-action-expand-hover)",
+    color: "var(--color-action-expand-icon)",
+  },
+  danger: {
+    bg: "var(--color-action-delete-bg)",
+    hoverBg: "var(--color-action-delete-hover)",
+    color: "var(--color-action-delete-icon)",
+  },
+  warning: {
+    bg: "var(--color-alert-warning-bg)",
+    hoverBg: "var(--color-alert-warning-bg)",
+    color: "var(--color-amber-500)",
+  },
+  info: {
+    bg: "var(--color-alert-info-bg)",
+    hoverBg: "var(--color-action-edit-bg)",
+    color: "var(--color-cyan-500)",
+  },
 };
 
 const sizeStyles: Record<string, { button: string; icon: string }> = {
@@ -28,12 +51,19 @@ export const IconButton: React.FC<IconButtonProps> = ({
   className = "",
   ...props
 }) => {
-  const variantClass = variantStyles[variant] || variantStyles.secondary;
+  const [isHovered, setIsHovered] = useState(false);
+  const variantStyle = variantStyles[variant] || variantStyles.secondary;
   const sizeClass = sizeStyles[size] || sizeStyles.md;
 
   return (
     <button
-      className={`${sizeClass.button} rounded-full flex items-center justify-center transition-all ${variantClass} ${className}`}
+      className={`${sizeClass.button} rounded-full flex items-center justify-center transition-all ${className}`}
+      style={{
+        background: isHovered ? variantStyle.hoverBg : variantStyle.bg,
+        color: variantStyle.color,
+      }}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
       {...props}
     >
       <Icon className={sizeClass.icon} />

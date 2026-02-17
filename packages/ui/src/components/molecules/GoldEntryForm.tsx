@@ -91,7 +91,7 @@ export const GoldEntryForm: React.FC<GoldEntryFormProps> = ({
           <p
             style={{
               fontSize: "var(--text-xs)",
-              color: "#6366f1",
+              color: "var(--color-violet-500)",
               marginTop: "var(--space-1)",
             }}
           >
@@ -101,7 +101,7 @@ export const GoldEntryForm: React.FC<GoldEntryFormProps> = ({
           <p
             style={{
               fontSize: "var(--text-xs)",
-              color: "#10b981",
+              color: "var(--color-green-500)",
               marginTop: "var(--space-1)",
             }}
           >
@@ -146,7 +146,7 @@ export const GoldEntryForm: React.FC<GoldEntryFormProps> = ({
         <p
           style={{
             fontSize: "var(--text-xs)",
-            color: "#10b981",
+            color: "var(--color-green-500)",
             marginTop: "var(--space-1)",
           }}
         >
@@ -166,7 +166,7 @@ export const GoldEntryForm: React.FC<GoldEntryFormProps> = ({
         <p
           style={{
             fontSize: "var(--text-xs)",
-            color: "#2563eb",
+            color: "var(--color-action-edit-icon)",
             marginTop: "var(--space-1)",
           }}
         >

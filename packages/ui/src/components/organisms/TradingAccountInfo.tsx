@@ -148,15 +148,15 @@ export const TradingAccountInfo: React.FC<TradingAccountInfoProps> = ({
       <div
         className="rounded-2xl p-6 border"
         style={{
-          background: "rgba(26, 31, 58, 0.6)",
+          background: "var(--glass-bg-dark)",
           backdropFilter: "blur(16px)",
-          borderColor: "rgba(123, 97, 255, 0.2)",
+          borderColor: "var(--glass-border-medium)",
         }}
       >
         <div className="flex items-center justify-center py-8">
           <Loader2
             className="w-6 h-6 animate-spin"
-            style={{ color: "#00d4ff" }}
+            style={{ color: "var(--color-cyan-400)" }}
           />
           <span
             className="ml-2"
@@ -174,14 +174,14 @@ export const TradingAccountInfo: React.FC<TradingAccountInfoProps> = ({
       <div
         className="rounded-2xl p-6 border"
         style={{
-          background: "rgba(26, 31, 58, 0.6)",
+          background: "var(--glass-bg-dark)",
           backdropFilter: "blur(16px)",
-          borderColor: "rgba(255, 51, 102, 0.3)",
+          borderColor: "var(--color-alert-error-border)",
         }}
       >
         <div
           className="flex items-center gap-3 text-sm"
-          style={{ color: "#ff3366" }}
+          style={{ color: "var(--color-red-400)" }}
         >
           <AlertCircle className="w-5 h-5 flex-shrink-0" />
           <span>{error}</span>
@@ -198,10 +198,10 @@ export const TradingAccountInfo: React.FC<TradingAccountInfoProps> = ({
     <div
       className="rounded-2xl p-6 border space-y-6"
       style={{
-        background: "rgba(26, 31, 58, 0.6)",
+        background: "var(--glass-bg-dark)",
         backdropFilter: "blur(16px)",
-        borderColor: "rgba(123, 97, 255, 0.2)",
-        boxShadow: "0 8px 32px rgba(0, 0, 0, 0.3)",
+        borderColor: "var(--glass-border-medium)",
+        boxShadow: "0 8px 32px var(--color-black-30)",
       }}
     >
       {/* Header with Refresh */}
@@ -209,9 +209,12 @@ export const TradingAccountInfo: React.FC<TradingAccountInfoProps> = ({
         <div className="flex items-center gap-3">
           <div
             className="p-2 rounded-lg"
-            style={{ background: "rgba(0, 255, 136, 0.1)" }}
+            style={{ background: "var(--color-alert-success-bg)" }}
           >
-            <Wallet className="w-5 h-5" style={{ color: "#00ff88" }} />
+            <Wallet
+              className="w-5 h-5"
+              style={{ color: "var(--color-nav-trading-active)" }}
+            />
           </div>
           <div>
             <h2
@@ -245,13 +248,16 @@ export const TradingAccountInfo: React.FC<TradingAccountInfoProps> = ({
         <div
           className="p-4 rounded-xl border"
           style={{
-            background: "rgba(15, 23, 42, 0.5)",
-            borderColor: "rgba(123, 97, 255, 0.2)",
+            background: "var(--glass-bg-darker)",
+            borderColor: "var(--glass-border-medium)",
           }}
         >
           <div className="space-y-3">
             <div className="flex items-center gap-3">
-              <User className="w-4 h-4" style={{ color: "#00d4ff" }} />
+              <User
+                className="w-4 h-4"
+                style={{ color: "var(--color-cyan-400)" }}
+              />
               <div>
                 <div
                   className="text-sm"
@@ -269,7 +275,10 @@ export const TradingAccountInfo: React.FC<TradingAccountInfoProps> = ({
             </div>
 
             <div className="flex items-center gap-3">
-              <Banknote className="w-4 h-4" style={{ color: "#00d4ff" }} />
+              <Banknote
+                className="w-4 h-4"
+                style={{ color: "var(--color-cyan-400)" }}
+              />
               <div>
                 <div
                   className="text-sm"
@@ -288,7 +297,10 @@ export const TradingAccountInfo: React.FC<TradingAccountInfoProps> = ({
 
             {accountInfo.email && (
               <div className="flex items-center gap-3">
-                <Mail className="w-4 h-4" style={{ color: "#00d4ff" }} />
+                <Mail
+                  className="w-4 h-4"
+                  style={{ color: "var(--color-cyan-400)" }}
+                />
                 <div>
                   <div
                     className="text-sm"
@@ -308,7 +320,10 @@ export const TradingAccountInfo: React.FC<TradingAccountInfoProps> = ({
 
             {accountInfo.mobile && (
               <div className="flex items-center gap-3">
-                <Phone className="w-4 h-4" style={{ color: "#00d4ff" }} />
+                <Phone
+                  className="w-4 h-4"
+                  style={{ color: "var(--color-cyan-400)" }}
+                />
                 <div>
                   <div
                     className="text-sm"
@@ -342,10 +357,10 @@ export const TradingAccountInfo: React.FC<TradingAccountInfoProps> = ({
             onClick={() => setShowAccountDropdown(!showAccountDropdown)}
             className="w-full p-3 rounded-xl border text-left flex items-center justify-between transition-colors"
             style={{
-              background: "rgba(15, 23, 42, 0.5)",
+              background: "var(--glass-bg-darker)",
               borderColor: showAccountDropdown
-                ? "rgba(0, 212, 255, 0.5)"
-                : "rgba(123, 97, 255, 0.2)",
+                ? "var(--color-cyan-400)"
+                : "var(--color-market-purple-border)",
             }}
           >
             <div>
@@ -375,9 +390,9 @@ export const TradingAccountInfo: React.FC<TradingAccountInfoProps> = ({
             <div
               className="absolute z-10 w-full mt-2 rounded-xl border overflow-hidden"
               style={{
-                background: "rgba(26, 31, 58, 0.95)",
+                background: "var(--glass-bg-dark-strong)",
                 backdropFilter: "blur(16px)",
-                borderColor: "rgba(123, 97, 255, 0.3)",
+                borderColor: "var(--glass-border-medium)",
               }}
             >
               {subAccounts.map((account) => (
@@ -388,7 +403,7 @@ export const TradingAccountInfo: React.FC<TradingAccountInfoProps> = ({
                   style={{
                     background:
                       selectedAccount?.id === account.id
-                        ? "rgba(0, 212, 255, 0.1)"
+                        ? "var(--color-sync-pending-bg)"
                         : undefined,
                   }}
                 >
@@ -417,12 +432,15 @@ export const TradingAccountInfo: React.FC<TradingAccountInfoProps> = ({
         <div
           className="p-4 rounded-xl border"
           style={{
-            background: "rgba(15, 23, 42, 0.5)",
-            borderColor: "rgba(123, 97, 255, 0.2)",
+            background: "var(--glass-bg-darker)",
+            borderColor: "var(--glass-border-medium)",
           }}
         >
           <div className="flex items-center gap-2 mb-4">
-            <TrendingUp className="w-4 h-4" style={{ color: "#00ff88" }} />
+            <TrendingUp
+              className="w-4 h-4"
+              style={{ color: "var(--color-nav-trading-active)" }}
+            />
             <span
               className="font-medium"
               style={{ color: "var(--color-text-primary)" }}
@@ -435,7 +453,7 @@ export const TradingAccountInfo: React.FC<TradingAccountInfoProps> = ({
             <div className="flex items-center justify-center py-4">
               <Loader2
                 className="w-4 h-4 animate-spin"
-                style={{ color: "#00d4ff" }}
+                style={{ color: "var(--color-cyan-400)" }}
               />
               <span
                 className="ml-2 text-sm"
@@ -457,7 +475,7 @@ export const TradingAccountInfo: React.FC<TradingAccountInfoProps> = ({
                   </div>
                   <div
                     className="text-xl font-semibold"
-                    style={{ color: "#00ff88" }}
+                    style={{ color: "var(--color-nav-trading-active)" }}
                   >
                     {formatCurrency(balance.netAssetValue)}
                   </div>
@@ -471,7 +489,7 @@ export const TradingAccountInfo: React.FC<TradingAccountInfoProps> = ({
                   </div>
                   <div
                     className="text-xl font-semibold"
-                    style={{ color: "#00d4ff" }}
+                    style={{ color: "var(--color-cyan-400)" }}
                   >
                     {formatCurrency(balance.stockValue)}
                   </div>
@@ -481,7 +499,7 @@ export const TradingAccountInfo: React.FC<TradingAccountInfoProps> = ({
               {/* Cash Details */}
               <div
                 className="pt-4 border-t"
-                style={{ borderColor: "rgba(123, 97, 255, 0.2)" }}
+                style={{ borderColor: "var(--color-market-purple-border)" }}
               >
                 <div
                   className="text-sm font-medium mb-3"
@@ -513,7 +531,7 @@ export const TradingAccountInfo: React.FC<TradingAccountInfoProps> = ({
                     </span>
                     <span
                       className="text-sm font-medium"
-                      style={{ color: "#00ff88" }}
+                      style={{ color: "var(--color-nav-trading-active)" }}
                     >
                       {formatCurrency(balance.availableCash)}
                     </span>
@@ -553,7 +571,7 @@ export const TradingAccountInfo: React.FC<TradingAccountInfoProps> = ({
               {(balance.totalDebt > 0 || balance.marginDebt > 0) && (
                 <div
                   className="pt-4 border-t"
-                  style={{ borderColor: "rgba(123, 97, 255, 0.2)" }}
+                  style={{ borderColor: "var(--color-market-purple-border)" }}
                 >
                   <div
                     className="text-sm font-medium mb-3"
@@ -571,7 +589,7 @@ export const TradingAccountInfo: React.FC<TradingAccountInfoProps> = ({
                       </span>
                       <span
                         className="text-sm font-medium"
-                        style={{ color: "#ff3366" }}
+                        style={{ color: "var(--color-red-400)" }}
                       >
                         {formatCurrency(balance.totalDebt)}
                       </span>
@@ -585,7 +603,7 @@ export const TradingAccountInfo: React.FC<TradingAccountInfoProps> = ({
                       </span>
                       <span
                         className="text-sm font-medium"
-                        style={{ color: "#ff3366" }}
+                        style={{ color: "var(--color-red-400)" }}
                       >
                         {formatCurrency(balance.marginDebt)}
                       </span>
@@ -599,7 +617,7 @@ export const TradingAccountInfo: React.FC<TradingAccountInfoProps> = ({
                 balance.depositInterest > 0) && (
                 <div
                   className="pt-4 border-t"
-                  style={{ borderColor: "rgba(123, 97, 255, 0.2)" }}
+                  style={{ borderColor: "var(--color-market-purple-border)" }}
                 >
                   <div
                     className="text-sm font-medium mb-3"
@@ -618,7 +636,7 @@ export const TradingAccountInfo: React.FC<TradingAccountInfoProps> = ({
                         </span>
                         <span
                           className="text-sm font-medium"
-                          style={{ color: "#ffa500" }}
+                          style={{ color: "var(--color-amber-500)" }}
                         >
                           {formatCurrency(balance.cashDividendReceiving)}
                         </span>
@@ -634,7 +652,7 @@ export const TradingAccountInfo: React.FC<TradingAccountInfoProps> = ({
                         </span>
                         <span
                           className="text-sm font-medium"
-                          style={{ color: "#ffa500" }}
+                          style={{ color: "var(--color-amber-500)" }}
                         >
                           {formatCurrency(balance.depositInterest)}
                         </span>

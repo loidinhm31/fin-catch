@@ -187,9 +187,9 @@ export const DraggableSymbolGrid: React.FC<DraggableSymbolGridProps> = ({
           padding: "32px",
           textAlign: "center",
           color: "var(--color-text-secondary, #94a3b8)",
-          background: "rgba(15, 23, 42, 0.4)",
+          background: "var(--glass-bg-darker)",
           borderRadius: "12px",
-          border: "1px dashed rgba(100, 116, 139, 0.3)",
+          border: "1px dashed var(--glass-border-medium)",
         }}
       >
         <p style={{ fontSize: "14px", marginBottom: "8px" }}>
@@ -229,7 +229,7 @@ export const DraggableSymbolGrid: React.FC<DraggableSymbolGridProps> = ({
           whileDrag={{
             scale: 1.05,
             zIndex: 50,
-            boxShadow: "0 20px 40px rgba(0, 0, 0, 0.4)",
+            boxShadow: "var(--shadow-xl)",
           }}
           layout
           transition={{
@@ -281,8 +281,8 @@ export const DraggableSymbolGridSkeleton: React.FC<{
           style={{
             width: "220px",
             minHeight: "180px",
-            background: "rgba(15, 23, 42, 0.7)",
-            border: "1px solid rgba(100, 116, 139, 0.2)",
+            background: "var(--glass-bg-dark)",
+            border: "1px solid var(--glass-border-light)",
             borderRadius: "12px",
           }}
         />

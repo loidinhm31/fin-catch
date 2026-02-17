@@ -22,6 +22,7 @@ export const ResponsiveChartContainer: React.FC<
   className = "",
 }) => {
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [isHovered, setIsHovered] = useState(false);
 
   return (
     <>
@@ -34,7 +35,7 @@ export const ResponsiveChartContainer: React.FC<
                 style={{
                   fontSize: "var(--text-lg)",
                   fontWeight: "var(--font-bold)",
-                  color: "var(--cube-gray-900)",
+                  color: "var(--color-text-primary)",
                 }}
               >
                 {title}
@@ -42,11 +43,21 @@ export const ResponsiveChartContainer: React.FC<
               {showExpandButton && (
                 <button
                   onClick={() => setIsFullscreen(true)}
-                  className="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                  onMouseEnter={() => setIsHovered(true)}
+                  onMouseLeave={() => setIsHovered(false)}
+                  className="p-1.5 rounded-lg transition-colors"
+                  style={{
+                    background: isHovered
+                      ? "var(--color-action-expand-bg)"
+                      : "transparent",
+                  }}
                   aria-label="Expand chart to fullscreen"
                   title="Expand to fullscreen"
                 >
-                  <Maximize2 className="w-4 h-4 text-gray-500" />
+                  <Maximize2
+                    className="w-4 h-4"
+                    style={{ color: "var(--color-text-secondary)" }}
+                  />
                 </button>
               )}
             </div>
@@ -54,8 +65,7 @@ export const ResponsiveChartContainer: React.FC<
               <p
                 style={{
                   fontSize: "var(--text-sm)",
-                  color: "var(--cube-gray-900)",
-                  opacity: 0.7,
+                  color: "var(--color-text-secondary)",
                 }}
               >
                 {subtitle}
@@ -70,7 +80,7 @@ export const ResponsiveChartContainer: React.FC<
           className="mt-2 text-center hidden sm:block"
           style={{
             fontSize: "var(--text-xs)",
-            color: "#718096",
+            color: "var(--color-text-muted)",
           }}
         >
           Tap expand icon for fullscreen view • Hover for details
@@ -79,7 +89,7 @@ export const ResponsiveChartContainer: React.FC<
           className="mt-2 text-center sm:hidden"
           style={{
             fontSize: "var(--text-xs)",
-            color: "#718096",
+            color: "var(--color-text-muted)",
           }}
         >
           Tap expand icon for better view • Touch for details

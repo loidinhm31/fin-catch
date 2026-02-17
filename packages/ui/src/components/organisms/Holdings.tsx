@@ -76,10 +76,10 @@ export const Holdings: React.FC<HoldingsProps> = ({
     <div
       className="rounded-2xl p-6 border"
       style={{
-        background: "rgba(26, 31, 58, 0.6)",
+        background: "var(--glass-bg-dark)",
         backdropFilter: "blur(16px)",
-        borderColor: "rgba(123, 97, 255, 0.2)",
-        boxShadow: "0 8px 32px rgba(0, 0, 0, 0.3)",
+        borderColor: "var(--glass-border-medium)",
+        boxShadow: "0 8px 32px var(--color-black-30)",
       }}
     >
       {/* Header */}
@@ -108,8 +108,8 @@ export const Holdings: React.FC<HoldingsProps> = ({
         <div
           className="p-4 rounded-xl border mb-4"
           style={{
-            background: "rgba(15, 23, 42, 0.5)",
-            borderColor: "rgba(123, 97, 255, 0.2)",
+            background: "var(--glass-bg-input)",
+            borderColor: "var(--color-market-purple-border)",
           }}
         >
           <div className="grid grid-cols-2 gap-4">
@@ -136,7 +136,12 @@ export const Holdings: React.FC<HoldingsProps> = ({
               </div>
               <div
                 className="text-xl font-semibold flex items-center gap-1"
-                style={{ color: totalPnl >= 0 ? "#00ff88" : "#ff3366" }}
+                style={{
+                  color:
+                    totalPnl >= 0
+                      ? "var(--color-trade-buy)"
+                      : "var(--color-trade-sell)",
+                }}
               >
                 {totalPnl >= 0 ? (
                   <TrendingUp className="w-4 h-4" />
@@ -158,7 +163,7 @@ export const Holdings: React.FC<HoldingsProps> = ({
         <div className="flex items-center justify-center py-8">
           <Loader2
             className="w-5 h-5 animate-spin"
-            style={{ color: "#00d4ff" }}
+            style={{ color: "var(--color-market-live)" }}
           />
           <span
             className="ml-2 text-sm"
@@ -192,8 +197,8 @@ export const Holdings: React.FC<HoldingsProps> = ({
                 key={deal.id}
                 className="p-4 rounded-xl border cursor-pointer transition-colors hover:bg-white/5"
                 style={{
-                  background: "rgba(15, 23, 42, 0.5)",
-                  borderColor: "rgba(123, 97, 255, 0.2)",
+                  background: "var(--glass-bg-input)",
+                  borderColor: "var(--color-market-purple-border)",
                 }}
                 onClick={() => onDealClick?.(deal)}
               >
@@ -210,8 +215,8 @@ export const Holdings: React.FC<HoldingsProps> = ({
                       <span
                         className="text-xs px-2 py-0.5 rounded"
                         style={{
-                          background: "rgba(0, 212, 255, 0.15)",
-                          color: "#00d4ff",
+                          background: "var(--color-sync-pending-bg)",
+                          color: "var(--color-market-live)",
                         }}
                       >
                         {deal.side === "NB" ? "LONG" : "SHORT"}
@@ -256,7 +261,11 @@ export const Holdings: React.FC<HoldingsProps> = ({
                   <div className="text-right">
                     <div
                       className="text-lg font-semibold flex items-center justify-end gap-1"
-                      style={{ color: isProfit ? "#00ff88" : "#ff3366" }}
+                      style={{
+                        color: isProfit
+                          ? "var(--color-trade-buy)"
+                          : "var(--color-trade-sell)",
+                      }}
                     >
                       {isProfit ? (
                         <TrendingUp className="w-4 h-4" />
@@ -267,7 +276,11 @@ export const Holdings: React.FC<HoldingsProps> = ({
                     </div>
                     <div
                       className="text-sm"
-                      style={{ color: isProfit ? "#00ff88" : "#ff3366" }}
+                      style={{
+                        color: isProfit
+                          ? "var(--color-trade-buy)"
+                          : "var(--color-trade-sell)",
+                      }}
                     >
                       {formatPercent(pnlPercent)}
                     </div>

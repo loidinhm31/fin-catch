@@ -11,10 +11,28 @@ export const ErrorAlert = React.memo(function ErrorAlert({
   onDismiss,
 }: ErrorAlertProps) {
   return (
-    <div className="mb-4 p-3 bg-red-50 border-l-4 border-red-500 rounded-r-lg flex items-start gap-3">
-      <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
-      <p className="text-sm text-red-800 flex-1">{message}</p>
-      <button onClick={onDismiss} className="text-red-600 hover:text-red-800">
+    <div
+      className="mb-4 p-3 border-l-4 rounded-r-lg flex items-start gap-3"
+      style={{
+        backgroundColor: "var(--color-alert-error-bg)",
+        borderColor: "var(--color-alert-error-border)",
+      }}
+    >
+      <AlertCircle
+        className="w-5 h-5 flex-shrink-0 mt-0.5"
+        style={{ color: "var(--color-alert-error-text)" }}
+      />
+      <p
+        className="text-sm flex-1"
+        style={{ color: "var(--color-alert-error-text)" }}
+      >
+        {message}
+      </p>
+      <button
+        onClick={onDismiss}
+        style={{ color: "var(--color-alert-error-text)" }}
+        className="hover:opacity-80"
+      >
         <X className="w-4 h-4" />
       </button>
     </div>

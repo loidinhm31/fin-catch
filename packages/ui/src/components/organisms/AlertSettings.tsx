@@ -75,12 +75,15 @@ export const AlertSettings: React.FC = () => {
     <div className="glass-card p-4 space-y-4">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <Bell className="w-5 h-5" style={{ color: "var(--cube-gray-600)" }} />
+          <Bell
+            className="w-5 h-5"
+            style={{ color: "var(--color-text-secondary)" }}
+          />
           <h3
             style={{
               fontSize: "var(--text-lg)",
               fontWeight: "var(--font-semibold)",
-              color: "var(--cube-gray-900)",
+              color: "var(--color-text-primary)",
             }}
           >
             Price Alerts
@@ -89,11 +92,20 @@ export const AlertSettings: React.FC = () => {
         <button
           onClick={loadPreferences}
           disabled={isLoading}
-          className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
+          className="p-2 rounded-lg transition-colors"
+          style={{
+            background: "transparent",
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.background = "var(--color-action-expand-bg)";
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.background = "transparent";
+          }}
         >
           <RefreshCw
             className={`w-4 h-4 ${isLoading ? "animate-spin" : ""}`}
-            style={{ color: "var(--cube-gray-500)" }}
+            style={{ color: "var(--color-text-secondary)" }}
           />
         </button>
       </div>
@@ -103,18 +115,24 @@ export const AlertSettings: React.FC = () => {
         className="flex items-center gap-2 p-2 rounded-lg"
         style={{
           backgroundColor: serverConnected
-            ? "rgba(16, 185, 129, 0.1)"
-            : "rgba(245, 158, 11, 0.1)",
+            ? "var(--color-alert-success-bg)"
+            : "var(--color-alert-warning-bg)",
         }}
       >
         <Cloud
           className="w-4 h-4"
-          style={{ color: serverConnected ? "#10b981" : "#f59e0b" }}
+          style={{
+            color: serverConnected
+              ? "var(--color-green-500)"
+              : "var(--color-amber-500)",
+          }}
         />
         <span
           style={{
             fontSize: "var(--text-sm)",
-            color: serverConnected ? "#065f46" : "#92400e",
+            color: serverConnected
+              ? "var(--color-alert-success-text)"
+              : "var(--color-alert-warning-text)",
           }}
         >
           {serverConnected
@@ -127,7 +145,7 @@ export const AlertSettings: React.FC = () => {
         <div className="flex justify-center py-4">
           <RefreshCw
             className="w-6 h-6 animate-spin"
-            style={{ color: "var(--cube-gray-400)" }}
+            style={{ color: "var(--color-text-muted)" }}
           />
         </div>
       ) : (
@@ -137,7 +155,7 @@ export const AlertSettings: React.FC = () => {
             <p
               style={{
                 fontSize: "var(--text-sm)",
-                color: "var(--cube-gray-600)",
+                color: "var(--color-text-secondary)",
               }}
             >
               Configure how you receive price alerts when your target or stop
@@ -145,18 +163,21 @@ export const AlertSettings: React.FC = () => {
             </p>
 
             {/* Push Notifications */}
-            <div className="flex items-center justify-between p-3 rounded-lg bg-gray-50">
+            <div
+              className="flex items-center justify-between p-3 rounded-lg"
+              style={{ background: "var(--glass-bg-dark)" }}
+            >
               <div className="flex items-center gap-3">
                 <Smartphone
                   className="w-5 h-5"
-                  style={{ color: "var(--cube-gray-600)" }}
+                  style={{ color: "var(--color-text-secondary)" }}
                 />
                 <div>
                   <span
                     style={{
                       fontSize: "var(--text-sm)",
                       fontWeight: "var(--font-medium)",
-                      color: "var(--cube-gray-900)",
+                      color: "var(--color-text-primary)",
                     }}
                   >
                     Push Notifications
@@ -164,7 +185,7 @@ export const AlertSettings: React.FC = () => {
                   <p
                     style={{
                       fontSize: "var(--text-xs)",
-                      color: "var(--cube-gray-500)",
+                      color: "var(--color-text-secondary)",
                     }}
                   >
                     Receive instant alerts on your device
@@ -183,23 +204,43 @@ export const AlertSettings: React.FC = () => {
                     }))
                   }
                 />
-                <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                <div
+                  className="w-11 h-6 rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:rounded-full after:h-5 after:w-5 after:transition-all"
+                  style={{
+                    background: preferences.push_enabled
+                      ? "var(--color-violet-500)"
+                      : "var(--glass-border-medium)",
+                  }}
+                >
+                  <div
+                    className="absolute top-[2px] left-[2px] h-5 w-5 rounded-full transition-all"
+                    style={{
+                      background: "var(--color-bg-tertiary)",
+                      transform: preferences.push_enabled
+                        ? "translateX(20px)"
+                        : "translateX(0)",
+                    }}
+                  />
+                </div>
               </label>
             </div>
 
             {/* Email Notifications */}
-            <div className="flex items-center justify-between p-3 rounded-lg bg-gray-50">
+            <div
+              className="flex items-center justify-between p-3 rounded-lg"
+              style={{ background: "var(--glass-bg-dark)" }}
+            >
               <div className="flex items-center gap-3">
                 <Mail
                   className="w-5 h-5"
-                  style={{ color: "var(--cube-gray-600)" }}
+                  style={{ color: "var(--color-text-secondary)" }}
                 />
                 <div>
                   <span
                     style={{
                       fontSize: "var(--text-sm)",
                       fontWeight: "var(--font-medium)",
-                      color: "var(--cube-gray-900)",
+                      color: "var(--color-text-primary)",
                     }}
                   >
                     Email Notifications
@@ -207,7 +248,7 @@ export const AlertSettings: React.FC = () => {
                   <p
                     style={{
                       fontSize: "var(--text-xs)",
-                      color: "var(--cube-gray-500)",
+                      color: "var(--color-text-secondary)",
                     }}
                   >
                     Receive alerts via email
@@ -226,7 +267,24 @@ export const AlertSettings: React.FC = () => {
                     }))
                   }
                 />
-                <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                <div
+                  className="w-11 h-6 rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:rounded-full after:h-5 after:w-5 after:transition-all"
+                  style={{
+                    background: preferences.email_enabled
+                      ? "var(--color-violet-500)"
+                      : "var(--glass-border-medium)",
+                  }}
+                >
+                  <div
+                    className="absolute top-[2px] left-[2px] h-5 w-5 rounded-full transition-all"
+                    style={{
+                      background: "var(--color-bg-tertiary)",
+                      transform: preferences.email_enabled
+                        ? "translateX(20px)"
+                        : "translateX(0)",
+                    }}
+                  />
+                </div>
               </label>
             </div>
 
@@ -237,7 +295,7 @@ export const AlertSettings: React.FC = () => {
                   style={{
                     fontSize: "var(--text-sm)",
                     fontWeight: "var(--font-medium)",
-                    color: "var(--cube-gray-700)",
+                    color: "var(--color-text-primary)",
                   }}
                 >
                   Email Address
@@ -252,9 +310,8 @@ export const AlertSettings: React.FC = () => {
                     }))
                   }
                   placeholder="your@email.com"
-                  className="w-full mt-1 px-3 py-2 rounded-lg border"
+                  className="glass-input w-full mt-1 px-3 py-2 rounded-lg"
                   style={{
-                    borderColor: "var(--cube-gray-300)",
                     fontSize: "var(--text-sm)",
                   }}
                 />
@@ -268,9 +325,9 @@ export const AlertSettings: React.FC = () => {
               style={{
                 backgroundColor:
                   serverConnected && !isSaving
-                    ? "var(--primary-color, #3b82f6)"
-                    : "#9ca3af",
-                color: "white",
+                    ? "var(--color-violet-500)"
+                    : "var(--color-text-muted)",
+                color: "var(--color-text-primary)",
                 opacity: isSaving ? 0.7 : 1,
                 cursor: serverConnected ? "pointer" : "not-allowed",
               }}
@@ -285,13 +342,15 @@ export const AlertSettings: React.FC = () => {
 
           {/* Info about server-side monitoring */}
           <div
-            className="pt-4 border-t"
-            style={{ borderColor: "rgba(0, 0, 0, 0.1)" }}
+            className="pt-4"
+            style={{
+              borderTop: "1px solid var(--glass-border-light)",
+            }}
           >
             <p
               style={{
                 fontSize: "var(--text-xs)",
-                color: "var(--cube-gray-500)",
+                color: "var(--color-text-secondary)",
               }}
             >
               Price alerts are monitored by the qm-sync server. Set target and

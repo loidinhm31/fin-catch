@@ -36,15 +36,15 @@ export const BondHoldingCard: React.FC<BondHoldingCardProps> = ({
   const isPositive = entryPerf.gainLoss >= 0;
 
   return (
-    <div className="glass-card p-4">
+    <div className="glass-card cyber-grid-bg p-4">
       <div className="flex items-start justify-between mb-3">
         <div className="flex-1">
           <div className="flex items-center gap-2 mb-2">
             <span
-              className="inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-semibold"
+              className="cyber-terminal-header px-2 py-0.5 rounded border"
               style={{
-                backgroundColor: "#f3e8ff",
-                color: "#6b21a8",
+                backgroundColor: "rgba(168, 85, 247, 0.1)",
+                borderColor: "#A855F7",
               }}
             >
               BOND
@@ -54,19 +54,23 @@ export const BondHoldingCard: React.FC<BondHoldingCardProps> = ({
                 className="inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-semibold"
                 style={{
                   backgroundColor:
-                    entry.currency === displayCurrency ? "#d1fae5" : "#fce7f3",
+                    entry.currency === displayCurrency
+                      ? "var(--color-badge-currency-match-bg)"
+                      : "var(--color-badge-currency-diff-bg)",
                   color:
-                    entry.currency === displayCurrency ? "#065f46" : "#9f1239",
+                    entry.currency === displayCurrency
+                      ? "var(--color-badge-currency-match-text)"
+                      : "var(--color-badge-currency-diff-text)",
                 }}
               >
                 {entry.currency}
               </span>
             )}
             <h3
+              className="cyber-glow-purple font-mono"
               style={{
                 fontSize: "var(--text-lg)",
                 fontWeight: "var(--font-bold)",
-                color: "var(--cube-gray-900)",
               }}
             >
               {entry.symbol}
@@ -75,15 +79,17 @@ export const BondHoldingCard: React.FC<BondHoldingCardProps> = ({
           <div className="grid grid-cols-2 gap-3">
             <div>
               <p
+                className="uppercase tracking-wide font-mono"
                 style={{
                   fontSize: "var(--text-xs)",
-                  color: "var(--cube-gray-500)",
+                  color: "#64748B",
                   marginBottom: "2px",
                 }}
               >
                 Current Value
               </p>
               <p
+                className="cyber-data"
                 style={{
                   fontWeight: "var(--font-bold)",
                   color: "var(--cube-gray-900)",
@@ -105,7 +111,9 @@ export const BondHoldingCard: React.FC<BondHoldingCardProps> = ({
               <p
                 style={{
                   fontWeight: "var(--font-bold)",
-                  color: isPositive ? "#10b981" : "#ef4444",
+                  color: isPositive
+                    ? "var(--color-green-500)"
+                    : "var(--color-red-500)",
                 }}
               >
                 {formatCurrency(entryPerf.gainLoss)}
@@ -113,7 +121,9 @@ export const BondHoldingCard: React.FC<BondHoldingCardProps> = ({
               <p
                 style={{
                   fontSize: "var(--text-xs)",
-                  color: isPositive ? "#10b981" : "#ef4444",
+                  color: isPositive
+                    ? "var(--color-green-500)"
+                    : "var(--color-red-500)",
                 }}
               >
                 {formatPercentage(entryPerf.gainLossPercentage)}
@@ -126,29 +136,62 @@ export const BondHoldingCard: React.FC<BondHoldingCardProps> = ({
       <div className="flex gap-2 ml-4">
         <button
           onClick={() => onEdit(entry)}
-          className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center hover:bg-blue-200 transition-all"
+          className="w-8 h-8 rounded-full flex items-center justify-center transition-all"
+          style={{ backgroundColor: "var(--color-action-edit-bg)" }}
+          onMouseEnter={(e) =>
+            (e.currentTarget.style.backgroundColor =
+              "var(--color-action-edit-hover)")
+          }
+          onMouseLeave={(e) =>
+            (e.currentTarget.style.backgroundColor =
+              "var(--color-action-edit-bg)")
+          }
         >
-          <Edit className="w-4 h-4" style={{ color: "#2563eb" }} />
+          <Edit
+            className="w-4 h-4"
+            style={{ color: "var(--color-action-edit-icon)" }}
+          />
         </button>
         <button
           onClick={() => onDelete(entry.id!)}
-          className="w-8 h-8 rounded-full bg-red-100 flex items-center justify-center hover:bg-red-200 transition-all"
+          className="w-8 h-8 rounded-full flex items-center justify-center transition-all"
+          style={{ backgroundColor: "var(--color-action-delete-bg)" }}
+          onMouseEnter={(e) =>
+            (e.currentTarget.style.backgroundColor =
+              "var(--color-action-delete-hover)")
+          }
+          onMouseLeave={(e) =>
+            (e.currentTarget.style.backgroundColor =
+              "var(--color-action-delete-bg)")
+          }
         >
-          <Trash2 className="w-4 h-4" style={{ color: "#dc2626" }} />
+          <Trash2
+            className="w-4 h-4"
+            style={{ color: "var(--color-action-delete-icon)" }}
+          />
         </button>
         <button
           onClick={onToggleExpand}
-          className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center hover:bg-gray-200 transition-all"
+          className="w-8 h-8 rounded-full flex items-center justify-center transition-all"
+          style={{ backgroundColor: "var(--color-action-expand-bg)" }}
+          onMouseEnter={(e) =>
+            (e.currentTarget.style.backgroundColor =
+              "var(--color-action-expand-hover)")
+          }
+          onMouseLeave={(e) =>
+            (e.currentTarget.style.backgroundColor =
+              "var(--color-action-expand-bg)")
+          }
         >
           {isExpanded ? (
             <ChevronUp
               className="w-4 h-4"
-              style={{ color: "var(--cube-gray-700)" }}
+              style={{ color: "var(--color-action-expand-icon)" }}
             />
           ) : (
             <ChevronDown
               className="w-4 h-4"
-              style={{ color: "var(--cube-gray-700)" }}
+              style={{ color: "var(--color-action-expand-icon)" }}
             />
           )}
         </button>
@@ -157,7 +200,7 @@ export const BondHoldingCard: React.FC<BondHoldingCardProps> = ({
       {isExpanded && (
         <div
           className="pt-3 border-t space-y-2"
-          style={{ borderColor: "rgba(0, 0, 0, 0.1)" }}
+          style={{ borderColor: "var(--color-black-10)" }}
         >
           <div className="grid grid-cols-2 gap-3">
             <div>

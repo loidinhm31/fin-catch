@@ -28,9 +28,9 @@ function getCandleColor(
   stroke: string;
 } {
   if (close >= open) {
-    return { fill: "rgba(0, 255, 136, 0.6)", stroke: "#00ff88" }; // Green for bullish
+    return { fill: "var(--color-trade-buy)", stroke: "var(--color-trade-buy)" }; // Green for bullish
   }
-  return { fill: "rgba(255, 51, 102, 0.6)", stroke: "#ff3366" }; // Red for bearish
+  return { fill: "var(--color-trade-sell)", stroke: "var(--color-trade-sell)" }; // Red for bearish
 }
 
 /**
@@ -96,21 +96,13 @@ export const MiniOhlcChart: React.FC<MiniOhlcChartProps> = ({
   if (candles.length === 0) {
     return (
       <div
-        className={className}
+        className={`flex items-center justify-center ${className ?? ""}`}
         style={{
           height,
           width: typeof width === "number" ? `${width}px` : width,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
         }}
       >
-        <span
-          style={{
-            fontSize: "10px",
-            color: "var(--color-text-secondary, #94a3b8)",
-          }}
-        >
+        <span className="text-[10px] text-[--color-text-secondary]">
           No data
         </span>
       </div>
@@ -130,13 +122,12 @@ export const MiniOhlcChart: React.FC<MiniOhlcChartProps> = ({
 
   return (
     <svg
-      className={className}
+      className={`block ${className ?? ""}`}
       viewBox={`0 0 ${svgWidth} ${svgHeight}`}
       preserveAspectRatio="none"
       style={{
         height,
         width: typeof width === "number" ? `${width}px` : width,
-        display: "block",
       }}
     >
       {candles.map((candle, index) => {
@@ -204,12 +195,10 @@ export const MiniOhlcChartSkeleton: React.FC<{
 }> = ({ height = 50, width = "100%", className }) => {
   return (
     <div
-      className={`animate-pulse ${className ?? ""}`}
+      className={`animate-pulse bg-[--color-border-primary] rounded ${className ?? ""}`}
       style={{
         height,
         width: typeof width === "number" ? `${width}px` : width,
-        background: "rgba(100, 116, 139, 0.2)",
-        borderRadius: "4px",
       }}
     />
   );

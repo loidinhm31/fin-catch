@@ -52,32 +52,32 @@ const getStatusStyle = (
   switch (status) {
     case "filled":
       return {
-        bg: "rgba(0, 255, 136, 0.15)",
-        color: "#00ff88",
+        bg: "var(--color-alert-success-bg)",
+        color: "var(--color-nav-trading-active)",
         icon: <Check className="w-3 h-3" />,
       };
     case "partiallyFilled":
       return {
-        bg: "rgba(0, 212, 255, 0.15)",
-        color: "#00d4ff",
+        bg: "var(--color-sync-pending-bg)",
+        color: "var(--color-cyan-400)",
         icon: <Clock className="w-3 h-3" />,
       };
     case "new":
     case "pending":
       return {
-        bg: "rgba(255, 165, 0, 0.15)",
-        color: "#ffa500",
+        bg: "var(--color-alert-warning-bg)",
+        color: "var(--color-amber-500)",
         icon: <Clock className="w-3 h-3" />,
       };
     case "rejected":
       return {
-        bg: "rgba(255, 51, 102, 0.15)",
-        color: "#ff3366",
+        bg: "var(--color-alert-error-bg)",
+        color: "var(--color-red-400)",
         icon: <XCircle className="w-3 h-3" />,
       };
     case "cancelled":
       return {
-        bg: "rgba(128, 128, 128, 0.15)",
+        bg: "var(--color-border-primary)",
         color: "#888",
         icon: <X className="w-3 h-3" />,
       };
@@ -85,7 +85,7 @@ const getStatusStyle = (
     case "doneForDay":
     default:
       return {
-        bg: "rgba(128, 128, 128, 0.15)",
+        bg: "var(--color-border-primary)",
         color: "#888",
         icon: <Clock className="w-3 h-3" />,
       };
@@ -138,10 +138,10 @@ export const OrderBook: React.FC<OrderBookProps> = ({
     <div
       className="rounded-2xl p-6 border"
       style={{
-        background: "rgba(26, 31, 58, 0.6)",
+        background: "var(--glass-bg-dark)",
         backdropFilter: "blur(16px)",
-        borderColor: "rgba(123, 97, 255, 0.2)",
-        boxShadow: "0 8px 32px rgba(0, 0, 0, 0.3)",
+        borderColor: "var(--glass-border-medium)",
+        boxShadow: "0 8px 32px var(--color-black-30)",
       }}
     >
       {/* Header */}
@@ -170,7 +170,7 @@ export const OrderBook: React.FC<OrderBookProps> = ({
         <div className="flex items-center justify-center py-8">
           <Loader2
             className="w-5 h-5 animate-spin"
-            style={{ color: "#00d4ff" }}
+            style={{ color: "var(--color-market-live)" }}
           />
           <span
             className="ml-2 text-sm"
@@ -199,8 +199,8 @@ export const OrderBook: React.FC<OrderBookProps> = ({
                 key={order.id}
                 className="p-4 rounded-xl border"
                 style={{
-                  background: "rgba(15, 23, 42, 0.5)",
-                  borderColor: "rgba(123, 97, 255, 0.2)",
+                  background: "var(--glass-bg-darker)",
+                  borderColor: "var(--glass-border-medium)",
                 }}
               >
                 <div className="flex items-start justify-between">
@@ -219,9 +219,11 @@ export const OrderBook: React.FC<OrderBookProps> = ({
                         className="px-2 py-0.5 rounded text-xs font-medium"
                         style={{
                           background: isBuy
-                            ? "rgba(0, 255, 136, 0.15)"
-                            : "rgba(255, 51, 102, 0.15)",
-                          color: isBuy ? "#00ff88" : "#ff3366",
+                            ? "var(--color-trade-buy-bg)"
+                            : "var(--color-trade-sell-bg)",
+                          color: isBuy
+                            ? "var(--color-trade-buy)"
+                            : "var(--color-trade-sell)",
                         }}
                       >
                         {isBuy ? "BUY" : "SELL"}
@@ -294,9 +296,9 @@ export const OrderBook: React.FC<OrderBookProps> = ({
                         disabled={isCancelling}
                         className="text-xs px-2 py-1"
                         style={{
-                          background: "rgba(255, 51, 102, 0.1)",
-                          borderColor: "rgba(255, 51, 102, 0.3)",
-                          color: "#ff3366",
+                          background: "var(--color-alert-error-bg)",
+                          borderColor: "var(--color-alert-error-border)",
+                          color: "var(--color-red-400)",
                         }}
                       >
                         {isCancelling ? (
@@ -317,8 +319,8 @@ export const OrderBook: React.FC<OrderBookProps> = ({
                   <div
                     className="mt-2 text-xs p-2 rounded"
                     style={{
-                      background: "rgba(255, 51, 102, 0.1)",
-                      color: "#ff3366",
+                      background: "var(--color-alert-error-bg)",
+                      color: "var(--color-red-400)",
                     }}
                   >
                     {order.rejectReason}

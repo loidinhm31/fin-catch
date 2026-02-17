@@ -20,7 +20,7 @@ export interface QmServerConfig {
 }
 
 /**
- * API response wrapper from qm-center-server
+ * API response wrapper from qm-hub-server
  */
 interface ApiResponse<T> {
   success: boolean;
@@ -37,7 +37,7 @@ function getDefaultBaseUrl(): string {
 
 /**
  * Shared adapter for financial data APIs
- * Calls qm-center-server directly - works in both Tauri webview and browser
+ * Calls qm-hub-server directly - works in both Tauri webview and browser
  */
 export class QmServerDataAdapter implements IDataService {
   private readonly baseUrl: string;

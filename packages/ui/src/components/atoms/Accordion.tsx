@@ -12,7 +12,7 @@ const AccordionItem = React.forwardRef<
   <AccordionPrimitive.Item
     ref={ref}
     className={cn("border rounded-lg", className)}
-    style={{ borderColor: "rgba(255, 255, 255, 0.1)" }}
+    style={{ borderColor: "var(--color-white-10)" }}
     {...props}
   />
 ));

@@ -37,13 +37,10 @@ export const SimpleAlertDialog: React.FC<SimpleAlertDialogProps> = ({
   };
 
   const buttonColors = {
-    info: "bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700",
-    warning:
-      "bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600",
-    error:
-      "bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700",
-    success:
-      "bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700",
+    info: "bg-cyan-500 hover:bg-cyan-600 shadow-glow-cyan",
+    warning: "bg-amber-400 hover:bg-amber-500 shadow-glow-amber",
+    error: "bg-red-600 hover:bg-red-700 shadow-glow-red",
+    success: "bg-green-500 hover:bg-green-600 shadow-glow-green",
   };
 
   return (

@@ -39,7 +39,10 @@ export const GoldChartResponsive: React.FC<GoldChartResponsiveProps> = ({
 
   if (!data || data.length === 0) {
     return (
-      <div className="flex items-center justify-center h-64 text-gray-500 dark:text-gray-400">
+      <div
+        className="flex items-center justify-center h-64"
+        style={{ color: "var(--color-text-secondary)" }}
+      >
         No data available
       </div>
     );
@@ -92,18 +95,26 @@ export const GoldChartResponsive: React.FC<GoldChartResponsiveProps> = ({
               <stop offset="95%" stopColor="#ffaa00" stopOpacity={0.1} />
             </linearGradient>
             <linearGradient id="goldSellGradient" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="5%" stopColor="#00ff88" stopOpacity={0.4} />
-              <stop offset="95%" stopColor="#00ff88" stopOpacity={0.1} />
+              <stop
+                offset="5%"
+                stopColor="var(--color-trade-buy)"
+                stopOpacity={0.4}
+              />
+              <stop
+                offset="95%"
+                stopColor="var(--color-trade-buy)"
+                stopOpacity={0.1}
+              />
             </linearGradient>
           </defs>
           <CartesianGrid
             strokeDasharray="3 3"
-            stroke="rgba(123, 97, 255, 0.2)"
+            stroke="var(--chart-grid)"
             vertical={false}
           />
           <XAxis
             dataKey="time"
-            stroke="#a0aec0"
+            stroke="var(--chart-axis)"
             style={{
               fontSize: `${activeDimensions.tickFontSize}px`,
               fontWeight: "500",
@@ -111,11 +122,11 @@ export const GoldChartResponsive: React.FC<GoldChartResponsiveProps> = ({
             angle={activeDimensions.angleXAxis}
             textAnchor="end"
             height={activeDimensions.marginBottom}
-            tick={{ fill: "#a0aec0" }}
+            tick={{ fill: "var(--chart-axis)" }}
             interval={xAxisInterval as any}
           />
           <YAxis
-            stroke="#a0aec0"
+            stroke="var(--chart-axis)"
             style={{
               fontSize: `${activeDimensions.tickFontSize}px`,
               fontWeight: "500",
@@ -127,7 +138,7 @@ export const GoldChartResponsive: React.FC<GoldChartResponsiveProps> = ({
                     angle: -90,
                     position: "insideLeft",
                     style: {
-                      fill: "#ffffff",
+                      fill: "var(--chart-label)",
                       fontWeight: "600",
                       fontSize: `${activeDimensions.labelFontSize}px`,
                     },
@@ -135,19 +146,18 @@ export const GoldChartResponsive: React.FC<GoldChartResponsiveProps> = ({
                 : undefined
             }
             tickFormatter={formatCurrencyCompact}
-            tick={{ fill: "#a0aec0" }}
+            tick={{ fill: "var(--chart-axis)" }}
             width={isMobile ? 60 : 80}
           />
           <Tooltip
             contentStyle={{
-              backgroundColor: "rgba(26, 31, 58, 0.95)",
-              border: "1px solid rgba(255, 170, 0, 0.3)",
+              backgroundColor: "var(--glass-bg-compact)",
+              border: "1px solid var(--color-amber-400)",
               borderRadius: "12px",
-              color: "#ffffff",
+              color: "var(--chart-label)",
               fontWeight: "600",
               fontSize: `${activeDimensions.fontSize}px`,
-              boxShadow:
-                "0 8px 24px rgba(0, 0, 0, 0.3), 0 0 24px rgba(255, 170, 0, 0.2)",
+              boxShadow: "var(--shadow-glass-sm)",
               backdropFilter: "blur(12px)",
             }}
             labelStyle={{
@@ -166,7 +176,7 @@ export const GoldChartResponsive: React.FC<GoldChartResponsiveProps> = ({
               wrapperStyle={{
                 fontWeight: "600",
                 paddingTop: "16px",
-                color: "#ffffff",
+                color: "var(--chart-label)",
                 fontSize: `${activeDimensions.legendFontSize}px`,
               }}
               iconType="line"
@@ -182,21 +192,21 @@ export const GoldChartResponsive: React.FC<GoldChartResponsiveProps> = ({
             activeDot={{
               r: isMobile ? 4 : 6,
               fill: "#ffaa00",
-              stroke: "#ffffff",
+              stroke: "var(--chart-label)",
               strokeWidth: 2,
             }}
           />
           <Line
             type="monotone"
             dataKey="sell"
-            stroke="#00ff88"
+            stroke="var(--color-trade-buy)"
             strokeWidth={isMobile ? 2 : 2.5}
             dot={false}
             name="Sell Price"
             activeDot={{
               r: isMobile ? 4 : 6,
-              fill: "#00ff88",
-              stroke: "#ffffff",
+              fill: "var(--color-trade-buy)",
+              stroke: "var(--chart-label)",
               strokeWidth: 2,
             }}
           />
@@ -204,8 +214,8 @@ export const GoldChartResponsive: React.FC<GoldChartResponsiveProps> = ({
             <Brush
               dataKey="time"
               height={activeDimensions.brushHeight}
-              stroke="rgba(123, 97, 255, 0.6)"
-              fill="rgba(26, 31, 58, 0.6)"
+              stroke="var(--color-market-purple-border)"
+              fill="var(--glass-bg-card)"
               travellerWidth={isMobile ? 15 : 10}
               startIndex={brushIndex.startIndex}
               endIndex={brushIndex.endIndex}

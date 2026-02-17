@@ -132,16 +132,19 @@ export const MarketDataTicker: React.FC<MarketDataTickerProps> = ({
       <div
         className="p-4 rounded-2xl border backdrop-blur-xl"
         style={{
-          background: "rgba(10, 14, 39, 0.5)",
-          borderColor: "rgba(0, 212, 255, 0.3)",
+          background: "var(--glass-bg-ticker)",
+          borderColor: "var(--color-sync-pending-border)",
         }}
       >
         <div className="flex items-center justify-center py-6">
           <Loader2
             className="w-6 h-6 animate-spin"
-            style={{ color: "#00d4ff" }}
+            style={{ color: "var(--color-market-live)" }}
           />
-          <span className="ml-3 text-sm" style={{ color: "#9ca3af" }}>
+          <span
+            className="ml-3 text-sm"
+            style={{ color: "var(--color-text-gray-light)" }}
+          >
             Loading {symbol}...
           </span>
         </div>
@@ -155,12 +158,12 @@ export const MarketDataTicker: React.FC<MarketDataTickerProps> = ({
       <div
         className="p-4 rounded-2xl border backdrop-blur-xl"
         style={{
-          background: "rgba(10, 14, 39, 0.5)",
-          borderColor: "rgba(255, 51, 102, 0.3)",
+          background: "var(--glass-bg-ticker)",
+          borderColor: "var(--color-trade-sell-border)",
         }}
       >
         <div className="text-center py-4">
-          <p className="text-sm" style={{ color: "#ff3366" }}>
+          <p className="text-sm" style={{ color: "var(--color-trade-sell)" }}>
             {error}
           </p>
         </div>
@@ -174,12 +177,15 @@ export const MarketDataTicker: React.FC<MarketDataTickerProps> = ({
       <div
         className="p-4 rounded-2xl border backdrop-blur-xl"
         style={{
-          background: "rgba(10, 14, 39, 0.5)",
-          borderColor: "rgba(0, 212, 255, 0.3)",
+          background: "var(--glass-bg-ticker)",
+          borderColor: "var(--color-sync-pending-border)",
         }}
       >
         <div className="text-center py-4">
-          <p className="text-sm" style={{ color: "#9ca3af" }}>
+          <p
+            className="text-sm"
+            style={{ color: "var(--color-text-gray-light)" }}
+          >
             Waiting for data...
           </p>
         </div>
@@ -205,27 +211,38 @@ export const MarketDataTicker: React.FC<MarketDataTickerProps> = ({
   change = change || 0;
   changePercent = changePercent || 0;
   const isUp = change >= 0;
-  const priceColor = isUp ? "#00ff88" : "#ff3366";
+  const priceColor = isUp
+    ? "var(--color-trade-buy)"
+    : "var(--color-trade-sell)";
+  const priceColorBg = isUp
+    ? "var(--color-trade-buy-bg)"
+    : "var(--color-trade-sell-bg)";
+  const priceColorBorder = isUp
+    ? "var(--color-trade-buy-border)"
+    : "var(--color-trade-sell-border)";
   const TrendIcon = isUp ? TrendingUp : TrendingDown;
 
   return (
     <div
       className="p-4 rounded-2xl border backdrop-blur-xl"
       style={{
-        background: "rgba(10, 14, 39, 0.5)",
-        borderColor: `${priceColor}30`,
+        background: "var(--glass-bg-ticker)",
+        borderColor: priceColorBorder,
       }}
     >
       {/* Header */}
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2">
-          <h3 className="text-xl font-bold" style={{ color: "white" }}>
+          <h3
+            className="text-xl font-bold"
+            style={{ color: "var(--color-text-primary)" }}
+          >
             {symbol}
           </h3>
           <span
             className="px-2 py-0.5 rounded text-xs font-medium"
             style={{
-              background: `${priceColor}20`,
+              background: priceColorBg,
               color: priceColor,
             }}
           >
@@ -237,10 +254,16 @@ export const MarketDataTicker: React.FC<MarketDataTickerProps> = ({
           <Activity
             className="w-3 h-3"
             style={{
-              color: connectionStatus === "connected" ? "#00ff88" : "#ff3366",
+              color:
+                connectionStatus === "connected"
+                  ? "var(--color-trade-buy)"
+                  : "var(--color-trade-sell)",
             }}
           />
-          <span className="text-xs" style={{ color: "#6b7280" }}>
+          <span
+            className="text-xs"
+            style={{ color: "var(--color-text-tertiary)" }}
+          >
             Live
           </span>
         </div>
@@ -266,30 +289,48 @@ export const MarketDataTicker: React.FC<MarketDataTickerProps> = ({
       {/* Best Bid/Ask */}
       <div className="grid grid-cols-2 gap-3 pt-3 border-t border-white/10">
         <div>
-          <div className="text-xs mb-1" style={{ color: "#6b7280" }}>
+          <div
+            className="text-xs mb-1"
+            style={{ color: "var(--color-text-tertiary)" }}
+          >
             Bid
           </div>
           <div className="flex items-baseline gap-1">
-            <span className="text-sm font-medium" style={{ color: "#00ff88" }}>
+            <span
+              className="text-sm font-medium"
+              style={{ color: "var(--color-trade-buy)" }}
+            >
               {stockInfo.bidPrice?.toLocaleString("vi-VN") ?? "-"}
             </span>
             {stockInfo.bidVolume && (
-              <span className="text-xs" style={{ color: "#6b7280" }}>
+              <span
+                className="text-xs"
+                style={{ color: "var(--color-text-tertiary)" }}
+              >
                 ({(stockInfo.bidVolume / 100).toFixed(0)})
               </span>
             )}
           </div>
         </div>
         <div>
-          <div className="text-xs mb-1" style={{ color: "#6b7280" }}>
+          <div
+            className="text-xs mb-1"
+            style={{ color: "var(--color-text-tertiary)" }}
+          >
             Ask
           </div>
           <div className="flex items-baseline gap-1">
-            <span className="text-sm font-medium" style={{ color: "#ff3366" }}>
+            <span
+              className="text-sm font-medium"
+              style={{ color: "var(--color-trade-sell)" }}
+            >
               {stockInfo.askPrice?.toLocaleString("vi-VN") ?? "-"}
             </span>
             {stockInfo.askVolume && (
-              <span className="text-xs" style={{ color: "#6b7280" }}>
+              <span
+                className="text-xs"
+                style={{ color: "var(--color-text-tertiary)" }}
+              >
                 ({(stockInfo.askVolume / 100).toFixed(0)})
               </span>
             )}
@@ -301,52 +342,88 @@ export const MarketDataTicker: React.FC<MarketDataTickerProps> = ({
       {showDetails && (
         <div className="grid grid-cols-3 gap-3 pt-3 mt-3 border-t border-white/10">
           <div>
-            <div className="text-xs mb-1" style={{ color: "#6b7280" }}>
+            <div
+              className="text-xs mb-1"
+              style={{ color: "var(--color-text-tertiary)" }}
+            >
               High
             </div>
-            <div className="text-sm font-medium" style={{ color: "white" }}>
+            <div
+              className="text-sm font-medium"
+              style={{ color: "var(--color-text-primary)" }}
+            >
               {stockInfo.high?.toLocaleString("vi-VN") ?? "-"}
             </div>
           </div>
           <div>
-            <div className="text-xs mb-1" style={{ color: "#6b7280" }}>
+            <div
+              className="text-xs mb-1"
+              style={{ color: "var(--color-text-tertiary)" }}
+            >
               Low
             </div>
-            <div className="text-sm font-medium" style={{ color: "white" }}>
+            <div
+              className="text-sm font-medium"
+              style={{ color: "var(--color-text-primary)" }}
+            >
               {stockInfo.low?.toLocaleString("vi-VN") ?? "-"}
             </div>
           </div>
           <div>
-            <div className="text-xs mb-1" style={{ color: "#6b7280" }}>
+            <div
+              className="text-xs mb-1"
+              style={{ color: "var(--color-text-tertiary)" }}
+            >
               Volume
             </div>
-            <div className="text-sm font-medium" style={{ color: "white" }}>
+            <div
+              className="text-sm font-medium"
+              style={{ color: "var(--color-text-primary)" }}
+            >
               {stockInfo.volume
                 ? (stockInfo.volume / 1000000).toFixed(2) + "M"
                 : "-"}
             </div>
           </div>
           <div>
-            <div className="text-xs mb-1" style={{ color: "#6b7280" }}>
+            <div
+              className="text-xs mb-1"
+              style={{ color: "var(--color-text-tertiary)" }}
+            >
               Ceiling
             </div>
-            <div className="text-sm font-medium" style={{ color: "#a855f7" }}>
+            <div
+              className="text-sm font-medium"
+              style={{ color: "var(--chart-ceiling)" }}
+            >
               {stockInfo.ceiling?.toLocaleString("vi-VN") ?? "-"}
             </div>
           </div>
           <div>
-            <div className="text-xs mb-1" style={{ color: "#6b7280" }}>
+            <div
+              className="text-xs mb-1"
+              style={{ color: "var(--color-text-tertiary)" }}
+            >
               Ref
             </div>
-            <div className="text-sm font-medium" style={{ color: "#eab308" }}>
+            <div
+              className="text-sm font-medium"
+              style={{ color: "var(--chart-reference)" }}
+            >
               {stockInfo.refPrice?.toLocaleString("vi-VN") ?? "-"}
             </div>
           </div>
           <div>
-            <div className="text-xs mb-1" style={{ color: "#6b7280" }}>
+            <div
+              className="text-xs mb-1"
+              style={{ color: "var(--color-text-tertiary)" }}
+            >
               Floor
             </div>
-            <div className="text-sm font-medium" style={{ color: "#06b6d4" }}>
+            <div
+              className="text-sm font-medium"
+              style={{ color: "var(--chart-floor)" }}
+            >
               {stockInfo.floor?.toLocaleString("vi-VN") ?? "-"}
             </div>
           </div>

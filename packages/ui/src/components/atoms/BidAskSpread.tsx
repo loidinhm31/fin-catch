@@ -71,11 +71,7 @@ export const BidAskSpread: React.FC<BidAskSpreadProps> = ({
   if (!hasBid && !hasAsk) {
     return (
       <div
-        className={className}
-        style={{
-          fontSize: "10px",
-          color: "var(--color-text-secondary, #94a3b8)",
-        }}
+        className={`text-[10px] text-[--color-text-secondary] ${className ?? ""}`}
       >
         No bid/ask
       </div>
@@ -85,31 +81,24 @@ export const BidAskSpread: React.FC<BidAskSpreadProps> = ({
   if (compact) {
     return (
       <div
-        className={className}
-        style={{
-          display: "flex",
-          alignItems: "center",
-          gap: "8px",
-          fontSize: "10px",
-          fontFamily: "monospace",
-        }}
+        className={`flex items-center gap-2 text-[10px] font-mono ${className ?? ""}`}
       >
         {/* Bid */}
-        <span style={{ color: "#00ff88" }}>
+        <span className="text-[--color-trade-buy]">
           B: {formatPrice(bidPrice)}
           {bidVolume !== undefined && (
-            <span style={{ opacity: 0.7 }}> ({formatVolume(bidVolume)})</span>
+            <span className="opacity-70"> ({formatVolume(bidVolume)})</span>
           )}
         </span>
 
         {/* Separator */}
-        <span style={{ color: "var(--color-text-secondary, #64748b)" }}>|</span>
+        <span className="text-[--color-text-secondary]">|</span>
 
         {/* Ask */}
-        <span style={{ color: "#ff3366" }}>
+        <span className="text-[--color-trade-sell]">
           A: {formatPrice(askPrice)}
           {askVolume !== undefined && (
-            <span style={{ opacity: 0.7 }}> ({formatVolume(askVolume)})</span>
+            <span className="opacity-70"> ({formatVolume(askVolume)})</span>
           )}
         </span>
       </div>
@@ -119,73 +108,35 @@ export const BidAskSpread: React.FC<BidAskSpreadProps> = ({
   // Stacked layout for non-compact mode
   return (
     <div
-      className={className}
-      style={{
-        display: "flex",
-        flexDirection: "column",
-        gap: "2px",
-        fontSize: "11px",
-        fontFamily: "monospace",
-      }}
+      className={`flex flex-col gap-0.5 text-[11px] font-mono ${className ?? ""}`}
     >
       {/* Bid row */}
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-        }}
-      >
-        <span style={{ color: "var(--color-text-secondary, #94a3b8)" }}>
-          Bid
-        </span>
-        <span style={{ color: "#00ff88" }}>
+      <div className="flex justify-between items-center">
+        <span className="text-[--color-text-secondary]">Bid</span>
+        <span className="text-[--color-trade-buy]">
           {formatPrice(bidPrice)}
           {bidVolume !== undefined && (
-            <span style={{ opacity: 0.7, marginLeft: "4px" }}>
-              ({formatVolume(bidVolume)})
-            </span>
+            <span className="opacity-70 ml-1">({formatVolume(bidVolume)})</span>
           )}
         </span>
       </div>
 
       {/* Ask row */}
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-        }}
-      >
-        <span style={{ color: "var(--color-text-secondary, #94a3b8)" }}>
-          Ask
-        </span>
-        <span style={{ color: "#ff3366" }}>
+      <div className="flex justify-between items-center">
+        <span className="text-[--color-text-secondary]">Ask</span>
+        <span className="text-[--color-trade-sell]">
           {formatPrice(askPrice)}
           {askVolume !== undefined && (
-            <span style={{ opacity: 0.7, marginLeft: "4px" }}>
-              ({formatVolume(askVolume)})
-            </span>
+            <span className="opacity-70 ml-1">({formatVolume(askVolume)})</span>
           )}
         </span>
       </div>
 
       {/* Spread indicator */}
       {bidPrice !== undefined && askPrice !== undefined && (
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            marginTop: "2px",
-            paddingTop: "2px",
-            borderTop: "1px solid rgba(100, 116, 139, 0.2)",
-          }}
-        >
-          <span style={{ color: "var(--color-text-secondary, #94a3b8)" }}>
-            Spread
-          </span>
-          <span style={{ color: "#00d4ff" }}>
+        <div className="flex justify-between items-center mt-0.5 pt-0.5 border-t border-[--color-border-primary]">
+          <span className="text-[--color-text-secondary]">Spread</span>
+          <span className="text-[--color-market-live]">
             {formatPrice(askPrice - bidPrice)} (
             {(((askPrice - bidPrice) / bidPrice) * 100).toFixed(2)}%)
           </span>
@@ -204,58 +155,17 @@ export const BidAskSpreadSkeleton: React.FC<{
 }> = ({ compact = true, className }) => {
   if (compact) {
     return (
-      <div
-        className={`animate-pulse ${className ?? ""}`}
-        style={{
-          display: "flex",
-          gap: "8px",
-        }}
-      >
-        <div
-          style={{
-            width: "60px",
-            height: "12px",
-            background: "rgba(100, 116, 139, 0.2)",
-            borderRadius: "2px",
-          }}
-        />
-        <div
-          style={{
-            width: "60px",
-            height: "12px",
-            background: "rgba(100, 116, 139, 0.2)",
-            borderRadius: "2px",
-          }}
-        />
+      <div className={`animate-pulse flex gap-2 ${className ?? ""}`}>
+        <div className="w-[60px] h-3 bg-[--color-border-primary] rounded-sm" />
+        <div className="w-[60px] h-3 bg-[--color-border-primary] rounded-sm" />
       </div>
     );
   }
 
   return (
-    <div
-      className={`animate-pulse ${className ?? ""}`}
-      style={{
-        display: "flex",
-        flexDirection: "column",
-        gap: "4px",
-      }}
-    >
-      <div
-        style={{
-          width: "100%",
-          height: "14px",
-          background: "rgba(100, 116, 139, 0.2)",
-          borderRadius: "2px",
-        }}
-      />
-      <div
-        style={{
-          width: "100%",
-          height: "14px",
-          background: "rgba(100, 116, 139, 0.2)",
-          borderRadius: "2px",
-        }}
-      />
+    <div className={`animate-pulse flex flex-col gap-1 ${className ?? ""}`}>
+      <div className="w-full h-3.5 bg-[--color-border-primary] rounded-sm" />
+      <div className="w-full h-3.5 bg-[--color-border-primary] rounded-sm" />
     </div>
   );
 };

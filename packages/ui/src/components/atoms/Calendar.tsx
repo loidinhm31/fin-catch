@@ -56,9 +56,9 @@ function Calendar({
         week: cn("mt-2 flex w-full", defaultClassNames.week),
         day: cn(
           "relative aspect-square h-full w-full flex-1 select-none p-0 text-center text-sm",
-          "hover:bg-[rgba(139,92,246,0.2)] hover:text-[var(--color-text-primary)] rounded-md",
-          "focus:bg-[rgba(139,92,246,0.2)] focus:text-[var(--color-text-primary)]",
-          "aria-selected:bg-gradient-to-r aria-selected:from-violet-500 aria-selected:to-violet-600",
+          "hover:bg-violet-500/20 hover:text-[var(--color-text-primary)] rounded-md",
+          "focus:bg-violet-500/20 focus:text-[var(--color-text-primary)]",
+          "aria-selected:bg-[var(--color-violet-500)] aria-selected:shadow-glow-violet",
           "aria-selected:text-white aria-selected:hover:bg-violet-600",
           defaultClassNames.day,
         ),
@@ -68,19 +68,19 @@ function Calendar({
           buttonVariants({ variant: "ghost" }),
         ),
         selected: cn(
-          "bg-gradient-to-r from-violet-500 to-violet-600",
+          "bg-[var(--color-violet-500)] shadow-glow-violet",
           "text-white hover:bg-violet-600 hover:text-white",
           "focus:bg-violet-600 focus:text-white",
           defaultClassNames.selected,
         ),
         today: cn(
-          "bg-[rgba(34,211,238,0.2)] text-cyan-400 font-semibold",
+          "bg-cyan-500/20 text-cyan-400 font-semibold",
           "border border-cyan-500/40",
           defaultClassNames.today,
         ),
         outside: cn(
           "text-[var(--color-text-muted)] opacity-50",
-          "aria-selected:bg-[rgba(139,92,246,0.1)] aria-selected:opacity-30",
+          "aria-selected:bg-violet-500/10 aria-selected:opacity-30",
           defaultClassNames.outside,
         ),
         disabled: cn(
