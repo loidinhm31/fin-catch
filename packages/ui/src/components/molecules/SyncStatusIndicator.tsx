@@ -168,7 +168,7 @@ export const SyncStatusIndicator: React.FC<SyncStatusIndicatorProps> = ({
           className="absolute -top-1 -right-1 flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full text-[10px] font-bold"
           style={{
             background: "var(--color-violet-500)",
-            color: "#ffffff",
+            color: "var(--color-text-primary)",
             boxShadow: "var(--shadow-glow-violet)",
           }}
         >

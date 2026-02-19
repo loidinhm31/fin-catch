@@ -44,7 +44,7 @@ export const BondHoldingCard: React.FC<BondHoldingCardProps> = ({
               className="cyber-terminal-header px-2 py-0.5 rounded border"
               style={{
                 backgroundColor: "rgba(168, 85, 247, 0.1)",
-                borderColor: "#A855F7",
+                borderColor: "var(--color-violet-500)",
               }}
             >
               BOND
@@ -82,7 +82,7 @@ export const BondHoldingCard: React.FC<BondHoldingCardProps> = ({
                 className="uppercase tracking-wide font-mono"
                 style={{
                   fontSize: "var(--text-xs)",
-                  color: "#64748B",
+                  color: "var(--color-text-muted)",
                   marginBottom: "2px",
                 }}
               >
@@ -92,7 +92,7 @@ export const BondHoldingCard: React.FC<BondHoldingCardProps> = ({
                 className="cyber-data"
                 style={{
                   fontWeight: "var(--font-bold)",
-                  color: "var(--cube-gray-900)",
+                  color: "var(--color-text-primary)",
                 }}
               >
                 {formatCurrency(entryPerf.currentValue)}
@@ -102,7 +102,7 @@ export const BondHoldingCard: React.FC<BondHoldingCardProps> = ({
               <p
                 style={{
                   fontSize: "var(--text-xs)",
-                  color: "var(--cube-gray-500)",
+                  color: "var(--color-text-muted)",
                   marginBottom: "2px",
                 }}
               >
@@ -207,7 +207,7 @@ export const BondHoldingCard: React.FC<BondHoldingCardProps> = ({
               <p
                 style={{
                   fontSize: "var(--text-xs)",
-                  color: "var(--cube-gray-500)",
+                  color: "var(--color-text-muted)",
                 }}
               >
                 Quantity (bonds)
@@ -216,7 +216,7 @@ export const BondHoldingCard: React.FC<BondHoldingCardProps> = ({
                 style={{
                   fontSize: "var(--text-sm)",
                   fontWeight: "var(--font-medium)",
-                  color: "var(--cube-gray-900)",
+                  color: "var(--color-text-primary)",
                 }}
               >
                 {entry.quantity}
@@ -226,7 +226,7 @@ export const BondHoldingCard: React.FC<BondHoldingCardProps> = ({
               <p
                 style={{
                   fontSize: "var(--text-xs)",
-                  color: "var(--cube-gray-500)",
+                  color: "var(--color-text-muted)",
                 }}
               >
                 Purchase Price per bond ({displayCurrency})
@@ -235,7 +235,7 @@ export const BondHoldingCard: React.FC<BondHoldingCardProps> = ({
                 style={{
                   fontSize: "var(--text-sm)",
                   fontWeight: "var(--font-medium)",
-                  color: "var(--cube-gray-900)",
+                  color: "var(--color-text-primary)",
                 }}
               >
                 {formatCurrency(entryPerf.purchasePrice || 0)}
@@ -245,7 +245,7 @@ export const BondHoldingCard: React.FC<BondHoldingCardProps> = ({
               <p
                 style={{
                   fontSize: "var(--text-xs)",
-                  color: "var(--cube-gray-500)",
+                  color: "var(--color-text-muted)",
                 }}
               >
                 Current Price per bond ({displayCurrency})
@@ -254,7 +254,7 @@ export const BondHoldingCard: React.FC<BondHoldingCardProps> = ({
                 style={{
                   fontSize: "var(--text-sm)",
                   fontWeight: "var(--font-medium)",
-                  color: "var(--cube-gray-900)",
+                  color: "var(--color-text-primary)",
                 }}
               >
                 {formatCurrency(entryPerf.currentPrice)}
@@ -264,7 +264,7 @@ export const BondHoldingCard: React.FC<BondHoldingCardProps> = ({
               <p
                 style={{
                   fontSize: "var(--text-xs)",
-                  color: "var(--cube-gray-500)",
+                  color: "var(--color-text-muted)",
                 }}
               >
                 Purchase Date
@@ -273,7 +273,7 @@ export const BondHoldingCard: React.FC<BondHoldingCardProps> = ({
                 style={{
                   fontSize: "var(--text-sm)",
                   fontWeight: "var(--font-medium)",
-                  color: "var(--cube-gray-900)",
+                  color: "var(--color-text-primary)",
                 }}
               >
                 {formatDate(entry.purchaseDate)}
@@ -286,7 +286,7 @@ export const BondHoldingCard: React.FC<BondHoldingCardProps> = ({
                   <p
                     style={{
                       fontSize: "var(--text-xs)",
-                      color: "var(--cube-gray-500)",
+                      color: "var(--color-text-muted)",
                     }}
                   >
                     Exchange Rate
@@ -295,7 +295,7 @@ export const BondHoldingCard: React.FC<BondHoldingCardProps> = ({
                     style={{
                       fontSize: "var(--text-sm)",
                       fontWeight: "var(--font-medium)",
-                      color: "var(--cube-gray-900)",
+                      color: "var(--color-text-primary)",
                     }}
                   >
                     1 {entry.currency} = {entryPerf.exchangeRate.toFixed(4)}{" "}
@@ -310,7 +310,7 @@ export const BondHoldingCard: React.FC<BondHoldingCardProps> = ({
               <p
                 style={{
                   fontSize: "var(--text-xs)",
-                  color: "var(--cube-gray-500)",
+                  color: "var(--color-text-muted)",
                 }}
               >
                 Face Value
@@ -319,7 +319,7 @@ export const BondHoldingCard: React.FC<BondHoldingCardProps> = ({
                 style={{
                   fontSize: "var(--text-sm)",
                   fontWeight: "var(--font-medium)",
-                  color: "var(--cube-gray-900)",
+                  color: "var(--color-text-primary)",
                 }}
               >
                 {entry.faceValue
@@ -331,7 +331,7 @@ export const BondHoldingCard: React.FC<BondHoldingCardProps> = ({
               <p
                 style={{
                   fontSize: "var(--text-xs)",
-                  color: "var(--cube-gray-500)",
+                  color: "var(--color-text-muted)",
                 }}
               >
                 Coupon Rate
@@ -340,7 +340,7 @@ export const BondHoldingCard: React.FC<BondHoldingCardProps> = ({
                 style={{
                   fontSize: "var(--text-sm)",
                   fontWeight: "var(--font-medium)",
-                  color: "var(--cube-gray-900)",
+                  color: "var(--color-text-primary)",
                 }}
               >
                 {entry.couponRate ? `${entry.couponRate.toFixed(2)}%` : "N/A"}
@@ -350,7 +350,7 @@ export const BondHoldingCard: React.FC<BondHoldingCardProps> = ({
               <p
                 style={{
                   fontSize: "var(--text-xs)",
-                  color: "var(--cube-gray-500)",
+                  color: "var(--color-text-muted)",
                 }}
               >
                 Maturity Date
@@ -359,7 +359,7 @@ export const BondHoldingCard: React.FC<BondHoldingCardProps> = ({
                 style={{
                   fontSize: "var(--text-sm)",
                   fontWeight: "var(--font-medium)",
-                  color: "var(--cube-gray-900)",
+                  color: "var(--color-text-primary)",
                 }}
               >
                 {entry.maturityDate ? formatDate(entry.maturityDate) : "N/A"}
@@ -369,7 +369,7 @@ export const BondHoldingCard: React.FC<BondHoldingCardProps> = ({
               <p
                 style={{
                   fontSize: "var(--text-xs)",
-                  color: "var(--cube-gray-500)",
+                  color: "var(--color-text-muted)",
                 }}
               >
                 Frequency
@@ -378,7 +378,7 @@ export const BondHoldingCard: React.FC<BondHoldingCardProps> = ({
                 style={{
                   fontSize: "var(--text-sm)",
                   fontWeight: "var(--font-medium)",
-                  color: "var(--cube-gray-900)",
+                  color: "var(--color-text-primary)",
                 }}
               >
                 {entry.couponFrequency
@@ -392,7 +392,7 @@ export const BondHoldingCard: React.FC<BondHoldingCardProps> = ({
                 <p
                   style={{
                     fontSize: "var(--text-xs)",
-                    color: "var(--cube-gray-500)",
+                    color: "var(--color-text-muted)",
                   }}
                 >
                   Current Market Price (Manual)
@@ -401,7 +401,7 @@ export const BondHoldingCard: React.FC<BondHoldingCardProps> = ({
                   style={{
                     fontSize: "var(--text-sm)",
                     fontWeight: "var(--font-medium)",
-                    color: "var(--cube-gray-900)",
+                    color: "var(--color-text-primary)",
                   }}
                 >
                   {formatCurrency(entry.currentMarketPrice, entry.currency)}
@@ -409,7 +409,7 @@ export const BondHoldingCard: React.FC<BondHoldingCardProps> = ({
                     <span
                       style={{
                         fontSize: "var(--text-xs)",
-                        color: "var(--cube-gray-500)",
+                        color: "var(--color-text-muted)",
                         marginLeft: "4px",
                       }}
                     >
@@ -438,7 +438,7 @@ export const BondHoldingCard: React.FC<BondHoldingCardProps> = ({
               <p
                 style={{
                   fontSize: "var(--text-xs)",
-                  color: "var(--cube-gray-500)",
+                  color: "var(--color-text-muted)",
                 }}
               >
                 Notes
@@ -446,7 +446,7 @@ export const BondHoldingCard: React.FC<BondHoldingCardProps> = ({
               <p
                 style={{
                   fontSize: "var(--text-sm)",
-                  color: "var(--cube-gray-900)",
+                  color: "var(--color-text-primary)",
                 }}
               >
                 {entry.notes}
@@ -458,7 +458,7 @@ export const BondHoldingCard: React.FC<BondHoldingCardProps> = ({
               <p
                 style={{
                   fontSize: "var(--text-xs)",
-                  color: "var(--cube-gray-500)",
+                  color: "var(--color-text-muted)",
                 }}
               >
                 Tags
@@ -466,7 +466,7 @@ export const BondHoldingCard: React.FC<BondHoldingCardProps> = ({
               <p
                 style={{
                   fontSize: "var(--text-sm)",
-                  color: "var(--cube-gray-900)",
+                  color: "var(--color-text-primary)",
                 }}
               >
                 {entry.tags}

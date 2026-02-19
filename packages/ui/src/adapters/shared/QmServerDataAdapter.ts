@@ -17,6 +17,7 @@ import { IDataService } from "@fin-catch/ui/adapters/factory/interfaces";
  */
 export interface QmServerConfig {
   baseUrl?: string;
+  apiBasePath?: string;
 }
 
 /**
@@ -41,9 +42,11 @@ function getDefaultBaseUrl(): string {
  */
 export class QmServerDataAdapter implements IDataService {
   private readonly baseUrl: string;
+  private readonly apiBasePath: string;
 
   constructor(config?: QmServerConfig) {
     this.baseUrl = config?.baseUrl || getDefaultBaseUrl();
+    this.apiBasePath = config?.apiBasePath ?? "/api/v1";
     serviceLogger.market(`Initialized with baseUrl: ${this.baseUrl}`);
   }
 
@@ -109,7 +112,7 @@ export class QmServerDataAdapter implements IDataService {
   ): Promise<StockHistoryResponse> {
     try {
       return await this.post<StockHistoryRequest, StockHistoryResponse>(
-        "/api/v1/fin-catch/stock-history",
+        `${this.apiBasePath}/fin-catch/stock-history`,
         request,
       );
     } catch (error) {
@@ -127,7 +130,7 @@ export class QmServerDataAdapter implements IDataService {
   async fetchGoldPrice(request: GoldPriceRequest): Promise<GoldPriceResponse> {
     try {
       return await this.post<GoldPriceRequest, GoldPriceResponse>(
-        "/api/v1/fin-catch/gold-prices",
+        `${this.apiBasePath}/fin-catch/gold-prices`,
         request,
       );
     } catch (error) {
@@ -146,7 +149,7 @@ export class QmServerDataAdapter implements IDataService {
   ): Promise<ExchangeRateResponse> {
     try {
       return await this.post<ExchangeRateRequest, ExchangeRateResponse>(
-        "/api/v1/fin-catch/exchange-rates",
+        `${this.apiBasePath}/fin-catch/exchange-rates`,
         request,
       );
     } catch (error) {
@@ -165,7 +168,7 @@ export class QmServerDataAdapter implements IDataService {
   ): Promise<GoldPremiumResponse> {
     try {
       return await this.post<GoldPremiumRequest, GoldPremiumResponse>(
-        "/api/v1/fin-catch/gold-premium",
+        `${this.apiBasePath}/fin-catch/gold-premium`,
         request,
       );
     } catch (error) {
@@ -180,7 +183,7 @@ export class QmServerDataAdapter implements IDataService {
   async getSources(): Promise<Record<string, string[]>> {
     try {
       return await this.get<Record<string, string[]>>(
-        "/api/v1/fin-catch/sources",
+        `${this.apiBasePath}/fin-catch/sources`,
       );
     } catch (error) {
       serviceLogger.marketError("Get sources failed");
@@ -191,7 +194,7 @@ export class QmServerDataAdapter implements IDataService {
   async healthCheckAll(): Promise<Record<string, boolean>> {
     try {
       return await this.get<Record<string, boolean>>(
-        "/api/v1/fin-catch/health",
+        `${this.apiBasePath}/fin-catch/health`,
       );
     } catch (error) {
       serviceLogger.marketError("Health check failed");

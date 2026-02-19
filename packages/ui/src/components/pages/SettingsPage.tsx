@@ -53,10 +53,10 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({ onLogout }) => {
               />
             </div>
             <div>
-              <h3 className="text-lg font-semibold text-[var(--color-text-primary)]">
+              <h3 className="text-lg font-semibold text-(--color-text-primary)">
                 Theme
               </h3>
-              <p className="text-sm text-[var(--color-text-secondary)]">
+              <p className="text-sm text-(--color-text-secondary)">
                 Choose your preferred appearance
               </p>
             </div>
@@ -75,7 +75,7 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({ onLogout }) => {
                         color: "var(--color-violet-500)",
                       }
                     : {
-                        borderColor: "var(--color-border-primary)",
+                        borderColor: "var(--color-border-light)",
                         backgroundColor: "transparent",
                         color: "var(--color-text-secondary)",
                       }
@@ -91,7 +91,7 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({ onLogout }) => {
                 onMouseLeave={(e) => {
                   if (theme !== option.value) {
                     e.currentTarget.style.borderColor =
-                      "var(--color-border-primary)";
+                      "var(--color-border-light)";
                     e.currentTarget.style.backgroundColor = "transparent";
                   }
                 }}

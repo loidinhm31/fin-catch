@@ -113,7 +113,7 @@ export function AppShell({
       <div
         className="min-h-screen flex items-center justify-center cyber-grid-pattern"
         style={{
-          background: "var(--color-bg-primary)",
+          background: "var(--color-bg-app)",
         }}
       >
         <LoadingSpinner />
@@ -137,7 +137,7 @@ export function AppShell({
     <div
       className="min-h-screen cyber-grid-pattern"
       style={{
-        background: "var(--color-bg-primary)",
+        background: "var(--color-bg-app)",
       }}
     >
       {/* Desktop Sidebar - Hidden on mobile */}

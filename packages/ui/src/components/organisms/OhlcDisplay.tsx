@@ -165,14 +165,14 @@ export const OhlcDisplay: React.FC<OhlcDisplayProps> = ({
           style={{
             height: 8,
             width: width * 0.8,
-            backgroundColor: "var(--color-border-primary)",
+            backgroundColor: "var(--color-border-light)",
           }}
         >
           <div
             className="h-full rounded-sm"
             style={{
               width: `${volumeHeight * 3}%`,
-              backgroundColor: "var(--color-border-primary)",
+              backgroundColor: "var(--color-border-light)",
             }}
           />
         </div>
@@ -195,7 +195,7 @@ export const OhlcDisplay: React.FC<OhlcDisplayProps> = ({
             transform: "translateX(-50%)",
             marginBottom: 8,
             background: "var(--glass-bg-compact)",
-            border: "1px solid var(--color-border-primary)",
+            border: "1px solid var(--color-border-light)",
           }}
         >
           {/* Symbol & Interval */}

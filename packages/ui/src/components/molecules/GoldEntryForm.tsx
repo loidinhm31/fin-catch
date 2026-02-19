@@ -66,7 +66,7 @@ export const GoldEntryForm: React.FC<GoldEntryFormProps> = ({
         <p
           style={{
             fontSize: "var(--text-xs)",
-            color: "var(--cube-gray-500)",
+            color: "var(--color-text-muted)",
             marginTop: "var(--space-1)",
           }}
         >
@@ -136,7 +136,7 @@ export const GoldEntryForm: React.FC<GoldEntryFormProps> = ({
           <p
             style={{
               fontSize: "var(--text-xs)",
-              color: "var(--cube-gray-600)",
+              color: "var(--color-text-secondary)",
               marginTop: "var(--space-1)",
             }}
           >

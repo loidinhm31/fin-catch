@@ -156,7 +156,7 @@ export const AddEditCouponModal: React.FC<AddEditCouponModalProps> = ({
           <p
             style={{
               fontSize: "var(--text-xs)",
-              color: "var(--cube-gray-500)",
+              color: "var(--color-text-muted)",
               marginTop: "var(--space-1)",
             }}
           >

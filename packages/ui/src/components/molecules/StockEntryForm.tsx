@@ -92,13 +92,13 @@ export const StockEntryForm: React.FC<StockEntryFormProps> = ({
               <div className="flex items-center gap-2">
                 <Bell
                   className="w-4 h-4"
-                  style={{ color: "var(--cube-gray-600)" }}
+                  style={{ color: "var(--color-text-secondary)" }}
                 />
                 <span
                   style={{
                     fontSize: "var(--text-sm)",
                     fontWeight: "var(--font-medium)",
-                    color: "var(--cube-gray-700)",
+                    color: "var(--color-text-secondary)",
                   }}
                 >
                   Price Alerts
@@ -109,7 +109,7 @@ export const StockEntryForm: React.FC<StockEntryFormProps> = ({
                     style={{
                       backgroundColor: alertEnabled
                         ? "var(--color-alert-success-bg)"
-                        : "var(--color-bg-secondary)",
+                        : "var(--color-bg-light)",
                       color: alertEnabled
                         ? "#065f46"
                         : "var(--color-text-tertiary)",
@@ -168,7 +168,7 @@ export const StockEntryForm: React.FC<StockEntryFormProps> = ({
                     htmlFor="alertEnabled"
                     style={{
                       fontSize: "var(--text-sm)",
-                      color: "var(--cube-gray-700)",
+                      color: "var(--color-text-secondary)",
                     }}
                   >
                     Enable price alerts
@@ -179,7 +179,7 @@ export const StockEntryForm: React.FC<StockEntryFormProps> = ({
               <p
                 style={{
                   fontSize: "var(--text-xs)",
-                  color: "var(--cube-gray-500)",
+                  color: "var(--color-text-muted)",
                 }}
               >
                 You'll receive notifications when the price crosses these

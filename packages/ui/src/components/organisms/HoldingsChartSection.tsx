@@ -29,7 +29,7 @@ export const HoldingsChartSection: React.FC<HoldingsChartSectionProps> = ({
           style={{
             fontSize: "var(--text-xl)",
             fontWeight: "var(--font-bold)",
-            color: "var(--cube-gray-900)",
+            color: "var(--color-text-primary)",
           }}
         >
           Holdings Performance
@@ -37,7 +37,7 @@ export const HoldingsChartSection: React.FC<HoldingsChartSectionProps> = ({
         {!showChart && (
           <button
             onClick={onShowChart}
-            className="bg-[#A855F7] text-white px-4 py-2 rounded-xl font-bold shadow-[0_0_15px_rgba(168,85,247,0.5)] hover:shadow-xl transition-all flex items-center gap-2"
+            className="bg-(--color-violet-500) text-white px-4 py-2 rounded-xl font-bold shadow-[0_0_15px_rgba(168,85,247,0.5)] hover:shadow-xl transition-all flex items-center gap-2"
             style={{ fontSize: "var(--text-sm)" }}
           >
             <BarChart3 className="w-4 h-4" />
@@ -54,7 +54,7 @@ export const HoldingsChartSection: React.FC<HoldingsChartSectionProps> = ({
               style={{
                 fontSize: "var(--text-sm)",
                 fontWeight: "var(--font-medium)",
-                color: "var(--cube-gray-900)",
+                color: "var(--color-text-primary)",
                 opacity: 0.7,
                 marginBottom: "var(--space-2)",
               }}
@@ -68,7 +68,7 @@ export const HoldingsChartSection: React.FC<HoldingsChartSectionProps> = ({
                   onClick={() => onTimeframeChange(tf)}
                   className={`px-3 py-2 rounded-lg font-bold transition-all ${
                     timeframe === tf
-                      ? "bg-[#06B6D4] text-white shadow-[0_0_12px_rgba(6,182,212,0.5)]"
+                      ? "bg-(--color-cyan-500) text-white shadow-[0_0_12px_rgba(6,182,212,0.5)]"
                       : "glass-button"
                   }`}
                   style={{ fontSize: "var(--text-xs)" }}
@@ -86,7 +86,7 @@ export const HoldingsChartSection: React.FC<HoldingsChartSectionProps> = ({
               <p
                 style={{
                   fontSize: "var(--text-sm)",
-                  color: "var(--cube-gray-900)",
+                  color: "var(--color-text-primary)",
                   marginTop: "var(--space-4)",
                 }}
               >
@@ -100,7 +100,7 @@ export const HoldingsChartSection: React.FC<HoldingsChartSectionProps> = ({
               <p
                 style={{
                   fontSize: "var(--text-sm)",
-                  color: "var(--cube-gray-900)",
+                  color: "var(--color-text-primary)",
                   opacity: 0.7,
                 }}
               >

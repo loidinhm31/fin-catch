@@ -25,7 +25,7 @@ export const PortfolioSelector: React.FC<PortfolioSelectorProps> = ({
         style={{
           fontSize: "var(--text-xl)",
           fontWeight: "var(--font-bold)",
-          color: "var(--cube-gray-900)",
+          color: "var(--color-text-primary)",
           marginBottom: "var(--space-4)",
         }}
       >
@@ -41,7 +41,7 @@ export const PortfolioSelector: React.FC<PortfolioSelectorProps> = ({
               onClick={() => onSelect(portfolio.id!)}
               className={`px-4 py-3 rounded-xl font-bold transition-all ${
                 selectedPortfolioId === portfolio.id
-                  ? "bg-[#A855F7] text-white shadow-[0_0_15px_rgba(168,85,247,0.5)] pr-14"
+                  ? "bg-(--color-violet-500) text-white shadow-[0_0_15px_rgba(168,85,247,0.5)] pr-14"
                   : "glass-button"
               }`}
               style={{ fontSize: "var(--text-sm)" }}

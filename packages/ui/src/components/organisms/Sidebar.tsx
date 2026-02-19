@@ -122,15 +122,15 @@ export function Sidebar({
           borderBottomColor: "var(--glass-border-light)",
         }}
       >
-        <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 bg-[--color-violet-500] shadow-[--shadow-glow-violet]">
-          <TrendingUp className="w-5 h-5 text-[--color-text-primary]" />
+        <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 bg-(--color-violet-500) shadow-(--shadow-glow-violet)">
+          <TrendingUp className="w-5 h-5 text-(--color-text-primary)" />
         </div>
         {!isCollapsed && (
           <div className="overflow-hidden">
-            <h1 className="text-lg font-bold whitespace-nowrap text-[--color-text-primary]">
+            <h1 className="text-lg font-bold whitespace-nowrap text-(--color-text-primary)">
               FinCatch
             </h1>
-            <p className="text-xs whitespace-nowrap text-[--color-text-secondary]">
+            <p className="text-xs whitespace-nowrap text-(--color-text-secondary)">
               Financial Tracker
             </p>
           </div>
@@ -191,7 +191,7 @@ export function Sidebar({
       {/* Collapse Toggle Button */}
       <button
         onClick={onToggleCollapse}
-        className="mx-3 mb-3 p-2 rounded-lg transition-all hover:bg-white/5 flex items-center justify-center text-[--color-text-muted]"
+        className="mx-3 mb-3 p-2 rounded-lg transition-all hover:bg-white/5 flex items-center justify-center text-(--color-text-muted)"
         title={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
       >
         {isCollapsed ? (
@@ -235,7 +235,7 @@ export function Sidebar({
             </span>
           )}
           {isCollapsed && pendingCount > 0 && (
-            <span className="absolute ml-6 -mt-4 flex items-center justify-center min-w-4 h-4 px-1 rounded-full text-[9px] font-bold bg-[--color-violet-500] shadow-[--shadow-glow-violet] text-[--color-text-primary]">
+            <span className="absolute ml-6 -mt-4 flex items-center justify-center min-w-4 h-4 px-1 rounded-full text-[9px] font-bold bg-(--color-violet-500) shadow-(--shadow-glow-violet) text-(--color-text-primary)">
               {pendingCount > 99 ? "99+" : pendingCount}
             </span>
           )}

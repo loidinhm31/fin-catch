@@ -88,7 +88,7 @@ export const HoldingsPerformanceChartResponsive: React.FC<
                 style={{
                   fontSize: "var(--text-xs)",
                   fontWeight: "var(--font-bold)",
-                  color: "var(--cube-gray-900)",
+                  color: "var(--color-text-primary)",
                 }}
               >
                 {holding.entry.symbol}
@@ -98,7 +98,9 @@ export const HoldingsPerformanceChartResponsive: React.FC<
               style={{
                 fontSize: "var(--text-sm)",
                 fontWeight: "var(--font-bold)",
-                color: isPositive ? "#10b981" : "#ef4444",
+                color: isPositive
+                  ? "var(--color-green-500)"
+                  : "var(--color-red-500)",
               }}
             >
               {isPositive ? "+" : ""}

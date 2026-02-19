@@ -20,7 +20,7 @@ export const Label = React.memo(function Label({
         fontSize: "var(--text-sm)",
         fontWeight: "var(--font-bold)",
         marginBottom: "var(--space-2)",
-        color: error ? "var(--color-red-500)" : "var(--cube-gray-900)",
+        color: error ? "var(--color-red-500)" : "var(--color-text-primary)",
       }}
       {...props}
     >

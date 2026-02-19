@@ -30,6 +30,7 @@ import { IMarketDataService } from "@fin-catch/ui/adapters/factory/interfaces";
  */
 export interface MarketDataConfig {
   baseUrl?: string;
+  apiBasePath?: string;
 }
 
 /**
@@ -105,6 +106,7 @@ function getDefaultBaseUrl(): string {
  */
 export class MarketDataAdapter implements IMarketDataService {
   private baseUrl: string;
+  private apiBasePath: string;
   private abortController: AbortController | null = null;
   private connectionStatus: MarketDataConnectionStatus = "disconnected";
   private snapshots: Map<string, StockInfo> = new Map();
@@ -134,6 +136,7 @@ export class MarketDataAdapter implements IMarketDataService {
       config?.baseUrl ||
       this.getStoredValue(AUTH_STORAGE_KEYS.SERVER_URL) ||
       getDefaultBaseUrl();
+    this.apiBasePath = config?.apiBasePath ?? "/api/v1";
 
     console.log(
       `[MarketDataAdapter] Initialized with baseUrl: ${this.baseUrl}`,
@@ -238,7 +241,7 @@ export class MarketDataAdapter implements IMarketDataService {
     this.currentPlatform = platform;
     this.notifyStatusChange("connecting");
 
-    const streamPath = `/api/v1/trading/${platform}/market-data/stream`;
+    const streamPath = `${this.apiBasePath}/trading/${platform}/market-data/stream`;
     const url = `${this.baseUrl}${streamPath}`;
 
     console.log(`[MarketDataAdapter] Connecting to SSE: ${url}`);
@@ -520,7 +523,7 @@ export class MarketDataAdapter implements IMarketDataService {
       return;
     }
 
-    const url = `${this.baseUrl}/api/v1/trading/${platform}/market-data/subscribe`;
+    const url = `${this.baseUrl}${this.apiBasePath}/trading/${platform}/market-data/subscribe`;
 
     console.log(`[MarketDataAdapter] Subscribing to ${upperSymbol}`);
 
@@ -580,7 +583,7 @@ export class MarketDataAdapter implements IMarketDataService {
       };
     }
 
-    const url = `${this.baseUrl}/api/v1/trading/${platform}/market-data/subscribe-batch`;
+    const url = `${this.baseUrl}${this.apiBasePath}/trading/${platform}/market-data/subscribe-batch`;
 
     console.log(
       `[MarketDataAdapter] Batch subscribing to ${symbols.length} symbols`,
@@ -638,7 +641,7 @@ export class MarketDataAdapter implements IMarketDataService {
     // Last subscriber, actually unsubscribe
     this.activeSubscriptions.delete(subscriptionKey);
 
-    const url = `${this.baseUrl}/api/v1/trading/${platform}/market-data/unsubscribe`;
+    const url = `${this.baseUrl}${this.apiBasePath}/trading/${platform}/market-data/unsubscribe`;
 
     console.log(`[MarketDataAdapter] Unsubscribing from ${upperSymbol}`);
 
@@ -684,7 +687,7 @@ export class MarketDataAdapter implements IMarketDataService {
       return;
     }
 
-    const url = `${this.baseUrl}/api/v1/trading/${platform}/market-data/unsubscribe-batch`;
+    const url = `${this.baseUrl}${this.apiBasePath}/trading/${platform}/market-data/unsubscribe-batch`;
 
     console.log(
       `[MarketDataAdapter] Batch unsubscribing from ${symbols.length} symbols`,
@@ -759,7 +762,7 @@ export class MarketDataAdapter implements IMarketDataService {
       return;
     }
 
-    const url = `${this.baseUrl}/api/v1/trading/${platform}/market-data/subscribe-index`;
+    const url = `${this.baseUrl}${this.apiBasePath}/trading/${platform}/market-data/subscribe-index`;
 
     console.log(`[MarketDataAdapter] Subscribing to index ${upperIndex}`);
 
@@ -818,7 +821,7 @@ export class MarketDataAdapter implements IMarketDataService {
       };
     }
 
-    const url = `${this.baseUrl}/api/v1/trading/${platform}/market-data/subscribe-indexes`;
+    const url = `${this.baseUrl}${this.apiBasePath}/trading/${platform}/market-data/subscribe-indexes`;
 
     console.log(
       `[MarketDataAdapter] Batch subscribing to ${indexes.length} indexes`,
@@ -884,7 +887,7 @@ export class MarketDataAdapter implements IMarketDataService {
     // Last subscriber, actually unsubscribe
     this.activeIndexSubscriptions.delete(subscriptionKey);
 
-    const url = `${this.baseUrl}/api/v1/trading/${platform}/market-data/unsubscribe-index`;
+    const url = `${this.baseUrl}${this.apiBasePath}/trading/${platform}/market-data/unsubscribe-index`;
 
     console.log(`[MarketDataAdapter] Unsubscribing from index ${upperIndex}`);
 
@@ -941,7 +944,7 @@ export class MarketDataAdapter implements IMarketDataService {
       throw new Error("Not authenticated. Please login first.");
     }
 
-    const url = `${this.baseUrl}/api/v1/trading/${platform}/market-data/stats`;
+    const url = `${this.baseUrl}${this.apiBasePath}/trading/${platform}/market-data/stats`;
 
     const response = await fetch(url, {
       method: "GET",
@@ -1067,7 +1070,7 @@ export class MarketDataAdapter implements IMarketDataService {
       return;
     }
 
-    const url = `${this.baseUrl}/api/v1/trading/${platform}/market-data/subscribe-ohlc`;
+    const url = `${this.baseUrl}${this.apiBasePath}/trading/${platform}/market-data/subscribe-ohlc`;
 
     console.log(
       `[MarketDataAdapter] Subscribing to OHLC ${upperSymbol}:${resolution}`,
@@ -1137,7 +1140,7 @@ export class MarketDataAdapter implements IMarketDataService {
     // Last subscriber, actually unsubscribe
     this.activeOhlcSubscriptions.delete(subscriptionKey);
 
-    const url = `${this.baseUrl}/api/v1/trading/${platform}/market-data/unsubscribe-ohlc`;
+    const url = `${this.baseUrl}${this.apiBasePath}/trading/${platform}/market-data/unsubscribe-ohlc`;
 
     console.log(
       `[MarketDataAdapter] Unsubscribing from OHLC ${upperSymbol}:${resolution}`,
@@ -1203,7 +1206,7 @@ export class MarketDataAdapter implements IMarketDataService {
       return;
     }
 
-    const url = `${this.baseUrl}/api/v1/trading/${platform}/market-data/subscribe-index-ohlc`;
+    const url = `${this.baseUrl}${this.apiBasePath}/trading/${platform}/market-data/subscribe-index-ohlc`;
 
     console.log(
       `[MarketDataAdapter] Subscribing to index OHLC ${upperIndex}:${resolution}`,
@@ -1271,7 +1274,7 @@ export class MarketDataAdapter implements IMarketDataService {
 
     this.activeOhlcSubscriptions.delete(subscriptionKey);
 
-    const url = `${this.baseUrl}/api/v1/trading/${platform}/market-data/unsubscribe-index-ohlc`;
+    const url = `${this.baseUrl}${this.apiBasePath}/trading/${platform}/market-data/unsubscribe-index-ohlc`;
 
     console.log(
       `[MarketDataAdapter] Unsubscribing from index OHLC ${upperIndex}:${resolution}`,
@@ -1323,7 +1326,7 @@ export class MarketDataAdapter implements IMarketDataService {
       };
     }
 
-    const url = `${this.baseUrl}/api/v1/trading/${platform}/market-data/subscribe-batch-with-ohlc`;
+    const url = `${this.baseUrl}${this.apiBasePath}/trading/${platform}/market-data/subscribe-batch-with-ohlc`;
 
     console.log(
       `[MarketDataAdapter] Batch subscribing to ${options.symbols.length} symbols with OHLC: ${options.includeOhlc || false}`,
@@ -1391,7 +1394,7 @@ export class MarketDataAdapter implements IMarketDataService {
       };
     }
 
-    const url = `${this.baseUrl}/api/v1/trading/${platform}/market-data/subscribe-indexes-with-ohlc`;
+    const url = `${this.baseUrl}${this.apiBasePath}/trading/${platform}/market-data/subscribe-indexes-with-ohlc`;
 
     console.log(
       `[MarketDataAdapter] Batch subscribing to ${options.indexes.length} indexes with OHLC: ${options.includeOhlc || false}`,

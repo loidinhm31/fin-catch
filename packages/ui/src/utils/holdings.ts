@@ -11,15 +11,15 @@ import { convertCurrency } from "./currency";
 // Chart colors for holdings
 const CHART_COLORS = [
   "#ec4899", // pink
-  "#06B6D4", // cyan
-  "#10b981", // green
+  "var(--color-cyan-500)", // cyan
+  "var(--color-green-500)", // green
   "#f59e0b", // amber
   "#8b5cf6", // violet
   "#ef4444", // red
   "#3b82f6", // blue
   "#14b8a6", // teal
   "#f97316", // orange
-  "#a855f7", // purple
+  "var(--color-violet-500)", // purple
 ];
 
 /**

@@ -114,12 +114,15 @@ export const GoldQueryForm: React.FC<GoldQueryFormProps> = ({
   return (
     <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-6">
       <div className="flex items-center space-x-2 mb-4">
-        <Coins className="w-6 h-6" style={{ color: "var(--cube-yellow)" }} />
+        <Coins
+          className="w-6 h-6"
+          style={{ color: "var(--color-amber-400)" }}
+        />
         <h3
           style={{
             fontSize: "var(--text-lg)",
             fontWeight: "var(--font-bold)",
-            color: "var(--cube-gray-900)",
+            color: "var(--color-text-primary)",
           }}
         >
           Gold Query

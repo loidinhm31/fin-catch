@@ -91,7 +91,7 @@ export const BondEntryForm: React.FC<BondEntryFormProps> = ({
         <p
           style={{
             fontSize: "var(--text-xs)",
-            color: "var(--cube-gray-500)",
+            color: "var(--color-text-muted)",
             marginTop: "var(--space-1)",
           }}
         >
@@ -115,7 +115,7 @@ export const BondEntryForm: React.FC<BondEntryFormProps> = ({
         <p
           style={{
             fontSize: "var(--text-xs)",
-            color: "var(--cube-gray-500)",
+            color: "var(--color-text-muted)",
             marginTop: "var(--space-1)",
           }}
         >
@@ -138,7 +138,7 @@ export const BondEntryForm: React.FC<BondEntryFormProps> = ({
         <p
           style={{
             fontSize: "var(--text-xs)",
-            color: "var(--cube-gray-500)",
+            color: "var(--color-text-muted)",
             marginTop: "var(--space-1)",
           }}
         >
@@ -152,9 +152,9 @@ export const BondEntryForm: React.FC<BondEntryFormProps> = ({
           <div
             className="p-4"
             style={{
-              backgroundColor: "var(--cube-gray-50)",
+              backgroundColor: "var(--color-bg-white)",
               borderRadius: "var(--radius-md)",
-              border: "1px solid var(--cube-gray-200)",
+              border: "1px solid var(--color-border-light)",
             }}
           >
             <p
@@ -209,7 +209,7 @@ export const BondEntryForm: React.FC<BondEntryFormProps> = ({
                 <p
                   style={{
                     fontSize: "var(--text-xs)",
-                    color: "var(--cube-gray-500)",
+                    color: "var(--color-text-muted)",
                     marginTop: "var(--space-1)",
                   }}
                 >
@@ -248,15 +248,15 @@ export const BondEntryForm: React.FC<BondEntryFormProps> = ({
               style={{
                 marginTop: "var(--space-3)",
                 padding: "var(--space-2)",
-                backgroundColor: "var(--cube-blue-50)",
+                backgroundColor: "var(--color-alert-info-bg)",
                 borderRadius: "var(--radius-md)",
-                border: "1px solid var(--cube-blue-200)",
+                border: "1px solid var(--color-alert-info-border)",
               }}
             >
               <p
                 style={{
                   fontSize: "var(--text-xs)",
-                  color: "var(--cube-blue-700)",
+                  color: "var(--color-alert-info-text)",
                 }}
               >
                 Bond parameters will be calculated automatically as you fill in
@@ -270,9 +270,9 @@ export const BondEntryForm: React.FC<BondEntryFormProps> = ({
             <div
               className="p-4"
               style={{
-                backgroundColor: "var(--cube-green-50)",
+                backgroundColor: "var(--color-alert-success-bg)",
                 borderRadius: "var(--radius-md)",
-                border: "1px solid var(--cube-green-200)",
+                border: "1px solid var(--color-alert-success-border)",
               }}
             >
               <p
@@ -280,7 +280,7 @@ export const BondEntryForm: React.FC<BondEntryFormProps> = ({
                   fontSize: "var(--text-sm)",
                   fontWeight: "var(--font-medium)",
                   marginBottom: "var(--space-3)",
-                  color: "var(--cube-green-800)",
+                  color: "var(--color-alert-success-text)",
                 }}
               >
                 Calculated Results
@@ -293,7 +293,7 @@ export const BondEntryForm: React.FC<BondEntryFormProps> = ({
                     value={faceValue}
                     readOnly
                     style={{
-                      backgroundColor: "var(--color-bg-secondary)",
+                      backgroundColor: "var(--color-bg-light)",
                       color: "var(--color-text-primary)",
                       cursor: "not-allowed",
                       fontWeight: 600,
@@ -307,7 +307,7 @@ export const BondEntryForm: React.FC<BondEntryFormProps> = ({
                     value={purchasePrice}
                     readOnly
                     style={{
-                      backgroundColor: "var(--color-bg-secondary)",
+                      backgroundColor: "var(--color-bg-light)",
                       color: "var(--color-text-primary)",
                       cursor: "not-allowed",
                       fontWeight: 600,
@@ -326,7 +326,7 @@ export const BondEntryForm: React.FC<BondEntryFormProps> = ({
                     value={couponRate}
                     readOnly
                     style={{
-                      backgroundColor: "var(--color-bg-secondary)",
+                      backgroundColor: "var(--color-bg-light)",
                       color: "var(--color-text-primary)",
                       cursor: "not-allowed",
                       fontWeight: 600,
@@ -337,7 +337,7 @@ export const BondEntryForm: React.FC<BondEntryFormProps> = ({
               <p
                 style={{
                   fontSize: "var(--text-xs)",
-                  color: "var(--cube-green-700)",
+                  color: "var(--color-alert-success-text)",
                   marginTop: "var(--space-2)",
                 }}
               >
@@ -405,7 +405,7 @@ export const BondEntryForm: React.FC<BondEntryFormProps> = ({
               <p
                 style={{
                   fontSize: "var(--text-xs)",
-                  color: "var(--cube-gray-500)",
+                  color: "var(--color-text-muted)",
                   marginTop: "var(--space-1)",
                 }}
               >
@@ -427,7 +427,7 @@ export const BondEntryForm: React.FC<BondEntryFormProps> = ({
             <p
               style={{
                 fontSize: "var(--text-xs)",
-                color: "var(--cube-gray-500)",
+                color: "var(--color-text-muted)",
                 marginTop: "var(--space-1)",
               }}
             >
@@ -470,7 +470,12 @@ export const BondEntryForm: React.FC<BondEntryFormProps> = ({
               border: "1px solid var(--color-alert-info-border)",
             }}
           >
-            <p style={{ fontSize: "var(--text-sm)", color: "#0369a1" }}>
+            <p
+              style={{
+                fontSize: "var(--text-sm)",
+                color: "var(--color-alert-info-text)",
+              }}
+            >
               <strong>Bond Valuation:</strong>
               <br />
               • Current value = current market price (or face value) × quantity

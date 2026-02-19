@@ -91,7 +91,7 @@ export const ServerDisconnectedOverlay: React.FC<
         <div
           className="p-8 text-white text-center"
           style={{
-            background: "#DC2626",
+            background: "var(--color-red-600)",
             boxShadow: "var(--shadow-glow-red)",
           }}
         >
@@ -116,7 +116,7 @@ export const ServerDisconnectedOverlay: React.FC<
           >
             <p className="text-gray-300">
               {closeAttempted ? (
-                <span style={{ color: "#ffb800" }}>
+                <span style={{ color: "var(--color-amber-400)" }}>
                   Unable to close automatically. Please close this tab manually.
                 </span>
               ) : (
@@ -146,7 +146,7 @@ export const ServerDisconnectedOverlay: React.FC<
               onClick={handleClosePage}
               className="w-full flex items-center justify-center gap-2 px-4 py-3 font-medium rounded-xl transition-colors"
               style={{
-                background: "#DC2626",
+                background: "var(--color-red-600)",
                 boxShadow: "var(--shadow-glow-red)",
                 color: "white",
               }}
@@ -159,7 +159,7 @@ export const ServerDisconnectedOverlay: React.FC<
               onClick={handleRefresh}
               className="w-full flex items-center justify-center gap-2 px-4 py-3 font-medium rounded-xl transition-colors"
               style={{
-                background: "#3B82F6",
+                background: "var(--color-blue-500)",
                 boxShadow: "var(--shadow-glow-violet)",
                 color: "white",
               }}

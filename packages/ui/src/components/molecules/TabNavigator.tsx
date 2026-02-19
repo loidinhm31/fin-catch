@@ -4,7 +4,7 @@ export interface TabItem<T extends string> {
   id: T;
   label: string;
   icon: React.ReactNode;
-  gradient: string;
+  color: string;
 }
 
 export interface TabNavigatorProps<T extends string> {
@@ -26,7 +26,7 @@ export function TabNavigator<T extends string>({
           onClick={() => onTabChange(tab.id)}
           className={`flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-xl font-bold transition-all ${
             activeTab === tab.id
-              ? `${tab.gradient} text-white shadow-lg`
+              ? `${tab.color} text-white shadow-lg`
               : "glass-button text-gray-700"
           }`}
           style={{ fontSize: "var(--text-sm)" }}

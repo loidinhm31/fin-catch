@@ -64,7 +64,7 @@ export const StockHoldingCard: React.FC<StockHoldingCardProps> = ({
               className="cyber-terminal-header px-2 py-0.5 rounded border"
               style={{
                 backgroundColor: "rgba(59, 130, 246, 0.1)",
-                borderColor: "#3B82F6",
+                borderColor: "var(--color-blue-500)",
               }}
             >
               STOCK
@@ -122,7 +122,7 @@ export const StockHoldingCard: React.FC<StockHoldingCardProps> = ({
                 className="uppercase tracking-wide font-mono"
                 style={{
                   fontSize: "var(--text-xs)",
-                  color: "#64748B",
+                  color: "var(--color-text-muted)",
                   marginBottom: "2px",
                 }}
               >
@@ -132,7 +132,7 @@ export const StockHoldingCard: React.FC<StockHoldingCardProps> = ({
                 className="cyber-data"
                 style={{
                   fontWeight: "var(--font-bold)",
-                  color: "var(--cube-gray-900)",
+                  color: "var(--color-text-primary)",
                 }}
               >
                 {formatCurrency(entryPerf.currentValue)}
@@ -143,7 +143,7 @@ export const StockHoldingCard: React.FC<StockHoldingCardProps> = ({
                 className="uppercase tracking-wide font-mono"
                 style={{
                   fontSize: "var(--text-xs)",
-                  color: "#64748B",
+                  color: "var(--color-text-muted)",
                   marginBottom: "2px",
                 }}
               >
@@ -251,7 +251,7 @@ export const StockHoldingCard: React.FC<StockHoldingCardProps> = ({
                 className="uppercase tracking-wide font-mono"
                 style={{
                   fontSize: "var(--text-xs)",
-                  color: "#64748B",
+                  color: "var(--color-text-muted)",
                 }}
               >
                 Quantity (shares)
@@ -261,7 +261,7 @@ export const StockHoldingCard: React.FC<StockHoldingCardProps> = ({
                 style={{
                   fontSize: "var(--text-sm)",
                   fontWeight: "var(--font-medium)",
-                  color: "var(--cube-gray-900)",
+                  color: "var(--color-text-primary)",
                 }}
               >
                 {entry.quantity}
@@ -272,7 +272,7 @@ export const StockHoldingCard: React.FC<StockHoldingCardProps> = ({
                 className="uppercase tracking-wide font-mono"
                 style={{
                   fontSize: "var(--text-xs)",
-                  color: "#64748B",
+                  color: "var(--color-text-muted)",
                 }}
               >
                 Purchase Price ({displayCurrency})
@@ -282,7 +282,7 @@ export const StockHoldingCard: React.FC<StockHoldingCardProps> = ({
                 style={{
                   fontSize: "var(--text-sm)",
                   fontWeight: "var(--font-medium)",
-                  color: "var(--cube-gray-900)",
+                  color: "var(--color-text-primary)",
                 }}
               >
                 {formatCurrency(entryPerf.purchasePrice || 0)}
@@ -293,7 +293,7 @@ export const StockHoldingCard: React.FC<StockHoldingCardProps> = ({
                 className="uppercase tracking-wide font-mono"
                 style={{
                   fontSize: "var(--text-xs)",
-                  color: "#64748B",
+                  color: "var(--color-text-muted)",
                 }}
               >
                 Current Price ({displayCurrency})
@@ -303,7 +303,7 @@ export const StockHoldingCard: React.FC<StockHoldingCardProps> = ({
                 style={{
                   fontSize: "var(--text-sm)",
                   fontWeight: "var(--font-medium)",
-                  color: "var(--cube-gray-900)",
+                  color: "var(--color-text-primary)",
                 }}
               >
                 {formatCurrency(entryPerf.currentPrice)}
@@ -314,7 +314,7 @@ export const StockHoldingCard: React.FC<StockHoldingCardProps> = ({
                 className="uppercase tracking-wide font-mono"
                 style={{
                   fontSize: "var(--text-xs)",
-                  color: "#64748B",
+                  color: "var(--color-text-muted)",
                 }}
               >
                 Purchase Date
@@ -324,7 +324,7 @@ export const StockHoldingCard: React.FC<StockHoldingCardProps> = ({
                 style={{
                   fontSize: "var(--text-sm)",
                   fontWeight: "var(--font-medium)",
-                  color: "var(--cube-gray-900)",
+                  color: "var(--color-text-primary)",
                 }}
               >
                 {formatDate(entry.purchaseDate)}
@@ -337,7 +337,7 @@ export const StockHoldingCard: React.FC<StockHoldingCardProps> = ({
                   <p
                     style={{
                       fontSize: "var(--text-xs)",
-                      color: "var(--cube-gray-500)",
+                      color: "var(--color-text-muted)",
                     }}
                   >
                     Exchange Rate
@@ -346,7 +346,7 @@ export const StockHoldingCard: React.FC<StockHoldingCardProps> = ({
                     style={{
                       fontSize: "var(--text-sm)",
                       fontWeight: "var(--font-medium)",
-                      color: "var(--cube-gray-900)",
+                      color: "var(--color-text-primary)",
                     }}
                   >
                     1 {entry.currency} = {entryPerf.exchangeRate.toFixed(4)}{" "}
@@ -361,7 +361,7 @@ export const StockHoldingCard: React.FC<StockHoldingCardProps> = ({
             <div
               className="p-3 rounded-lg"
               style={{
-                backgroundColor: "var(--color-bg-secondary)",
+                backgroundColor: "var(--color-bg-light)",
               }}
             >
               <div className="flex items-center justify-between mb-2">
@@ -370,7 +370,7 @@ export const StockHoldingCard: React.FC<StockHoldingCardProps> = ({
                   style={{
                     fontSize: "var(--text-xs)",
                     fontWeight: "var(--font-medium)",
-                    color: "#64748B",
+                    color: "var(--color-text-muted)",
                   }}
                 >
                   Price Alerts
@@ -383,7 +383,7 @@ export const StockHoldingCard: React.FC<StockHoldingCardProps> = ({
                       className="uppercase tracking-wide font-mono"
                       style={{
                         fontSize: "var(--text-xs)",
-                        color: "#64748B",
+                        color: "var(--color-text-muted)",
                       }}
                     >
                       🎯 Target Price
@@ -393,7 +393,7 @@ export const StockHoldingCard: React.FC<StockHoldingCardProps> = ({
                       style={{
                         fontSize: "var(--text-sm)",
                         fontWeight: "var(--font-medium)",
-                        color: "var(--cube-gray-900)",
+                        color: "var(--color-text-primary)",
                       }}
                     >
                       {formatCurrency(entry.targetPrice)}
@@ -421,7 +421,7 @@ export const StockHoldingCard: React.FC<StockHoldingCardProps> = ({
                       className="uppercase tracking-wide font-mono"
                       style={{
                         fontSize: "var(--text-xs)",
-                        color: "#64748B",
+                        color: "var(--color-text-muted)",
                       }}
                     >
                       🛑 Stop Loss
@@ -431,7 +431,7 @@ export const StockHoldingCard: React.FC<StockHoldingCardProps> = ({
                       style={{
                         fontSize: "var(--text-sm)",
                         fontWeight: "var(--font-medium)",
-                        color: "var(--cube-gray-900)",
+                        color: "var(--color-text-primary)",
                       }}
                     >
                       {formatCurrency(entry.stopLoss)}
@@ -462,7 +462,7 @@ export const StockHoldingCard: React.FC<StockHoldingCardProps> = ({
               <p
                 style={{
                   fontSize: "var(--text-xs)",
-                  color: "var(--cube-gray-500)",
+                  color: "var(--color-text-muted)",
                 }}
               >
                 Notes
@@ -470,7 +470,7 @@ export const StockHoldingCard: React.FC<StockHoldingCardProps> = ({
               <p
                 style={{
                   fontSize: "var(--text-sm)",
-                  color: "var(--cube-gray-900)",
+                  color: "var(--color-text-primary)",
                 }}
               >
                 {entry.notes}
@@ -482,7 +482,7 @@ export const StockHoldingCard: React.FC<StockHoldingCardProps> = ({
               <p
                 style={{
                   fontSize: "var(--text-xs)",
-                  color: "var(--cube-gray-500)",
+                  color: "var(--color-text-muted)",
                 }}
               >
                 Tags
@@ -490,7 +490,7 @@ export const StockHoldingCard: React.FC<StockHoldingCardProps> = ({
               <p
                 style={{
                   fontSize: "var(--text-sm)",
-                  color: "var(--cube-gray-900)",
+                  color: "var(--color-text-primary)",
                 }}
               >
                 {entry.tags}

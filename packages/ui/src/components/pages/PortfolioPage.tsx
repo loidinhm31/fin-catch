@@ -125,7 +125,7 @@ export const PortfolioPage: React.FC = () => {
                 style={{
                   fontSize: "var(--text-3xl)",
                   fontWeight: "var(--font-bold)",
-                  color: "var(--cube-gray-900)",
+                  color: "var(--color-text-primary)",
                 }}
               >
                 PORTFOLIO
@@ -133,7 +133,7 @@ export const PortfolioPage: React.FC = () => {
               <p
                 style={{
                   fontSize: "var(--text-sm)",
-                  color: "var(--cube-gray-900)",
+                  color: "var(--color-text-primary)",
                   opacity: 0.7,
                 }}
               >
@@ -246,13 +246,13 @@ export const PortfolioPage: React.FC = () => {
             <div className="glass-card p-12 text-center">
               <Wallet
                 className="w-16 h-16 mx-auto mb-4 opacity-30"
-                style={{ color: "var(--cube-pink)" }}
+                style={{ color: "var(--color-accent-pink)" }}
               />
               <p
                 style={{
                   fontSize: "var(--text-lg)",
                   fontWeight: "var(--font-bold)",
-                  color: "var(--cube-gray-900)",
+                  color: "var(--color-text-primary)",
                 }}
               >
                 No portfolios yet
@@ -260,7 +260,7 @@ export const PortfolioPage: React.FC = () => {
               <p
                 style={{
                   fontSize: "var(--text-sm)",
-                  color: "var(--cube-gray-900)",
+                  color: "var(--color-text-primary)",
                   opacity: 0.7,
                   marginTop: "var(--space-2)",
                 }}

@@ -43,7 +43,7 @@ export const GoldHoldingCard: React.FC<GoldHoldingCardProps> = ({
               className="cyber-terminal-header px-2 py-0.5 rounded border"
               style={{
                 backgroundColor: "rgba(250, 204, 21, 0.1)",
-                borderColor: "#FACC15",
+                borderColor: "var(--color-amber-400)",
               }}
             >
               GOLD
@@ -81,7 +81,7 @@ export const GoldHoldingCard: React.FC<GoldHoldingCardProps> = ({
                 className="uppercase tracking-wide font-mono"
                 style={{
                   fontSize: "var(--text-xs)",
-                  color: "#64748B",
+                  color: "var(--color-text-muted)",
                   marginBottom: "2px",
                 }}
               >
@@ -91,7 +91,7 @@ export const GoldHoldingCard: React.FC<GoldHoldingCardProps> = ({
                 className="cyber-data"
                 style={{
                   fontWeight: "var(--font-bold)",
-                  color: "var(--cube-gray-900)",
+                  color: "var(--color-text-primary)",
                 }}
               >
                 {formatCurrency(entryPerf.currentValue)}
@@ -101,7 +101,7 @@ export const GoldHoldingCard: React.FC<GoldHoldingCardProps> = ({
               <p
                 style={{
                   fontSize: "var(--text-xs)",
-                  color: "var(--cube-gray-500)",
+                  color: "var(--color-text-muted)",
                   marginBottom: "2px",
                 }}
               >
@@ -206,7 +206,7 @@ export const GoldHoldingCard: React.FC<GoldHoldingCardProps> = ({
               <p
                 style={{
                   fontSize: "var(--text-xs)",
-                  color: "var(--cube-gray-500)",
+                  color: "var(--color-text-muted)",
                 }}
               >
                 Quantity {entry.unit ? `(${getUnitLabel(entry.unit)})` : ""}
@@ -215,7 +215,7 @@ export const GoldHoldingCard: React.FC<GoldHoldingCardProps> = ({
                 style={{
                   fontSize: "var(--text-sm)",
                   fontWeight: "var(--font-medium)",
-                  color: "var(--cube-gray-900)",
+                  color: "var(--color-text-primary)",
                 }}
               >
                 {entry.quantity}
@@ -223,7 +223,7 @@ export const GoldHoldingCard: React.FC<GoldHoldingCardProps> = ({
                   <span
                     style={{
                       fontSize: "var(--text-xs)",
-                      color: "var(--cube-gray-500)",
+                      color: "var(--color-text-muted)",
                       marginLeft: "var(--space-1)",
                     }}
                   >
@@ -236,7 +236,7 @@ export const GoldHoldingCard: React.FC<GoldHoldingCardProps> = ({
               <p
                 style={{
                   fontSize: "var(--text-xs)",
-                  color: "var(--cube-gray-500)",
+                  color: "var(--color-text-muted)",
                 }}
               >
                 Purchase Price per {entry.unit || "unit"} ({displayCurrency})
@@ -245,7 +245,7 @@ export const GoldHoldingCard: React.FC<GoldHoldingCardProps> = ({
                 style={{
                   fontSize: "var(--text-sm)",
                   fontWeight: "var(--font-medium)",
-                  color: "var(--cube-gray-900)",
+                  color: "var(--color-text-primary)",
                 }}
               >
                 {formatCurrency(entryPerf.purchasePrice || 0)}
@@ -255,7 +255,7 @@ export const GoldHoldingCard: React.FC<GoldHoldingCardProps> = ({
               <p
                 style={{
                   fontSize: "var(--text-xs)",
-                  color: "var(--cube-gray-500)",
+                  color: "var(--color-text-muted)",
                 }}
               >
                 Current Price per {entry.unit || "unit"} ({displayCurrency})
@@ -264,7 +264,7 @@ export const GoldHoldingCard: React.FC<GoldHoldingCardProps> = ({
                 style={{
                   fontSize: "var(--text-sm)",
                   fontWeight: "var(--font-medium)",
-                  color: "var(--cube-gray-900)",
+                  color: "var(--color-text-primary)",
                 }}
               >
                 {formatCurrency(entryPerf.currentPrice)}
@@ -274,7 +274,7 @@ export const GoldHoldingCard: React.FC<GoldHoldingCardProps> = ({
               <p
                 style={{
                   fontSize: "var(--text-xs)",
-                  color: "var(--cube-gray-500)",
+                  color: "var(--color-text-muted)",
                 }}
               >
                 Purchase Date
@@ -283,7 +283,7 @@ export const GoldHoldingCard: React.FC<GoldHoldingCardProps> = ({
                 style={{
                   fontSize: "var(--text-sm)",
                   fontWeight: "var(--font-medium)",
-                  color: "var(--cube-gray-900)",
+                  color: "var(--color-text-primary)",
                 }}
               >
                 {formatDate(entry.purchaseDate)}
@@ -296,7 +296,7 @@ export const GoldHoldingCard: React.FC<GoldHoldingCardProps> = ({
                   <p
                     style={{
                       fontSize: "var(--text-xs)",
-                      color: "var(--cube-gray-500)",
+                      color: "var(--color-text-muted)",
                     }}
                   >
                     Exchange Rate
@@ -305,7 +305,7 @@ export const GoldHoldingCard: React.FC<GoldHoldingCardProps> = ({
                     style={{
                       fontSize: "var(--text-sm)",
                       fontWeight: "var(--font-medium)",
-                      color: "var(--cube-gray-900)",
+                      color: "var(--color-text-primary)",
                     }}
                   >
                     1 {entry.currency} = {entryPerf.exchangeRate.toFixed(4)}{" "}
@@ -319,7 +319,7 @@ export const GoldHoldingCard: React.FC<GoldHoldingCardProps> = ({
               <p
                 style={{
                   fontSize: "var(--text-xs)",
-                  color: "var(--cube-gray-500)",
+                  color: "var(--color-text-muted)",
                 }}
               >
                 Gold Type
@@ -328,7 +328,7 @@ export const GoldHoldingCard: React.FC<GoldHoldingCardProps> = ({
                 style={{
                   fontSize: "var(--text-sm)",
                   fontWeight: "var(--font-medium)",
-                  color: "var(--cube-gray-900)",
+                  color: "var(--color-text-primary)",
                 }}
               >
                 {entry.goldType}
@@ -340,7 +340,7 @@ export const GoldHoldingCard: React.FC<GoldHoldingCardProps> = ({
               <p
                 style={{
                   fontSize: "var(--text-xs)",
-                  color: "var(--cube-gray-500)",
+                  color: "var(--color-text-muted)",
                 }}
               >
                 Notes
@@ -348,7 +348,7 @@ export const GoldHoldingCard: React.FC<GoldHoldingCardProps> = ({
               <p
                 style={{
                   fontSize: "var(--text-sm)",
-                  color: "var(--cube-gray-900)",
+                  color: "var(--color-text-primary)",
                 }}
               >
                 {entry.notes}
@@ -360,7 +360,7 @@ export const GoldHoldingCard: React.FC<GoldHoldingCardProps> = ({
               <p
                 style={{
                   fontSize: "var(--text-xs)",
-                  color: "var(--cube-gray-500)",
+                  color: "var(--color-text-muted)",
                 }}
               >
                 Tags
@@ -368,7 +368,7 @@ export const GoldHoldingCard: React.FC<GoldHoldingCardProps> = ({
               <p
                 style={{
                   fontSize: "var(--text-sm)",
-                  color: "var(--cube-gray-900)",
+                  color: "var(--color-text-primary)",
                 }}
               >
                 {entry.tags}

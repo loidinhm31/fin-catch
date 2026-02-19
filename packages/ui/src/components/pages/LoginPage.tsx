@@ -87,7 +87,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({
     <div
       className="min-h-screen flex items-center justify-center px-4 py-8 cyber-grid-pattern"
       style={{
-        background: "var(--color-bg-primary)",
+        background: "var(--color-bg-app)",
       }}
     >
       <div className="w-full max-w-md">
@@ -114,7 +114,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({
           >
             Fin Catch
           </h1>
-          <p className="text-[var(--color-text-secondary)] text-sm">
+          <p className="text-(--color-text-secondary) text-sm">
             Sync your portfolio across devices
           </p>
         </div>

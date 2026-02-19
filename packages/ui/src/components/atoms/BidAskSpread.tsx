@@ -71,7 +71,7 @@ export const BidAskSpread: React.FC<BidAskSpreadProps> = ({
   if (!hasBid && !hasAsk) {
     return (
       <div
-        className={`text-[10px] text-[--color-text-secondary] ${className ?? ""}`}
+        className={`text-[10px] text-(--color-text-secondary) ${className ?? ""}`}
       >
         No bid/ask
       </div>
@@ -84,7 +84,7 @@ export const BidAskSpread: React.FC<BidAskSpreadProps> = ({
         className={`flex items-center gap-2 text-[10px] font-mono ${className ?? ""}`}
       >
         {/* Bid */}
-        <span className="text-[--color-trade-buy]">
+        <span className="text-(--color-trade-buy)">
           B: {formatPrice(bidPrice)}
           {bidVolume !== undefined && (
             <span className="opacity-70"> ({formatVolume(bidVolume)})</span>
@@ -92,10 +92,10 @@ export const BidAskSpread: React.FC<BidAskSpreadProps> = ({
         </span>
 
         {/* Separator */}
-        <span className="text-[--color-text-secondary]">|</span>
+        <span className="text-(--color-text-secondary)">|</span>
 
         {/* Ask */}
-        <span className="text-[--color-trade-sell]">
+        <span className="text-(--color-trade-sell)">
           A: {formatPrice(askPrice)}
           {askVolume !== undefined && (
             <span className="opacity-70"> ({formatVolume(askVolume)})</span>
@@ -112,8 +112,8 @@ export const BidAskSpread: React.FC<BidAskSpreadProps> = ({
     >
       {/* Bid row */}
       <div className="flex justify-between items-center">
-        <span className="text-[--color-text-secondary]">Bid</span>
-        <span className="text-[--color-trade-buy]">
+        <span className="text-(--color-text-secondary)">Bid</span>
+        <span className="text-(--color-trade-buy)">
           {formatPrice(bidPrice)}
           {bidVolume !== undefined && (
             <span className="opacity-70 ml-1">({formatVolume(bidVolume)})</span>
@@ -123,8 +123,8 @@ export const BidAskSpread: React.FC<BidAskSpreadProps> = ({
 
       {/* Ask row */}
       <div className="flex justify-between items-center">
-        <span className="text-[--color-text-secondary]">Ask</span>
-        <span className="text-[--color-trade-sell]">
+        <span className="text-(--color-text-secondary)">Ask</span>
+        <span className="text-(--color-trade-sell)">
           {formatPrice(askPrice)}
           {askVolume !== undefined && (
             <span className="opacity-70 ml-1">({formatVolume(askVolume)})</span>
@@ -134,9 +134,9 @@ export const BidAskSpread: React.FC<BidAskSpreadProps> = ({
 
       {/* Spread indicator */}
       {bidPrice !== undefined && askPrice !== undefined && (
-        <div className="flex justify-between items-center mt-0.5 pt-0.5 border-t border-[--color-border-primary]">
-          <span className="text-[--color-text-secondary]">Spread</span>
-          <span className="text-[--color-market-live]">
+        <div className="flex justify-between items-center mt-0.5 pt-0.5 border-t border-(--color-border-light)">
+          <span className="text-(--color-text-secondary)">Spread</span>
+          <span className="text-(--color-market-live)">
             {formatPrice(askPrice - bidPrice)} (
             {(((askPrice - bidPrice) / bidPrice) * 100).toFixed(2)}%)
           </span>
@@ -156,16 +156,16 @@ export const BidAskSpreadSkeleton: React.FC<{
   if (compact) {
     return (
       <div className={`animate-pulse flex gap-2 ${className ?? ""}`}>
-        <div className="w-[60px] h-3 bg-[--color-border-primary] rounded-sm" />
-        <div className="w-[60px] h-3 bg-[--color-border-primary] rounded-sm" />
+        <div className="w-[60px] h-3 bg-(--color-border-light) rounded-sm" />
+        <div className="w-[60px] h-3 bg-(--color-border-light) rounded-sm" />
       </div>
     );
   }
 
   return (
     <div className={`animate-pulse flex flex-col gap-1 ${className ?? ""}`}>
-      <div className="w-full h-3.5 bg-[--color-border-primary] rounded-sm" />
-      <div className="w-full h-3.5 bg-[--color-border-primary] rounded-sm" />
+      <div className="w-full h-3.5 bg-(--color-border-light) rounded-sm" />
+      <div className="w-full h-3.5 bg-(--color-border-light) rounded-sm" />
     </div>
   );
 };

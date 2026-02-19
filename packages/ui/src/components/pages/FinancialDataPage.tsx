@@ -224,7 +224,7 @@ export const FinancialDataPage: React.FC = () => {
                 style={{
                   fontSize: "var(--text-3xl)",
                   fontWeight: "var(--font-bold)",
-                  color: "var(--cube-gray-900)",
+                  color: "var(--color-text-primary)",
                 }}
               >
                 FIN-CATCH
@@ -232,7 +232,7 @@ export const FinancialDataPage: React.FC = () => {
               <p
                 style={{
                   fontSize: "var(--text-sm)",
-                  color: "var(--cube-gray-900)",
+                  color: "var(--color-text-primary)",
                   opacity: 0.7,
                 }}
               >
@@ -296,7 +296,7 @@ export const FinancialDataPage: React.FC = () => {
               style={{
                 fontSize: "var(--text-xl)",
                 fontWeight: "var(--font-bold)",
-                color: "var(--cube-gray-900)",
+                color: "var(--color-text-primary)",
                 marginBottom: "var(--space-4)",
               }}
             >
@@ -371,7 +371,7 @@ export const FinancialDataPage: React.FC = () => {
                   style={{
                     fontSize: "var(--text-lg)",
                     fontWeight: "var(--font-bold)",
-                    color: "var(--cube-gray-900)",
+                    color: "var(--color-text-primary)",
                     marginBottom: "var(--space-4)",
                   }}
                 >
@@ -384,7 +384,7 @@ export const FinancialDataPage: React.FC = () => {
                         <p
                           style={{
                             fontSize: "var(--text-xs)",
-                            color: "var(--cube-gray-900)",
+                            color: "var(--color-text-primary)",
                             opacity: 0.6,
                           }}
                         >
@@ -394,7 +394,7 @@ export const FinancialDataPage: React.FC = () => {
                           style={{
                             fontSize: "var(--text-lg)",
                             fontWeight: "var(--font-bold)",
-                            color: "var(--cube-gray-900)",
+                            color: "var(--color-text-primary)",
                           }}
                         >
                           {stockData.symbol}
@@ -404,7 +404,7 @@ export const FinancialDataPage: React.FC = () => {
                         <p
                           style={{
                             fontSize: "var(--text-xs)",
-                            color: "var(--cube-gray-900)",
+                            color: "var(--color-text-primary)",
                             opacity: 0.6,
                           }}
                         >
@@ -414,7 +414,7 @@ export const FinancialDataPage: React.FC = () => {
                           style={{
                             fontSize: "var(--text-lg)",
                             fontWeight: "var(--font-bold)",
-                            color: "var(--cube-gray-900)",
+                            color: "var(--color-text-primary)",
                           }}
                         >
                           {stockData.source}
@@ -424,7 +424,7 @@ export const FinancialDataPage: React.FC = () => {
                         <p
                           style={{
                             fontSize: "var(--text-xs)",
-                            color: "var(--cube-gray-900)",
+                            color: "var(--color-text-primary)",
                             opacity: 0.6,
                           }}
                         >
@@ -434,7 +434,7 @@ export const FinancialDataPage: React.FC = () => {
                           style={{
                             fontSize: "var(--text-lg)",
                             fontWeight: "var(--font-bold)",
-                            color: "var(--cube-gray-900)",
+                            color: "var(--color-text-primary)",
                           }}
                         >
                           {stockData.resolution}
@@ -444,7 +444,7 @@ export const FinancialDataPage: React.FC = () => {
                         <p
                           style={{
                             fontSize: "var(--text-xs)",
-                            color: "var(--cube-gray-900)",
+                            color: "var(--color-text-primary)",
                             opacity: 0.6,
                           }}
                         >
@@ -454,7 +454,7 @@ export const FinancialDataPage: React.FC = () => {
                           style={{
                             fontSize: "var(--text-lg)",
                             fontWeight: "var(--font-bold)",
-                            color: "var(--cube-gray-900)",
+                            color: "var(--color-text-primary)",
                           }}
                         >
                           {stockData.data?.length || 0}
@@ -468,7 +468,7 @@ export const FinancialDataPage: React.FC = () => {
                         <p
                           style={{
                             fontSize: "var(--text-xs)",
-                            color: "var(--cube-gray-900)",
+                            color: "var(--color-text-primary)",
                             opacity: 0.6,
                           }}
                         >
@@ -478,7 +478,7 @@ export const FinancialDataPage: React.FC = () => {
                           style={{
                             fontSize: "var(--text-lg)",
                             fontWeight: "var(--font-bold)",
-                            color: "var(--cube-gray-900)",
+                            color: "var(--color-text-primary)",
                           }}
                         >
                           {goldData.gold_price_id}
@@ -488,7 +488,7 @@ export const FinancialDataPage: React.FC = () => {
                         <p
                           style={{
                             fontSize: "var(--text-xs)",
-                            color: "var(--cube-gray-900)",
+                            color: "var(--color-text-primary)",
                             opacity: 0.6,
                           }}
                         >
@@ -498,7 +498,7 @@ export const FinancialDataPage: React.FC = () => {
                           style={{
                             fontSize: "var(--text-lg)",
                             fontWeight: "var(--font-bold)",
-                            color: "var(--cube-gray-900)",
+                            color: "var(--color-text-primary)",
                           }}
                         >
                           {goldData.source}
@@ -508,7 +508,7 @@ export const FinancialDataPage: React.FC = () => {
                         <p
                           style={{
                             fontSize: "var(--text-xs)",
-                            color: "var(--cube-gray-900)",
+                            color: "var(--color-text-primary)",
                             opacity: 0.6,
                           }}
                         >
@@ -518,7 +518,7 @@ export const FinancialDataPage: React.FC = () => {
                           style={{
                             fontSize: "var(--text-lg)",
                             fontWeight: "var(--font-bold)",
-                            color: "var(--cube-gray-900)",
+                            color: "var(--color-text-primary)",
                           }}
                         >
                           {goldData.status}
@@ -528,7 +528,7 @@ export const FinancialDataPage: React.FC = () => {
                         <p
                           style={{
                             fontSize: "var(--text-xs)",
-                            color: "var(--cube-gray-900)",
+                            color: "var(--color-text-primary)",
                             opacity: 0.6,
                           }}
                         >
@@ -538,7 +538,7 @@ export const FinancialDataPage: React.FC = () => {
                           style={{
                             fontSize: "var(--text-lg)",
                             fontWeight: "var(--font-bold)",
-                            color: "var(--cube-gray-900)",
+                            color: "var(--color-text-primary)",
                           }}
                         >
                           {goldData.data?.length || 0}
@@ -554,19 +554,19 @@ export const FinancialDataPage: React.FC = () => {
               {activeTab === "stock" ? (
                 <TrendingUp
                   className="w-20 h-20 mx-auto mb-4 opacity-30"
-                  style={{ color: "var(--cube-cyan)" }}
+                  style={{ color: "var(--color-cyan-400)" }}
                 />
               ) : (
                 <Coins
                   className="w-20 h-20 mx-auto mb-4 opacity-30"
-                  style={{ color: "var(--cube-yellow)" }}
+                  style={{ color: "var(--color-amber-400)" }}
                 />
               )}
               <p
                 style={{
                   fontSize: "var(--text-lg)",
                   fontWeight: "var(--font-bold)",
-                  color: "var(--cube-gray-900)",
+                  color: "var(--color-text-primary)",
                 }}
               >
                 No data yet
@@ -574,7 +574,7 @@ export const FinancialDataPage: React.FC = () => {
               <p
                 style={{
                   fontSize: "var(--text-sm)",
-                  color: "var(--cube-gray-900)",
+                  color: "var(--color-text-primary)",
                   opacity: 0.7,
                   marginTop: "var(--space-2)",
                 }}
@@ -591,7 +591,7 @@ export const FinancialDataPage: React.FC = () => {
                 style={{
                   fontSize: "var(--text-xl)",
                   fontWeight: "var(--font-bold)",
-                  color: "var(--cube-gray-900)",
+                  color: "var(--color-text-primary)",
                 }}
               >
                 Gold Premium Analysis
@@ -781,13 +781,13 @@ export const FinancialDataPage: React.FC = () => {
                   <div className="glass-card p-8 text-center">
                     <TrendingDown
                       className="w-16 h-16 mx-auto mb-4 opacity-30"
-                      style={{ color: "var(--cube-yellow)" }}
+                      style={{ color: "var(--color-amber-400)" }}
                     />
                     <p
                       style={{
                         fontSize: "var(--text-lg)",
                         fontWeight: "var(--font-bold)",
-                        color: "var(--cube-gray-900)",
+                        color: "var(--color-text-primary)",
                       }}
                     >
                       No premium data available

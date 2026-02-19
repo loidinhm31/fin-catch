@@ -265,7 +265,7 @@ export const MiniStockChart: React.FC<MiniStockChartProps> = ({
           bottom: "2px",
           left: "4px",
           fontSize: "8px",
-          color: "var(--color-text-secondary, #64748b)",
+          color: "var(--color-text-secondary, var(--color-text-muted))",
         }}
       >
         1Y

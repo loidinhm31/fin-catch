@@ -256,7 +256,7 @@ export const CompactOrderForm: React.FC<CompactOrderFormProps> = ({
           alignItems: "center",
           marginBottom: "12px",
           paddingBottom: "8px",
-          borderBottom: "1px solid var(--color-border-primary)",
+          borderBottom: "1px solid var(--color-border-light)",
         }}
       >
         <div>

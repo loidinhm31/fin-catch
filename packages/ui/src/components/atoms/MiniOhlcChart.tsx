@@ -102,7 +102,7 @@ export const MiniOhlcChart: React.FC<MiniOhlcChartProps> = ({
           width: typeof width === "number" ? `${width}px` : width,
         }}
       >
-        <span className="text-[10px] text-[--color-text-secondary]">
+        <span className="text-[10px] text-(--color-text-secondary)">
           No data
         </span>
       </div>
@@ -195,7 +195,7 @@ export const MiniOhlcChartSkeleton: React.FC<{
 }> = ({ height = 50, width = "100%", className }) => {
   return (
     <div
-      className={`animate-pulse bg-[--color-border-primary] rounded ${className ?? ""}`}
+      className={`animate-pulse bg-(--color-border-light) rounded ${className ?? ""}`}
       style={{
         height,
         width: typeof width === "number" ? `${width}px` : width,

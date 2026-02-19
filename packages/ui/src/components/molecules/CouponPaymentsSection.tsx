@@ -121,7 +121,7 @@ export const CouponPaymentsSection: React.FC<CouponPaymentsSectionProps> = ({
             style={{
               fontSize: "var(--text-sm)",
               fontWeight: "var(--font-semibold)",
-              color: "var(--cube-gray-900)",
+              color: "var(--color-text-primary)",
             }}
           >
             Coupon Payments
@@ -135,7 +135,7 @@ export const CouponPaymentsSection: React.FC<CouponPaymentsSectionProps> = ({
               padding: "var(--space-1) var(--space-2)",
               fontSize: "var(--text-xs)",
               fontWeight: "var(--font-medium)",
-              color: "#ffffff",
+              color: "var(--color-text-primary)",
               background: "var(--color-violet-500)",
               boxShadow: "var(--shadow-glow-violet)",
               border: "none",
@@ -161,7 +161,7 @@ export const CouponPaymentsSection: React.FC<CouponPaymentsSectionProps> = ({
           <p
             style={{
               fontSize: "var(--text-sm)",
-              color: "var(--cube-gray-500)",
+              color: "var(--color-text-muted)",
             }}
           >
             Loading payments...
@@ -170,7 +170,7 @@ export const CouponPaymentsSection: React.FC<CouponPaymentsSectionProps> = ({
           <p
             style={{
               fontSize: "var(--text-sm)",
-              color: "var(--cube-gray-500)",
+              color: "var(--color-text-muted)",
               fontStyle: "italic",
             }}
           >
@@ -192,9 +192,9 @@ export const CouponPaymentsSection: React.FC<CouponPaymentsSectionProps> = ({
                   justifyContent: "space-between",
                   alignItems: "center",
                   padding: "var(--space-2)",
-                  backgroundColor: "var(--color-bg-secondary)",
+                  backgroundColor: "var(--color-bg-light)",
                   borderRadius: "var(--radius-sm)",
-                  border: "1px solid var(--color-border-primary)",
+                  border: "1px solid var(--color-border-light)",
                 }}
               >
                 <div style={{ flex: 1 }}>
@@ -209,7 +209,7 @@ export const CouponPaymentsSection: React.FC<CouponPaymentsSectionProps> = ({
                       style={{
                         fontSize: "var(--text-sm)",
                         fontWeight: "var(--font-medium)",
-                        color: "var(--cube-gray-900)",
+                        color: "var(--color-text-primary)",
                       }}
                     >
                       {formatDate(payment.paymentDate)}
@@ -228,7 +228,7 @@ export const CouponPaymentsSection: React.FC<CouponPaymentsSectionProps> = ({
                     <p
                       style={{
                         fontSize: "var(--text-xs)",
-                        color: "var(--cube-gray-500)",
+                        color: "var(--color-text-muted)",
                         marginTop: "var(--space-1)",
                       }}
                     >
@@ -268,7 +268,7 @@ export const CouponPaymentsSection: React.FC<CouponPaymentsSectionProps> = ({
             style={{
               marginTop: "var(--space-3)",
               paddingTop: "var(--space-3)",
-              borderTop: "1px solid var(--color-border-primary)",
+              borderTop: "1px solid var(--color-border-light)",
               display: "flex",
               justifyContent: "space-between",
               alignItems: "center",
@@ -278,7 +278,7 @@ export const CouponPaymentsSection: React.FC<CouponPaymentsSectionProps> = ({
               style={{
                 fontSize: "var(--text-sm)",
                 fontWeight: "var(--font-medium)",
-                color: "var(--cube-gray-900)",
+                color: "var(--color-text-primary)",
               }}
             >
               Total Coupon Income

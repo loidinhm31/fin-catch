@@ -21,6 +21,7 @@ import { ITradingAuthService } from "@fin-catch/ui/adapters/factory/interfaces";
  */
 export interface TradingAuthConfig {
   baseUrl?: string;
+  apiBasePath?: string;
 }
 
 /**
@@ -38,12 +39,14 @@ function getDefaultBaseUrl(): string {
  */
 export class TradingAuthAdapter implements ITradingAuthService {
   private baseUrl: string;
+  private apiBasePath: string;
 
   constructor(config?: TradingAuthConfig) {
     this.baseUrl =
       config?.baseUrl ||
       this.getStoredValue(AUTH_STORAGE_KEYS.SERVER_URL) ||
       getDefaultBaseUrl();
+    this.apiBasePath = config?.apiBasePath ?? "/api/v1";
 
     serviceLogger.trading(`Initialized with baseUrl: ${this.baseUrl}`);
   }
@@ -163,7 +166,7 @@ export class TradingAuthAdapter implements ITradingAuthService {
    */
   async getSupportedPlatforms(): Promise<TradingPlatform[]> {
     const response = await this.get<{ platforms: TradingPlatform[] }>(
-      "/api/v1/trading/platforms",
+      `${this.apiBasePath}/trading/platforms`,
       false,
     );
     return response.platforms;
@@ -188,7 +191,7 @@ export class TradingAuthAdapter implements ITradingAuthService {
     }
 
     return this.post<{ username: string; password: string }, TradingSession>(
-      `/api/v1/trading/${platform}/login`,
+      `${this.apiBasePath}/trading/${platform}/login`,
       { username, password },
     );
   }
@@ -205,7 +208,7 @@ export class TradingAuthAdapter implements ITradingAuthService {
     }
 
     await this.post<Record<string, never>, { message: string }>(
-      `/api/v1/trading/${platform}/request-otp`,
+      `${this.apiBasePath}/trading/${platform}/request-otp`,
       {},
     );
   }
@@ -228,7 +231,7 @@ export class TradingAuthAdapter implements ITradingAuthService {
     }
 
     return this.post<{ otp: string; otp_type: string }, TradingSession>(
-      `/api/v1/trading/${platform}/verify-otp`,
+      `${this.apiBasePath}/trading/${platform}/verify-otp`,
       { otp, otp_type: otpType },
     );
   }
@@ -247,7 +250,7 @@ export class TradingAuthAdapter implements ITradingAuthService {
 
     try {
       const session = await this.get<TradingSession>(
-        `/api/v1/trading/${platform}/status`,
+        `${this.apiBasePath}/trading/${platform}/status`,
       );
 
       // Return null if disconnected
@@ -274,7 +277,7 @@ export class TradingAuthAdapter implements ITradingAuthService {
     }
 
     await this.post<Record<string, never>, TradingSession>(
-      `/api/v1/trading/${platform}/logout`,
+      `${this.apiBasePath}/trading/${platform}/logout`,
       {},
     );
   }
@@ -293,7 +296,9 @@ export class TradingAuthAdapter implements ITradingAuthService {
       throw new Error("Not authenticated. Please login to qm-hub first.");
     }
 
-    return this.get<TradingAccountInfo>(`/api/v1/trading/${platform}/account`);
+    return this.get<TradingAccountInfo>(
+      `${this.apiBasePath}/trading/${platform}/account`,
+    );
   }
 
   /**
@@ -309,7 +314,7 @@ export class TradingAuthAdapter implements ITradingAuthService {
     }
 
     const response = await this.get<{ accounts: TradingSubAccount[] }>(
-      `/api/v1/trading/${platform}/accounts`,
+      `${this.apiBasePath}/trading/${platform}/accounts`,
     );
     return response.accounts;
   }
@@ -331,7 +336,7 @@ export class TradingAuthAdapter implements ITradingAuthService {
     }
 
     return this.get<TradingAccountBalance>(
-      `/api/v1/trading/${platform}/accounts/${accountId}/balance`,
+      `${this.apiBasePath}/trading/${platform}/accounts/${accountId}/balance`,
     );
   }
 
@@ -356,7 +361,7 @@ export class TradingAuthAdapter implements ITradingAuthService {
     }
 
     const response = await this.get<{ loanPackages: LoanPackage[] }>(
-      `/api/v1/trading/${platform}/accounts/${accountNo}/loan-packages`,
+      `${this.apiBasePath}/trading/${platform}/accounts/${accountNo}/loan-packages`,
     );
     return response.loanPackages;
   }
@@ -390,7 +395,7 @@ export class TradingAuthAdapter implements ITradingAuthService {
     });
 
     return this.get<PPSE>(
-      `/api/v1/trading/${platform}/accounts/${accountNo}/ppse?${params}`,
+      `${this.apiBasePath}/trading/${platform}/accounts/${accountNo}/ppse?${params}`,
     );
   }
 
@@ -411,7 +416,7 @@ export class TradingAuthAdapter implements ITradingAuthService {
     }
 
     return this.post<PlaceOrderRequest, Order>(
-      `/api/v1/trading/${platform}/accounts/${order.accountNo}/orders`,
+      `${this.apiBasePath}/trading/${platform}/accounts/${order.accountNo}/orders`,
       order,
     );
   }
@@ -433,7 +438,7 @@ export class TradingAuthAdapter implements ITradingAuthService {
     }
 
     const response = await this.get<{ orders: Order[] }>(
-      `/api/v1/trading/${platform}/accounts/${accountNo}/orders`,
+      `${this.apiBasePath}/trading/${platform}/accounts/${accountNo}/orders`,
     );
     return response.orders;
   }
@@ -457,7 +462,7 @@ export class TradingAuthAdapter implements ITradingAuthService {
     }
 
     return this.delete<Order>(
-      `/api/v1/trading/${platform}/accounts/${accountNo}/orders/${orderId}`,
+      `${this.apiBasePath}/trading/${platform}/accounts/${accountNo}/orders/${orderId}`,
     );
   }
 
@@ -478,7 +483,7 @@ export class TradingAuthAdapter implements ITradingAuthService {
     }
 
     const response = await this.get<{ deals: Deal[] }>(
-      `/api/v1/trading/${platform}/accounts/${accountNo}/deals`,
+      `${this.apiBasePath}/trading/${platform}/accounts/${accountNo}/deals`,
     );
     return response.deals;
   }

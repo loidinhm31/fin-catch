@@ -84,7 +84,9 @@ export const GoldPremiumChartResponsive: React.FC<
         {/* Compact Premium Rate Badge */}
         <div
           className={`p-3 sm:p-4 rounded-xl mb-3 ${
-            isPremiumPositive ? "bg-[#FACC15]/20" : "bg-[#06B6D4]/20"
+            isPremiumPositive
+              ? "bg-(--color-amber-400)/20"
+              : "bg-(--color-cyan-500)/20"
           } border-2 ${isPremiumPositive ? "border-yellow-300" : "border-blue-300"}`}
         >
           <div className="flex items-center justify-between flex-wrap gap-2">
@@ -162,7 +164,7 @@ export const GoldPremiumChartResponsive: React.FC<
               style={{
                 fontSize: isMobile ? "var(--text-sm)" : "var(--text-base)",
                 fontWeight: "var(--font-bold)",
-                color: "#10B981",
+                color: "var(--color-green-500)",
               }}
             >
               {formatCurrencyValue(point.market_price_vnd)}

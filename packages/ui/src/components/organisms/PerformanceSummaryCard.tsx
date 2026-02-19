@@ -19,7 +19,7 @@ export const PerformanceSummaryCard: React.FC<PerformanceSummaryCardProps> = ({
         style={{
           fontSize: "var(--text-xl)",
           fontWeight: "var(--font-bold)",
-          color: "var(--cube-gray-900)",
+          color: "var(--color-text-primary)",
           marginBottom: "var(--space-4)",
         }}
       >
@@ -32,7 +32,7 @@ export const PerformanceSummaryCard: React.FC<PerformanceSummaryCardProps> = ({
               style={{
                 fontSize: "var(--text-sm)",
                 fontWeight: "var(--font-medium)",
-                color: "var(--cube-gray-900)",
+                color: "var(--color-text-primary)",
                 opacity: 0.7,
                 marginBottom: "var(--space-1)",
               }}
@@ -43,7 +43,7 @@ export const PerformanceSummaryCard: React.FC<PerformanceSummaryCardProps> = ({
               style={{
                 fontSize: "var(--text-4xl)",
                 fontWeight: "var(--font-extrabold)",
-                color: "var(--cube-gray-900)",
+                color: "var(--color-text-primary)",
               }}
             >
               {formatCurrency(performance.totalValue)}
@@ -69,7 +69,7 @@ export const PerformanceSummaryCard: React.FC<PerformanceSummaryCardProps> = ({
             <p
               style={{
                 fontSize: "var(--text-xs)",
-                color: "var(--cube-gray-900)",
+                color: "var(--color-text-primary)",
                 opacity: 0.7,
                 marginBottom: "var(--space-1)",
               }}
@@ -93,7 +93,7 @@ export const PerformanceSummaryCard: React.FC<PerformanceSummaryCardProps> = ({
             <p
               style={{
                 fontSize: "var(--text-xs)",
-                color: "var(--cube-gray-900)",
+                color: "var(--color-text-primary)",
                 opacity: 0.7,
                 marginBottom: "var(--space-1)",
               }}

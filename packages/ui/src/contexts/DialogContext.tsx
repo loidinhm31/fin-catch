@@ -169,7 +169,7 @@ export const DialogProvider: React.FC<{ children: React.ReactNode }> = ({
                 <AlertDialogAction
                   className={cn(
                     dialogState.options.variant === "error" &&
-                      "bg-[#DC2626] hover:bg-[#B91C1C] shadow-[0_0_12px_rgba(220,38,38,0.5)]",
+                      "bg-(--color-red-600) hover:bg-(--color-red-700) shadow-[0_0_12px_rgba(220,38,38,0.5)]",
                   )}
                   onClick={handleConfirm}
                 >

@@ -20,7 +20,7 @@ export const CurrencySelectorSection: React.FC<
         style={{
           fontSize: "var(--text-sm)",
           fontWeight: "var(--font-medium)",
-          color: "var(--cube-gray-900)",
+          color: "var(--color-text-primary)",
           opacity: 0.7,
           marginBottom: "var(--space-2)",
         }}

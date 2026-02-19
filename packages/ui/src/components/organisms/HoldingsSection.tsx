@@ -55,17 +55,17 @@ export const HoldingsSection: React.FC<HoldingsSectionProps> = ({
           style={{
             fontSize: "var(--text-xl)",
             fontWeight: "var(--font-bold)",
-            color: "var(--cube-gray-900)",
+            color: "var(--color-text-primary)",
           }}
         >
           Holdings{" "}
-          <span style={{ color: "var(--cube-gray-400)" }}>
+          <span style={{ color: "var(--color-text-muted)" }}>
             ({entriesCount})
           </span>
         </h2>
         <button
           onClick={onAdd}
-          className="bg-linear-to-r from-cyan-300 to-blue-700 text-white px-4 py-2 rounded-xl font-bold shadow-lg hover:shadow-xl transition-all flex items-center gap-2"
+          className="bg-cyan-500 text-white px-4 py-2 rounded-xl font-bold shadow-lg hover:shadow-xl transition-all flex items-center gap-2"
           style={{ fontSize: "var(--text-sm)" }}
         >
           <Plus className="w-4 h-4" />
@@ -81,13 +81,13 @@ export const HoldingsSection: React.FC<HoldingsSectionProps> = ({
         <div className="glass-card p-12 text-center">
           <Wallet
             className="w-16 h-16 mx-auto mb-4 opacity-30"
-            style={{ color: "var(--cube-pink)" }}
+            style={{ color: "var(--color-accent-pink)" }}
           />
           <p
             style={{
               fontSize: "var(--text-lg)",
               fontWeight: "var(--font-bold)",
-              color: "var(--cube-gray-900)",
+              color: "var(--color-text-primary)",
             }}
           >
             No holdings yet
@@ -95,7 +95,7 @@ export const HoldingsSection: React.FC<HoldingsSectionProps> = ({
           <p
             style={{
               fontSize: "var(--text-sm)",
-              color: "var(--cube-gray-900)",
+              color: "var(--color-text-primary)",
               opacity: 0.7,
               marginTop: "var(--space-2)",
             }}

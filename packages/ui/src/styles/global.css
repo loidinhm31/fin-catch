@@ -27,11 +27,11 @@
 @theme {
   /* ===== FINTECH COLOR PALETTE (Dark Mode OLED) ===== */
   /* Background Colors - Deep Black & Midnight Blue */
-  --color-bg-primary: #0f172a;
+  --color-bg-app: #0f172a;
   /* slate-900 - Primary dark background */
-  --color-bg-secondary: #0a0e27;
+  --color-bg-light: #0a0e27;
   /* Midnight blue - Secondary areas */
-  --color-bg-tertiary: #121212;
+  --color-bg-white: #121212;
   /* Deep black - OLED optimization */
   /* Fintech Brand Colors */
   --color-amber-400: #fbbf24;
@@ -51,6 +51,8 @@
   /* Tech accent - Bright cyan */
   --color-cyan-500: #06b6d4;
   /* Tech accent - Primary */
+  --color-cyan-600: #0891B2;
+  /* Tech accent - Hover */
   --color-blue-400: #60a5fa;
   /* Secondary tech accent */
   --color-blue-500: #3b82f6;
@@ -60,10 +62,16 @@
   /* Success/Gain */
   --color-green-500: #22c55e;
   /* Success primary */
+  --color-green-600: #059669;
+  /* Success hover */
   --color-red-400: #f87171;
   /* Error/Loss */
   --color-red-500: #ef4444;
   /* Error primary */
+  --color-red-600: #DC2626;
+  /* Error strong */
+  --color-red-700: #B91C1C;
+  /* Error hover */
   /* Text Colors - High Contrast for Readability */
   --color-text-primary: #f8fafc;
   /* slate-50 - Primary text */
@@ -72,9 +80,9 @@
   --color-text-muted: #64748b;
   /* slate-500 - Muted text */
   /* Border Colors */
-  --color-border-primary: #334155;
+  --color-border-light: #334155;
   /* slate-700 - Primary borders */
-  --color-border-secondary: #1e293b;
+  --color-border-strong: #1e293b;
   /* slate-800 - Subtle borders */
   /* ===== GLASSMORPHISM - DARK MODE ===== */
   /* Glass backgrounds with dark tint - Increased opacity for better text contrast */
@@ -295,6 +303,10 @@
   --chart-reference: #eab308;
   --chart-floor: #06b6d4;
 
+  /* Accent Colors */
+  --color-accent-pink: #ec4899;
+  /* Pink accent */
+
   /* Additional Text Shades */
   --color-text-tertiary: #6b7280;
   --color-text-gray-light: #9ca3af;
@@ -312,9 +324,9 @@
 .light,
 [data-theme="light"] {
   /* Light Background Colors */
-  --color-bg-primary: #f8fafc;
-  --color-bg-secondary: #f1f5f9;
-  --color-bg-tertiary: #ffffff;
+  --color-bg-app: #f8fafc;
+  --color-bg-light: #f1f5f9;
+  --color-bg-white: #ffffff;
 
   /* Light Text Colors */
   --color-text-primary: #0f172a;
@@ -322,8 +334,8 @@
   --color-text-muted: #64748b;
 
   /* Light Border Colors */
-  --color-border-primary: #e2e8f0;
-  --color-border-secondary: #cbd5e1;
+  --color-border-light: #e2e8f0;
+  --color-border-strong: #cbd5e1;
 
   /* Fintech Brand Colors - Light Mode */
   --color-violet-500: #7c3aed;
@@ -420,7 +432,7 @@
 .light .shadow-body,
 [data-theme="light"],
 [data-theme="light"] .shadow-body {
-  background: var(--color-bg-primary);
+  background: var(--color-bg-app);
   color: var(--color-text-primary);
 }
 
@@ -490,7 +502,7 @@ body,
   padding: 0;
   font-family: var(--font-base), serif;
   color: var(--color-text-primary);
-  background: var(--color-bg-primary);
+  background: var(--color-bg-app);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   width: 100%;
@@ -919,7 +931,7 @@ h6 {
 /* ===== SCREEN BACKGROUNDS - DARK GRADIENTS ===== */
 
 .screen-welcome {
-  background: var(--color-bg-primary);
+  background: var(--color-bg-app);
   background-image:
     linear-gradient(rgba(59, 130, 246, 0.03) 1px, transparent 1px),
     linear-gradient(90deg, rgba(59, 130, 246, 0.03) 1px, transparent 1px);
@@ -930,7 +942,7 @@ h6 {
 }
 
 .screen-explore {
-  background: var(--color-bg-primary);
+  background: var(--color-bg-app);
   background-image:
     linear-gradient(rgba(59, 130, 246, 0.03) 1px, transparent 1px),
     linear-gradient(90deg, rgba(59, 130, 246, 0.03) 1px, transparent 1px);
@@ -941,7 +953,7 @@ h6 {
 }
 
 .screen-detail {
-  background: var(--color-bg-secondary);
+  background: var(--color-bg-light);
   min-height: 100vh;
   position: relative;
   overflow: hidden;
@@ -1021,14 +1033,14 @@ h6 {
 }
 
 ::-webkit-scrollbar-track {
-  background: var(--color-bg-secondary);
+  background: var(--color-bg-light);
   border-radius: var(--radius-sm);
 }
 
 ::-webkit-scrollbar-thumb {
   background: var(--color-violet-500);
   border-radius: var(--radius-sm);
-  border: 2px solid var(--color-bg-secondary);
+  border: 2px solid var(--color-bg-light);
 }
 
 ::-webkit-scrollbar-thumb:hover {
@@ -1067,47 +1079,11 @@ h6 {
   }
 }
 
-/* ===== BACKWARDS COMPATIBILITY ===== */
-
 :root {
-  /* Keep old color variable names for existing components */
-  --cube-cyan: var(--color-cyan-400);
-  --cube-cyan-light: var(--color-cyan-400);
-  --cube-cyan-dark: var(--color-cyan-500);
-  --cube-blue: var(--color-blue-500);
-  --cube-blue-light: var(--color-blue-400);
-  --cube-blue-dark: var(--color-blue-500);
-  --cube-yellow: var(--color-amber-400);
-  --cube-yellow-light: var(--color-amber-400);
-  --cube-pink: #ec4899;
-  --cube-pink-light: #f9a8d4;
-
-  /* Text colors - ensure high contrast */
-  --cube-gray-900: var(--color-text-primary);
-  /* #F8FAFC - White text for dark mode */
-  --cube-gray-800: var(--color-text-secondary);
-  /* #CBD5E1 - Light gray */
-  --cube-gray-700: var(--color-text-secondary);
-  /* #CBD5E1 - Light gray */
-  --cube-gray-600: var(--color-text-secondary);
-  /* #CBD5E1 - Light gray */
-  --cube-gray-500: var(--color-text-muted);
-  /* #64748B - Muted but visible */
-  --cube-gray-400: var(--color-text-muted);
-  /* #64748B - Muted but visible */
-  --cube-gray-300: var(--color-text-secondary);
-  /* #CBD5E1 - Light gray */
-  --cube-gray-200: var(--color-border-primary);
-  /* #334155 - Borders */
-  --cube-gray-100: var(--color-border-secondary);
-  /* #1E293B - Subtle borders */
-  --cube-white: var(--color-text-primary);
-  /* #F8FAFC - White */
-
   /* Old gradient variables */
   --gradient-explore: linear-gradient(135deg,
-      var(--color-bg-primary) 0%,
-      var(--color-bg-secondary) 100%);
+      var(--color-bg-app) 0%,
+      var(--color-bg-light) 100%);
 }
 
 /* ===== DATE PICKER FIXES ===== */
@@ -1226,9 +1202,9 @@ select:active {
 .cyber,
 [data-theme="cyber"] {
   /* Backgrounds - VS Code inspired */
-  --color-bg-primary: #0F172A;
-  --color-bg-secondary: #1E293B;
-  --color-bg-tertiary: #0a0e1a;
+  --color-bg-app: #0F172A;
+  --color-bg-light: #1E293B;
+  --color-bg-white: #0a0e1a;
 
   /* Fintech Brand Colors - Cyber override with syntax palette */
   --color-amber-400: #FACC15;
@@ -1256,8 +1232,8 @@ select:active {
   --color-text-muted: #64748B;
 
   /* Border Colors */
-  --color-border-primary: #334155;
-  --color-border-secondary: #1E293B;
+  --color-border-light: #334155;
+  --color-border-strong: #1E293B;
 
   /* Glassmorphism - Enhanced with cyan borders */
   --glass-bg-dark: rgba(30, 41, 59, 0.95);
@@ -1332,7 +1308,7 @@ select:active {
 .cyber .shadow-body,
 [data-theme="cyber"],
 [data-theme="cyber"] .shadow-body {
-  background: var(--color-bg-primary);
+  background: var(--color-bg-app);
   color: var(--color-text-primary);
 }
 

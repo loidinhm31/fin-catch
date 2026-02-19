@@ -78,7 +78,7 @@ export const PriceAlertToast: React.FC<PriceAlertToastProps> = ({
             key={toast.id}
             onClick={() => onAlertClick?.(toast.alert)}
             className={`
-              animate-slide-up cursor-pointer rounded-xl shadow-[--shadow-md] overflow-hidden
+              animate-slide-up cursor-pointer rounded-xl shadow-(--shadow-md) overflow-hidden
               ${isTarget ? "bg-green-100" : "bg-red-100"}
             `}
           >
@@ -133,7 +133,7 @@ export const PriceAlertToast: React.FC<PriceAlertToastProps> = ({
             {/* Progress bar */}
             <div
               className={`h-1 ${
-                isTarget ? "bg-[--color-green-500]" : "bg-[--color-red-500]"
+                isTarget ? "bg-(--color-green-500)" : "bg-(--color-red-500)"
               }`}
               style={{
                 animation: `shrink ${duration}ms linear`,

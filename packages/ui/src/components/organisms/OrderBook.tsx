@@ -77,7 +77,7 @@ const getStatusStyle = (
       };
     case "cancelled":
       return {
-        bg: "var(--color-border-primary)",
+        bg: "var(--color-border-light)",
         color: "#888",
         icon: <X className="w-3 h-3" />,
       };
@@ -85,7 +85,7 @@ const getStatusStyle = (
     case "doneForDay":
     default:
       return {
-        bg: "var(--color-border-primary)",
+        bg: "var(--color-border-light)",
         color: "#888",
         icon: <Clock className="w-3 h-3" />,
       };

@@ -81,12 +81,15 @@ export const StockQueryForm: React.FC<StockQueryFormProps> = ({
   return (
     <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-6">
       <div className="flex items-center space-x-2 mb-4">
-        <TrendingUp className="w-6 h-6" style={{ color: "var(--cube-cyan)" }} />
+        <TrendingUp
+          className="w-6 h-6"
+          style={{ color: "var(--color-cyan-400)" }}
+        />
         <h3
           style={{
             fontSize: "var(--text-lg)",
             fontWeight: "var(--font-bold)",
-            color: "var(--cube-gray-900)",
+            color: "var(--color-text-primary)",
           }}
         >
           Stock Query

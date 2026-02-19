@@ -19,8 +19,8 @@ const SelectTrigger = React.forwardRef<
     className={cn(
       "glass-input w-full",
       "flex h-10 items-center justify-between rounded-lg px-3 py-2 text-sm",
-      "placeholder:text-[var(--color-text-muted)]",
-      "focus:outline-none focus:border-[var(--color-violet-500)]",
+      "placeholder:text-(--color-text-muted)",
+      "focus:outline-none focus:border-(--color-violet-500)",
       "focus:ring-violet-500/30 focus:shadow-glow-violet",
       "disabled:cursor-not-allowed disabled:opacity-50",
       "[&>span]:line-clamp-1",
@@ -108,7 +108,7 @@ const SelectContent = React.forwardRef<
           className={cn(
             "p-1",
             position === "popper" &&
-              "h-[var(--radix-select-trigger-height)] w-full min-w-[var(--radix-select-trigger-width)]",
+              "h-(--radix-select-trigger-height) w-full min-w-(--radix-select-trigger-width)",
           )}
         >
           {children}

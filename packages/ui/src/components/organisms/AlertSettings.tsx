@@ -215,7 +215,7 @@ export const AlertSettings: React.FC = () => {
                   <div
                     className="absolute top-[2px] left-[2px] h-5 w-5 rounded-full transition-all"
                     style={{
-                      background: "var(--color-bg-tertiary)",
+                      background: "var(--color-bg-white)",
                       transform: preferences.push_enabled
                         ? "translateX(20px)"
                         : "translateX(0)",
@@ -278,7 +278,7 @@ export const AlertSettings: React.FC = () => {
                   <div
                     className="absolute top-[2px] left-[2px] h-5 w-5 rounded-full transition-all"
                     style={{
-                      background: "var(--color-bg-tertiary)",
+                      background: "var(--color-bg-white)",
                       transform: preferences.email_enabled
                         ? "translateX(20px)"
                         : "translateX(0)",
