@@ -13,32 +13,25 @@ import {
   AlertTriangle,
   ArrowLeftRight,
 } from "lucide-react";
-import { useSyncStatus } from "@fin-catch/ui/hooks";
-
-type Page = "financial-data" | "portfolio" | "trading" | "settings";
+import { NavLink } from "react-router-dom";
+import { useSyncStatus, useNav } from "@fin-catch/ui/hooks";
 
 interface SidebarProps {
-  currentPage: Page;
-  onNavigate: (page: Page) => void;
-  onSyncTap?: () => void;
   isCollapsed: boolean;
   onToggleCollapse: () => void;
+  className?: string;
 }
 
-export function Sidebar({
-  currentPage,
-  onNavigate,
-  onSyncTap,
-  isCollapsed,
-  onToggleCollapse,
-}: SidebarProps) {
+export function Sidebar({ isCollapsed, onToggleCollapse }: SidebarProps) {
   const { isAuthenticated, syncStatus, isSyncing, lastSyncSuccess, error } =
     useSyncStatus();
+  const { to, navigate } = useNav();
 
   const navItems: {
-    id: Page;
+    id: string;
     label: string;
     icon: typeof LineChart;
+    path: string;
     activeColor: string;
     activeBg: string;
   }[] = [
@@ -46,6 +39,7 @@ export function Sidebar({
       id: "financial-data",
       label: "Market",
       icon: LineChart,
+      path: "/market",
       activeColor: "var(--color-nav-market-active)",
       activeBg: "var(--color-nav-market-bg)",
     },
@@ -53,6 +47,7 @@ export function Sidebar({
       id: "portfolio",
       label: "Portfolio",
       icon: Wallet,
+      path: "/portfolio",
       activeColor: "var(--color-nav-portfolio-active)",
       activeBg: "var(--color-nav-portfolio-bg)",
     },
@@ -60,6 +55,7 @@ export function Sidebar({
       id: "trading",
       label: "Trading",
       icon: ArrowLeftRight,
+      path: "/trading",
       activeColor: "var(--color-nav-trading-active)",
       activeBg: "var(--color-nav-trading-bg)",
     },
@@ -67,6 +63,7 @@ export function Sidebar({
       id: "settings",
       label: "Settings",
       icon: Settings,
+      path: "/settings",
       activeColor: "var(--color-nav-settings-active)",
       activeBg: "var(--color-nav-settings-bg)",
     },
@@ -140,51 +137,54 @@ export function Sidebar({
       {/* Navigation Items */}
       <nav className="flex-1 px-3 py-4">
         <ul className="space-y-1">
-          {navItems.map(({ id, label, icon: Icon, activeColor, activeBg }) => {
-            const isActive = currentPage === id;
-            return (
+          {navItems.map(
+            ({ id, label, icon: Icon, path, activeColor, activeBg }) => (
               <li key={id}>
-                <button
-                  onClick={() => onNavigate(id)}
+                <NavLink
+                  to={to(path)}
                   title={isCollapsed ? label : undefined}
-                  className={`
-                    w-full flex items-center gap-3 py-3 rounded-xl
-                    transition-all duration-200 group
-                    ${isCollapsed ? "px-0 justify-center" : "px-4"}
-                  `}
-                  style={{
+                  className={({ isActive }) =>
+                    `w-full flex items-center gap-3 py-3 rounded-xl transition-all duration-200 group ${
+                      isCollapsed ? "px-0 justify-center" : "px-4"
+                    }`
+                  }
+                  style={({ isActive }) => ({
                     color: isActive ? activeColor : "var(--color-nav-inactive)",
                     background: isActive ? activeBg : "transparent",
-                  }}
+                  })}
                 >
-                  <Icon
-                    className={`w-5 h-5 shrink-0 transition-all ${
-                      isActive
-                        ? "stroke-[2.5]"
-                        : "stroke-2 group-hover:stroke-[2.5]"
-                    }`}
-                  />
-                  {!isCollapsed && (
+                  {({ isActive }) => (
                     <>
-                      <span
-                        className={`text-sm whitespace-nowrap ${
-                          isActive ? "font-semibold" : "font-medium"
+                      <Icon
+                        className={`w-5 h-5 shrink-0 transition-all ${
+                          isActive
+                            ? "stroke-[2.5]"
+                            : "stroke-2 group-hover:stroke-[2.5]"
                         }`}
-                      >
-                        {label}
-                      </span>
-                      {isActive && (
-                        <div
-                          className="ml-auto w-1.5 h-1.5 rounded-full shrink-0"
-                          style={{ background: activeColor }}
-                        />
+                      />
+                      {!isCollapsed && (
+                        <>
+                          <span
+                            className={`text-sm whitespace-nowrap ${
+                              isActive ? "font-semibold" : "font-medium"
+                            }`}
+                          >
+                            {label}
+                          </span>
+                          {isActive && (
+                            <div
+                              className="ml-auto w-1.5 h-1.5 rounded-full shrink-0"
+                              style={{ background: activeColor }}
+                            />
+                          )}
+                        </>
                       )}
                     </>
                   )}
-                </button>
+                </NavLink>
               </li>
-            );
-          })}
+            ),
+          )}
         </ul>
       </nav>
 
@@ -209,7 +209,7 @@ export function Sidebar({
         }}
       >
         <button
-          onClick={onSyncTap}
+          onClick={() => navigate("/settings")}
           title={
             isSyncing
               ? "Syncing..."

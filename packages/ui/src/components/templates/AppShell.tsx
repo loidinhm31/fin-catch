@@ -1,12 +1,13 @@
 import { lazy, Suspense, useState } from "react";
-import { Navigate, Route, Routes, useLocation } from "react-router-dom";
+import { Navigate, Route, Routes } from "react-router-dom";
 import { LoginPage } from "@fin-catch/ui/components/pages";
 import { ErrorBoundary, LoadingSpinner } from "@fin-catch/ui/components/atoms";
+import { SyncStatusIndicator } from "@fin-catch/ui/components/molecules";
 import {
-  BottomNav,
-  SyncStatusIndicator,
-} from "@fin-catch/ui/components/molecules";
-import { PriceAlertToast, Sidebar } from "@fin-catch/ui/components/organisms";
+  PriceAlertToast,
+  Sidebar,
+  BottomNavigation,
+} from "@fin-catch/ui/components/organisms";
 import "@fin-catch/ui/styles";
 import { useAuth, useNav } from "@fin-catch/ui/hooks";
 
@@ -38,8 +39,6 @@ const TradingOperationsPage = lazy(() =>
   })),
 );
 
-type Page = "financial-data" | "portfolio" | "trading" | "settings";
-
 /**
  * Props for AppShell component
  */
@@ -65,43 +64,16 @@ export function AppShell({
   embedded = false,
   onLogoutRequest,
 }: AppShellProps = {}) {
-  // Navigation hooks
-  const location = useLocation();
-  const { to, nav } = useNav();
+  const { to, navigate } = useNav();
 
   const [localSkipAuth, setLocalSkipAuth] = useState(false);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
 
   // Skip initial auth check if tokens are provided externally (embedded mode)
   // This prevents unnecessary /api/v1/auth/me calls when already authenticated
-  const {
-    isAuthenticated,
-    isLoading: isAuthLoading,
-    checkAuthStatus,
-  } = useAuth({ skipInitialCheck: skipAuthProp });
-
-  // Derive current page from path
-  const getCurrentPage = (): Page => {
-    // Check path to support root-level and embedded routing
-    const path = location.pathname;
-    if (path.endsWith("/market") || path === "/market") return "financial-data";
-    // Match both /trading and /trading/operations
-    if (path.includes("/trading") || path === "/trading") return "trading";
-    if (path.endsWith("/settings") || path === "/settings") return "settings";
-    return "portfolio"; // default
-  };
-
-  const currentPage = getCurrentPage();
-
-  const handleNavigate = (page: Page) => {
-    const pageMap: Record<Page, string> = {
-      "financial-data": "market",
-      trading: "trading",
-      settings: "settings",
-      portfolio: "portfolio",
-    };
-    nav(pageMap[page] || "portfolio");
-  };
+  const { isLoading: isAuthLoading, checkAuthStatus } = useAuth({
+    skipInitialCheck: skipAuthProp,
+  });
 
   // Use either the prop or local state for skip auth
   const skipAuth = skipAuthProp || localSkipAuth;
@@ -130,9 +102,6 @@ export function AppShell({
     checkAuthStatus();
   };
 
-  // Always show navigation - embedded prop is only for theme isolation now
-  const showNavigation = true;
-
   return (
     <div
       className="min-h-screen cyber-grid-pattern"
@@ -141,31 +110,24 @@ export function AppShell({
       }}
     >
       {/* Desktop Sidebar - Hidden on mobile */}
-      {showNavigation && (
-        <Sidebar
-          currentPage={currentPage}
-          onNavigate={handleNavigate}
-          onSyncTap={() => handleNavigate("settings")}
-          isCollapsed={isSidebarCollapsed}
-          onToggleCollapse={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
-        />
-      )}
+      <Sidebar
+        isCollapsed={isSidebarCollapsed}
+        onToggleCollapse={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
+      />
 
       {/* Header with Sync Status - Mobile only, desktop has sidebar */}
-      {showNavigation && (
-        <div
-          className="fixed top-0 left-0 right-0 z-40 flex justify-end px-4 py-3 md:hidden"
-          style={{
-            background: "var(--glass-bg-dark-strong)",
-            backdropFilter: "blur(16px)",
-            WebkitBackdropFilter: "blur(16px)",
-            borderBottom: "1px solid var(--glass-border-light)",
-            boxShadow: "var(--shadow-md)",
-          }}
-        >
-          <SyncStatusIndicator onTap={() => handleNavigate("settings")} />
-        </div>
-      )}
+      <div
+        className="fixed top-0 left-0 right-0 z-40 flex justify-end px-4 py-3 md:hidden"
+        style={{
+          background: "var(--glass-bg-dark-strong)",
+          backdropFilter: "blur(16px)",
+          WebkitBackdropFilter: "blur(16px)",
+          borderBottom: "1px solid var(--glass-border-light)",
+          boxShadow: "var(--shadow-md)",
+        }}
+      >
+        <SyncStatusIndicator onTap={() => navigate("/settings")} />
+      </div>
 
       {/* Page Content - Adjust margins for sidebar on desktop */}
       <div
@@ -194,22 +156,22 @@ export function AppShell({
                   <LoginPage
                     onLoginSuccess={() => {
                       checkAuthStatus();
-                      nav("/portfolio");
+                      navigate("/portfolio");
                     }}
                     onSkip={() => {
                       setLocalSkipAuth(true);
-                      nav("/portfolio");
+                      navigate("/portfolio");
                     }}
                   />
                 }
               />
               <Route
                 path="/"
-                element={<Navigate to={to("portfolio")} replace />}
+                element={<Navigate to={to("/portfolio")} replace />}
               />
               <Route
                 path="*"
-                element={<Navigate to={to("portfolio")} replace />}
+                element={<Navigate to={to("/portfolio")} replace />}
               />
             </Routes>
           </Suspense>
@@ -217,9 +179,7 @@ export function AppShell({
       </div>
 
       {/* Mobile Bottom Navigation - Hidden on desktop */}
-      {showNavigation && (
-        <BottomNav currentPage={currentPage} onNavigate={handleNavigate} />
-      )}
+      <BottomNavigation />
 
       {/* Price Alert Toast Notifications */}
       <PriceAlertToast />

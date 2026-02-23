@@ -25,6 +25,11 @@ interface ThemeProviderProps {
    * This prevents theme conflicts between multiple embedded apps.
    */
   embedded?: boolean;
+  /**
+   * Custom event name dispatched when theme changes in embedded mode.
+   * @default FIN_CATCH_THEME_EVENT
+   */
+  themeEventName?: string;
 }
 
 const getSystemTheme = (): "light" | "dark" => {
@@ -39,6 +44,7 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({
   defaultTheme = "cyber",
   storageKey = FIN_CATCH_THEME_STORAGE_KEY,
   embedded = false,
+  themeEventName = FIN_CATCH_THEME_EVENT,
 }) => {
   const [theme, setThemeState] = useState<Theme>(() => {
     if (typeof window === "undefined") return defaultTheme;
@@ -83,7 +89,7 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({
       // In embedded mode, dispatch custom event for ShadowWrapper to handle
       // This avoids modifying document.documentElement which would affect other apps
       window.dispatchEvent(
-        new CustomEvent(FIN_CATCH_THEME_EVENT, {
+        new CustomEvent(themeEventName, {
           detail: { theme: resolved },
         }),
       );
@@ -91,10 +97,12 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({
       // In standalone mode, apply theme to document element directly
       const root = window.document.documentElement;
       root.setAttribute("data-theme", resolved);
-      root.classList.remove("light", "dark", "cyber");
-      root.classList.add(resolved);
+      root.classList.remove("dark", "cyber");
+      if (resolved !== "light") {
+        root.classList.add(resolved);
+      }
     }
-  }, [theme, storageKey, embedded]);
+  }, [theme, storageKey, embedded, themeEventName]);
 
   useEffect(() => {
     if (theme !== "system") return;
@@ -106,21 +114,23 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({
 
       if (embedded) {
         window.dispatchEvent(
-          new CustomEvent(FIN_CATCH_THEME_EVENT, {
+          new CustomEvent(themeEventName, {
             detail: { theme: newTheme },
           }),
         );
       } else {
         const root = window.document.documentElement;
         root.setAttribute("data-theme", newTheme);
-        root.classList.remove("light", "dark", "cyber");
-        root.classList.add(newTheme);
+        root.classList.remove("dark", "cyber");
+        if (newTheme !== "light") {
+          root.classList.add(newTheme);
+        }
       }
     };
 
     mediaQuery.addEventListener("change", handleChange);
     return () => mediaQuery.removeEventListener("change", handleChange);
-  }, [theme, embedded]);
+  }, [theme, embedded, themeEventName]);
 
   const setTheme = (newTheme: Theme) => {
     setThemeState(newTheme);

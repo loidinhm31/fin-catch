@@ -118,7 +118,7 @@ const DialogTitle = React.forwardRef<
     className={cn("text-2xl font-bold leading-none tracking-tight", className)}
     style={{
       color: "var(--color-text-primary)",
-      fontFamily: "var(--font-heading)",
+      fontFamily: "var(--font-family-heading)",
     }}
     {...props}
   />

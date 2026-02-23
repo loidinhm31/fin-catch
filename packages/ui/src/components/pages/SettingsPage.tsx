@@ -10,7 +10,7 @@ interface SettingsPageProps {
 }
 
 export const SettingsPage: React.FC<SettingsPageProps> = ({ onLogout }) => {
-  const { nav } = useNav();
+  const { navigate } = useNav();
   const { isAuthenticated, logout } = useAuth();
   const { theme, setTheme } = useTheme();
 
@@ -164,7 +164,7 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({ onLogout }) => {
             <Button
               variant="primary"
               className="w-full"
-              onClick={() => nav("/login")}
+              onClick={() => navigate("/login")}
             >
               Login / Register
             </Button>

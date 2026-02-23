@@ -55,7 +55,7 @@ export const TradingAccountInfo: React.FC<TradingAccountInfoProps> = ({
   tradingService,
   platform,
 }) => {
-  const { to, nav } = useNav();
+  const { navigate } = useNav();
 
   // Account info state
   const [accountInfo, setAccountInfo] = useState<TradingAccountInfoType | null>(
@@ -679,8 +679,8 @@ export const TradingAccountInfo: React.FC<TradingAccountInfoProps> = ({
           <Button
             variant="primary"
             onClick={() => {
-              nav(
-                `trading/operations?platform=${platform}&account=${selectedAccount.id}`,
+              navigate(
+                `/trading/operations?platform=${platform}&account=${selectedAccount.id}`,
               );
             }}
             className="w-full"

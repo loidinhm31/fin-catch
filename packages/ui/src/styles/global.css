@@ -108,10 +108,13 @@
 
   /* ===== TYPOGRAPHY - Tech Startup ===== */
   /* Font Families */
-  --font-heading: "Space Grotesk", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-  --font-base: "Space Grotesk", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-  /* Alias for backward compatibility (will be mangled by regex in embed, but works in base app) */
-  --font-body: var(--font-base);
+  --font-family-heading: "Space Grotesk", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-family-body: "Space Grotesk", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  /* Explicitly set --font-mono to JetBrains Mono so that when this CSS is processed
+     alongside qm-hub-app's Tailwind, Tailwind's default (ui-monospace) doesn't override
+     qm-hub-app's --font-mono: "JetBrains Mono" at the document level. */
+  --font-mono: "JetBrains Mono", "Fira Code", ui-monospace, monospace;
+  --font-data: "JetBrains Mono", "Fira Code", ui-monospace, monospace;
 
   /* Font Sizes */
   --text-xs: 0.75rem;
@@ -496,11 +499,12 @@ html {
   scroll-behavior: smooth;
 }
 
-body,
+/* :host styles the shadow host element in embedded (Shadow DOM) mode.
+   Kept unlayered so it applies at full cascade priority inside the shadow root. */
 :host {
   margin: 0;
   padding: 0;
-  font-family: var(--font-base), serif;
+  font-family: var(--font-family-body), serif;
   color: var(--color-text-primary);
   background: var(--color-bg-app);
   -webkit-font-smoothing: antialiased;
@@ -509,16 +513,35 @@ body,
   min-height: 100%;
 }
 
-/* All headings use Space Grotesk */
-h1,
-h2,
-h3,
-h4,
-h5,
-h6 {
-  font-family: var(--font-heading);
-  font-weight: var(--font-bold);
-  color: var(--color-text-primary);
+/* body / heading rules are placed in @layer base so that when this CSS is
+   processed by an embedding app's Tailwind pipeline (e.g. via ?inline with
+   @tailwindcss/vite), the host app's unlayered body/heading styles win and
+   fin-catch cannot override the host font. Layered styles always lose to
+   unlayered styles of equal specificity, regardless of source order. */
+@layer base {
+  body {
+    margin: 0;
+    padding: 0;
+    font-family: var(--font-family-body), serif;
+    color: var(--color-text-primary);
+    background: var(--color-bg-app);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    width: 100%;
+    min-height: 100%;
+  }
+
+  /* All headings use Space Grotesk */
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-family: var(--font-family-heading);
+    font-weight: var(--font-bold);
+    color: var(--color-text-primary);
+  }
 }
 
 /* ===== GLASSMORPHISM COMPONENTS (DARK MODE) ===== */
@@ -582,7 +605,7 @@ h6 {
   cursor: pointer;
   color: var(--color-text-primary);
   font-weight: var(--font-semibold);
-  font-family: var(--font-heading);
+  font-family: var(--font-family-heading);
 }
 
 .glass-button:hover {
@@ -598,7 +621,7 @@ h6 {
   background: var(--color-violet-500);
   color: var(--color-text-primary);
   font-weight: var(--font-bold);
-  font-family: var(--font-heading);
+  font-family: var(--font-family-heading);
   border-radius: var(--radius-lg);
   padding: var(--space-3) var(--space-8);
   border: none;
@@ -619,7 +642,7 @@ h6 {
   background: transparent;
   color: var(--color-text-primary);
   font-weight: var(--font-semibold);
-  font-family: var(--font-heading);
+  font-family: var(--font-family-heading);
   border-radius: var(--radius-lg);
   padding: var(--space-3) var(--space-6);
   border: 2px solid var(--glass-border-medium);
@@ -1244,8 +1267,8 @@ select:active {
   --glass-border-glow: rgba(6, 182, 212, 0.6);    /* Cyan glow */
 
   /* Typography - IBM Plex Sans for body, JetBrains Mono for data */
-  --font-heading: "JetBrains Mono", "Fira Code", ui-monospace, monospace;
-  --font-base: "JetBrains Mono", "Fira Code", ui-monospace, monospace;
+  --font-family-heading: "JetBrains Mono", "Fira Code", ui-monospace, monospace;
+  --font-family-body: "JetBrains Mono", "Fira Code", ui-monospace, monospace;
   --font-mono: "JetBrains Mono", "Fira Code", ui-monospace, monospace;
   --font-data: "JetBrains Mono", "Fira Code", ui-monospace, monospace;
 
@@ -1317,7 +1340,7 @@ select:active {
 .cyber *,
 [data-theme="cyber"],
 [data-theme="cyber"] * {
-  font-family: var(--font-base, "IBM Plex Sans", sans-serif);
+  font-family: var(--font-family-body, "IBM Plex Sans", sans-serif);
 }
 
 /* Cyber theme monospace fonts */

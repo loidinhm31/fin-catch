@@ -78,7 +78,7 @@ function saveCollapsedSections(state: {
  * - Holdings (current positions) - collapsible
  */
 export const TradingOperationsPage: React.FC = () => {
-  const { nav } = useNav();
+  const { navigate } = useNav();
   const [searchParams] = useSearchParams();
 
   // Get params from URL
@@ -345,7 +345,7 @@ export const TradingOperationsPage: React.FC = () => {
 
   // Handle back navigation
   const handleBack = () => {
-    nav("trading");
+    navigate("/trading");
   };
 
   // Refresh all data

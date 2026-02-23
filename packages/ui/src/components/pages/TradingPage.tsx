@@ -168,7 +168,7 @@ export const TradingPage: React.FC = () => {
             className="text-2xl font-bold mb-1"
             style={{
               color: "var(--color-text-primary)",
-              fontFamily: "var(--font-heading)",
+              fontFamily: "var(--font-family-heading)",
             }}
           >
             Trading

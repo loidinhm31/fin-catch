@@ -18,6 +18,7 @@ export * from "./StockChartResponsive";
 export * from "./StockQueryForm";
 export * from "./SyncSettings";
 export * from "./Sidebar";
+export * from "./BottomNavigation";
 export * from "./TradingAccountInfo";
 export * from "./TradingPlatformConnect";
 export * from "./OrderForm";
