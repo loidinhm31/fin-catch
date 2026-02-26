@@ -19,7 +19,7 @@ export class IndexedDBPortfolioAdapter implements IPortfolioService {
   }
 
   async listPortfolios(): Promise<Portfolio[]> {
-    const portfolios = await db.portfolios.toArray();
+    const portfolios = await db.portfolios.filter((p) => !p.deleted).toArray();
     portfolios.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
     return portfolios;
   }

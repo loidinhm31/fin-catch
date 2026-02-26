@@ -9,12 +9,14 @@ export interface Portfolio {
   createdAt: number; // Unix timestamp in seconds
   syncVersion: number;
   syncedAt?: number;
+  deleted?: boolean;
+  deletedAt?: number | null;
 }
 
 export interface PortfolioEntry {
   id: string; // UUID
   portfolioId: string; // UUID reference
-  assetType: "stock" | "gold" | "bond";
+  assetType: "stock" | "gold" | "bond" | "cash" | "crypto";
   symbol: string;
   quantity: number;
   purchasePrice: number;
@@ -46,6 +48,8 @@ export interface PortfolioEntry {
   lastAlertType?: "target" | "stop_loss"; // Type of last triggered alert
   syncVersion: number;
   syncedAt?: number;
+  deleted?: boolean;
+  deletedAt?: number | null;
 }
 
 // Price alert event data (received from qm-sync server)
@@ -106,6 +110,8 @@ export interface BondCouponPayment {
   createdAt: number;
   syncVersion: number;
   syncedAt?: number;
+  deleted?: boolean;
+  deletedAt?: number | null;
 }
 
 // Form data for creating/editing entries

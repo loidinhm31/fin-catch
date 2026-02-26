@@ -58,10 +58,10 @@ export class FinCatchDatabase extends Dexie {
     super("FinCatchDB");
 
     this.version(1).stores({
-      portfolios: "id, createdAt, syncVersion, syncedAt",
+      portfolios: "id, createdAt, syncVersion, syncedAt, deleted",
       portfolioEntries:
-        "id, portfolioId, assetType, symbol, createdAt, syncVersion, syncedAt",
-      couponPayments: "id, entryId, paymentDate, syncVersion, syncedAt",
+        "id, portfolioId, assetType, symbol, createdAt, syncVersion, syncedAt, deleted",
+      couponPayments: "id, entryId, paymentDate, syncVersion, syncedAt, deleted",
       _syncMeta: "key",
       _pendingChanges: "++id, tableName, rowId",
     });

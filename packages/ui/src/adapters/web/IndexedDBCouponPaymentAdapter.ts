@@ -11,10 +11,12 @@ export class IndexedDBCouponPaymentAdapter implements ICouponPaymentService {
   }
 
   async listCouponPayments(entryId: string): Promise<BondCouponPayment[]> {
-    return db.couponPayments
+    const payments = await db.couponPayments
       .where("entryId")
       .equals(entryId)
-      .sortBy("paymentDate");
+      .filter((p) => !p.deleted)
+      .toArray();
+    return payments.sort((a, b) => a.paymentDate - b.paymentDate);
   }
 
   async updateCouponPayment(payment: BondCouponPayment): Promise<void> {

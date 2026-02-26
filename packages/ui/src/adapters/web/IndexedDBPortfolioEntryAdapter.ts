@@ -22,6 +22,7 @@ export class IndexedDBPortfolioEntryAdapter implements IPortfolioEntryService {
     return db.portfolioEntries
       .where("portfolioId")
       .equals(portfolioId)
+      .filter((e) => !e.deleted)
       .toArray();
   }
 

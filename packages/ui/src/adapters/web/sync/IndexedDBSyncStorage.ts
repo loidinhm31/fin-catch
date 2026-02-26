@@ -303,6 +303,41 @@ export class IndexedDBSyncStorage {
   }
 
   /**
+   * Validate a record pulled from the server before inserting into IDB.
+   * Rejects records with missing required fields or invalid enum values.
+   */
+  private validatePullRecord(record: PullRecord): boolean {
+    if (!record.rowId || typeof record.rowId !== "string") return false;
+    if (!record.data || typeof record.data !== "object") return false;
+
+    switch (record.tableName) {
+      case "portfolios": {
+        const { name, createdAt } = record.data as Record<string, unknown>;
+        if (!name || typeof name !== "string") return false;
+        if (createdAt !== undefined && typeof createdAt !== "number")
+          return false;
+        break;
+      }
+      case "portfolioEntries": {
+        const { assetType } = record.data as Record<string, unknown>;
+        const validTypes = ["stock", "bond", "gold", "cash", "crypto"];
+        if (!assetType || !validTypes.includes(assetType as string))
+          return false;
+        break;
+      }
+      case "bondCouponPayments": {
+        const { amount, paymentDate } = record.data as Record<string, unknown>;
+        if (typeof amount !== "number") return false;
+        if (typeof paymentDate !== "number") return false;
+        break;
+      }
+      default:
+        return false;
+    }
+    return true;
+  }
+
+  /**
    * Insert or update a record from the server.
    * Server and local both use camelCase - only FK references need mapping.
    */
@@ -313,6 +348,14 @@ export class IndexedDBSyncStorage {
     const table = this.getTable(record.tableName);
     if (!table) {
       console.warn(`Unknown table: ${record.tableName}`);
+      return;
+    }
+
+    if (!this.validatePullRecord(record)) {
+      console.warn(
+        `[IndexedDBSyncStorage] Rejected invalid record from server:`,
+        { tableName: record.tableName, rowId: record.rowId },
+      );
       return;
     }
 
@@ -340,11 +383,6 @@ export class IndexedDBSyncStorage {
       data.createdAt = syncedAt;
     }
 
-    console.log(
-      `[IndexedDBSyncStorage] Upserting to ${record.tableName}:`,
-      data,
-    );
-
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     await table.put(data as any);
   }
@@ -353,6 +391,12 @@ export class IndexedDBSyncStorage {
    * Delete a record that was deleted on the server.
    */
   private async deleteRecord(record: PullRecord): Promise<void> {
+    if (!record.rowId || typeof record.rowId !== "string") {
+      console.warn(`[IndexedDBSyncStorage] Skipping delete with invalid rowId`, {
+        tableName: record.tableName,
+      });
+      return;
+    }
     const table = this.getTable(record.tableName);
     if (!table) {
       console.warn(`Unknown table: ${record.tableName}`);

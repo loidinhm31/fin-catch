@@ -15,6 +15,35 @@ import {
 import { IndexedDBSyncStorage } from "./IndexedDBSyncStorage";
 import { getCurrentTimestamp } from "../database";
 
+const defaultSleep = (ms: number) =>
+  new Promise<void>((resolve) => setTimeout(resolve, ms));
+
+/**
+ * Wraps an async fn with exponential backoff + jitter.
+ * Does NOT retry on 401/403 (auth errors — retrying would hammer auth).
+ * Exported for unit testing; accepts an optional sleep override for fast tests.
+ */
+export async function withRetry<T>(
+  fn: () => Promise<T>,
+  maxAttempts = 3,
+  sleep = defaultSleep,
+): Promise<T> {
+  for (let attempt = 0; attempt < maxAttempts; attempt++) {
+    try {
+      return await fn();
+    } catch (e) {
+      // Do not retry on auth errors — retrying would hammer auth and risk lockout.
+      // Match HTTP status codes embedded in error messages using word-boundary patterns.
+      const isAuthError =
+        e instanceof Error && /\b40[13]\b/.test(e.message);
+      if (isAuthError || attempt === maxAttempts - 1) throw e;
+      const delay = Math.min(1000 * 2 ** attempt + Math.random() * 500, 8000);
+      await sleep(delay);
+    }
+  }
+  throw new Error("unreachable");
+}
+
 /**
  * Token provider function type.
  * The sync adapter gets tokens from the auth service (single source of truth).
@@ -229,8 +258,10 @@ export class IndexedDBSyncAdapter implements ISyncService {
       // Get last checkpoint
       const checkpoint = await this.storage.getCheckpoint();
 
-      // Perform delta sync
-      const response = await client.delta(pendingChanges, checkpoint);
+      // Perform delta sync (with retry for transient network errors)
+      const response = await withRetry(() =>
+        client.delta(pendingChanges, checkpoint),
+      );
 
       let pushed = 0;
       let pulled = 0;
@@ -241,13 +272,17 @@ export class IndexedDBSyncAdapter implements ISyncService {
         pushed = response.push.synced;
         conflicts = response.push.conflicts.length;
 
-        // Mark pushed records as synced
-        if (pushed > 0) {
-          const syncedIds = pendingChanges.map((r) => ({
-            tableName: r.tableName,
-            rowId: r.rowId,
-          }));
-          await this.storage.markSynced(syncedIds);
+        // Mark only non-conflicted records as synced
+        if (pushed > 0 || pendingChanges.length > 0) {
+          const conflictIds = new Set(
+            response.push.conflicts.map((c) => c.rowId),
+          );
+          const syncedIds = pendingChanges
+            .filter((r) => !conflictIds.has(r.rowId))
+            .map((r) => ({ tableName: r.tableName, rowId: r.rowId }));
+          if (syncedIds.length > 0) {
+            await this.storage.markSynced(syncedIds);
+          }
         }
 
         // Emit progress after push phase
@@ -287,7 +322,9 @@ export class IndexedDBSyncAdapter implements ISyncService {
             currentCheckpoint,
           );
 
-          const pullResponse = await client.pull(currentCheckpoint);
+          const pullResponse = await withRetry(() =>
+            client.pull(currentCheckpoint),
+          );
 
           // Collect records from this page
           allRecords.push(...pullResponse.records);
