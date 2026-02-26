@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { PortfolioEntry } from "@fin-catch/shared";
 import {
   listEntries,
@@ -11,6 +11,14 @@ export const usePortfolioEntries = (portfolioId: string | null) => {
   const [entries, setEntries] = useState<PortfolioEntry[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
+  const deleteErrorTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const setDeleteErrorWithTimeout = (msg: string) => {
+    if (deleteErrorTimer.current) clearTimeout(deleteErrorTimer.current);
+    setDeleteError(msg);
+    deleteErrorTimer.current = setTimeout(() => setDeleteError(null), 5000);
+  };
 
   const loadEntries = useCallback(async (id: string) => {
     setIsLoading(true);
@@ -40,9 +48,16 @@ export const usePortfolioEntries = (portfolioId: string | null) => {
   };
 
   const deleteEntry = async (entryId: string) => {
-    await deleteEntryService(entryId);
-    if (portfolioId) {
-      await loadEntries(portfolioId);
+    setDeleteError(null);
+    try {
+      await deleteEntryService(entryId);
+      if (portfolioId) {
+        await loadEntries(portfolioId);
+      }
+    } catch (err) {
+      setDeleteErrorWithTimeout(
+        err instanceof Error ? err.message : "Failed to delete entry",
+      );
     }
   };
 
@@ -52,11 +67,18 @@ export const usePortfolioEntries = (portfolioId: string | null) => {
     }
   }, [portfolioId]);
 
+  useEffect(() => {
+    return () => {
+      if (deleteErrorTimer.current) clearTimeout(deleteErrorTimer.current);
+    };
+  }, []);
+
   return {
     entries,
     isLoading,
     error,
     setError,
+    deleteError,
     loadEntries,
     createEntry,
     updateEntry,

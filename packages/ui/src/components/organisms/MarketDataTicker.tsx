@@ -96,6 +96,9 @@ export const MarketDataTicker: React.FC<MarketDataTickerProps> = ({
   useEffect(() => {
     if (!marketData || !symbol) return;
 
+    // Use an object so the async callback can reference mutable state after cleanup runs
+    const state = { mounted: true, subscribed: false };
+
     setLoading(true);
     setError(null);
 
@@ -108,18 +111,32 @@ export const MarketDataTicker: React.FC<MarketDataTickerProps> = ({
         handleStatusChangeRef.current(status),
     );
 
-    // Subscribe to symbol after a short delay to ensure connection
-    const subscribeTimeout = setTimeout(() => {
-      marketData.subscribe(platform, symbol).catch((err: Error) => {
+    // Subscribe after short delay — guard against unmount during the window
+    const subscribeTimeout = setTimeout(async () => {
+      if (!state.mounted) return;
+      try {
+        await marketData.subscribe(platform, symbol);
+        if (!state.mounted) {
+          // Cleanup ran while we were awaiting — unsubscribe immediately
+          marketData.unsubscribe(platform, symbol).catch(console.error);
+          return;
+        }
+        state.subscribed = true;
+      } catch (err) {
+        if (!state.mounted) return;
         console.error("[MarketDataTicker] Subscribe error:", err);
-        setError(err.message);
+        setError((err as Error).message);
         setLoading(false);
-      });
+        disconnect();
+      }
     }, 500);
 
     return () => {
+      state.mounted = false;
       clearTimeout(subscribeTimeout);
-      marketData.unsubscribe(platform, symbol).catch(console.error);
+      if (state.subscribed) {
+        marketData.unsubscribe(platform, symbol).catch(console.error);
+      }
       disconnect();
     };
     // Only re-connect when symbol, platform, or marketData changes

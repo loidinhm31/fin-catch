@@ -37,6 +37,7 @@ export const PortfolioPage: React.FC = () => {
     isLoading: isEntriesLoading,
     loadEntries,
     deleteEntry,
+    deleteError,
   } = usePortfolioEntries(selectedPortfolioId);
 
   const [displayCurrency, setDisplayCurrency] = useState<CurrencyCode>(
@@ -217,6 +218,20 @@ export const PortfolioPage: React.FC = () => {
                   onHideChart={() => setShowChart(false)}
                   onTimeframeChange={setTimeframe}
                 />
+              )}
+
+              {/* Delete error banner */}
+              {deleteError && (
+                <div
+                  className="rounded-lg px-4 py-3 text-sm border"
+                  style={{
+                    background: "var(--color-alert-error-bg, rgba(239,68,68,0.1))",
+                    borderColor: "var(--color-alert-error-border, rgba(239,68,68,0.3))",
+                    color: "var(--color-red-500)",
+                  }}
+                >
+                  {deleteError}
+                </div>
               )}
 
               {/* Holdings Section */}

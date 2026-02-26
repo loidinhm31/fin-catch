@@ -47,40 +47,46 @@ export const useHoldingsPerformance = (
     return { start, end: now };
   };
 
-  const loadPerformance = async () => {
-    if (entries.length === 0) {
-      setData(null);
-      return;
-    }
-
-    setIsLoading(true);
-    try {
-      const { start, end } = calculateTimeframe();
-      const performanceData = await calculateAllHoldingsPerformance(
-        entries,
-        start,
-        end,
-        displayCurrency,
-      );
-      setData(performanceData);
-      setError(null);
-    } catch (err) {
-      console.error("Failed to load holdings performance:", err);
-      setError(
-        err instanceof Error
-          ? err.message
-          : "Failed to load holdings performance",
-      );
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
   useEffect(() => {
-    if (showChart && entries.length > 0) {
-      loadPerformance();
-    }
-  }, [showChart, timeframe, displayCurrency]);
+    if (!showChart || entries.length === 0) return;
+
+    let cancelled = false;
+
+    const run = async () => {
+      setIsLoading(true);
+      try {
+        const { start, end } = calculateTimeframe();
+        const performanceData = await calculateAllHoldingsPerformance(
+          entries,
+          start,
+          end,
+          displayCurrency,
+        );
+        if (!cancelled) {
+          setData(performanceData);
+          setError(null);
+        }
+      } catch (err) {
+        if (!cancelled) {
+          console.error("Failed to load holdings performance:", err);
+          setError(
+            err instanceof Error
+              ? err.message
+              : "Failed to load holdings performance",
+          );
+        }
+      } finally {
+        if (!cancelled) setIsLoading(false);
+      }
+    };
+
+    run();
+    return () => {
+      cancelled = true;
+    };
+    // entries identity changes only when content changes (useState setter replaces array)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [showChart, timeframe, displayCurrency, entries]);
 
   return {
     timeframe,

@@ -114,6 +114,14 @@ export const CompactOrderForm: React.FC<CompactOrderFormProps> = ({
   // Track if user has manually edited the price
   const [priceManuallyEdited, setPriceManuallyEdited] = useState(false);
 
+  // Guard against state mutation after unmount (getPPSE has no AbortSignal support)
+  const mountedRef = React.useRef(true);
+  useEffect(() => {
+    return () => {
+      mountedRef.current = false;
+    };
+  }, []);
+
   // UI state
   const [ppse, setPpse] = useState<PPSE | null>(null);
   const [isLoadingPPSE, setIsLoadingPPSE] = useState(false);
@@ -149,6 +157,7 @@ export const CompactOrderForm: React.FC<CompactOrderFormProps> = ({
       return;
     }
 
+    if (!mountedRef.current) return;
     setIsLoadingPPSE(true);
     try {
       const result = await tradingService.getPPSE(
@@ -158,12 +167,14 @@ export const CompactOrderForm: React.FC<CompactOrderFormProps> = ({
         priceNum * 1000, // Convert to VND
         selectedLoanPackageId,
       );
-      setPpse(result);
+      if (mountedRef.current) setPpse(result);
     } catch (err) {
-      console.error("Failed to fetch PPSE:", err);
-      setPpse(null);
+      if (mountedRef.current) {
+        console.error("Failed to fetch PPSE:", err);
+        setPpse(null);
+      }
     } finally {
-      setIsLoadingPPSE(false);
+      if (mountedRef.current) setIsLoadingPPSE(false);
     }
   }, [
     symbol,
@@ -174,10 +185,19 @@ export const CompactOrderForm: React.FC<CompactOrderFormProps> = ({
     accountNo,
   ]);
 
-  // Debounce PPSE fetch
+  // Debounce PPSE fetch — cancelled flag prevents state mutation after unmount
   useEffect(() => {
-    const timer = setTimeout(fetchPPSE, 500);
-    return () => clearTimeout(timer);
+    let cancelled = false;
+
+    const timer = setTimeout(async () => {
+      if (cancelled) return;
+      await fetchPPSE();
+    }, 500);
+
+    return () => {
+      cancelled = true;
+      clearTimeout(timer);
+    };
   }, [fetchPPSE]);
 
   const handleSubmit = async (e: React.FormEvent) => {
