@@ -64,6 +64,11 @@ export class QmServerAuthAdapter implements IAuthService {
   private statusCacheTimestamp: number = 0;
   private static STATUS_CACHE_TTL = 10000; // 10 seconds cache
 
+  // Dedup concurrent refresh calls — server uses rotation so double-refresh = 401
+  private refreshPromise: Promise<void> | null = null;
+  // Guard against in-flight refresh re-writing tokens after logout
+  private loggedOut = false;
+
   constructor(config?: QmServerAuthConfig) {
     // In web mode, skip localStorage and use env directly
     // In Tauri mode, allow localStorage to override env for user configuration
@@ -236,7 +241,7 @@ export class QmServerAuthAdapter implements IAuthService {
         AuthResponse
       >(`${this.apiBasePath}/auth/register`, { username, email, password });
 
-      // Store auth data
+      this.loggedOut = false;
       this.storeAuthData(response);
 
       return response;
@@ -253,10 +258,8 @@ export class QmServerAuthAdapter implements IAuthService {
         AuthResponse
       >(`${this.apiBasePath}/auth/login`, { email, password });
 
-      // Store auth data
+      this.loggedOut = false;
       this.storeAuthData(response);
-
-      // Invalidate cache so next getStatus() fetches fresh data
       this.invalidateStatusCache();
 
       return response;
@@ -267,20 +270,39 @@ export class QmServerAuthAdapter implements IAuthService {
   }
 
   async logout(): Promise<void> {
-    // Clear all stored auth data
+    this.loggedOut = true;
+    // Invalidate cache before clearing tokens — concurrent getStatus() sees no stale data
+    this.invalidateStatusCache();
+    this.clearTokens();
+
+    if (typeof window !== "undefined") {
+      window.dispatchEvent(new Event("auth:logout"));
+    }
+
+    serviceLogger.qmServer("Logged out");
+  }
+
+  private clearTokens(): void {
     this.removeStoredValue(STORAGE_KEYS.ACCESS_TOKEN);
     this.removeStoredValue(STORAGE_KEYS.REFRESH_TOKEN);
     this.removeStoredValue(STORAGE_KEYS.USER_ID);
     this.removeStoredValue(STORAGE_KEYS.APPS);
     this.removeStoredValue(STORAGE_KEYS.IS_ADMIN);
-
-    // Invalidate cache
-    this.invalidateStatusCache();
-
-    serviceLogger.qmServer("Logged out");
   }
 
   async refreshToken(): Promise<void> {
+    return this.doRefresh();
+  }
+
+  private doRefresh(): Promise<void> {
+    if (this.refreshPromise) return this.refreshPromise;
+    this.refreshPromise = this.performRefresh().finally(() => {
+      this.refreshPromise = null;
+    });
+    return this.refreshPromise;
+  }
+
+  private async performRefresh(): Promise<void> {
     const refreshToken = this.getStoredValue(STORAGE_KEYS.REFRESH_TOKEN);
     if (!refreshToken) {
       throw new Error("No refresh token available");
@@ -292,14 +314,19 @@ export class QmServerAuthAdapter implements IAuthService {
         { accessToken: string; refreshToken: string }
       >(`${this.apiBasePath}/auth/refresh`, { refreshToken });
 
-      // Update stored tokens
-      this.setStoredValue(STORAGE_KEYS.ACCESS_TOKEN, response.accessToken);
-      this.setStoredValue(STORAGE_KEYS.REFRESH_TOKEN, response.refreshToken);
-      serviceLogger.qmServerDebug("Token refreshed");
+      // If logout() ran while fetch was in-flight, discard the rotated tokens
+      if (!this.loggedOut) {
+        this.setStoredValue(STORAGE_KEYS.ACCESS_TOKEN, response.accessToken);
+        this.setStoredValue(STORAGE_KEYS.REFRESH_TOKEN, response.refreshToken);
+        serviceLogger.qmServerDebug("Token refreshed");
+      }
     } catch (error) {
       serviceLogger.qmServerError("Token refresh failed");
-      // Clear tokens on refresh failure
-      await this.logout();
+      // Clear tokens without dispatching auth:logout — this is an internal failure,
+      // not a user-initiated logout. Callers see isAuthenticated: false via their
+      // own error handling paths.
+      this.invalidateStatusCache();
+      this.clearTokens();
       throw error;
     }
   }
@@ -483,6 +510,7 @@ export class QmServerAuthAdapter implements IAuthService {
     this.setStoredValue(STORAGE_KEYS.ACCESS_TOKEN, accessToken);
     this.setStoredValue(STORAGE_KEYS.REFRESH_TOKEN, refreshToken);
     this.setStoredValue(STORAGE_KEYS.USER_ID, userId);
+    this.invalidateStatusCache();
     serviceLogger.qmServerDebug("Tokens saved from external source");
   }
 

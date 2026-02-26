@@ -7,6 +7,7 @@ import { syncGetStatus, syncNow } from "@fin-catch/ui/services";
  * This is used for periodic status checks to avoid unnecessary API calls.
  */
 function getLocalAuthStatus(): { isAuthenticated: boolean } {
+  if (typeof localStorage === "undefined") return { isAuthenticated: false };
   const accessToken = localStorage.getItem(AUTH_STORAGE_KEYS.ACCESS_TOKEN);
   return { isAuthenticated: !!accessToken };
 }
@@ -79,6 +80,19 @@ export function useSyncStatus(
     const interval = setInterval(loadStatus, autoRefreshInterval);
     return () => clearInterval(interval);
   }, [autoRefreshInterval, loadStatus]);
+
+  // React immediately to logout — don't wait for next poll interval
+  // TODO: cross-tab logout via window.addEventListener("storage", ...) for multi-tab support
+  useEffect(() => {
+    const handler = () => {
+      setIsAuthenticated(false);
+      setSyncStatus(null);
+      setError(null);
+      setLastSyncSuccess(null);
+    };
+    window.addEventListener("auth:logout", handler);
+    return () => window.removeEventListener("auth:logout", handler);
+  }, []);
 
   return {
     isAuthenticated,
