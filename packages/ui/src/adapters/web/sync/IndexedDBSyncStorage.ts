@@ -16,6 +16,21 @@ import {
 } from "@fin-catch/ui/adapters/web";
 import type { Checkpoint, PullRecord, SyncRecord } from "@fin-catch/shared";
 
+/** Maps local Dexie table names → server sync protocol table names. */
+const LOCAL_TO_SERVER_TABLE: Record<string, string> = {
+  couponPayments: "bondCouponPayments",
+};
+
+/** Maps server sync protocol table names → local Dexie table names. */
+const SERVER_TO_LOCAL_TABLE: Record<string, string> = Object.fromEntries(
+  Object.entries(LOCAL_TO_SERVER_TABLE).map(([local, server]) => [server, local]),
+);
+
+/** Resolve local table name to server table name (identity if no mapping exists). */
+function resolveTableName(localName: string): string {
+  return LOCAL_TO_SERVER_TABLE[localName] ?? localName;
+}
+
 /**
  * IndexedDB implementation of sync storage.
  */
@@ -100,7 +115,7 @@ export class IndexedDBSyncStorage {
     for (const payment of payments) {
       if (payment.syncedAt === undefined || payment.syncedAt === null) {
         records.push({
-          tableName: "bondCouponPayments",
+          tableName: resolveTableName("couponPayments"),
           rowId: payment.id,
           data: {
             entrySyncUuid: payment.entryId, // Map FK reference for server
@@ -121,12 +136,8 @@ export class IndexedDBSyncStorage {
       .filter((change) => change.operation === "delete")
       .toArray();
     for (const change of pendingDeletes) {
-      // Map local Dexie table names to sync protocol table names
-      let tableName = change.tableName;
-      if (tableName === "couponPayments") tableName = "bondCouponPayments";
-
       records.push({
-        tableName,
+        tableName: resolveTableName(change.tableName),
         rowId: change.rowId,
         data: {},
         version: change.version,
@@ -246,16 +257,9 @@ export class IndexedDBSyncStorage {
     );
   }
 
-  /**
-   * Convert server table name to local table name for _pendingChanges.
-   */
+  /** Convert server table name to local Dexie table name for _pendingChanges lookup. */
   private serverToLocalTableName(tableName: string): string {
-    switch (tableName) {
-      case "bondCouponPayments":
-        return "couponPayments";
-      default:
-        return tableName;
-    }
+    return SERVER_TO_LOCAL_TABLE[tableName] ?? tableName;
   }
 
   // =========================================================================
