@@ -54,8 +54,8 @@ export class FinCatchDatabase extends Dexie {
   _syncMeta!: Table<SyncMeta, string>;
   _pendingChanges!: Table<PendingChange, number>;
 
-  constructor() {
-    super("FinCatchDB");
+  constructor(dbName = "FinCatchDB") {
+    super(dbName);
 
     this.version(1).stores({
       portfolios: "id, createdAt, syncVersion, syncedAt, deleted",
@@ -97,8 +97,60 @@ export class FinCatchDatabase extends Dexie {
   }
 }
 
-// Singleton database instance
-export const db = new FinCatchDatabase();
+// =============================================================================
+// Per-user DB management
+// =============================================================================
+
+let _db: FinCatchDatabase | null = null;
+let _currentUserId: string | null = null;
+
+async function hashUserId(userId: string): Promise<string> {
+  const encoded = new TextEncoder().encode(userId);
+  const hash = await crypto.subtle.digest("SHA-256", encoded);
+  return Array.from(new Uint8Array(hash))
+    .map((b) => b.toString(16).padStart(2, "0"))
+    .join("")
+    .slice(0, 12);
+}
+
+/**
+ * Initialize (or reinitialize) the DB for a specific user.
+ * If userId is undefined (standalone mode), uses the legacy "FinCatchDB" name.
+ * Calling with the same userId is a no-op.
+ */
+export async function initDb(userId?: string): Promise<FinCatchDatabase> {
+  if (!userId) {
+    if (!_db || _currentUserId !== null) {
+      if (_db) _db.close();
+      _db = new FinCatchDatabase("FinCatchDB");
+      _currentUserId = null;
+    }
+    return _db;
+  }
+  if (_db && _currentUserId === userId) return _db;
+  if (_db) _db.close();
+  const prefix = await hashUserId(userId);
+  _db = new FinCatchDatabase(`FinCatchDB_${prefix}`);
+  _currentUserId = userId;
+  return _db;
+}
+
+/** Returns the active DB instance. Throws if initDb() has not been called. */
+export function getDb(): FinCatchDatabase {
+  if (!_db) throw new Error("FinCatchDB not initialized. Call initDb() first.");
+  return _db;
+}
+
+/** Close and delete the current user's IndexedDB. Used on logout. */
+export async function deleteCurrentDb(): Promise<void> {
+  if (_db) {
+    const name = _db.name;
+    _db.close();
+    await Dexie.delete(name);
+    _db = null;
+    _currentUserId = null;
+  }
+}
 
 /**
  * Generate a UUID v4

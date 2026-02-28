@@ -10,6 +10,9 @@ import {
   IndexedDBPortfolioAdapter,
   IndexedDBPortfolioEntryAdapter,
   IndexedDBSyncAdapter,
+  IndexedDBSyncStorage,
+  initDb,
+  deleteCurrentDb,
 } from "@fin-catch/ui/adapters/web";
 import {
   MarketDataAdapter,
@@ -36,6 +39,7 @@ import {
   setPortfolioService,
   setSyncService,
   setTradingAuthService,
+  getSyncService,
 } from "@fin-catch/ui/adapters";
 
 /**
@@ -48,9 +52,42 @@ export function FinCatchApp({
   onLogoutRequest,
   className,
   basePath,
+  registerLogoutCleanup,
 }: FinCatchEmbedProps) {
-  // Initialize services synchronously before first render
+  const [dbReady, setDbReady] = useState(false);
+
+  useEffect(() => {
+    setDbReady(false);
+    initDb(authTokens?.userId)
+      .then(() => setDbReady(true))
+      .catch(console.error);
+  }, [authTokens?.userId]);
+
+  // Register logout cleanup with hub after DB is ready
+  useEffect(() => {
+    if (!dbReady || !registerLogoutCleanup) return;
+    const unregister = registerLogoutCleanup("fin-catch", async () => {
+      try {
+        const storage = new IndexedDBSyncStorage();
+        const hasPending = await storage.hasPendingChanges();
+        if (hasPending) {
+          const syncService = getSyncService();
+          const result = await syncService.syncNow();
+          if (!result.success) return { success: false, error: result.error };
+        }
+        await deleteCurrentDb();
+        return { success: true };
+      } catch (e) {
+        return { success: false, error: e instanceof Error ? e.message : "Cleanup failed" };
+      }
+    });
+    return unregister;
+  }, [dbReady, registerLogoutCleanup]);
+
+  // Initialize services only after DB is ready
   const platform = useMemo<IPlatformServices>(() => {
+    if (!dbReady) return {} as IPlatformServices;
+
     // Data storage services - all platforms use IndexedDB
     setPortfolioService(new IndexedDBPortfolioAdapter());
     setPortfolioEntryService(new IndexedDBPortfolioEntryAdapter());
@@ -81,11 +118,11 @@ export function FinCatchApp({
     setMarketDataService(new MarketDataAdapter());
 
     return getAllServices();
-  }, []);
+  }, [dbReady]);
 
   // If external auth tokens are provided, save them to the auth service
   useEffect(() => {
-    if (authTokens?.accessToken && authTokens?.refreshToken) {
+    if (dbReady && authTokens?.accessToken && authTokens?.refreshToken) {
       platform.auth
         .saveTokensExternal?.(
           authTokens.accessToken,
@@ -94,7 +131,7 @@ export function FinCatchApp({
         )
         .catch(console.error);
     }
-  }, [authTokens, platform.auth]);
+  }, [dbReady, authTokens, platform.auth]);
 
   // Determine if we should skip auth (tokens provided externally)
   const skipAuth = !!(authTokens?.accessToken && authTokens?.refreshToken);
@@ -105,8 +142,10 @@ export function FinCatchApp({
   );
 
   useEffect(() => {
-    setPortalContainer(containerRef.current);
-  }, []);
+    if (containerRef.current) setPortalContainer(containerRef.current);
+  }, [dbReady]);
+
+  if (!dbReady) return null;
 
   const content = (
     <AppShell

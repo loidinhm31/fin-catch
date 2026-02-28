@@ -1,17 +1,17 @@
 import type { IPortfolioService } from "@fin-catch/ui/adapters/factory/interfaces";
 import type { Portfolio } from "@fin-catch/shared";
-import { db } from "./database";
+import { getDb } from "./database";
 import { withSyncTracking, trackDelete } from "./indexedDbHelpers";
 
 export class IndexedDBPortfolioAdapter implements IPortfolioService {
   async createPortfolio(portfolio: Portfolio): Promise<string> {
     const newPortfolio = withSyncTracking(portfolio);
-    await db.portfolios.add(newPortfolio);
+    await getDb().portfolios.add(newPortfolio);
     return newPortfolio.id!;
   }
 
   async getPortfolio(id: string): Promise<Portfolio> {
-    const portfolio = await db.portfolios.get(id);
+    const portfolio = await getDb().portfolios.get(id);
     if (!portfolio) {
       throw new Error(`Portfolio not found: ${id}`);
     }
@@ -19,37 +19,37 @@ export class IndexedDBPortfolioAdapter implements IPortfolioService {
   }
 
   async listPortfolios(): Promise<Portfolio[]> {
-    const portfolios = await db.portfolios.filter((p) => !p.deleted).toArray();
+    const portfolios = await getDb().portfolios.filter((p) => !p.deleted).toArray();
     portfolios.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
     return portfolios;
   }
 
   async updatePortfolio(portfolio: Portfolio): Promise<void> {
-    const existing = await db.portfolios.get(portfolio.id);
+    const existing = await getDb().portfolios.get(portfolio.id);
     if (!existing) {
       throw new Error(`Portfolio not found: ${portfolio.id}`);
     }
-    await db.portfolios.put(withSyncTracking(portfolio, existing));
+    await getDb().portfolios.put(withSyncTracking(portfolio, existing));
   }
 
   async deletePortfolio(id: string): Promise<void> {
-    await db.transaction(
+    await getDb().transaction(
       "rw",
       [
-        db.portfolios,
-        db.portfolioEntries,
-        db.couponPayments,
-        db._pendingChanges,
+        getDb().portfolios,
+        getDb().portfolioEntries,
+        getDb().couponPayments,
+        getDb()._pendingChanges,
       ],
       async () => {
-        const portfolio = await db.portfolios.get(id);
-        const entries = await db.portfolioEntries
+        const portfolio = await getDb().portfolios.get(id);
+        const entries = await getDb().portfolioEntries
           .where("portfolioId")
           .equals(id)
           .toArray();
 
         for (const entry of entries) {
-          const payments = await db.couponPayments
+          const payments = await getDb().couponPayments
             .where("entryId")
             .equals(entry.id)
             .toArray();
@@ -60,7 +60,7 @@ export class IndexedDBPortfolioAdapter implements IPortfolioService {
               payment.syncVersion || 0,
             );
           }
-          await db.couponPayments.where("entryId").equals(entry.id).delete();
+          await getDb().couponPayments.where("entryId").equals(entry.id).delete();
           await trackDelete(
             "portfolioEntries",
             entry.id,
@@ -68,13 +68,13 @@ export class IndexedDBPortfolioAdapter implements IPortfolioService {
           );
         }
 
-        await db.portfolioEntries.where("portfolioId").equals(id).delete();
+        await getDb().portfolioEntries.where("portfolioId").equals(id).delete();
 
         if (portfolio) {
           await trackDelete("portfolios", id, portfolio.syncVersion || 0);
         }
 
-        await db.portfolios.delete(id);
+        await getDb().portfolios.delete(id);
       },
     );
   }

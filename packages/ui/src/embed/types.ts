@@ -55,4 +55,10 @@ export interface FinCatchEmbedProps {
    * Default: "email"
    */
   otpType?: "email" | "smart";
+
+  /** Register a cleanup callback for logout (sync + delete DB). Returns unregister fn. */
+  registerLogoutCleanup?: (
+    appId: string,
+    fn: () => Promise<{ success: boolean; error?: string }>,
+  ) => () => void;
 }

@@ -10,7 +10,7 @@
  */
 
 import {
-  db,
+  getDb,
   getCurrentTimestamp,
   SYNC_META_KEYS,
 } from "@fin-catch/ui/adapters/web";
@@ -50,7 +50,7 @@ export class IndexedDBSyncStorage {
     const records: SyncRecord[] = [];
 
     // 1. Get unsynced portfolios (syncedAt is undefined)
-    const portfolios = await db.portfolios.toArray();
+    const portfolios = await getDb().portfolios.toArray();
     for (const portfolio of portfolios) {
       if (portfolio.syncedAt === undefined || portfolio.syncedAt === null) {
         records.push({
@@ -69,7 +69,7 @@ export class IndexedDBSyncStorage {
     }
 
     // 2. Get unsynced portfolio entries (syncedAt is undefined)
-    const entries = await db.portfolioEntries.toArray();
+    const entries = await getDb().portfolioEntries.toArray();
     for (const entry of entries) {
       if (entry.syncedAt === undefined || entry.syncedAt === null) {
         records.push({
@@ -111,7 +111,7 @@ export class IndexedDBSyncStorage {
     }
 
     // 3. Get unsynced coupon payments (syncedAt is undefined)
-    const payments = await db.couponPayments.toArray();
+    const payments = await getDb().couponPayments.toArray();
     for (const payment of payments) {
       if (payment.syncedAt === undefined || payment.syncedAt === null) {
         records.push({
@@ -132,7 +132,7 @@ export class IndexedDBSyncStorage {
     }
 
     // 4. Get pending deletes from _pendingChanges table
-    const pendingDeletes = await db._pendingChanges
+    const pendingDeletes = await getDb()._pendingChanges
       .filter((change) => change.operation === "delete")
       .toArray();
     for (const change of pendingDeletes) {
@@ -155,29 +155,36 @@ export class IndexedDBSyncStorage {
     let count = 0;
 
     // Count unsynced portfolios
-    const portfolios = await db.portfolios.toArray();
+    const portfolios = await getDb().portfolios.toArray();
     count += portfolios.filter(
       (p) => p.syncedAt === undefined || p.syncedAt === null,
     ).length;
 
     // Count unsynced entries
-    const entries = await db.portfolioEntries.toArray();
+    const entries = await getDb().portfolioEntries.toArray();
     count += entries.filter(
       (e) => e.syncedAt === undefined || e.syncedAt === null,
     ).length;
 
     // Count unsynced payments
-    const payments = await db.couponPayments.toArray();
+    const payments = await getDb().couponPayments.toArray();
     count += payments.filter(
       (p) => p.syncedAt === undefined || p.syncedAt === null,
     ).length;
 
     // Count pending deletes
-    count += await db._pendingChanges
+    count += await getDb()._pendingChanges
       .filter((change) => change.operation === "delete")
       .count();
 
     return count;
+  }
+
+  /**
+   * Returns true if there are any local changes not yet synced.
+   */
+  async hasPendingChanges(): Promise<boolean> {
+    return (await this.getPendingChangesCount()) > 0;
   }
 
   /**
@@ -191,13 +198,13 @@ export class IndexedDBSyncStorage {
     version: number,
   ): Promise<void> {
     // Check if there's already a pending change for this record
-    const existing = await db._pendingChanges
+    const existing = await getDb()._pendingChanges
       .where({ tableName, rowId })
       .first();
 
     if (existing) {
       // Update the existing pending change
-      await db._pendingChanges.update(existing.id!, {
+      await getDb()._pendingChanges.update(existing.id!, {
         operation,
         data,
         version,
@@ -205,7 +212,7 @@ export class IndexedDBSyncStorage {
       });
     } else {
       // Add a new pending change
-      await db._pendingChanges.add({
+      await getDb()._pendingChanges.add({
         tableName,
         rowId,
         operation,
@@ -225,13 +232,13 @@ export class IndexedDBSyncStorage {
   ): Promise<void> {
     const now = getCurrentTimestamp();
 
-    await db.transaction(
+    await getDb().transaction(
       "rw",
       [
-        db._pendingChanges,
-        db.portfolios,
-        db.portfolioEntries,
-        db.couponPayments,
+        getDb()._pendingChanges,
+        getDb().portfolios,
+        getDb().portfolioEntries,
+        getDb().couponPayments,
       ],
       async () => {
         for (const { tableName, rowId } of recordIds) {
@@ -239,7 +246,7 @@ export class IndexedDBSyncStorage {
           const localTableName = this.serverToLocalTableName(tableName);
 
           // Remove from pending changes (deletes are tracked here)
-          await db._pendingChanges
+          await getDb()._pendingChanges
             .where({ tableName: localTableName, rowId })
             .delete();
 
@@ -289,9 +296,9 @@ export class IndexedDBSyncStorage {
         this.getTableOrder(b.tableName) - this.getTableOrder(a.tableName),
     );
 
-    await db.transaction(
+    await getDb().transaction(
       "rw",
-      [db.portfolios, db.portfolioEntries, db.couponPayments],
+      [getDb().portfolios, getDb().portfolioEntries, getDb().couponPayments],
       async () => {
         // Apply non-deleted first
         for (const record of nonDeleted) {
@@ -418,7 +425,7 @@ export class IndexedDBSyncStorage {
    * Get the last sync checkpoint.
    */
   async getCheckpoint(): Promise<Checkpoint | undefined> {
-    const checkpointJson = await db.getSyncMeta(SYNC_META_KEYS.CHECKPOINT);
+    const checkpointJson = await getDb().getSyncMeta(SYNC_META_KEYS.CHECKPOINT);
     if (!checkpointJson) return undefined;
 
     try {
@@ -432,14 +439,14 @@ export class IndexedDBSyncStorage {
    * Save the sync checkpoint.
    */
   async saveCheckpoint(checkpoint: Checkpoint): Promise<void> {
-    await db.setSyncMeta(SYNC_META_KEYS.CHECKPOINT, JSON.stringify(checkpoint));
+    await getDb().setSyncMeta(SYNC_META_KEYS.CHECKPOINT, JSON.stringify(checkpoint));
   }
 
   /**
    * Get the last sync timestamp.
    */
   async getLastSyncAt(): Promise<number | undefined> {
-    const value = await db.getSyncMeta(SYNC_META_KEYS.LAST_SYNC_AT);
+    const value = await getDb().getSyncMeta(SYNC_META_KEYS.LAST_SYNC_AT);
     return value ? parseInt(value, 10) : undefined;
   }
 
@@ -447,7 +454,7 @@ export class IndexedDBSyncStorage {
    * Save the last sync timestamp.
    */
   async saveLastSyncAt(timestamp: number): Promise<void> {
-    await db.setSyncMeta(SYNC_META_KEYS.LAST_SYNC_AT, timestamp.toString());
+    await getDb().setSyncMeta(SYNC_META_KEYS.LAST_SYNC_AT, timestamp.toString());
   }
 
   // =========================================================================
@@ -468,7 +475,7 @@ export class IndexedDBSyncStorage {
    * Clear all pending changes (e.g., after a full reset).
    */
   async clearPendingChanges(): Promise<void> {
-    await db._pendingChanges.clear();
+    await getDb()._pendingChanges.clear();
   }
 
   // =========================================================================
@@ -481,12 +488,12 @@ export class IndexedDBSyncStorage {
   private getTable(tableName: string) {
     switch (tableName) {
       case "portfolios":
-        return db.portfolios;
+        return getDb().portfolios;
       case "portfolioEntries":
-        return db.portfolioEntries;
+        return getDb().portfolioEntries;
       case "bondCouponPayments":
       case "couponPayments":
-        return db.couponPayments;
+        return getDb().couponPayments;
       default:
         return undefined;
     }
