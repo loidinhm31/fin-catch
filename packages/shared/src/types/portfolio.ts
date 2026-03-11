@@ -16,7 +16,7 @@ export interface Portfolio {
 export interface PortfolioEntry {
   id: string; // UUID
   portfolioId: string; // UUID reference
-  assetType: "stock" | "gold" | "bond" | "cash" | "crypto";
+  assetType: "stock" | "gold" | "bond" | "cash" | "crypto" | "savings";
   symbol: string;
   quantity: number;
   purchasePrice: number;
@@ -38,6 +38,11 @@ export interface PortfolioEntry {
   currentMarketPrice?: number; // User-entered current price
   lastPriceUpdate?: number; // Unix timestamp of last price update
   ytm?: number; // Yield to Maturity as percentage (used in calculated mode)
+  // Savings-specific fields
+  interestRate?: number; // Annual rate as percentage (e.g., 6.5)
+  demandDepositRate?: number; // Early withdrawal rate as percentage (e.g., 0.1)
+  termMonths?: number; // Deposit term in months (e.g., 6, 12, 24)
+  compoundingType?: "simple" | "compound";
   // Stock alert fields (synced to server, monitoring handled by qm-sync)
   targetPrice?: number; // Take-profit price
   stopLoss?: number; // Stop-loss price
@@ -116,7 +121,7 @@ export interface BondCouponPayment {
 
 // Form data for creating/editing entries
 export interface PortfolioEntryFormData {
-  assetType: "stock" | "gold" | "bond";
+  assetType: "stock" | "gold" | "bond" | "savings";
   symbol: string;
   quantity: string;
   purchasePrice: string;
@@ -126,12 +131,17 @@ export interface PortfolioEntryFormData {
   tags?: string[];
   transactionFees?: string;
   source?: string;
+  // Savings-specific fields
+  interestRate?: string;
+  demandDepositRate?: string;
+  termMonths?: string;
+  compoundingType?: "simple" | "compound";
 }
 
 // Asset allocation data for pie chart
 export interface AssetAllocation {
   symbol: string;
-  assetType: "stock" | "gold" | "bond";
+  assetType: "stock" | "gold" | "bond" | "cash" | "crypto" | "savings";
   value: number;
   percentage: number;
   color: string;

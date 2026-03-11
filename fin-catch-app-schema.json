@@ -162,6 +162,26 @@
           "name": "lastAlertType",
           "type": "string",
           "nullable": true
+        },
+        {
+          "name": "interestRate",
+          "type": "number",
+          "nullable": true
+        },
+        {
+          "name": "demandDepositRate",
+          "type": "number",
+          "nullable": true
+        },
+        {
+          "name": "termMonths",
+          "type": "integer",
+          "nullable": true
+        },
+        {
+          "name": "compoundingType",
+          "type": "string",
+          "nullable": true
         }
       ],
       "primaryKey": "rowId"

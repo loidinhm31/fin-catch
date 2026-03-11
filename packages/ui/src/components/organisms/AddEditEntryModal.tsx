@@ -20,6 +20,7 @@ import {
 import {
   BondEntryForm,
   GoldEntryForm,
+  SavingsEntryForm,
   StockEntryForm,
 } from "@fin-catch/ui/components/molecules";
 
@@ -38,9 +39,9 @@ export const AddEditEntryModal: React.FC<AddEditEntryModalProps> = ({
   portfolioId,
   editingEntry,
 }) => {
-  const [assetType, setAssetType] = useState<"stock" | "gold" | "bond">(
-    "stock",
-  );
+  const [assetType, setAssetType] = useState<
+    "stock" | "gold" | "bond" | "cash" | "crypto" | "savings"
+  >("stock");
   const [symbol, setSymbol] = useState("");
   const [quantity, setQuantity] = useState("");
   const [purchasePrice, setPurchasePrice] = useState("");
@@ -54,6 +55,14 @@ export const AddEditEntryModal: React.FC<AddEditEntryModalProps> = ({
     "gram" | "mace" | "tael" | "ounce" | "kg"
   >("mace");
   const [goldType, setGoldType] = useState<string>("");
+  // Savings-specific state
+  const [depositLabel, setDepositLabel] = useState("");
+  const [interestRate, setInterestRate] = useState("");
+  const [demandDepositRate, setDemandDepositRate] = useState("");
+  const [termMonths, setTermMonths] = useState("");
+  const [compoundingType, setCompoundingType] = useState<"simple" | "compound">(
+    "simple",
+  );
   // Bond-specific state
   const [bondIdentifier, setBondIdentifier] = useState("");
   const [bondInputMode, setBondInputMode] = useState<"direct" | "calculated">(
@@ -96,6 +105,14 @@ export const AddEditEntryModal: React.FC<AddEditEntryModalProps> = ({
       setSource(editingEntry.source || "");
       setGoldUnit((editingEntry.unit as any) || "mace");
       setGoldType(editingEntry.assetType === "gold" ? editingEntry.symbol : "");
+      // Initialize savings fields
+      if (editingEntry.assetType === "savings") {
+        setDepositLabel(editingEntry.symbol);
+        setInterestRate(editingEntry.interestRate?.toString() || "");
+        setDemandDepositRate(editingEntry.demandDepositRate?.toString() || "");
+        setTermMonths(editingEntry.termMonths?.toString() || "");
+        setCompoundingType(editingEntry.compoundingType || "simple");
+      }
       // Initialize price alert fields (stock only)
       if (editingEntry.assetType === "stock") {
         setTargetPrice(editingEntry.targetPrice?.toString() || "");
@@ -192,6 +209,12 @@ export const AddEditEntryModal: React.FC<AddEditEntryModalProps> = ({
     setSource("");
     setGoldUnit("mace");
     setGoldType("");
+    // Reset savings fields
+    setDepositLabel("");
+    setInterestRate("");
+    setDemandDepositRate("");
+    setTermMonths("");
+    setCompoundingType("simple");
     // Reset bond fields
     setBondIdentifier("");
     setBondInputMode("direct");
@@ -209,7 +232,9 @@ export const AddEditEntryModal: React.FC<AddEditEntryModalProps> = ({
     setError(null);
   };
 
-  const handleAssetTypeChange = (newType: "stock" | "gold" | "bond") => {
+  const handleAssetTypeChange = (
+    newType: "stock" | "gold" | "bond" | "cash" | "crypto" | "savings",
+  ) => {
     setAssetType(newType);
     if (newType === "gold") {
       setCurrency("VND");
@@ -218,6 +243,10 @@ export const AddEditEntryModal: React.FC<AddEditEntryModalProps> = ({
       setCurrency("USD");
       setSource("manual");
       setCouponFrequency("semiannual");
+    } else if (newType === "savings") {
+      setCurrency("VND");
+      setSource("manual");
+      setQuantity("1");
     } else {
       setCurrency("USD");
       // Set default stock source to vndirect if available
@@ -363,7 +392,21 @@ export const AddEditEntryModal: React.FC<AddEditEntryModalProps> = ({
         }
       }
     }
-    if (!quantity || parseFloat(quantity) <= 0) {
+    if (assetType === "savings") {
+      if (!depositLabel) {
+        setError("Deposit label is required");
+        return;
+      }
+      if (!interestRate || parseFloat(interestRate) < 0) {
+        setError("Interest rate must be 0 or greater");
+        return;
+      }
+      if (!termMonths || parseInt(termMonths) <= 0) {
+        setError("Term must be greater than 0 months");
+        return;
+      }
+    }
+    if (assetType !== "savings" && (!quantity || parseFloat(quantity) <= 0)) {
       setError("Quantity must be greater than 0");
       return;
     }
@@ -405,8 +448,10 @@ export const AddEditEntryModal: React.FC<AddEditEntryModalProps> = ({
             ? bondIdentifier
             : assetType === "gold"
               ? goldType
-              : symbol,
-        quantity: parseFloat(quantity),
+              : assetType === "savings"
+                ? depositLabel
+                : symbol,
+        quantity: assetType === "savings" ? 1 : parseFloat(quantity),
         purchasePrice: parseFloat(purchasePrice),
         currency,
         purchaseDate: purchaseDate ? dateToUnixTimestamp(purchaseDate) : 0,
@@ -439,6 +484,20 @@ export const AddEditEntryModal: React.FC<AddEditEntryModalProps> = ({
             ? Math.floor(Date.now() / 1000)
             : undefined,
         ytm: assetType === "bond" && ytm ? parseFloat(ytm) : undefined,
+        // Savings-specific fields
+        interestRate:
+          assetType === "savings" && interestRate
+            ? parseFloat(interestRate)
+            : undefined,
+        demandDepositRate:
+          assetType === "savings" && demandDepositRate
+            ? parseFloat(demandDepositRate)
+            : undefined,
+        termMonths:
+          assetType === "savings" && termMonths
+            ? parseInt(termMonths)
+            : undefined,
+        compoundingType: assetType === "savings" ? compoundingType : undefined,
         // Price alert fields (stock only)
         targetPrice:
           assetType === "stock" && targetPrice
@@ -489,12 +548,21 @@ export const AddEditEntryModal: React.FC<AddEditEntryModalProps> = ({
           <Select
             value={assetType}
             onValueChange={(value) =>
-              handleAssetTypeChange(value as "stock" | "gold" | "bond")
+              handleAssetTypeChange(
+                value as
+                  | "stock"
+                  | "gold"
+                  | "bond"
+                  | "cash"
+                  | "crypto"
+                  | "savings",
+              )
             }
             options={[
               { value: "stock", label: "Stock" },
               { value: "gold", label: "Gold" },
               { value: "bond", label: "Bond" },
+              { value: "savings", label: "Savings" },
             ]}
           />
         </div>
@@ -526,6 +594,22 @@ export const AddEditEntryModal: React.FC<AddEditEntryModalProps> = ({
             purchaseDate={purchaseDate}
             setPurchaseDate={setPurchaseDate}
             error={error}
+            isSubmitting={isSubmitting}
+          />
+        ) : assetType === "savings" ? (
+          <SavingsEntryForm
+            depositLabel={depositLabel}
+            setDepositLabel={setDepositLabel}
+            principal={purchasePrice}
+            setPrincipal={setPurchasePrice}
+            interestRate={interestRate}
+            setInterestRate={setInterestRate}
+            demandDepositRate={demandDepositRate}
+            setDemandDepositRate={setDemandDepositRate}
+            termMonths={termMonths}
+            setTermMonths={setTermMonths}
+            compoundingType={compoundingType}
+            setCompoundingType={setCompoundingType}
             isSubmitting={isSubmitting}
           />
         ) : assetType === "gold" ? (

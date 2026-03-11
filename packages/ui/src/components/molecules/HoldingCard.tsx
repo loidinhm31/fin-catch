@@ -7,6 +7,7 @@ import {
 import { StockHoldingCard } from "./StockHoldingCard";
 import { GoldHoldingCard } from "./GoldHoldingCard";
 import { BondHoldingCard } from "./BondHoldingCard";
+import { SavingsHoldingCard } from "./SavingsHoldingCard";
 
 export interface HoldingCardProps {
   entryPerf: EntryPerformance;
@@ -32,6 +33,8 @@ export const HoldingCard: React.FC<HoldingCardProps> = (props) => {
       return <GoldHoldingCard {...props} />;
     case "bond":
       return <BondHoldingCard {...props} />;
+    case "savings":
+      return <SavingsHoldingCard {...props} />;
     default:
       return null;
   }

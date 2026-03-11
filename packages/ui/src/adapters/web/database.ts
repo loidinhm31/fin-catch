@@ -66,6 +66,15 @@ export class FinCatchDatabase extends Dexie {
       _pendingChanges: "++id, tableName, rowId",
     });
 
+    this.version(2).stores({
+      portfolios: "id, createdAt, syncVersion, syncedAt, deleted",
+      portfolioEntries:
+        "id, portfolioId, assetType, symbol, createdAt, syncVersion, syncedAt, deleted",
+      couponPayments: "id, entryId, paymentDate, syncVersion, syncedAt, deleted",
+      _syncMeta: "key",
+      _pendingChanges: "++id, tableName, rowId",
+    });
+
     // Map table names
     this.portfolios = this.table("portfolios");
     this.portfolioEntries = this.table("portfolioEntries");

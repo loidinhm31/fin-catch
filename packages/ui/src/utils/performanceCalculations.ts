@@ -107,6 +107,57 @@ const getTargetDateProgressRatio = (
   return Number(ratio.toFixed(3));
 };
 
+export const calculateSavingsValue = (
+  principal: number,
+  annualRate: number,
+  termMonths: number,
+  compoundingType: "simple" | "compound",
+  purchaseDateUnix: number,
+): { maturityValue: number; currentValue: number } => {
+  const now = Math.floor(Date.now() / 1000);
+  const elapsedSeconds = Math.max(0, now - purchaseDateUnix);
+  const rate = annualRate / 100;
+
+  if (termMonths <= 0) {
+    const elapsedYears = elapsedSeconds / (365 * 24 * 60 * 60);
+    const value = principal * (1 + rate * elapsedYears);
+    return { maturityValue: value, currentValue: value };
+  }
+
+  const interestPerTerm = rate * (termMonths / 12);
+
+  const elapsedMonths = elapsedSeconds / (30.44 * 24 * 60 * 60);
+
+  if (compoundingType === "simple") {
+    const maturityValue = principal * (1 + interestPerTerm);
+    // Accrue linearly over the term — show proportional gain, not full term gain from day 1
+    const progress = Math.min(1, elapsedMonths / termMonths);
+    const currentValue = principal * (1 + interestPerTerm * progress);
+    return { maturityValue, currentValue };
+  }
+
+  // Compound (auto-renewal)
+  const completedTerms = Math.floor(elapsedMonths / termMonths);
+  const accumulatedPrincipal =
+    principal * Math.pow(1 + interestPerTerm, completedTerms);
+  const remainingMonths = elapsedMonths - completedTerms * termMonths;
+  const currentValue =
+    accumulatedPrincipal * (1 + rate * (remainingMonths / 12));
+  const maturityValue = accumulatedPrincipal * (1 + interestPerTerm);
+
+  return { maturityValue, currentValue };
+};
+
+export const calculateSavingsEarlyWithdrawal = (
+  principal: number,
+  demandDepositRate: number,
+  purchaseDateUnix: number,
+): number => {
+  const now = Math.floor(Date.now() / 1000);
+  const elapsedDays = Math.max(0, (now - purchaseDateUnix) / (24 * 60 * 60));
+  return principal * (1 + (demandDepositRate / 100) * (elapsedDays / 365));
+};
+
 export const calculatePortfolioPerformance = async (
   entries: PortfolioEntry[],
   displayCurrency: CurrencyCode,
@@ -190,6 +241,24 @@ export const calculatePortfolioPerformance = async (
         }
         currentPriceCurrency = entry.currency || "USD";
         priceScale = 1; // No scaling for bonds
+      } else if (entry.assetType === "savings") {
+        if (
+          entry.interestRate !== undefined &&
+          entry.termMonths !== undefined
+        ) {
+          const { currentValue: savingsCurrentValue } = calculateSavingsValue(
+            entry.purchasePrice,
+            entry.interestRate,
+            entry.termMonths,
+            entry.compoundingType || "simple",
+            entry.purchaseDate,
+          );
+          currentPrice = savingsCurrentValue;
+        } else {
+          currentPrice = entry.purchasePrice;
+        }
+        currentPriceCurrency = entry.currency || "VND";
+        priceScale = 1;
       }
 
       const currentPriceInDisplayCurrency = await convertCurrency(
@@ -199,8 +268,11 @@ export const calculatePortfolioPerformance = async (
       );
 
       let scaledPurchasePrice: number;
-      if (entry.assetType === "stock") {
-        // Purchase price was entered by user in actual price, no scaling needed
+      if (
+        entry.assetType === "stock" ||
+        entry.assetType === "bond" ||
+        entry.assetType === "savings"
+      ) {
         scaledPurchasePrice = entry.purchasePrice;
       } else {
         const userUnit = entry.unit || "tael";
@@ -290,6 +362,8 @@ export const calculatePortfolioPerformance = async (
         } else {
           priceSource = "faceValue";
         }
+      } else if (entry.assetType === "savings") {
+        priceSource = "calculated";
       } else {
         priceSource = entry.source || "unknown";
       }
