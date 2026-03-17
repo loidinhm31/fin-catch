@@ -10,6 +10,8 @@ import {
   Portfolio,
   PortfolioEntry,
   BondCouponPayment,
+  SellTransaction,
+  CapitalTransaction,
   AuthResponse,
   AuthStatus,
   SyncConfig,
@@ -24,6 +26,8 @@ import {
   getCouponPaymentService,
   getAuthService,
   getSyncService,
+  getSellTransactionService,
+  getCapitalService,
 } from "@fin-catch/ui/adapters/factory";
 
 // Each function calls the factory accessor per invocation — intentional lazy init.
@@ -142,4 +146,29 @@ export async function syncWithProgress(
     return syncService.syncWithProgress(onProgress);
   }
   return syncService.syncNow();
+}
+
+// Sell Transaction operations
+export async function createSellTransaction(tx: SellTransaction): Promise<string> {
+  return getSellTransactionService().createSellTransaction(tx);
+}
+export async function listSellTransactionsByEntry(entryId: string): Promise<SellTransaction[]> {
+  return getSellTransactionService().listByEntry(entryId);
+}
+export async function listSellTransactionsByPortfolio(portfolioId: string): Promise<SellTransaction[]> {
+  return getSellTransactionService().listByPortfolio(portfolioId);
+}
+export async function deleteSellTransaction(id: string): Promise<void> {
+  return getSellTransactionService().deleteSellTransaction(id);
+}
+
+// Capital operations
+export async function createCapitalTransaction(tx: CapitalTransaction): Promise<string> {
+  return getCapitalService().createCapitalTransaction(tx);
+}
+export async function listCapitalTransactions(): Promise<CapitalTransaction[]> {
+  return getCapitalService().listCapitalTransactions();
+}
+export async function deleteCapitalTransaction(id: string): Promise<void> {
+  return getCapitalService().deleteCapitalTransaction(id);
 }

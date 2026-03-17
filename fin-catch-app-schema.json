@@ -220,6 +220,111 @@
         }
       ],
       "primaryKey": "rowId"
+    },
+    "sellTransactions": {
+      "columns": [
+        {
+          "name": "entrySyncUuid",
+          "type": "string",
+          "nullable": false
+        },
+        {
+          "name": "portfolioSyncUuid",
+          "type": "string",
+          "nullable": false
+        },
+        {
+          "name": "sellPrice",
+          "type": "number",
+          "nullable": false
+        },
+        {
+          "name": "quantity",
+          "type": "number",
+          "nullable": false
+        },
+        {
+          "name": "sellDate",
+          "type": "integer",
+          "nullable": false
+        },
+        {
+          "name": "fees",
+          "type": "number",
+          "nullable": false
+        },
+        {
+          "name": "currency",
+          "type": "string",
+          "nullable": false
+        },
+        {
+          "name": "realizedGainLoss",
+          "type": "number",
+          "nullable": false
+        },
+        {
+          "name": "costBasisPerUnit",
+          "type": "number",
+          "nullable": false
+        },
+        {
+          "name": "notes",
+          "type": "string",
+          "nullable": true
+        },
+        {
+          "name": "createdAt",
+          "type": "integer",
+          "nullable": false
+        }
+      ],
+      "primaryKey": "rowId"
+    },
+    "capitalTransactions": {
+      "columns": [
+        {
+          "name": "type",
+          "type": "string",
+          "nullable": false
+        },
+        {
+          "name": "amount",
+          "type": "number",
+          "nullable": false
+        },
+        {
+          "name": "currency",
+          "type": "string",
+          "nullable": false
+        },
+        {
+          "name": "baseCurrencyAmount",
+          "type": "number",
+          "nullable": false
+        },
+        {
+          "name": "referenceId",
+          "type": "string",
+          "nullable": true
+        },
+        {
+          "name": "notes",
+          "type": "string",
+          "nullable": true
+        },
+        {
+          "name": "date",
+          "type": "integer",
+          "nullable": false
+        },
+        {
+          "name": "createdAt",
+          "type": "integer",
+          "nullable": false
+        }
+      ],
+      "primaryKey": "rowId"
     }
   }
 }

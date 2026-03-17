@@ -14,11 +14,13 @@ import { serviceLogger } from "@fin-catch/ui/utils";
 // Interfaces
 import type {
   IAuthService,
+  ICapitalService,
   ICouponPaymentService,
   IDataService,
   IMarketDataService,
   IPortfolioEntryService,
   IPortfolioService,
+  ISellTransactionService,
   ISyncService,
   ITradingAuthService,
 } from "./interfaces";
@@ -32,6 +34,8 @@ let authService: IAuthService | null = null;
 let syncService: ISyncService | null = null;
 let tradingAuthService: ITradingAuthService | null = null;
 let marketDataService: IMarketDataService | null = null;
+let sellTransactionService: ISellTransactionService | null = null;
+let capitalService: ICapitalService | null = null;
 
 // ============= Setters =============
 
@@ -101,6 +105,22 @@ export const setTradingAuthService = (service: ITradingAuthService): void => {
 export const setMarketDataService = (service: IMarketDataService): void => {
   marketDataService = service;
   serviceLogger.factory("Set MarketDataService");
+};
+
+/**
+ * Set custom Sell Transaction Service
+ */
+export const setSellTransactionService = (service: ISellTransactionService): void => {
+  sellTransactionService = service;
+  serviceLogger.factory("Set SellTransactionService");
+};
+
+/**
+ * Set custom Capital Service
+ */
+export const setCapitalService = (service: ICapitalService): void => {
+  capitalService = service;
+  serviceLogger.factory("Set CapitalService");
 };
 
 // ============= Getters =============
@@ -193,6 +213,32 @@ export const getMarketDataService = (): IMarketDataService | null => {
   return marketDataService;
 };
 
+/**
+ * Get the Sell Transaction Service
+ * @throws Error if service not initialized
+ */
+export const getSellTransactionService = (): ISellTransactionService => {
+  if (!sellTransactionService) {
+    throw new Error(
+      "SellTransactionService not initialized. Call setSellTransactionService first.",
+    );
+  }
+  return sellTransactionService;
+};
+
+/**
+ * Get the Capital Service
+ * @throws Error if service not initialized
+ */
+export const getCapitalService = (): ICapitalService => {
+  if (!capitalService) {
+    throw new Error(
+      "CapitalService not initialized. Call setCapitalService first.",
+    );
+  }
+  return capitalService;
+};
+
 // ============= Optional Getters =============
 
 export const getSyncServiceOptional = (): ISyncService | null => {
@@ -218,6 +264,8 @@ export const getAllServices = () => ({
   sync: getSyncService(),
   trading: tradingAuthService ?? undefined,
   marketData: marketDataService ?? undefined,
+  sellTransaction: getSellTransactionService(),
+  capital: getCapitalService(),
 });
 
 /**
@@ -232,5 +280,7 @@ export const resetServices = (): void => {
   syncService = null;
   tradingAuthService = null;
   marketDataService = null;
+  sellTransactionService = null;
+  capitalService = null;
   serviceLogger.factory("Reset all services");
 };

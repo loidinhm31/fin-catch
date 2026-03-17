@@ -376,6 +376,7 @@ export const calculatePortfolioPerformance = async (
         totalCost: totalCost,
         gainLoss: gainLoss,
         gainLossPercentage: gainLossPercentage,
+        realizedGainLoss: 0, // Populated in Phase 02 via sell transaction aggregation
         priceSource: priceSource,
         currency: displayCurrency,
         exchangeRate: exchangeRate,
@@ -399,6 +400,7 @@ export const calculatePortfolioPerformance = async (
       totalCost: totalCost,
       totalGainLoss: totalGainLoss,
       totalGainLossPercentage: totalGainLossPercentage,
+      totalRealizedGainLoss: 0, // Populated in Phase 02 via sell transaction aggregation
       currency: displayCurrency,
       entriesPerformance: entriesPerformance,
     };

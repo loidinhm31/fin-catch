@@ -6,3 +6,5 @@ export type { IAuthService, RequiredSyncConfig } from "./IAuthService";
 export type { ISyncService } from "./ISyncService";
 export type { ITradingAuthService } from "./ITradingAuthService";
 export type { IMarketDataService } from "./IMarketDataService";
+export type { ISellTransactionService } from "./ISellTransactionService";
+export type { ICapitalService } from "./ICapitalService";

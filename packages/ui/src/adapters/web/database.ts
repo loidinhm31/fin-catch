@@ -8,8 +8,10 @@
 import Dexie, { type EntityTable, type Table } from "dexie";
 import type {
   BondCouponPayment,
+  CapitalTransaction,
   Portfolio,
   PortfolioEntry,
+  SellTransaction,
 } from "@fin-catch/shared";
 
 // =============================================================================
@@ -49,6 +51,8 @@ export class FinCatchDatabase extends Dexie {
   portfolios!: EntityTable<Portfolio, "id">;
   portfolioEntries!: EntityTable<PortfolioEntry, "id">;
   couponPayments!: EntityTable<BondCouponPayment, "id">;
+  sellTransactions!: EntityTable<SellTransaction, "id">;
+  capitalTransactions!: EntityTable<CapitalTransaction, "id">;
 
   // Sync tables
   _syncMeta!: Table<SyncMeta, string>;
@@ -75,10 +79,25 @@ export class FinCatchDatabase extends Dexie {
       _pendingChanges: "++id, tableName, rowId",
     });
 
+    this.version(3).stores({
+      portfolios: "id, createdAt, syncVersion, syncedAt, deleted",
+      portfolioEntries:
+        "id, portfolioId, assetType, symbol, createdAt, syncVersion, syncedAt, deleted",
+      couponPayments: "id, entryId, paymentDate, syncVersion, syncedAt, deleted",
+      sellTransactions:
+        "id, entryId, portfolioId, sellDate, syncVersion, syncedAt, deleted",
+      capitalTransactions:
+        "id, type, date, referenceId, syncVersion, syncedAt, deleted",
+      _syncMeta: "key",
+      _pendingChanges: "++id, tableName, rowId",
+    });
+
     // Map table names
     this.portfolios = this.table("portfolios");
     this.portfolioEntries = this.table("portfolioEntries");
     this.couponPayments = this.table("couponPayments");
+    this.sellTransactions = this.table("sellTransactions");
+    this.capitalTransactions = this.table("capitalTransactions");
     this._syncMeta = this.table("_syncMeta");
     this._pendingChanges = this.table("_pendingChanges");
   }

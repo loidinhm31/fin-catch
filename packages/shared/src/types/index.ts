@@ -7,3 +7,5 @@ export * from "./auth";
 export * from "./sync";
 export * from "./trading";
 export * from "./market-data";
+export * from "./sell-transaction";
+export * from "./capital";

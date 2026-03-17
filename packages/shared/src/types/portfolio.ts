@@ -78,6 +78,7 @@ export interface PortfolioPerformance {
   totalCost: number;
   totalGainLoss: number;
   totalGainLossPercentage: number;
+  totalRealizedGainLoss: number;
   currency: CurrencyCode; // Currency of the calculated values
   entriesPerformance: EntryPerformance[];
 }
@@ -90,6 +91,7 @@ export interface EntryPerformance {
   totalCost: number;
   gainLoss: number;
   gainLossPercentage: number;
+  realizedGainLoss: number;
   priceSource: string;
   currency: CurrencyCode; // Currency of the calculated values
   exchangeRate?: number; // Exchange rate used if conversion was needed
