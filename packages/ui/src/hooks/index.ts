@@ -1,4 +1,5 @@
 export * from "./useAuth";
+export * from "./useCapitalAccount";
 export * from "./useCouponPayments";
 export * from "./useCurrencyPreference";
 export * from "./useErrorBoundary";
@@ -8,5 +9,6 @@ export * from "./usePortfolioEntries";
 export * from "./usePortfolioPerformance";
 export * from "./usePortfolios";
 export * from "./useResponsiveChart";
+export * from "./useSellTransactions";
 export * from "./useSyncStatus";
 export * from "./useNav";

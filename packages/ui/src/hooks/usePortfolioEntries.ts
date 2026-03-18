@@ -1,13 +1,18 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { PortfolioEntry } from "@fin-catch/shared";
+import type { CapitalTransaction, CurrencyCode, PortfolioEntry } from "@fin-catch/shared";
 import {
-  listEntries,
+  createCapitalTransaction,
   createEntry as createEntryService,
-  updateEntry as updateEntryService,
   deleteEntry as deleteEntryService,
+  listEntries,
+  updateEntry as updateEntryService,
 } from "@fin-catch/ui/services";
+import { convertCurrency } from "../utils/currency";
 
-export const usePortfolioEntries = (portfolioId: string | null) => {
+export const usePortfolioEntries = (
+  portfolioId: string | null,
+  baseCurrency?: CurrencyCode,
+) => {
   const [entries, setEntries] = useState<PortfolioEntry[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -35,6 +40,33 @@ export const usePortfolioEntries = (portfolioId: string | null) => {
 
   const createEntry = async (entry: PortfolioEntry) => {
     await createEntryService(entry);
+
+    if (baseCurrency) {
+      try {
+        const buyAmount = entry.purchasePrice * entry.quantity + (entry.transactionFees ?? 0);
+        const baseCurrencyAmount = await convertCurrency(
+          buyAmount,
+          entry.currency ?? baseCurrency,
+          baseCurrency,
+        );
+        const now = Math.floor(Date.now() / 1000);
+        const capitalTx: CapitalTransaction = {
+          id: crypto.randomUUID(),
+          type: "buy-deduction",
+          amount: buyAmount,
+          currency: entry.currency ?? baseCurrency,
+          baseCurrencyAmount,
+          referenceId: entry.id,
+          date: entry.purchaseDate ?? now,
+          createdAt: now,
+          syncVersion: 0,
+        };
+        await createCapitalTransaction(capitalTx);
+      } catch (err) {
+        console.warn("Failed to create buy-deduction capital transaction:", err);
+      }
+    }
+
     if (portfolioId) {
       await loadEntries(portfolioId);
     }

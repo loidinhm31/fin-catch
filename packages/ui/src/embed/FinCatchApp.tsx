@@ -6,13 +6,15 @@
  */
 
 import {
+  IndexedDBCapitalAdapter,
   IndexedDBCouponPaymentAdapter,
   IndexedDBPortfolioAdapter,
   IndexedDBPortfolioEntryAdapter,
+  IndexedDBSellTransactionAdapter,
   IndexedDBSyncAdapter,
   IndexedDBSyncStorage,
-  initDb,
   deleteCurrentDb,
+  initDb,
 } from "@fin-catch/ui/adapters/web";
 import {
   MarketDataAdapter,
@@ -31,15 +33,17 @@ import { DialogProvider, ThemeProvider } from "@fin-catch/ui/contexts";
 import { isTauri } from "@fin-catch/ui/utils";
 import {
   getAllServices,
+  getSyncService,
   setAuthService,
+  setCapitalService,
   setCouponPaymentService,
   setDataService,
   setMarketDataService,
   setPortfolioEntryService,
   setPortfolioService,
+  setSellTransactionService,
   setSyncService,
   setTradingAuthService,
-  getSyncService,
 } from "@fin-catch/ui/adapters";
 
 /**
@@ -92,6 +96,8 @@ export function FinCatchApp({
     setPortfolioService(new IndexedDBPortfolioAdapter());
     setPortfolioEntryService(new IndexedDBPortfolioEntryAdapter());
     setCouponPaymentService(new IndexedDBCouponPaymentAdapter());
+    setSellTransactionService(new IndexedDBSellTransactionAdapter());
+    setCapitalService(new IndexedDBCapitalAdapter());
 
     // Data service - platform-specific for performance
     if (isTauri()) {

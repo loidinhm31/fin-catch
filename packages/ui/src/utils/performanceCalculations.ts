@@ -9,6 +9,7 @@ import {
   fetchStockHistory,
   fetchGoldPrice,
   listCouponPayments,
+  listSellTransactionsByPortfolio,
 } from "@fin-catch/ui/services";
 import { convertCurrency } from "./currency";
 
@@ -166,6 +167,22 @@ export const calculatePortfolioPerformance = async (
 
   try {
     const entriesPerformance: EntryPerformance[] = [];
+
+    // Batch-fetch all sell transactions for the portfolio to avoid N+1 queries
+    const sellTxByEntryId = new Map<string, { realizedGainLoss: number; currency: CurrencyCode }[]>();
+    const portfolioId = entries[0]?.portfolioId;
+    if (portfolioId) {
+      try {
+        const allSellTxs = await listSellTransactionsByPortfolio(portfolioId);
+        for (const tx of allSellTxs) {
+          const list = sellTxByEntryId.get(tx.entryId) ?? [];
+          list.push({ realizedGainLoss: tx.realizedGainLoss, currency: tx.currency });
+          sellTxByEntryId.set(tx.entryId, list);
+        }
+      } catch (err) {
+        console.warn("Failed to fetch sell transactions for portfolio:", err);
+      }
+    }
 
     for (const entry of entries) {
       let currentPrice = 0;
@@ -342,6 +359,18 @@ export const calculatePortfolioPerformance = async (
         }
       }
 
+      // Sum realized P&L from sell transactions for this entry
+      let realizedGainLossInDisplayCurrency = 0;
+      const sellTxsForEntry = sellTxByEntryId.get(entry.id) ?? [];
+      for (const sellTx of sellTxsForEntry) {
+        const converted = await convertCurrency(
+          sellTx.realizedGainLoss,
+          sellTx.currency,
+          displayCurrency,
+        );
+        realizedGainLossInDisplayCurrency += converted;
+      }
+
       // Calculate gain/loss including coupon income for bonds
       const gainLoss = currentValue - totalCost + couponIncomeInDisplayCurrency;
       const gainLossPercentage =
@@ -376,7 +405,7 @@ export const calculatePortfolioPerformance = async (
         totalCost: totalCost,
         gainLoss: gainLoss,
         gainLossPercentage: gainLossPercentage,
-        realizedGainLoss: 0, // Populated in Phase 02 via sell transaction aggregation
+        realizedGainLoss: realizedGainLossInDisplayCurrency,
         priceSource: priceSource,
         currency: displayCurrency,
         exchangeRate: exchangeRate,
@@ -394,13 +423,17 @@ export const calculatePortfolioPerformance = async (
     const totalGainLoss = totalValue - totalCost;
     const totalGainLossPercentage =
       totalCost > 0 ? (totalGainLoss / totalCost) * 100 : 0;
+    const totalRealizedGainLoss = entriesPerformance.reduce(
+      (sum, e) => sum + e.realizedGainLoss,
+      0,
+    );
 
     return {
       totalValue: totalValue,
       totalCost: totalCost,
       totalGainLoss: totalGainLoss,
       totalGainLossPercentage: totalGainLossPercentage,
-      totalRealizedGainLoss: 0, // Populated in Phase 02 via sell transaction aggregation
+      totalRealizedGainLoss,
       currency: displayCurrency,
       entriesPerformance: entriesPerformance,
     };
