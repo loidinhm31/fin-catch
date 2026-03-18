@@ -6,7 +6,7 @@ import {
   PortfolioEntry,
 } from "@fin-catch/shared";
 import { CouponPaymentsSection } from "./CouponPaymentsSection";
-import { SellHistorySection } from "@fin-catch/ui/components/organisms/SellHistorySection";
+import { SellHistorySection } from "@fin-catch/ui/components/organisms";
 
 export interface BondHoldingCardProps {
   entryPerf: EntryPerformance;

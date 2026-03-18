@@ -93,7 +93,7 @@ jobs:
         uses: tauri-apps/tauri-action@v0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          VITE_QM_CENTER_SERVER_URL: ${{ secrets.VITE_QM_CENTER_SERVER_URL }}
+          VITE_QM_HUB_SERVER_URL: ${{ secrets.VITE_QM_HUB_SERVER_URL }}
           VITE_FIN_CATCH_APP_ID: ${{ secrets.VITE_FIN_CATCH_APP_ID }}
           VITE_FIN_CATCH_API_KEY: ${{ secrets.VITE_FIN_CATCH_API_KEY }}
         with:

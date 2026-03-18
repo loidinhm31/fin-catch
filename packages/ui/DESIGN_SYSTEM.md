@@ -277,6 +277,26 @@ Consistent spacing scale for margins, padding:
 - **Width**: 8px
 - **Behavior**: Auto-hide on mobile, always visible on desktop
 
+## Asset Types & Calculation Rules
+
+The app supports six asset types. Each has specific calculation and UI treatment.
+
+| Type | Fields | Calculation | Renewal |
+|------|--------|-----------|---------|
+| **stock** | symbol, quantity, purchasePrice, currency, purchaseDate, targetPrice, stopLoss | Real-time price from market data; gain/loss vs purchase price | None |
+| **gold** | symbol, quantity, purchasePrice, unit (gram/mace/tael/ounce/kg), goldType (SJC code), source (sjc) | Real-time gold spot price (VND); unit conversion to taels | None |
+| **bond** | symbol, faceValue, couponRate, maturityDate, couponFrequency, ytm (optional) | Present value formula with coupon discount, or manual currentMarketPrice, or faceValue fallback | None |
+| **savings** | principal, interestRate, termMonths, startDate, demandDepositRate, autoRenewal, renewalCount, originalStartDate, bankName | YTD: principal × (1 + demandRate × daysHeld/365); maturity: principal × (1 + interestRate × termMonths/12) | Auto-renew extends term, renewal count tracks cycles |
+| **crypto** | symbol, quantity, purchasePrice, currency | Reserved for future market data integration | None |
+| **cash** | symbol, quantity, purchasePrice, currency | No price update; value = quantity × purchasePrice | None |
+
+### Savings Asset Specifics
+
+- **YTD value** (`calculateSavingsYtdValue`): Assumes demand deposit rate accumulates daily from `startDate` (or `purchaseDate` if missing). Returns maturity value if past term and no auto-renewal.
+- **Maturity value** (`calculateSavingsMaturityValue`): Principal + simple interest for one term; renewal cycles not compounded.
+- **Auto-renewal**: When enabled, maturity value rolls into next term at same rate; `renewalCount` increments on each maturity.
+- **Currency**: Defaults to VND; user can override.
+
 ## FinCatch App Sync Schema
 
 The **fin-catch-app** integrates with **qm-sync** for cross-device data synchronization. The following schema must be registered with qm-sync for the application to sync properly.
@@ -331,7 +351,17 @@ curl -X POST http://localhost:3000/api/v1/apps \
         { "name": "couponFrequency", "type": "string", "nullable": true },
         { "name": "currentMarketPrice", "type": "number", "nullable": true },
         { "name": "lastPriceUpdate", "type": "integer", "nullable": true },
-        { "name": "ytm", "type": "number", "nullable": true }
+        { "name": "ytm", "type": "number", "nullable": true },
+        { "name": "targetPrice", "type": "number", "nullable": true },
+        { "name": "stopLoss", "type": "number", "nullable": true },
+        { "name": "alertEnabled", "type": "boolean", "nullable": true },
+        { "name": "lastAlertAt", "type": "integer", "nullable": true },
+        { "name": "alertCount", "type": "integer", "nullable": true },
+        { "name": "lastAlertType", "type": "string", "nullable": true },
+        { "name": "interestRate", "type": "number", "nullable": true },
+        { "name": "demandDepositRate", "type": "number", "nullable": true },
+        { "name": "termMonths", "type": "integer", "nullable": true },
+        { "name": "compoundingType", "type": "string", "nullable": true }
       ],
       "primaryKey": "rowId"
     },
@@ -349,6 +379,29 @@ curl -X POST http://localhost:3000/api/v1/apps \
   }
 }
 ```
+
+### Asset Types
+
+`assetType` values supported in portfolio entries:
+- `"stock"` — Equity holdings with market data sync, price alerts
+- `"bond"` — Fixed-income securities with coupon tracking & YTM calculation
+- `"gold"` — Precious metals (SJC, bars, etc.) with weight units (gram, mace, tael, ounce, kg)
+- `"crypto"` — Digital assets with market price tracking
+- `"cash"` — Fiat currency holdings
+- `"savings"` — Deposit accounts with interest rate & term tracking (NEW)
+
+### Savings Asset Type Fields
+
+When `assetType = "savings"`:
+- `interestRate` (number, %) — Annual interest rate (e.g., 6.5)
+- `demandDepositRate` (number, %) — Early withdrawal rate (e.g., 0.1)
+- `termMonths` (integer) — Deposit term in months (6, 12, 24, etc.)
+- `compoundingType` (string) — `"simple"` or `"compound"`
+- `symbol` — Bank account identifier or ISIN (required for schema)
+- `purchasePrice` — Principal amount (required for schema)
+- `purchaseDate` — Deposit opening date (required for schema)
+
+Earnings calculation: `interestValue = principal × (rate / 100) × (months / 12)` (simple) or compound interest formula (compound).
 
 ### Schema Notes
 

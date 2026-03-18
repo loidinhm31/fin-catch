@@ -7,7 +7,7 @@ import {
   getUnitLabel,
   PortfolioEntry,
 } from "@fin-catch/shared";
-import { SellHistorySection } from "@fin-catch/ui/components/organisms/SellHistorySection";
+import { SellHistorySection } from "@fin-catch/ui/components/organisms";
 
 export interface GoldHoldingCardProps {
   entryPerf: EntryPerformance;

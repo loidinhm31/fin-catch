@@ -89,8 +89,8 @@ function getDefaultBaseUrl(): string {
   try {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const env = (import.meta as any).env;
-    if (env?.VITE_QM_CENTER_SERVER_URL) {
-      return env.VITE_QM_CENTER_SERVER_URL;
+    if (env?.VITE_QM_HUB_SERVER_URL) {
+      return env.VITE_QM_HUB_SERVER_URL;
     }
   } catch {
     // Not in a Vite environment
