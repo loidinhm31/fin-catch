@@ -131,7 +131,56 @@ export class IndexedDBSyncStorage {
       }
     }
 
-    // 4. Get pending deletes from _pendingChanges table
+    // 4. Get unsynced sell transactions (syncedAt is undefined)
+    const sellTxs = await getDb().sellTransactions.toArray();
+    for (const tx of sellTxs) {
+      if (tx.syncedAt === undefined || tx.syncedAt === null) {
+        records.push({
+          tableName: "sellTransactions",
+          rowId: tx.id,
+          data: {
+            portfolioSyncUuid: tx.portfolioId, // Map FK reference for server
+            entrySyncUuid: tx.entryId, // Map FK reference for server
+            sellPrice: tx.sellPrice,
+            quantity: tx.quantity,
+            sellDate: tx.sellDate,
+            fees: tx.fees,
+            currency: tx.currency,
+            realizedGainLoss: tx.realizedGainLoss,
+            costBasisPerUnit: tx.costBasisPerUnit,
+            notes: tx.notes,
+            createdAt: tx.createdAt,
+          },
+          version: tx.syncVersion || 1,
+          deleted: false,
+        });
+      }
+    }
+
+    // 5. Get unsynced capital transactions (syncedAt is undefined)
+    const capitalTxs = await getDb().capitalTransactions.toArray();
+    for (const tx of capitalTxs) {
+      if (tx.syncedAt === undefined || tx.syncedAt === null) {
+        records.push({
+          tableName: "capitalTransactions",
+          rowId: tx.id,
+          data: {
+            type: tx.type,
+            amount: tx.amount,
+            currency: tx.currency,
+            baseCurrencyAmount: tx.baseCurrencyAmount,
+            referenceId: tx.referenceId,
+            notes: tx.notes,
+            date: tx.date,
+            createdAt: tx.createdAt,
+          },
+          version: tx.syncVersion || 1,
+          deleted: false,
+        });
+      }
+    }
+
+    // 6. Get pending deletes from _pendingChanges table
     const pendingDeletes = await getDb()._pendingChanges
       .filter((change) => change.operation === "delete")
       .toArray();
@@ -170,6 +219,18 @@ export class IndexedDBSyncStorage {
     const payments = await getDb().couponPayments.toArray();
     count += payments.filter(
       (p) => p.syncedAt === undefined || p.syncedAt === null,
+    ).length;
+
+    // Count unsynced sell transactions
+    const sellTxs = await getDb().sellTransactions.toArray();
+    count += sellTxs.filter(
+      (t) => t.syncedAt === undefined || t.syncedAt === null,
+    ).length;
+
+    // Count unsynced capital transactions
+    const capitalTxs = await getDb().capitalTransactions.toArray();
+    count += capitalTxs.filter(
+      (t) => t.syncedAt === undefined || t.syncedAt === null,
     ).length;
 
     // Count pending deletes
@@ -239,6 +300,8 @@ export class IndexedDBSyncStorage {
         getDb().portfolios,
         getDb().portfolioEntries,
         getDb().couponPayments,
+        getDb().sellTransactions,
+        getDb().capitalTransactions,
       ],
       async () => {
         for (const { tableName, rowId } of recordIds) {
@@ -298,7 +361,13 @@ export class IndexedDBSyncStorage {
 
     await getDb().transaction(
       "rw",
-      [getDb().portfolios, getDb().portfolioEntries, getDb().couponPayments],
+      [
+        getDb().portfolios,
+        getDb().portfolioEntries,
+        getDb().couponPayments,
+        getDb().sellTransactions,
+        getDb().capitalTransactions,
+      ],
       async () => {
         // Apply non-deleted first
         for (const record of nonDeleted) {
@@ -340,6 +409,29 @@ export class IndexedDBSyncStorage {
         const { amount, paymentDate } = record.data as Record<string, unknown>;
         if (typeof amount !== "number") return false;
         if (typeof paymentDate !== "number") return false;
+        break;
+      }
+      case "sellTransactions": {
+        const { sellPrice, quantity, sellDate, fees, currency, realizedGainLoss, costBasisPerUnit } =
+          record.data as Record<string, unknown>;
+        if (typeof sellPrice !== "number") return false;
+        if (typeof quantity !== "number") return false;
+        if (typeof sellDate !== "number") return false;
+        if (typeof fees !== "number") return false;
+        if (typeof realizedGainLoss !== "number") return false;
+        if (typeof costBasisPerUnit !== "number") return false;
+        if (!currency || typeof currency !== "string") return false;
+        break;
+      }
+      case "capitalTransactions": {
+        const { type, amount, date, currency, baseCurrencyAmount } =
+          record.data as Record<string, unknown>;
+        const validTypes = ["pay-in", "withdraw", "buy-deduction", "sell-credit"];
+        if (!type || !validTypes.includes(type as string)) return false;
+        if (typeof amount !== "number") return false;
+        if (typeof date !== "number") return false;
+        if (typeof baseCurrencyAmount !== "number") return false;
+        if (!currency || typeof currency !== "string") return false;
         break;
       }
       default:
@@ -494,6 +586,10 @@ export class IndexedDBSyncStorage {
       case "bondCouponPayments":
       case "couponPayments":
         return getDb().couponPayments;
+      case "sellTransactions":
+        return getDb().sellTransactions;
+      case "capitalTransactions":
+        return getDb().capitalTransactions;
       default:
         return undefined;
     }
@@ -511,6 +607,10 @@ export class IndexedDBSyncStorage {
         return 1;
       case "bondCouponPayments":
       case "couponPayments":
+        return 2;
+      case "sellTransactions":
+        return 2;
+      case "capitalTransactions":
         return 2;
       default:
         return 99;
