@@ -434,6 +434,7 @@ export const calculatePortfolioPerformance = async (
       totalGainLoss: totalGainLoss,
       totalGainLossPercentage: totalGainLossPercentage,
       totalRealizedGainLoss,
+      totalCombinedPnl: totalGainLoss + totalRealizedGainLoss,
       currency: displayCurrency,
       entriesPerformance: entriesPerformance,
     };

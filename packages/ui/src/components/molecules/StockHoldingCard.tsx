@@ -1,10 +1,12 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import {
   Bell,
   BellOff,
   ChevronDown,
   ChevronUp,
   Edit,
+  TrendingDown,
+  TrendingUp,
   Trash2,
 } from "lucide-react";
 import {
@@ -12,6 +14,7 @@ import {
   EntryPerformance,
   PortfolioEntry,
 } from "@fin-catch/shared";
+import { SellHistorySection } from "@fin-catch/ui/components/organisms/SellHistorySection";
 
 export interface StockHoldingCardProps {
   entryPerf: EntryPerformance;
@@ -20,6 +23,7 @@ export interface StockHoldingCardProps {
   onToggleExpand: () => void;
   onEdit: (entry: PortfolioEntry) => void;
   onDelete: (entryId: string) => void;
+  onSell?: (entry: PortfolioEntry) => void;
   formatCurrency: (value: number, currency?: CurrencyCode) => string;
   formatPercentage: (value: number) => string;
   formatDate: (timestamp: number) => string;
@@ -33,12 +37,19 @@ export const StockHoldingCard: React.FC<StockHoldingCardProps> = ({
   onToggleExpand,
   onEdit,
   onDelete,
+  onSell,
   formatCurrency,
   formatPercentage,
   formatDate,
 }) => {
   const entry = entryPerf.entry;
   const isPositive = entryPerf.gainLoss >= 0;
+
+  // Lazy-mount SellHistorySection: only after first expansion to avoid N+1 DB queries
+  const [hasBeenExpanded, setHasBeenExpanded] = useState(isExpanded);
+  useEffect(() => {
+    if (isExpanded) setHasBeenExpanded(true);
+  }, [isExpanded]);
 
   // Alert status helpers
   const hasAlerts = entry.targetPrice || entry.stopLoss;
@@ -176,7 +187,39 @@ export const StockHoldingCard: React.FC<StockHoldingCardProps> = ({
         </div>
       </div>
 
+      {/* Realized P&L badge */}
+      {entryPerf.realizedGainLoss !== 0 && (
+        <div className="flex items-center gap-1 mt-1 mb-1">
+          {entryPerf.realizedGainLoss >= 0 ? (
+            <TrendingUp className="w-3 h-3" style={{ color: "var(--color-green-500)" }} />
+          ) : (
+            <TrendingDown className="w-3 h-3" style={{ color: "var(--color-red-500)" }} />
+          )}
+          <span
+            className="text-xs font-semibold"
+            style={{
+              color: entryPerf.realizedGainLoss >= 0
+                ? "var(--color-green-500)"
+                : "var(--color-red-500)",
+            }}
+          >
+            Realized: {entryPerf.realizedGainLoss >= 0 ? "+" : ""}
+            {formatCurrency(entryPerf.realizedGainLoss)}
+          </span>
+        </div>
+      )}
+
       <div className="flex gap-2 ml-4">
+        {onSell && entry.quantity > 0 && (
+          <button
+            onClick={(e) => { e.stopPropagation(); onSell(entry); }}
+            className="px-2.5 h-8 rounded-full text-xs font-semibold flex items-center gap-1 transition-opacity hover:opacity-80"
+            style={{ background: "var(--color-red-600)", color: "#fff" }}
+            title="Sell position"
+          >
+            SELL
+          </button>
+        )}
         <button
           onClick={() => onEdit(entry)}
           className="w-8 h-8 rounded-full flex items-center justify-center transition-all"
@@ -496,6 +539,14 @@ export const StockHoldingCard: React.FC<StockHoldingCardProps> = ({
                 {entry.tags}
               </p>
             </div>
+          )}
+
+          {hasBeenExpanded && (
+            <SellHistorySection
+              entry={entry}
+              baseCurrency={displayCurrency}
+              formatDate={formatDate}
+            />
           )}
         </div>
       )}

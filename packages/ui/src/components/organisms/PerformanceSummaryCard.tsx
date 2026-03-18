@@ -74,7 +74,7 @@ export const PerformanceSummaryCard: React.FC<PerformanceSummaryCardProps> = ({
                 marginBottom: "var(--space-1)",
               }}
             >
-              Gain/Loss
+              Unrealized P&L
             </p>
             <p
               style={{
@@ -113,6 +113,58 @@ export const PerformanceSummaryCard: React.FC<PerformanceSummaryCardProps> = ({
               {formatPercentage(performance.totalGainLossPercentage)}
             </p>
           </div>
+          {performance.totalRealizedGainLoss !== 0 && (
+            <>
+              <div>
+                <p
+                  style={{
+                    fontSize: "var(--text-xs)",
+                    color: "var(--color-text-primary)",
+                    opacity: 0.7,
+                    marginBottom: "var(--space-1)",
+                  }}
+                >
+                  Realized P&L
+                </p>
+                <p
+                  style={{
+                    fontSize: "var(--text-lg)",
+                    fontWeight: "var(--font-bold)",
+                    color:
+                      performance.totalRealizedGainLoss >= 0
+                        ? "var(--color-green-500)"
+                        : "var(--color-red-500)",
+                  }}
+                >
+                  {formatCurrency(performance.totalRealizedGainLoss)}
+                </p>
+              </div>
+              <div>
+                <p
+                  style={{
+                    fontSize: "var(--text-xs)",
+                    color: "var(--color-text-primary)",
+                    opacity: 0.7,
+                    marginBottom: "var(--space-1)",
+                  }}
+                >
+                  Total P&L
+                </p>
+                <p
+                  style={{
+                    fontSize: "var(--text-lg)",
+                    fontWeight: "var(--font-bold)",
+                    color:
+                      performance.totalCombinedPnl >= 0
+                        ? "var(--color-green-500)"
+                        : "var(--color-red-500)",
+                  }}
+                >
+                  {formatCurrency(performance.totalCombinedPnl)}
+                </p>
+              </div>
+            </>
+          )}
         </div>
       </div>
     </div>

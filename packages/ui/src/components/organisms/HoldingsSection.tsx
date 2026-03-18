@@ -14,7 +14,8 @@ export interface HoldingsSectionProps {
   onAdd: () => void;
   onEdit: (entry: PortfolioEntry) => void;
   onDelete: (entryId: string) => void;
-  onPaymentsChange?: () => void; // Callback for when coupon payments change
+  onPaymentsChange?: () => void;
+  onSell?: (entry: PortfolioEntry) => void;
   formatCurrency: (value: number, currency?: CurrencyCode) => string;
   formatPercentage: (value: number) => string;
   formatDate: (timestamp: number) => string;
@@ -28,6 +29,7 @@ export const HoldingsSection: React.FC<HoldingsSectionProps> = ({
   onEdit,
   onDelete,
   onPaymentsChange,
+  onSell,
   formatCurrency,
   formatPercentage,
   formatDate,
@@ -115,6 +117,7 @@ export const HoldingsSection: React.FC<HoldingsSectionProps> = ({
               onEdit={onEdit}
               onDelete={onDelete}
               onPaymentsChange={onPaymentsChange}
+              onSell={onSell}
               formatCurrency={formatCurrency}
               formatPercentage={formatPercentage}
               formatDate={formatDate}

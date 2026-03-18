@@ -1,19 +1,24 @@
 import React, { useState } from "react";
-import { Wallet } from "lucide-react";
+import { ChevronDown, ChevronUp, Wallet } from "lucide-react";
 import { CurrencyCode, PortfolioEntry } from "@fin-catch/shared";
 import { formatCurrency as formatCurrencyUtil } from "@fin-catch/ui/utils";
 import { getPreference, setPreference } from "@fin-catch/ui/utils";
 import { ConfirmDialog, CubeShape } from "@fin-catch/ui/components/atoms";
 import {
   AddEditEntryModal,
+  CapitalAccountCard,
+  CapitalTransactionHistory,
   CreatePortfolioModal,
   CurrencySelectorSection,
   HoldingsChartSection,
   HoldingsSection,
+  PayInWithdrawModal,
   PerformanceSummaryCard,
   PortfolioSelector,
+  SellEntryModal,
 } from "@fin-catch/ui/components/organisms";
 import {
+  useCapitalAccount,
   useHoldingsPerformance,
   usePortfolioEntries,
   usePortfolioPerformance,
@@ -55,6 +60,14 @@ export const PortfolioPage: React.FC = () => {
     setShowChart,
   } = useHoldingsPerformance(entries, displayCurrency);
 
+  const {
+    summary: capitalSummary,
+    transactions: capitalTransactions,
+    payIn,
+    withdraw,
+    refresh: refreshCapital,
+  } = useCapitalAccount(displayCurrency);
+
   // Modal state
   const [showCreatePortfolio, setShowCreatePortfolio] = useState(false);
   const [editingPortfolio, setEditingPortfolio] = useState<
@@ -63,9 +76,16 @@ export const PortfolioPage: React.FC = () => {
   const [showAddEntry, setShowAddEntry] = useState(false);
   const [editingEntry, setEditingEntry] = useState<PortfolioEntry | null>(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
-  const [portfolioToDelete, setPortfolioToDelete] = useState<string | null>(
-    null,
-  );
+  const [portfolioToDelete, setPortfolioToDelete] = useState<string | null>(null);
+
+  // Sell modal state
+  const [sellingEntry, setSellingEntry] = useState<PortfolioEntry | null>(null);
+
+  // Capital modal state
+  const [capitalModalType, setCapitalModalType] = useState<"pay-in" | "withdraw" | null>(null);
+
+  // Capital history visibility
+  const [showCapitalHistory, setShowCapitalHistory] = useState(false);
 
   // Handlers
   const handleCurrencyChange = (currency: CurrencyCode) => {
@@ -100,6 +120,10 @@ export const PortfolioPage: React.FC = () => {
   const handleEditEntry = (entry: PortfolioEntry) => {
     setEditingEntry(entry);
     setShowAddEntry(true);
+  };
+
+  const handleSellEntry = (entry: PortfolioEntry) => {
+    setSellingEntry(entry);
   };
 
   // Formatting helpers
@@ -198,6 +222,46 @@ export const PortfolioPage: React.FC = () => {
 
           {selectedPortfolio && (
             <>
+              {/* Capital Account */}
+              {capitalSummary && (
+                <CapitalAccountCard
+                  summary={capitalSummary}
+                  formatCurrency={formatCurrency}
+                  onPayIn={() => setCapitalModalType("pay-in")}
+                  onWithdraw={() => setCapitalModalType("withdraw")}
+                />
+              )}
+
+              {/* Capital Transaction History (collapsible) */}
+              {capitalTransactions.length > 0 && (
+                <div className="mb-6">
+                  <button
+                    onClick={() => setShowCapitalHistory((v) => !v)}
+                    className="flex items-center gap-2 mb-2"
+                    style={{
+                      fontSize: "var(--text-sm)",
+                      color: "var(--color-text-secondary)",
+                    }}
+                  >
+                    {showCapitalHistory ? (
+                      <ChevronUp className="w-4 h-4" />
+                    ) : (
+                      <ChevronDown className="w-4 h-4" />
+                    )}
+                    Capital History ({capitalTransactions.length})
+                  </button>
+                  {showCapitalHistory && (
+                    <div className="glass-card p-4">
+                      <CapitalTransactionHistory
+                        transactions={capitalTransactions}
+                        displayCurrency={displayCurrency}
+                        formatDate={formatDate}
+                      />
+                    </div>
+                  )}
+                </div>
+              )}
+
               {/* Performance Summary */}
               {performance && (
                 <PerformanceSummaryCard
@@ -245,6 +309,7 @@ export const PortfolioPage: React.FC = () => {
                 }}
                 onEdit={handleEditEntry}
                 onDelete={deleteEntry}
+                onSell={handleSellEntry}
                 onPaymentsChange={() => {
                   if (selectedPortfolioId) {
                     loadEntries(selectedPortfolioId);
@@ -335,6 +400,33 @@ export const PortfolioPage: React.FC = () => {
         confirmText="Delete"
         cancelText="Cancel"
         type="danger"
+      />
+
+      <SellEntryModal
+        isOpen={sellingEntry !== null}
+        onClose={() => setSellingEntry(null)}
+        onSuccess={() => {
+          setSellingEntry(null);
+          if (selectedPortfolioId) loadEntries(selectedPortfolioId);
+          refreshCapital();
+        }}
+        entry={sellingEntry}
+        baseCurrency={displayCurrency}
+      />
+
+      <PayInWithdrawModal
+        type={capitalModalType ?? "pay-in"}
+        isOpen={capitalModalType !== null}
+        onClose={() => setCapitalModalType(null)}
+        onSubmit={async (amount, currency, date, notes) => {
+          if (capitalModalType === "pay-in") {
+            await payIn(amount, currency, date, notes);
+          } else {
+            await withdraw(amount, currency, date, notes);
+          }
+        }}
+        availableCapital={capitalSummary?.availableCapital}
+        baseCurrency={displayCurrency}
       />
     </div>
   );

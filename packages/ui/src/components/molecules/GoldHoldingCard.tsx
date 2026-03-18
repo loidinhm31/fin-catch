@@ -1,5 +1,5 @@
-import React from "react";
-import { ChevronDown, ChevronUp, Edit, Trash2 } from "lucide-react";
+import React, { useEffect, useState } from "react";
+import { ChevronDown, ChevronUp, Edit, TrendingDown, TrendingUp, Trash2 } from "lucide-react";
 import {
   convertToGrams,
   CurrencyCode,
@@ -7,6 +7,7 @@ import {
   getUnitLabel,
   PortfolioEntry,
 } from "@fin-catch/shared";
+import { SellHistorySection } from "@fin-catch/ui/components/organisms/SellHistorySection";
 
 export interface GoldHoldingCardProps {
   entryPerf: EntryPerformance;
@@ -15,6 +16,7 @@ export interface GoldHoldingCardProps {
   onToggleExpand: () => void;
   onEdit: (entry: PortfolioEntry) => void;
   onDelete: (entryId: string) => void;
+  onSell?: (entry: PortfolioEntry) => void;
   formatCurrency: (value: number, currency?: CurrencyCode) => string;
   formatPercentage: (value: number) => string;
   formatDate: (timestamp: number) => string;
@@ -27,12 +29,18 @@ export const GoldHoldingCard: React.FC<GoldHoldingCardProps> = ({
   onToggleExpand,
   onEdit,
   onDelete,
+  onSell,
   formatCurrency,
   formatPercentage,
   formatDate,
 }) => {
   const entry = entryPerf.entry;
   const isPositive = entryPerf.gainLoss >= 0;
+
+  const [hasBeenExpanded, setHasBeenExpanded] = useState(isExpanded);
+  useEffect(() => {
+    if (isExpanded) setHasBeenExpanded(true);
+  }, [isExpanded]);
 
   return (
     <div className="glass-card cyber-grid-bg p-4">
@@ -132,7 +140,38 @@ export const GoldHoldingCard: React.FC<GoldHoldingCardProps> = ({
         </div>
       </div>
 
+      {entryPerf.realizedGainLoss !== 0 && (
+        <div className="flex items-center gap-1 mt-1 mb-1">
+          {entryPerf.realizedGainLoss >= 0 ? (
+            <TrendingUp className="w-3 h-3" style={{ color: "var(--color-green-500)" }} />
+          ) : (
+            <TrendingDown className="w-3 h-3" style={{ color: "var(--color-red-500)" }} />
+          )}
+          <span
+            className="text-xs font-semibold"
+            style={{
+              color: entryPerf.realizedGainLoss >= 0
+                ? "var(--color-green-500)"
+                : "var(--color-red-500)",
+            }}
+          >
+            Realized: {entryPerf.realizedGainLoss >= 0 ? "+" : ""}
+            {formatCurrency(entryPerf.realizedGainLoss)}
+          </span>
+        </div>
+      )}
+
       <div className="flex gap-2 ml-4">
+        {onSell && entry.quantity > 0 && (
+          <button
+            onClick={(e) => { e.stopPropagation(); onSell(entry); }}
+            className="px-2.5 h-8 rounded-full text-xs font-semibold flex items-center gap-1 transition-opacity hover:opacity-80"
+            style={{ background: "var(--color-red-600)", color: "#fff" }}
+            title="Sell position"
+          >
+            SELL
+          </button>
+        )}
         <button
           onClick={() => onEdit(entry)}
           className="w-8 h-8 rounded-full flex items-center justify-center transition-all"
@@ -374,6 +413,14 @@ export const GoldHoldingCard: React.FC<GoldHoldingCardProps> = ({
                 {entry.tags}
               </p>
             </div>
+          )}
+
+          {hasBeenExpanded && (
+            <SellHistorySection
+              entry={entry}
+              baseCurrency={displayCurrency}
+              formatDate={formatDate}
+            />
           )}
         </div>
       )}

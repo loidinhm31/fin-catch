@@ -76,10 +76,11 @@ export interface PortfolioWithEntries extends Portfolio {
 export interface PortfolioPerformance {
   totalValue: number;
   totalCost: number;
-  totalGainLoss: number;
+  totalGainLoss: number; // Unrealized P&L
   totalGainLossPercentage: number;
   totalRealizedGainLoss: number;
-  currency: CurrencyCode; // Currency of the calculated values
+  totalCombinedPnl: number; // totalGainLoss + totalRealizedGainLoss
+  currency: CurrencyCode;
   entriesPerformance: EntryPerformance[];
 }
 

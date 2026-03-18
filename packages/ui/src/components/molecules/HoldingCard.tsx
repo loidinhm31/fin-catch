@@ -17,6 +17,7 @@ export interface HoldingCardProps {
   onEdit: (entry: PortfolioEntry) => void;
   onDelete: (entryId: string) => void;
   onPaymentsChange?: () => void;
+  onSell?: (entry: PortfolioEntry) => void;
   formatCurrency: (value: number, currency?: CurrencyCode) => string;
   formatPercentage: (value: number) => string;
   formatDate: (timestamp: number) => string;
@@ -33,8 +34,11 @@ export const HoldingCard: React.FC<HoldingCardProps> = (props) => {
       return <GoldHoldingCard {...props} />;
     case "bond":
       return <BondHoldingCard {...props} />;
-    case "savings":
-      return <SavingsHoldingCard {...props} />;
+    case "savings": {
+      // onSell not supported for savings in v1 — explicitly omit
+      const { onSell: _onSell, ...savingsProps } = props;
+      return <SavingsHoldingCard {...savingsProps} />;
+    }
     default:
       return null;
   }
