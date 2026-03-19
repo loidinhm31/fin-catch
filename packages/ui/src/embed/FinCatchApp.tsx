@@ -45,6 +45,7 @@ import {
   setSyncService,
   setTradingAuthService,
 } from "@fin-catch/ui/adapters";
+import { useAutoSync } from "../hooks/useAutoSync";
 
 /**
  * FinCatchApp - Main embeddable component
@@ -125,6 +126,12 @@ export function FinCatchApp({
 
     return getAllServices();
   }, [dbReady]);
+
+  const isAuthenticated = !!(authTokens?.accessToken && authTokens?.refreshToken);
+  useAutoSync({
+    syncService: dbReady ? platform.sync : null,
+    enabled: dbReady && isAuthenticated && embedded,
+  });
 
   // If external auth tokens are provided, save them to the auth service
   useEffect(() => {
