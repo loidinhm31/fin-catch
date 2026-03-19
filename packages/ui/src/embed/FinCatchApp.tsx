@@ -46,6 +46,27 @@ import {
   setTradingAuthService,
 } from "@fin-catch/ui/adapters";
 import { useAutoSync } from "../hooks/useAutoSync";
+import { useSyncToast } from "../hooks/useSyncToast";
+import { SyncToastProvider } from "@fin-catch/ui/contexts";
+import { SyncToast } from "@fin-catch/ui/components/atoms";
+import type { ISyncService } from "@fin-catch/ui/adapters/factory/interfaces";
+
+function SyncAutoSyncManager({
+  syncService,
+  enabled,
+}: {
+  syncService: ISyncService | null;
+  enabled: boolean;
+}) {
+  const { handleSyncStart, handleSyncResult } = useSyncToast();
+  useAutoSync({
+    syncService,
+    enabled,
+    onSyncStart: handleSyncStart,
+    onSyncResult: handleSyncResult,
+  });
+  return null;
+}
 
 /**
  * FinCatchApp - Main embeddable component
@@ -128,10 +149,7 @@ export function FinCatchApp({
   }, [dbReady]);
 
   const isAuthenticated = !!(authTokens?.accessToken && authTokens?.refreshToken);
-  useAutoSync({
-    syncService: dbReady ? platform.sync : null,
-    enabled: dbReady && isAuthenticated && embedded,
-  });
+  const autoSyncEnabled = dbReady && isAuthenticated && embedded;
 
   // If external auth tokens are provided, save them to the auth service
   useEffect(() => {
@@ -175,7 +193,14 @@ export function FinCatchApp({
           <DialogProvider>
             <BasePathContext.Provider value={basePath || ""}>
               <PortalContainerContext.Provider value={portalContainer}>
-                {useRouter ? <BrowserRouter>{content}</BrowserRouter> : content}
+                <SyncToastProvider position="top-right">
+                  {useRouter ? <BrowserRouter>{content}</BrowserRouter> : content}
+                  <SyncAutoSyncManager
+                    syncService={dbReady ? getSyncService() : null}
+                    enabled={autoSyncEnabled}
+                  />
+                  <SyncToast />
+                </SyncToastProvider>
               </PortalContainerContext.Provider>
             </BasePathContext.Provider>
           </DialogProvider>

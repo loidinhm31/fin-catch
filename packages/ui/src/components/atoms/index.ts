@@ -35,3 +35,4 @@ export * from "./IconButton";
 export * from "./MiniOhlcChart";
 export * from "./MiniStockChart";
 export * from "./BidAskSpread";
+export * from "./SyncToast";
