@@ -24,7 +24,7 @@
     "tailwind-merge": "^3.4.1"
   },
   "devDependencies": {
-    "@fin-catch/eslint-config": "workspace:*",
+    "@fin-catch/eslint-config": "0.2.3",
     "@fin-catch/tsconfig": "workspace:*",
     "typescript": "~5.8.3"
   }
