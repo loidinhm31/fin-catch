@@ -8,7 +8,7 @@ import type {
   StockHistoryRequest,
   StockHistoryResponse,
 } from "@fin-catch/shared";
-import { env } from "@fin-catch/shared";
+import { AUTH_STORAGE_KEYS, env } from "@fin-catch/shared";
 import { serviceLogger } from "@fin-catch/ui/utils";
 import { IDataService } from "@fin-catch/ui/adapters/factory/interfaces";
 
@@ -50,6 +50,26 @@ export class QmServerDataAdapter implements IDataService {
     serviceLogger.market(`Initialized with baseUrl: ${this.baseUrl}`);
   }
 
+  private getAccessToken(): string | null {
+    if (typeof localStorage === "undefined") return null;
+    return localStorage.getItem(AUTH_STORAGE_KEYS.ACCESS_TOKEN);
+  }
+
+  private getAuthHeaders(): Record<string, string> {
+    const headers: Record<string, string> = { Accept: "application/json" };
+    const token = this.getAccessToken();
+    if (token) {
+      headers["Authorization"] = `Bearer ${token}`;
+    }
+    return headers;
+  }
+
+  private handleUnauthorized(): void {
+    if (typeof window !== "undefined") {
+      window.dispatchEvent(new Event("auth:logout"));
+    }
+  }
+
   private async post<TReq, TRes>(
     endpoint: string,
     request: TReq,
@@ -59,12 +79,14 @@ export class QmServerDataAdapter implements IDataService {
 
     const response = await fetch(url, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Accept: "application/json",
-      },
+      headers: { ...this.getAuthHeaders(), "Content-Type": "application/json" },
       body: JSON.stringify(request),
     });
+
+    if (response.status === 401) {
+      this.handleUnauthorized();
+      throw new Error("Unauthorized: session expired");
+    }
 
     if (!response.ok) {
       const errorText = await response.text();
@@ -81,16 +103,19 @@ export class QmServerDataAdapter implements IDataService {
     return result.data!;
   }
 
-  private async get<TRes>(endpoint: string): Promise<TRes> {
+  private async get<TRes>(endpoint: string, auth = true): Promise<TRes> {
     const url = `${this.baseUrl}${endpoint}`;
     serviceLogger.market(`GET ${endpoint}`);
 
     const response = await fetch(url, {
       method: "GET",
-      headers: {
-        Accept: "application/json",
-      },
+      headers: auth ? this.getAuthHeaders() : { Accept: "application/json" },
     });
+
+    if (response.status === 401) {
+      this.handleUnauthorized();
+      throw new Error("Unauthorized: session expired");
+    }
 
     if (!response.ok) {
       const errorText = await response.text();
@@ -195,6 +220,7 @@ export class QmServerDataAdapter implements IDataService {
     try {
       return await this.get<Record<string, boolean>>(
         `${this.apiBasePath}/fin-catch/health`,
+        false,
       );
     } catch (error) {
       serviceLogger.marketError("Health check failed");
