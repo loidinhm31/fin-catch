@@ -58,7 +58,7 @@ export const PriceAlertToast: React.FC<PriceAlertToastProps> = ({
   }, [toasts.length, duration]);
 
   // Expose addToast for SSE alerts via a global callback
-  // This allows qm-sync SSE connection to dispatch alerts to this component
+  // This allows qm-hub SSE connection to dispatch alerts to this component
   // Usage: window.__priceAlertToast?.addToast(alert)
   useEffect(() => {
     window.__priceAlertToast = { addToast };

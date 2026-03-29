@@ -17,6 +17,7 @@ import {
   PortfolioSelector,
   SellEntryModal,
 } from "@fin-catch/ui/components/organisms";
+import { AlertModeSelector } from "@fin-catch/ui/components/molecules";
 import {
   useCapitalAccount,
   useHoldingsPerformance,
@@ -164,6 +165,9 @@ export const PortfolioPage: React.FC = () => {
               >
                 Track your investments
               </p>
+              <div className="mt-2">
+                <AlertModeSelector />
+              </div>
             </div>
             <CubeShape className="animate-float" variant="pink" />
           </div>
