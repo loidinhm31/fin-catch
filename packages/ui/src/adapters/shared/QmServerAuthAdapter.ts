@@ -17,7 +17,7 @@ export interface QmServerAuthConfig {
 }
 
 /**
- * API response wrapper from qm-hub-server
+ * API response wrapper from glean-oak-server
  */
 interface ApiResponse<T> {
   success: boolean;
@@ -26,7 +26,7 @@ interface ApiResponse<T> {
 }
 
 /**
- * Token storage keys - use centralized keys for SSO across qm-hub ecosystem
+ * Token storage keys - use centralized keys for SSO across glean-oak ecosystem
  */
 const STORAGE_KEYS = AUTH_STORAGE_KEYS;
 
@@ -50,7 +50,7 @@ function getDefaultApiKey(): string {
 
 /**
  * Shared adapter for auth APIs
- * Calls qm-hub-server directly - works in both Tauri webview and browser
+ * Calls glean-oak-server directly - works in both Tauri webview and browser
  * Stores tokens in localStorage (for http) - note: less secure than Tauri's encrypted storage
  */
 export class QmServerAuthAdapter implements IAuthService {

@@ -43,7 +43,7 @@ export interface PortfolioEntry {
   demandDepositRate?: number; // Early withdrawal rate as percentage (e.g., 0.1)
   termMonths?: number; // Deposit term in months (e.g., 6, 12, 24)
   compoundingType?: "simple" | "compound";
-  // Stock alert fields (synced to server, monitoring handled by qm-sync)
+  // Stock alert fields (synced to server, monitoring handled by glean-oak-sync)
   targetPrice?: number; // Take-profit price
   stopLoss?: number; // Stop-loss price
   alertEnabled?: boolean; // Alerts active (default true when prices set)
@@ -57,7 +57,7 @@ export interface PortfolioEntry {
   deletedAt?: number | null;
 }
 
-// Price alert event data (received from qm-sync server)
+// Price alert event data (received from glean-oak-sync server)
 export interface PriceAlertEvent {
   entryId: string;
   symbol: string;

@@ -13,13 +13,13 @@ vi.mock("@fin-catch/ui/adapters/web", () => ({
   SYNC_META_KEYS: { CHECKPOINT: "checkpoint", LAST_SYNC_AT: "lastSyncAt" },
 }));
 
-// Mock QmSyncClient construction so IndexedDBSyncAdapter doesn't fail on init
+// Mock GleanOakClient construction so IndexedDBSyncAdapter doesn't fail on init
 vi.mock("@fin-catch/shared", async (importOriginal) => {
   const actual = await importOriginal<typeof import("@fin-catch/shared")>();
   return {
     ...actual,
     createSyncClientConfig: vi.fn(() => ({})),
-    QmSyncClient: vi.fn().mockImplementation(() => ({
+    GleanOakClient: vi.fn().mockImplementation(() => ({
       isAuthenticated: vi.fn().mockReturnValue(false),
       setTokens: vi.fn(),
       login: vi.fn(),

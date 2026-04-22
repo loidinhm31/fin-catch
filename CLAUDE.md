@@ -82,7 +82,7 @@ packages/ui/src/components/
 
 `FinCatchApp` (`packages/ui/src/embed/FinCatchApp.tsx`):
 
-- Main entry point for embedding in other apps (e.g., qm-hub-app)
+- Main entry point for embedding in other apps (e.g., glean-oak-app)
 - Configures platform services, context providers, routing
 - Supports shared SSO via localStorage tokens
 
@@ -96,7 +96,7 @@ packages/ui/src/components/
 - Dexie.js for IndexedDB abstraction
 - All TypeScript strict mode
 - All local types use camelCase (matching server API)
-- **Element selectors (`body`, `h1`–`h6`, etc.) in `global.css` must live inside `@layer base`** so they cannot override `qm-hub-app`'s unlayered body/heading rules when the CSS is processed by the host app's `@tailwindcss/vite` pipeline. `:host` selectors may remain unlayered (shadow DOM only). See `embed-app/CLAUDE.md § CSS Isolation for Embedded Apps`.
+- **Element selectors (`body`, `h1`–`h6`, etc.) in `global.css` must live inside `@layer base`** so they cannot override `glean-oak-app`'s unlayered body/heading rules when the CSS is processed by the host app's `@tailwindcss/vite` pipeline. `:host` selectors may remain unlayered (shadow DOM only). See `embed-app/CLAUDE.md § CSS Isolation for Embedded Apps`.
 
 ## Security Posture (Web Target)
 
@@ -115,7 +115,7 @@ Logout dispatches `window.dispatchEvent(new Event('auth:logout'))` so `useSyncSt
 
 ## Sync Integration
 
-This app syncs with `qm-sync` server using IndexedDB for local storage. Key tables: `portfolios`, `portfolio_entries`, `bond_coupon_payments`.
+This app syncs with `glean-oak-sync` server using IndexedDB for local storage. Key tables: `portfolios`, `portfolio_entries`, `bond_coupon_payments`.
 
 - Sync schema defined in `packages/ui/DESIGN_SYSTEM.md` (FinCatch App Sync Schema section)
 - Soft delete with server-side TTL purging (60 days default)

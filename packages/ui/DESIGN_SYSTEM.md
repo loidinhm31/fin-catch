@@ -299,7 +299,7 @@ The app supports six asset types. Each has specific calculation and UI treatment
 
 ## FinCatch App Sync Schema
 
-The **fin-catch-app** integrates with **qm-sync** for cross-device data synchronization. The following schema must be registered with qm-sync for the application to sync properly.
+The **fin-catch-app** integrates with **glean-oak-sync** for cross-device data synchronization. The following schema must be registered with glean-oak-sync for the application to sync properly.
 
 ### App Registration Schema
 

@@ -2,7 +2,7 @@
  * Market data types for real-time streaming
  *
  * Types for DNSE MQTT-over-WebSocket market data feed.
- * These types mirror the Rust types in qm-sync.
+ * These types mirror the Rust types in glean-oak-sync.
  */
 
 /**

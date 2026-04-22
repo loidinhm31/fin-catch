@@ -27,7 +27,7 @@ export interface StockHoldingCardProps {
   formatCurrency: (value: number, currency?: CurrencyCode) => string;
   formatPercentage: (value: number) => string;
   formatDate: (timestamp: number) => string;
-  // Note: onResetAlert removed - alert state now managed by qm-sync server
+  // Note: onResetAlert removed - alert state now managed by glean-oak-sync server
 }
 
 export const StockHoldingCard: React.FC<StockHoldingCardProps> = ({
@@ -54,7 +54,7 @@ export const StockHoldingCard: React.FC<StockHoldingCardProps> = ({
   // Alert status helpers
   const hasAlerts = entry.targetPrice || entry.stopLoss;
   const alertsEnabled = entry.alertEnabled !== false;
-  // Note: alert_triggered state now managed by qm-sync server
+  // Note: alert_triggered state now managed by glean-oak-sync server
   // Triggered alerts are shown via PriceAlertToast component
 
   // Calculate distance to thresholds

@@ -35,7 +35,7 @@ Vietnamese retail investment market growth driven by:
   - **Cash**: Currency holdings
 
 ### Market Data & Pricing
-- Real-time price updates via qm-hub-server integration
+- Real-time price updates via glean-oak-server integration
 - Support for VN stock data (VNDirect, SSI APIs)
 - SJC gold prices with live unit conversion
 - Exchange rates (9 currencies) with 5-minute cache TTL
@@ -49,7 +49,7 @@ Vietnamese retail investment market growth driven by:
 - Alerts stored on portfolio entry records
 
 ### Trading (DNSE - Vietnamese Stock Exchange)
-- Live order placement via DNSE proxy (qm-fin-catch-trading-platform)
+- Live order placement via DNSE proxy (glean-oak-fin-catch-trading-platform)
 - Support for 7 order types (market, limit, stop, trailing stop, etc.)
 - Real-time position tracking with P&L
 - Order history and deal confirmation
@@ -71,7 +71,7 @@ Vietnamese retail investment market growth driven by:
 - Soft delete support (deleted entries marked, server TTL purges)
 
 ### Platform Support
-- **Web**: Embedded in qm-hub-app via Shadow DOM, standalone Vite SPA
+- **Web**: Embedded in glean-oak-app via Shadow DOM, standalone Vite SPA
 - **Tauri Desktop**: Native Windows/macOS/Linux app with SQLite (planned—current: IndexedDB)
 - **Mobile**: Android support planned via Tauri Android
 
@@ -106,7 +106,7 @@ All platforms abstracted behind service interfaces with implementation selection
 | IPortfolioService | CRUD portfolios | IndexedDB | IndexedDB |
 | IPortfolioEntryService | CRUD holdings | IndexedDB | IndexedDB |
 | ICouponPaymentService | Bond coupon tracking | IndexedDB | IndexedDB |
-| IAuthService | Login, token mgmt | HTTP (qm-hub-server) | HTTP |
+| IAuthService | Login, token mgmt | HTTP (glean-oak-server) | HTTP |
 | IDataService | Market data fetch | HTTP (QmServerDataAdapter) | IPC (TauriDataAdapter) |
 | ISyncService | Offline-first sync | IndexedDB checkpoint | IndexedDB checkpoint |
 | IMarketDataService | Real-time SSE | MQTT/SSE streams | MQTT/SSE streams |
@@ -132,7 +132,7 @@ All platforms abstracted behind service interfaces with implementation selection
 - `deletedAt` — Soft-delete timestamp
 
 ### Authentication & Authorization
-- **Web/Embed**: OAuth via parent app (qm-hub-app) → localStorage JWT tokens
+- **Web/Embed**: OAuth via parent app (glean-oak-app) → localStorage JWT tokens
 - **Tauri**: JWT via HTTP authentication endpoint
 - **Dual token flow**: Access token (short-lived) + refresh token (long-lived) with rotation support
 - **API auth headers**: `X-API-Key`, `X-App-Id` (app identity) + `Authorization: Bearer` (user identity)
@@ -195,11 +195,11 @@ All platforms abstracted behind service interfaces with implementation selection
 - Price history for 30+ days
 - Price alerts (max 3 per entry)
 - Web + Tauri launch with offline-first sync
-- Authentication via qm-hub-server
-- Shadow DOM embedding in qm-hub-app
+- Authentication via glean-oak-server
+- Shadow DOM embedding in glean-oak-app
 
 ### v1.1 (Trading)
-- DNSE trading via qm-fin-catch-trading-platform
+- DNSE trading via glean-oak-fin-catch-trading-platform
 - Order placement, history, deal confirmation
 - Real-time P&L tracking
 - Position management
@@ -213,7 +213,7 @@ All platforms abstracted behind service interfaces with implementation selection
 ## Deployment & Maintenance
 
 ### Release Channels
-- **Web**: Deployed via qm-hub-app; no separate rollout
+- **Web**: Deployed via glean-oak-app; no separate rollout
 - **Tauri**: GitHub Releases (Windows, macOS, Linux)
 - **CI/CD**: GitHub Actions (lint, test, build, release)
 

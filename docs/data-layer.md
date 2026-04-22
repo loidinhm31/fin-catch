@@ -2,7 +2,7 @@
 
 ## Overview
 
-fin-catch organizes data into domain entities (portfolios, entries, transactions) synced via qm-sync to qm-hub-server. All client-side storage uses IndexedDB via Dexie.js. Two-phase sync: push pending changes → pull remote updates with checkpoint-based pagination.
+fin-catch organizes data into domain entities (portfolios, entries, transactions) synced via glean-oak-sync to glean-oak-server. All client-side storage uses IndexedDB via Dexie.js. Two-phase sync: push pending changes → pull remote updates with checkpoint-based pagination.
 
 ## Domain Model
 

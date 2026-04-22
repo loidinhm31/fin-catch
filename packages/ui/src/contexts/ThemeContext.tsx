@@ -2,7 +2,7 @@ import React, { createContext, useContext, useEffect, useState } from "react";
 
 export type Theme = "light" | "dark" | "system" | "cyber";
 
-// Custom event name for theme changes (used by ShadowWrapper in qm-hub-app)
+// Custom event name for theme changes (used by ShadowWrapper in glean-oak-app)
 export const FIN_CATCH_THEME_EVENT = "fin-catch-theme-change";
 export const FIN_CATCH_THEME_STORAGE_KEY = "fin-catch-theme";
 
@@ -19,7 +19,7 @@ interface ThemeProviderProps {
   defaultTheme?: Theme;
   storageKey?: string;
   /**
-   * When true, the app is embedded in another app (e.g., qm-hub).
+   * When true, the app is embedded in another app (e.g., glean-oak).
    * In embedded mode, theme changes are dispatched via custom events
    * instead of modifying document.documentElement directly.
    * This prevents theme conflicts between multiple embedded apps.

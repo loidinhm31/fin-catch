@@ -34,8 +34,8 @@ function getDefaultBaseUrl(): string {
 /**
  * HTTP adapter for trading platform authentication
  *
- * Calls qm-hub-server trading endpoints.
- * Requires qm-hub JWT authentication (Bearer token).
+ * Calls glean-oak-server trading endpoints.
+ * Requires glean-oak JWT authentication (Bearer token).
  */
 export class TradingAuthAdapter implements ITradingAuthService {
   private baseUrl: string;
@@ -187,7 +187,7 @@ export class TradingAuthAdapter implements ITradingAuthService {
   ): Promise<TradingSession> {
     const token = this.getAccessToken();
     if (!token) {
-      throw new Error("Not authenticated. Please login to qm-hub first.");
+      throw new Error("Not authenticated. Please login to glean-oak first.");
     }
 
     return this.post<{ username: string; password: string }, TradingSession>(
@@ -204,7 +204,7 @@ export class TradingAuthAdapter implements ITradingAuthService {
   async requestOtp(platform: TradingPlatformId): Promise<void> {
     const token = this.getAccessToken();
     if (!token) {
-      throw new Error("Not authenticated. Please login to qm-hub first.");
+      throw new Error("Not authenticated. Please login to glean-oak first.");
     }
 
     await this.post<Record<string, never>, { message: string }>(
@@ -227,7 +227,7 @@ export class TradingAuthAdapter implements ITradingAuthService {
   ): Promise<TradingSession> {
     const token = this.getAccessToken();
     if (!token) {
-      throw new Error("Not authenticated. Please login to qm-hub first.");
+      throw new Error("Not authenticated. Please login to glean-oak first.");
     }
 
     return this.post<{ otp: string; otp_type: string }, TradingSession>(
@@ -293,7 +293,7 @@ export class TradingAuthAdapter implements ITradingAuthService {
   ): Promise<TradingAccountInfo> {
     const token = this.getAccessToken();
     if (!token) {
-      throw new Error("Not authenticated. Please login to qm-hub first.");
+      throw new Error("Not authenticated. Please login to glean-oak first.");
     }
 
     return this.get<TradingAccountInfo>(
@@ -310,7 +310,7 @@ export class TradingAuthAdapter implements ITradingAuthService {
   async getAccounts(platform: TradingPlatformId): Promise<TradingSubAccount[]> {
     const token = this.getAccessToken();
     if (!token) {
-      throw new Error("Not authenticated. Please login to qm-hub first.");
+      throw new Error("Not authenticated. Please login to glean-oak first.");
     }
 
     const response = await this.get<{ accounts: TradingSubAccount[] }>(
@@ -332,7 +332,7 @@ export class TradingAuthAdapter implements ITradingAuthService {
   ): Promise<TradingAccountBalance> {
     const token = this.getAccessToken();
     if (!token) {
-      throw new Error("Not authenticated. Please login to qm-hub first.");
+      throw new Error("Not authenticated. Please login to glean-oak first.");
     }
 
     return this.get<TradingAccountBalance>(
@@ -357,7 +357,7 @@ export class TradingAuthAdapter implements ITradingAuthService {
   ): Promise<LoanPackage[]> {
     const token = this.getAccessToken();
     if (!token) {
-      throw new Error("Not authenticated. Please login to qm-hub first.");
+      throw new Error("Not authenticated. Please login to glean-oak first.");
     }
 
     const response = await this.get<{ loanPackages: LoanPackage[] }>(
@@ -385,7 +385,7 @@ export class TradingAuthAdapter implements ITradingAuthService {
   ): Promise<PPSE> {
     const token = this.getAccessToken();
     if (!token) {
-      throw new Error("Not authenticated. Please login to qm-hub first.");
+      throw new Error("Not authenticated. Please login to glean-oak first.");
     }
 
     const params = new URLSearchParams({
@@ -412,7 +412,7 @@ export class TradingAuthAdapter implements ITradingAuthService {
   ): Promise<Order> {
     const token = this.getAccessToken();
     if (!token) {
-      throw new Error("Not authenticated. Please login to qm-hub first.");
+      throw new Error("Not authenticated. Please login to glean-oak first.");
     }
 
     return this.post<PlaceOrderRequest, Order>(
@@ -434,7 +434,7 @@ export class TradingAuthAdapter implements ITradingAuthService {
   ): Promise<Order[]> {
     const token = this.getAccessToken();
     if (!token) {
-      throw new Error("Not authenticated. Please login to qm-hub first.");
+      throw new Error("Not authenticated. Please login to glean-oak first.");
     }
 
     const response = await this.get<{ orders: Order[] }>(
@@ -458,7 +458,7 @@ export class TradingAuthAdapter implements ITradingAuthService {
   ): Promise<Order> {
     const token = this.getAccessToken();
     if (!token) {
-      throw new Error("Not authenticated. Please login to qm-hub first.");
+      throw new Error("Not authenticated. Please login to glean-oak first.");
     }
 
     return this.delete<Order>(
@@ -479,7 +479,7 @@ export class TradingAuthAdapter implements ITradingAuthService {
   ): Promise<Deal[]> {
     const token = this.getAccessToken();
     if (!token) {
-      throw new Error("Not authenticated. Please login to qm-hub first.");
+      throw new Error("Not authenticated. Please login to glean-oak first.");
     }
 
     const response = await this.get<{ deals: Deal[] }>(

@@ -14,7 +14,7 @@ type AlertMode = "auto" | "realtime" | "cronjob";
 
 const ALERT_MODE_OPTIONS: { value: AlertMode; label: string; description: string }[] = [
   { value: "auto", label: "Auto", description: "Realtime when DNSE active, scheduled otherwise" },
-  { value: "cronjob", label: "Scheduled", description: "Polling every 60s via qm-hub" },
+  { value: "cronjob", label: "Scheduled", description: "Polling every 60s via glean-oak" },
   { value: "realtime", label: "Realtime", description: "MQTT ticks via DNSE trading session" },
 ];
 
@@ -166,8 +166,8 @@ export const AlertSettings: React.FC = () => {
           }}
         >
           {serverConnected
-            ? "Connected to qm-hub server"
-            : "Alerts will be active when qm-hub server is connected"}
+            ? "Connected to glean-oak server"
+            : "Alerts will be active when glean-oak server is connected"}
         </span>
       </div>
 
@@ -394,7 +394,7 @@ export const AlertSettings: React.FC = () => {
 
           <div className="pt-4" style={{ borderTop: "1px solid var(--glass-border-light)" }}>
             <p style={{ fontSize: "var(--text-xs)", color: "var(--color-text-secondary)" }}>
-              Price alerts are monitored by the qm-hub server. Set target and stop-loss prices
+              Price alerts are monitored by the glean-oak server. Set target and stop-loss prices
               on your portfolio entries, and you&apos;ll be notified when those prices are
               reached — even when the app is closed.
             </p>

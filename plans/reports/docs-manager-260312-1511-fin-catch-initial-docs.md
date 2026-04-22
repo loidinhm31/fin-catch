@@ -12,7 +12,7 @@ Created comprehensive documentation for the fin-catch project (offline-first por
 ## Deliverables
 
 ### 1. README.md (262 LOC)
-**Path**: `/home/loidinh/ws/sharing/qm-sync/embed-app/fin-catch/README.md`
+**Path**: `/home/loidinh/ws/sharing/glean-oak-sync/embed-app/fin-catch/README.md`
 
 Introductory guide covering:
 - Quick start (prerequisites, installation, dev commands)
@@ -29,7 +29,7 @@ Introductory guide covering:
 **Quality**: Clear, actionable, under 300 lines for easy scanning
 
 ### 2. docs/project-overview-pdr.md (248 LOC)
-**Path**: `/home/loidinh/ws/sharing/qm-sync/embed-app/fin-catch/docs/project-overview-pdr.md`
+**Path**: `/home/loidinh/ws/sharing/glean-oak-sync/embed-app/fin-catch/docs/project-overview-pdr.md`
 
 Product Development Requirements covering:
 - Product vision: Offline-first Vietnamese market portfolio tracker
@@ -47,7 +47,7 @@ Product Development Requirements covering:
 **Quality**: PDR format with clear requirements, rationale, and roadmap
 
 ### 3. docs/codebase-summary.md (296 LOC)
-**Path**: `/home/loidinh/ws/sharing/qm-sync/embed-app/fin-catch/docs/codebase-summary.md`
+**Path**: `/home/loidinh/ws/sharing/glean-oak-sync/embed-app/fin-catch/docs/codebase-summary.md`
 
 Codebase metrics and structure:
 - Repository overview (29.7K LOC total, Turborepo + pnpm)
@@ -67,7 +67,7 @@ Codebase metrics and structure:
 **Quality**: Metrics-driven; quick reference for developers joining the project
 
 ### 4. docs/code-standards.md (681 LOC)
-**Path**: `/home/loidinh/ws/sharing/qm-sync/embed-app/fin-catch/docs/code-standards.md`
+**Path**: `/home/loidinh/ws/sharing/glean-oak-sync/embed-app/fin-catch/docs/code-standards.md`
 
 Comprehensive coding guidelines:
 - TypeScript config & naming conventions (camelCase DB, PascalCase components, UPPER_SNAKE_CASE constants)
@@ -95,7 +95,7 @@ Comprehensive coding guidelines:
 **Status**: PRESERVED — NOT OVERWRITTEN
 
 The existing 461-line architecture.md was not modified per requirements. It contains:
-- C4 Context diagram (fin-catch system, qm-hub-server, market sources, users)
+- C4 Context diagram (fin-catch system, glean-oak-server, market sources, users)
 - Monorepo structure (apps/, packages/, schema)
 - Platform adapter architecture (flowchart, service interfaces, storage layer)
 - Domain model (ER diagram: Portfolio, PortfolioEntry, BondCouponPayment)
@@ -172,10 +172,10 @@ Would duplicate existing architecture.md (461 LOC). Per requirements, not overwr
 ### ✅ All Files Created
 
 ```bash
-/home/loidinh/ws/sharing/qm-sync/embed-app/fin-catch/README.md (262 LOC)
-/home/loidinh/ws/sharing/qm-sync/embed-app/fin-catch/docs/project-overview-pdr.md (248 LOC)
-/home/loidinh/ws/sharing/qm-sync/embed-app/fin-catch/docs/codebase-summary.md (296 LOC)
-/home/loidinh/ws/sharing/qm-sync/embed-app/fin-catch/docs/code-standards.md (681 LOC)
+/home/loidinh/ws/sharing/glean-oak-sync/embed-app/fin-catch/README.md (262 LOC)
+/home/loidinh/ws/sharing/glean-oak-sync/embed-app/fin-catch/docs/project-overview-pdr.md (248 LOC)
+/home/loidinh/ws/sharing/glean-oak-sync/embed-app/fin-catch/docs/codebase-summary.md (296 LOC)
+/home/loidinh/ws/sharing/glean-oak-sync/embed-app/fin-catch/docs/code-standards.md (681 LOC)
 ```
 
 ### ✅ LOC Compliance

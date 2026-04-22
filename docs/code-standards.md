@@ -317,7 +317,7 @@ const CreatePortfolioForm = () => {
 /* packages/ui/src/styles/global.css */
 
 @layer base {
-  /* Element selectors MUST be in @layer base to avoid leaking to qm-hub-app */
+  /* Element selectors MUST be in @layer base to avoid leaking to glean-oak-app */
   body {
     @apply font-body text-(--color-text-primary);
     background: var(--color-bg-app);

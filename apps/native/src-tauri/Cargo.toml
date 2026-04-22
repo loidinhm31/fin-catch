@@ -24,6 +24,6 @@ tauri-plugin-store = "2"
 serde_json = "1"
 
 # Financial data aggregation library (includes tokio runtime)
-qm-fin-catch-data = "0.1.0"
+glean-oak-fin-catch-data = "0.1.0"
 
 [workspace]

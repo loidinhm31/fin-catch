@@ -111,8 +111,8 @@
   --font-family-heading: "Space Grotesk", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   --font-family-body: "Space Grotesk", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   /* Explicitly set --font-mono to JetBrains Mono so that when this CSS is processed
-     alongside qm-hub-app's Tailwind, Tailwind's default (ui-monospace) doesn't override
-     qm-hub-app's --font-mono: "JetBrains Mono" at the document level. */
+     alongside glean-oak-app's Tailwind, Tailwind's default (ui-monospace) doesn't override
+     glean-oak-app's --font-mono: "JetBrains Mono" at the document level. */
   --font-mono: "JetBrains Mono", "Fira Code", ui-monospace, monospace;
   --font-data: "JetBrains Mono", "Fira Code", ui-monospace, monospace;
 

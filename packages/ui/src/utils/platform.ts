@@ -24,12 +24,12 @@ export const isMobile = (): boolean => {
 
 /**
  * Check if auth/sync features are available
- * Available on all platforms via qm-hub-server
+ * Available on all platforms via glean-oak-server
  */
 export const hasAuthSupport = (): boolean => true;
 
 /**
  * Check if market data APIs are available
- * Available on all platforms via qm-hub-server
+ * Available on all platforms via glean-oak-server
  */
 export const hasMarketDataSupport = (): boolean => true;

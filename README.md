@@ -2,7 +2,7 @@
 
 **Offline-first portfolio tracker for Vietnamese financial markets**
 
-Track stocks (VN), gold (SJC), bonds, crypto, cash, and savings across desktop and web. Syncs seamlessly with qm-hub-server.
+Track stocks (VN), gold (SJC), bonds, crypto, cash, and savings across desktop and web. Syncs seamlessly with glean-oak-server.
 
 ## Quick Start
 
@@ -69,7 +69,7 @@ fin-catch/
 │   │   ├── src/components/    # Atomic design: atoms → molecules → organisms → pages
 │   │   ├── src/adapters/      # Service implementations (IndexedDB, HTTP, IPC)
 │   │   ├── src/hooks/         # Custom React hooks
-│   │   ├── src/embed/         # FinCatchApp export for qm-hub-app embedding
+│   │   ├── src/embed/         # FinCatchApp export for glean-oak-app embedding
 │   │   ├── src/styles/        # Tailwind v4 + CSS variables
 │   │   └── DESIGN_SYSTEM.md   # Component specs, colors, typography
 │   ├── shared/                # Types, utilities, constants (~2K LOC)
@@ -86,7 +86,7 @@ fin-catch/
 
 ## Architecture Overview
 
-**Offline-first sync** with checkpoint-based pagination. All data stored locally in IndexedDB (Dexie.js); syncs with qm-hub-server on demand.
+**Offline-first sync** with checkpoint-based pagination. All data stored locally in IndexedDB (Dexie.js); syncs with glean-oak-server on demand.
 
 **Adapter pattern**: Services abstracted behind interfaces; platform-specific implementations selected at boot (web uses HTTP, Tauri uses native IPC for market data).
 
@@ -147,9 +147,9 @@ All adapter implementations are tested in isolation with mocked storage/HTTP.
 
 ## Deployment
 
-### Web (Embedded in qm-hub-app)
+### Web (Embedded in glean-oak-app)
 
-Deployed as part of qm-hub-app via GitHub Actions. Build outputs to `apps/web/dist/`.
+Deployed as part of glean-oak-app via GitHub Actions. Build outputs to `apps/web/dist/`.
 
 ### Desktop (Tauri)
 
@@ -157,7 +157,7 @@ Releases built and published via GitHub Actions. Downloads from GitHub Releases 
 
 ### Versioning
 
-- Web: Uses qm-hub-app version
+- Web: Uses glean-oak-app version
 - Desktop: Semantic versioning (e.g., `v1.0.0`)
 - Database schema: Dexie.js version increments for IndexedDB structure changes
 
@@ -206,7 +206,7 @@ See [docs/code-standards.md](./docs/code-standards.md) for detailed conventions.
 - Soft delete support
 
 ### Platform Support
-- **Web**: Embedded in qm-hub-app via Shadow DOM
+- **Web**: Embedded in glean-oak-app via Shadow DOM
 - **Desktop**: Tauri v2 (Windows, macOS, Linux)
 - **Mobile**: Android support planned
 
@@ -220,7 +220,7 @@ See [docs/code-standards.md](./docs/code-standards.md) for detailed conventions.
 | `framer-motion` | 12.34.0 | Animations |
 | `@radix-ui/*` | latest | Accessible UI primitives |
 | `@tauri-apps/api` | 2.10.1 | Desktop IPC |
-| `@qm-hub/sync-client-types` | 0.2.2 | Sync protocol types |
+| `@glean-oak/sync-client-types` | 0.2.2 | Sync protocol types |
 | `tailwindcss` | 4.1.18 | Styling (v4 + Vite) |
 
 ## Documentation

@@ -2,7 +2,7 @@
 
 ## Overview
 
-fin-catch is an offline-first portfolio tracker for Vietnamese financial markets (stocks, gold, bonds, crypto, cash). Built as an embeddable React app with platform-agnostic storage via IndexedDB/Dexie.js, it syncs to qm-hub-server using checkpoint-based pagination. Supports standalone (web/Tauri desktop) and embedded mode (inside qm-hub-app via Shadow DOM).
+fin-catch is an offline-first portfolio tracker for Vietnamese financial markets (stocks, gold, bonds, crypto, cash). Built as an embeddable React app with platform-agnostic storage via IndexedDB/Dexie.js, it syncs to glean-oak-server using checkpoint-based pagination. Supports standalone (web/Tauri desktop) and embedded mode (inside glean-oak-app via Shadow DOM).
 
 ```mermaid
 C4Context
@@ -12,8 +12,8 @@ C4Context
 
     System(finCatch, "fin-catch", "Offline-first portfolio tracker")
 
-    System_Ext(qmHub, "qm-hub-server", "Axum API: sync, auth, market data, alerts")
-    System_Ext(qmHubApp, "qm-hub-app", "Admin panel host (Shadow DOM embed)")
+    System_Ext(qmHub, "glean-oak-server", "Axum API: sync, auth, market data, alerts")
+    System_Ext(qmHubApp, "glean-oak-app", "Admin panel host (Shadow DOM embed)")
     System_Ext(dnse, "DNSE", "VN stock trading platform")
     System_Ext(marketSources, "Market Sources", "VNDirect, SSI, Yahoo Finance, SJC")
 
@@ -21,7 +21,7 @@ C4Context
     Rel(finCatch, qmHub, "Sync, auth, market data, alerts", "HTTPS/SSE")
     Rel(qmHubApp, finCatch, "Embeds via Shadow DOM + token SSO")
     Rel(qmHub, marketSources, "Fetches prices")
-    Rel(finCatch, dnse, "Trading orders via qm-hub proxy")
+    Rel(finCatch, dnse, "Trading orders via glean-oak proxy")
 ```
 
 ## Monorepo Structure
@@ -84,7 +84,7 @@ flowchart TB
 
     subgraph Storage["Storage Layer"]
         IDB[(IndexedDB / Dexie.js)]
-        HTTP[qm-hub-server APIs]
+        HTTP[glean-oak-server APIs]
         SSE[SSE / MQTT Streams]
     end
 
@@ -255,7 +255,7 @@ sequenceDiagram
     participant Adapter as IndexedDB Adapter
     participant IDB as IndexedDB
     participant Sync as IndexedDBSyncAdapter
-    participant Server as qm-hub-server
+    participant Server as glean-oak-server
 
     Note over UI,Server: Local Write (Offline-capable)
     UI->>Adapter: createEntry(entry) / createSellTx(tx)
@@ -311,7 +311,7 @@ flowchart LR
 
     subgraph SyncAdapter["IndexedDBSyncAdapter"]
         TP[TokenProvider fn]
-        QSC[QmSyncClient]
+        QSC[GleanOakClient]
     end
 
     TP -->|reads| AT
@@ -349,7 +349,7 @@ flowchart TB
 
     subgraph Storage["Storage"]
         IDB[(IndexedDB)]
-        Remote[qm-hub-server]
+        Remote[glean-oak-server]
     end
 
     Pages --> Organisms --> Molecules --> Atoms
@@ -387,7 +387,7 @@ All pages lazy-loaded via `React.lazy()`.
 
 ```mermaid
 flowchart TB
-    subgraph QmHubApp["qm-hub-app (Host)"]
+    subgraph GleanOakApp["glean-oak-app (Host)"]
         BR[BrowserRouter]
         SW[ShadowWrapper]
         TokenStore[localStorage tokens]
@@ -425,14 +425,14 @@ flowchart TB
 
 ```mermaid
 flowchart LR
-    subgraph Sources["Data Sources (via qm-hub-server)"]
+    subgraph Sources["Data Sources (via glean-oak-server)"]
         VND[VNDirect]
         SSI[SSI]
         Yahoo[Yahoo Finance]
         SJC[SJC Gold]
     end
 
-    subgraph Server["qm-hub-server"]
+    subgraph Server["glean-oak-server"]
         FCD[fin-catch-data plugin<br/>Historical prices, gold, FX]
         FCM[fin-catch-monitor plugin<br/>Price alerts]
         FTP[trading-platform plugin<br/>DNSE proxy]
@@ -473,7 +473,7 @@ stateDiagram-v2
     AutoDisabled --> Armed: User re-enables + resets count
 ```
 
-Alerts stored on `PortfolioEntry` fields. Server-side `qm-fin-catch-monitor` polls prices, fires notifications via `qm-notification`, sends SSE events to client as toast notifications.
+Alerts stored on `PortfolioEntry` fields. Server-side `glean-oak-fin-catch-monitor` polls prices, fires notifications via `glean-oak-notification`, sends SSE events to client as toast notifications.
 
 ## Testing Strategy
 
@@ -503,7 +503,7 @@ Test files:
 | `framer-motion` | 12.34.0 | Animations |
 | `@radix-ui/*` | latest | Accessible UI primitives |
 | `@tauri-apps/api` | 2.10.1 | Desktop IPC |
-| `@qm-hub/sync-client-types` | 0.2.2 | Sync protocol types |
+| `@glean-oak/sync-client-types` | 0.2.2 | Sync protocol types |
 | `tailwindcss` | 4.1.18 | Styling (v4 + Vite plugin) |
 
 ## Build & Deploy

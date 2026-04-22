@@ -43,7 +43,7 @@ fin-catch/
 │   │   │   │   ├── useCurrencyPreference (20 LOC)
 │   │   │   │   └── useFrozenPrice (64 LOC)
 │   │   │   ├── platform/     # PlatformContext (71 LOC)
-│   │   │   ├── embed/        # FinCatchApp export for qm-hub-app
+│   │   │   ├── embed/        # FinCatchApp export for glean-oak-app
 │   │   │   ├── styles/       # global.css (42KB)
 │   │   │   ├── utils/        # Utility functions (~500 LOC)
 │   │   │   └── stores/       # Service getters (singleton pattern)
@@ -103,7 +103,7 @@ fin-catch/
 | `adapters/factory/ServiceFactory.ts` | 237 | Lazy singleton getters; `isTauri()` detection; setter DI |
 | `adapters/factory/interfaces/*.ts` | 150+ | IPortfolioService, IAuthService, etc. |
 | `adapters/shared/QmServerAuthAdapter.ts` | 210 | HTTP auth, token refresh dedup, localStorage |
-| `adapters/shared/QmServerDataAdapter.ts` | 210 | Fetch stock/gold/FX data from qm-hub-server |
+| `adapters/shared/QmServerDataAdapter.ts` | 210 | Fetch stock/gold/FX data from glean-oak-server |
 | `adapters/tauri/TauriDataAdapter.ts` | 133 | IPC to native fin-catch-data plugin |
 | `adapters/web/sync/IndexedDBSyncAdapter.ts` | 300+ | Checkpoint sync, conflict resolution, retry backoff |
 | `platform/PlatformContext.tsx` | 71 | React context wrapping all services |
@@ -178,7 +178,7 @@ fin-catch/
 | `framer-motion` | 12.34.0 | Animations | Portal modals, transitions |
 | `@radix-ui/*` | latest | Unstyled accessible primitives | 15+ Radix packages |
 | `@tauri-apps/api` | 2.10.1 | Desktop IPC | Windows, macOS, Linux |
-| `@qm-hub/sync-client-types` | 0.2.2 | Sync protocol types | From qm-core-engine |
+| `@glean-oak/sync-client-types` | 0.2.2 | Sync protocol types | From glean-oak-core-engine |
 | `tailwindcss` | 4.1.18 | CSS (v4 + Vite plugin) | No PostCSS |
 | `axios` | latest | HTTP client | Shared between adapters |
 | `zod` | latest | Form validation | Schemas in packages/shared |

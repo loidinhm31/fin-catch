@@ -1,7 +1,7 @@
 /**
  * IndexedDB Sync Storage
  *
- * Implements the LocalStorage pattern from qm-sync-client for IndexedDB/Dexie.
+ * Implements the LocalStorage pattern from glean-oak-sync-client for IndexedDB/Dexie.
  * Provides methods for tracking pending changes, applying remote changes,
  * and managing sync checkpoints.
  *
@@ -390,9 +390,11 @@ export class IndexedDBSyncStorage {
     if (!record.rowId || typeof record.rowId !== "string") return false;
     if (!record.data || typeof record.data !== "object") return false;
 
+    const data = record.data as any;
+
     switch (record.tableName) {
       case "portfolios": {
-        const { name, createdAt } = record.data as Record<string, unknown>;
+        const { name, createdAt } = data;
         if (!name || typeof name !== "string") return false;
         if (createdAt !== undefined && typeof createdAt !== "number")
           return false;
@@ -462,9 +464,11 @@ export class IndexedDBSyncStorage {
       return;
     }
 
+    const recordData = record.data as any;
+
     // Build the data object - server already sends camelCase
     const data: Record<string, unknown> = {
-      ...record.data,
+      ...recordData,
       id: record.rowId,
       syncVersion: record.version,
       syncedAt: syncedAt,

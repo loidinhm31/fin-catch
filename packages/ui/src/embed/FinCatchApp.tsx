@@ -2,7 +2,7 @@
  * FinCatchApp - Embeddable wrapper component for fin-catch
  *
  * This component can be used to embed fin-catch into other applications
- * like qm-hub-app. It sets up all necessary services and providers.
+ * like glean-oak-app. It sets up all necessary services and providers.
  */
 
 import {

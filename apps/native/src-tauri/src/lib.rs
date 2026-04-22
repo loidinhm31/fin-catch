@@ -1,6 +1,6 @@
 use std::sync::Arc;
 use tauri::{Manager, State};
-use qm_fin_catch_data::{
+use glean_oak_fin_catch_data::{
     DataSourceGateway,
     StockHistoryRequest, StockHistoryResponse,
     GoldPriceRequest, GoldPriceResponse,
@@ -59,7 +59,7 @@ async fn fetch_gold_premium(
     request: GoldPremiumRequest,
     state: State<'_, AppState>,
 ) -> Result<GoldPremiumResponse, String> {
-    use qm_fin_catch_data::models::gold_premium::GoldPremiumCalculator;
+    use glean_oak_fin_catch_data::models::gold_premium::GoldPremiumCalculator;
 
     request.validate().map_err(|e| e.to_string())?;
 

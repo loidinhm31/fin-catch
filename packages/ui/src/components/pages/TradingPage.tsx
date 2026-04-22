@@ -14,7 +14,7 @@ import { usePlatformServices } from "@fin-catch/ui/platform";
 export const TradingPage: React.FC = () => {
   const { trading, auth } = usePlatformServices();
 
-  // Check if user is authenticated (trading requires qm-hub auth)
+  // Check if user is authenticated (trading requires glean-oak auth)
   const [isAuthenticated, setIsAuthenticated] = React.useState<boolean | null>(
     null,
   );

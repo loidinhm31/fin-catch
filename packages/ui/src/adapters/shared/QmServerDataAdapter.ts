@@ -21,7 +21,7 @@ export interface QmServerConfig {
 }
 
 /**
- * API response wrapper from qm-hub-server
+ * API response wrapper from glean-oak-server
  */
 interface ApiResponse<T> {
   success: boolean;
@@ -38,7 +38,7 @@ function getDefaultBaseUrl(): string {
 
 /**
  * Shared adapter for financial data APIs
- * Calls qm-hub-server directly - works in both Tauri webview and browser
+ * Calls glean-oak-server directly - works in both Tauri webview and browser
  */
 export class QmServerDataAdapter implements IDataService {
   private readonly baseUrl: string;
